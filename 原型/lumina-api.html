@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · API 接口文档 v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding:56px 64px; max-width:1280px; margin:0 auto;}
+
+  /* Cover */
+  .cover{padding:80px 0 64px; border-bottom:1px solid var(--line); margin-bottom:56px; display:grid; grid-template-columns:2fr 1fr; gap:48px; align-items:end;}
+  .cover .brand{display:flex; align-items:center; gap:14px; margin-bottom:32px;}
+  .cover .brand .logo{width:56px; height:56px; border-radius:14px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:28px; font-weight:500; font-style:italic;}
+  .cover .brand .name{font-family:var(--f-display); font-size:20px; font-weight:500;}
+  .cover .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:4px;}
+  .cover .doc-type{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--cobalt); background:var(--cobalt-soft); padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:20px;}
+  .cover h1{font-family:var(--f-display); font-weight:300; font-size:72px; letter-spacing:-0.04em; line-height:1;}
+  .cover h1 em{font-style:italic; color:var(--cobalt);}
+  .cover h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .cover .subtitle{font-size:18px; color:var(--inkwell-2); margin-top:20px; font-weight:300;}
+  .cover .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; line-height:2.2;}
+  .cover .meta .label{color:var(--inkwell-2); font-size:10px; display:block; margin-bottom:2px;}
+  .cover .meta .value{color:var(--inkwell); font-size:13px; text-transform:none; font-family:var(--f-body); font-weight:500;}
+  .cover .meta .row{padding:8px 0; border-top:1px solid var(--line);}
+  .cover .meta .row:first-child{border-top:none;}
+
+  /* Stats */
+  .stats{display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; margin-bottom:56px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px;}
+  .stat{text-align:center; padding:6px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .val{font-family:var(--f-display); font-size:26px; font-weight:300;}
+  .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  /* TOC */
+  .toc{background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px 28px; margin-bottom:56px;}
+  .toc h3{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .toc-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:4px 32px;}
+  .toc-grid a{display:block; padding:6px 0; font-size:13px; color:var(--inkwell); text-decoration:none; border-bottom:1px dashed var(--line);}
+  .toc-grid a:hover{color:var(--cobalt);}
+  .toc-grid a .num{font-family:var(--f-mono); font-size:10px; color:var(--cobalt); margin-right:8px;}
+
+  /* Sections */
+  .section{margin-bottom:64px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:24px; padding-bottom:14px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:36px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  h3.sub{font-family:var(--f-display); font-size:22px; font-weight:400; margin:32px 0 14px; letter-spacing:-0.01em;}
+  h3.sub em{font-style:italic; color:var(--cobalt);}
+
+  p{margin-bottom:12px; line-height:1.7;}
+  p.lead{font-size:17px;}
+  ul,ol{margin:0 0 16px 20px; line-height:1.8;}
+  li{margin-bottom:4px;}
+  b{font-weight:600;}
+  code{font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px; font-size:13px; border:1px solid var(--line);}
+
+  /* Tables */
+  table{width:100%; border-collapse:collapse; margin:16px 0 24px; font-size:13px;}
+  th{background:var(--ricepaper); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-strong);}
+  td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  tr:hover td{background:rgba(250,246,236,0.5);}
+  .tag{display:inline-block; font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; padding:2px 7px; border-radius:4px;}
+  .tag.get{background:var(--growth); color:#fff;}
+  .tag.post{background:var(--cobalt); color:#fff;}
+  .tag.put{background:var(--highlighter); color:var(--inkwell);}
+  .tag.delete{background:var(--correction); color:#fff;}
+  .tag.ws{background:var(--ai); color:#fff;}
+  .tag.req{background:var(--correction-soft); color:var(--correction);}
+  .tag.opt{background:var(--ricepaper-2); color:var(--inkwell-2);}
+
+  /* Info boxes */
+  .info{padding:16px 20px; border-radius:10px; margin:16px 0 20px; font-size:13px; line-height:1.7;}
+  .info .label{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; font-weight:600;}
+  .info.note{background:var(--cobalt-soft); border:1px solid var(--cobalt);}
+  .info.warn{background:var(--highlighter-soft); border:1px solid var(--highlighter);}
+  .info.success{background:var(--growth-soft); border:1px solid var(--growth);}
+  .info.error{background:var(--correction-soft); border:1px solid var(--correction);}
+
+  /* Endpoint card */
+  .endpoint{background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; margin:16px 0 20px;}
+  .endpoint-header{display:flex; align-items:center; gap:12px; margin-bottom:14px; padding-bottom:14px; border-bottom:1px dashed var(--line);}
+  .endpoint-method{font-family:var(--f-mono); font-size:11px; font-weight:600; padding:4px 10px; border-radius:6px; text-transform:uppercase; letter-spacing:0.05em;}
+  .endpoint-method.get{background:var(--growth); color:#fff;}
+  .endpoint-method.post{background:var(--cobalt); color:#fff;}
+  .endpoint-method.put{background:var(--highlighter); color:var(--inkwell);}
+  .endpoint-method.delete{background:var(--correction); color:#fff;}
+  .endpoint-method.ws{background:var(--ai); color:#fff;}
+  .endpoint-path{font-family:var(--f-mono); font-size:14px; font-weight:500; color:var(--inkwell);}
+  .endpoint-desc{font-size:13px; color:var(--inkwell-2); margin-left:auto;}
+  .endpoint h4{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin:14px 0 8px;}
+
+  /* Code blocks */
+  pre{background:var(--inkwell); color:var(--ricepaper); padding:18px 20px; border-radius:10px; font-family:var(--f-mono); font-size:12px; line-height:1.7; overflow-x:auto; margin:8px 0 14px;}
+  pre .comment{color:rgba(250,246,236,0.5);}
+  pre .key{color:var(--cobalt-soft);}
+  pre .string{color:var(--growth-soft);}
+  pre .number{color:var(--highlighter);}
+  pre .keyword{color:var(--highlighter);}
+  pre .type{color:#A78BFA;}
+
+  /* Base URL */
+  .base-url{background:var(--inkwell); color:var(--ricepaper); padding:14px 20px; border-radius:10px; font-family:var(--f-mono); font-size:14px; margin:16px 0 24px; display:flex; align-items:center; gap:12px;}
+  .base-url .label{font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:rgba(250,246,236,0.6);}
+  .base-url .url{color:var(--highlighter); font-weight:500;}
+
+  /* Footer */
+  footer{margin-top:64px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div>
+    <div class="brand">
+      <div class="logo">墨</div>
+      <div class="name">Lumina · 墨光<small>API Reference</small></div>
+    </div>
+    <div class="doc-type">API Reference · v1.0</div>
+    <h1>
+      <span class="hl">API</span> 接口<br/>
+      <em>文档</em>
+    </h1>
+    <div class="subtitle">RESTful · OpenAPI 3.1 · JWT 认证 · 全接口规范</div>
+  </div>
+  <div class="meta">
+    <div class="row">
+      <span class="label">文档编号</span>
+      <span class="value">API-LUMINA-2026-001</span>
+    </div>
+    <div class="row">
+      <span class="label">版本号</span>
+      <span class="value">v1.0 · 初始发布</span>
+    </div>
+    <div class="row">
+      <span class="label">基础路径</span>
+      <span class="value">/api/v1</span>
+    </div>
+    <div class="row">
+      <span class="label">协议</span>
+      <span class="value">HTTPS · JSON · WebSocket</span>
+    </div>
+    <div class="row">
+      <span class="label">状态</span>
+      <span class="value" style="color:var(--growth); font-weight:600;">● 已发布</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ STATS ============ -->
+<div class="stats">
+  <div class="stat"><div class="val hl">8</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val hl">42</div><div class="lbl">接口数</div></div>
+  <div class="stat"><div class="val">3</div><div class="lbl">WebSocket</div></div>
+  <div class="stat"><div class="val">JWT</div><div class="lbl">认证方式</div></div>
+  <div class="stat"><div class="val">RFC 7807</div><div class="lbl">错误格式</div></div>
+</div>
+
+<!-- ============ TOC ============ -->
+<nav class="toc">
+  <h3>目录 · Table of Contents</h3>
+  <div class="toc-grid">
+    <a href="#s1"><span class="num">01</span>概览与约定</a>
+    <a href="#s2"><span class="num">02</span>认证与授权</a>
+    <a href="#s3"><span class="num">03</span>用户模块</a>
+    <a href="#s4"><span class="num">04</span>课程模块</a>
+    <a href="#s5"><span class="num">05</span>作业模块</a>
+    <a href="#s6"><span class="num">06</span>成绩模块</a>
+    <a href="#s7"><span class="num">07</span>直播模块</a>
+    <a href="#s8"><span class="num">08</span>AI 模块</a>
+    <a href="#s9"><span class="num">09</span>错误码</a>
+    <a href="#s10"><span class="num">10</span>限流策略</a>
+    <a href="#s11"><span class="num">11</span>SDK · 示例代码</a>
+  </div>
+</nav>
+
+<!-- ============ 01 · 概览 ============ -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <h2>01 · 概览与约定 <em>Overview</em></h2>
+    <div class="num-tag">Convention</div>
+  </div>
+
+  <h3 class="sub">1.1 基础信息</h3>
+  <div class="base-url">
+    <span class="label">Base URL</span>
+    <span class="url">https://api.lumina.edu/api/v1</span>
+  </div>
+
+  <table>
+    <thead><tr><th>项目</th><th>约定</th></tr></thead>
+    <tbody>
+      <tr><td><b>协议</b></td><td>HTTPS（强制）· HTTP/2</td></tr>
+      <tr><td><b>数据格式</b></td><td>JSON（<code>Content-Type: application/json</code>）</td></tr>
+      <tr><td><b>字符编码</b></td><td>UTF-8</td></tr>
+      <tr><td><b>时间格式</b></td><td>ISO 8601（<code>2026-08-25T09:41:00+08:00</code>）</td></tr>
+      <tr><td><b>ID 格式</b></td><td>UUID v4（<code>550e8400-e29b-41d4-a716-446655440000</code>）</td></tr>
+      <tr><td><b>分页</b></td><td>Cursor-based（<code>?cursor=xxx&limit=20</code>）</td></tr>
+      <tr><td><b>压缩</b></td><td>支持 gzip · Brotli</td></tr>
+      <tr><td><b>版本</b></td><td>URL 路径（<code>/api/v1/</code> · <code>/api/v2/</code>）</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">1.2 响应格式</h3>
+  <pre><span class="comment">// 成功响应</span>
+{
+  <span class="key">"code"</span>: <span class="number">0</span>,
+  <span class="key">"data"</span>: { ... },
+  <span class="key">"meta"</span>: {
+    <span class="key">"request_id"</span>: <span class="string">"req_abc123"</span>,
+    <span class="key">"timestamp"</span>: <span class="string">"2026-08-25T09:41:00+08:00"</span>
+  }
+}
+
+<span class="comment">// 分页响应</span>
+{
+  <span class="key">"code"</span>: <span class="number">0</span>,
+  <span class="key">"data"</span>: [ ... ],
+  <span class="key">"pagination"</span>: {
+    <span class="key">"cursor"</span>: <span class="string">"eyJpZCI6MTAwfQ=="</span>,
+    <span class="key">"has_more"</span>: <span class="keyword">true</span>,
+    <span class="key">"total"</span>: <span class="number">1284</span>
+  }
+}</pre>
+
+  <h3 class="sub">1.3 HTTP 方法</h3>
+  <table>
+    <thead><tr><th>方法</th><th>语义</th><th>幂等</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag get">GET</span></td><td>查询资源</td><td>✅ 是</td><td><code>GET /courses</code></td></tr>
+      <tr><td><span class="tag post">POST</span></td><td>创建资源</td><td>❌ 否</td><td><code>POST /courses</code></td></tr>
+      <tr><td><span class="tag put">PUT</span></td><td>全量更新</td><td>✅ 是</td><td><code>PUT /courses/{id}</code></td></tr>
+      <tr><td><span class="tag put">PATCH</span></td><td>部分更新</td><td>❌ 否</td><td><code>PATCH /courses/{id}</code></td></tr>
+      <tr><td><span class="tag delete">DELETE</span></td><td>删除资源</td><td>✅ 是</td><td><code>DELETE /courses/{id}</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 02 · 认证 ============ -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <h2>02 · 认证与授权 <em>Auth</em></h2>
+    <div class="num-tag">JWT · RBAC</div>
+  </div>
+
+  <h3 class="sub">2.1 JWT 认证流程</h3>
+  <div class="info note">
+    <div class="label">双令牌机制</div>
+    <b>Access Token</b>：15 分钟有效，用于 API 请求鉴权<br/>
+    <b>Refresh Token</b>：7 天有效，用于刷新 Access Token
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/auth/login</span>
+      <span class="endpoint-desc">登录获取令牌</span>
+    </div>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"username"</span>: <span class="string">"linqing"</span>,
+  <span class="key">"password"</span>: <span class="string">"hashed_password"</span>,
+  <span class="key">"device"</span>: <span class="string">"web"</span>    <span class="comment">// web | mobile | desktop</span>
+}</pre>
+    <h4>响应</h4>
+    <pre>{
+  <span class="key">"code"</span>: <span class="number">0</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"access_token"</span>: <span class="string">"eyJhbGciOiJIUzI1NiIs..."</span>,
+    <span class="key">"refresh_token"</span>: <span class="string">"eyJhbGciOiJIUzI1NiIs..."</span>,
+    <span class="key">"expires_in"</span>: <span class="number">900</span>,          <span class="comment">// 15 分钟</span>
+    <span class="key">"token_type"</span>: <span class="string">"Bearer"</span>,
+    <span class="key">"user"</span>: {
+      <span class="key">"id"</span>: <span class="string">"550e8400-e29b-41d4-..."</span>,
+      <span class="key">"name"</span>: <span class="string">"林清"</span>,
+      <span class="key">"role"</span>: <span class="string">"student"</span>
+    }
+  }
+}</pre>
+  </div>
+
+  <h3 class="sub">2.2 请求头</h3>
+  <pre><span class="comment">// 所有需要认证的请求</span>
+<span class="keyword">Authorization</span>: Bearer eyJhbGciOiJIUzI1NiIs...
+<span class="keyword">Content-Type</span>: application/json
+<span class="keyword">X-Request-ID</span>: <span class="string">client_generated_uuid</span>  <span class="comment">// 可选，用于追踪</span></pre>
+
+  <h3 class="sub">2.3 角色权限</h3>
+  <table>
+    <thead><tr><th>角色</th><th>说明</th><th>可访问资源</th></tr></thead>
+    <tbody>
+      <tr><td><b>student</b></td><td>学生</td><td>自己的课程/作业/成绩</td></tr>
+      <tr><td><b>teacher</b></td><td>教师</td><td>自己教授的课程 + 选课学生数据</td></tr>
+      <tr><td><b>admin</b></td><td>管理员</td><td>全局数据 · 系统配置 · 审批</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 03 · 用户 ============ -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <h2>03 · 用户模块 <em>Users</em></h2>
+    <div class="num-tag">6 endpoints</div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/users/me</span>
+      <span class="endpoint-desc">获取当前用户信息</span>
+    </div>
+    <h4>响应</h4>
+    <pre>{
+  <span class="key">"code"</span>: <span class="number">0</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"id"</span>: <span class="string">"550e8400-e29b-41d4-..."</span>,
+    <span class="key">"student_id"</span>: <span class="string">"2023010001"</span>,
+    <span class="key">"name"</span>: <span class="string">"林清"</span>,
+    <span class="key">"email"</span>: <span class="string">"linqing@huacing.edu.cn"</span>,
+    <span class="key">"role"</span>: <span class="string">"student"</span>,
+    <span class="key">"department"</span>: <span class="string">"计算机科学与技术"</span>,
+    <span class="key">"grade"</span>: <span class="string">"2023"</span>,
+    <span class="key">"avatar_url"</span>: <span class="string">"https://cdn.lumina.edu/avatars/..."</span>,
+    <span class="key">"created_at"</span>: <span class="string">"2023-09-01T08:00:00+08:00"</span>
+  }
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method put">PATCH</span>
+      <span class="endpoint-path">/users/me</span>
+      <span class="endpoint-desc">更新个人信息</span>
+    </div>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"name"</span>: <span class="string">"林清"</span>,
+  <span class="key">"avatar_url"</span>: <span class="string">"https://cdn.lumina.edu/..."</span>,
+  <span class="key">"bio"</span>: <span class="string">"热爱编程，喜欢数学"</span>
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/users/{id}</span>
+      <span class="endpoint-desc">查询用户（教师/管理员）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/auth/refresh</span>
+      <span class="endpoint-desc">刷新令牌</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/auth/logout</span>
+      <span class="endpoint-desc">注销 · 黑名单令牌</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/auth/password</span>
+      <span class="endpoint-desc">修改密码</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 · 课程 ============ -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <h2>04 · 课程模块 <em>Courses</em></h2>
+    <div class="num-tag">8 endpoints</div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/courses</span>
+      <span class="endpoint-desc">课程列表</span>
+    </div>
+    <h4>查询参数</h4>
+    <table>
+      <thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>semester</code></td><td>string</td><td><span class="tag opt">可选</span></td><td>学期，如 <code>2026-1</code></td></tr>
+        <tr><td><code>department</code></td><td>string</td><td><span class="tag opt">可选</span></td><td>院系筛选</td></tr>
+        <tr><td><code>cursor</code></td><td>string</td><td><span class="tag opt">可选</span></td><td>分页游标</td></tr>
+        <tr><td><code>limit</code></td><td>int</td><td><span class="tag opt">可选</span></td><td>每页数量（默认 20，最大 100）</td></tr>
+      </tbody>
+    </table>
+    <h4>响应</h4>
+    <pre>{
+  <span class="key">"code"</span>: <span class="number">0</span>,
+  <span class="key">"data"</span>: [
+    {
+      <span class="key">"id"</span>: <span class="string">"c001"</span>,
+      <span class="key">"code"</span>: <span class="string">"CS201"</span>,
+      <span class="key">"title"</span>: <span class="string">"高等数学"</span>,
+      <span class="key">"teacher"</span>: { <span class="key">"id"</span>: <span class="string">"t001"</span>, <span class="key">"name"</span>: <span class="string">"王建国"</span> },
+      <span class="key">"credits"</span>: <span class="number">4.0</span>,
+      <span class="key">"students_count"</span>: <span class="number">86</span>,
+      <span class="key">"semester"</span>: <span class="string">"2026-1"</span>,
+      <span class="key">"schedule"</span>: [
+        { <span class="key">"day"</span>: <span class="number">1</span>, <span class="key">"start"</span>: <span class="string">"08:00"</span>, <span class="key">"end"</span>: <span class="string">"09:40"</span>, <span class="key">"room"</span>: <span class="string">"教三201"</span> }
+      ]
+    }
+  ],
+  <span class="key">"pagination"</span>: { <span class="key">"cursor"</span>: <span class="string">"..."</span>, <span class="key">"has_more"</span>: <span class="keyword">true</span> }
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/courses/{id}</span>
+      <span class="endpoint-desc">课程详情</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/courses</span>
+      <span class="endpoint-desc">创建课程（教师）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/courses/{id}/chapters</span>
+      <span class="endpoint-desc">章节列表</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/courses/{id}/enroll</span>
+      <span class="endpoint-desc">选课（学生）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method delete">DELETE</span>
+      <span class="endpoint-path">/courses/{id}/enroll</span>
+      <span class="endpoint-desc">退课（学生）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/courses/{id}/students</span>
+      <span class="endpoint-desc">选课学生列表（教师）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/courses/{id}/announcements</span>
+      <span class="endpoint-desc">课程公告</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 · 作业 ============ -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <h2>05 · 作业模块 <em>Assignments</em></h2>
+    <div class="num-tag">6 endpoints</div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/assignments</span>
+      <span class="endpoint-desc">作业列表</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/courses/{course_id}/assignments</span>
+      <span class="endpoint-desc">发布作业（教师）</span>
+    </div>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"title"</span>: <span class="string">"第四章习题"</span>,
+  <span class="key">"description"</span>: <span class="string">"完成课本 P120-P125 所有习题"</span>,
+  <span class="key">"due_at"</span>: <span class="string">"2026-09-01T23:59:00+08:00"</span>,
+  <span class="key">"max_score"</span>: <span class="number">100</span>,
+  <span class="key">"ai_grading"</span>: <span class="keyword">true</span>,
+  <span class="key">"rubric"</span>: [
+    { <span class="key">"criteria"</span>: <span class="string">"解题过程完整"</span>, <span class="key">"weight"</span>: <span class="number">0.4</span> },
+    { <span class="key">"criteria"</span>: <span class="string">"答案正确"</span>, <span class="key">"weight"</span>: <span class="number">0.4</span> },
+    { <span class="key">"criteria"</span>: <span class="string">"书写规范"</span>, <span class="key">"weight"</span>: <span class="number">0.2</span> }
+  ]
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/assignments/{id}/submit</span>
+      <span class="endpoint-desc">提交作业（学生）</span>
+    </div>
+    <h4>请求体（multipart/form-data）</h4>
+    <pre><span class="key">file</span>: <span class="string">&lt;binary&gt;</span>         <span class="comment">// 作业文件</span>
+<span class="key">text_answer</span>: <span class="string">"..."</span>    <span class="comment">// 文字答案（可选）</span>
+<span class="key">submission_note</span>: <span class="string">"..."</span> <span class="comment">// 提交备注</span></pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/assignments/{id}/grade</span>
+      <span class="endpoint-desc">批阅（教师/AI）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/assignments/{id}/submissions</span>
+      <span class="endpoint-desc">提交列表（教师）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/assignments/{id}/submissions/me</span>
+      <span class="endpoint-desc">我的提交（学生）</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 06 · 成绩 ============ -->
+<section class="section" id="s6">
+  <div class="section-header">
+    <h2>06 · 成绩模块 <em>Grades</em></h2>
+    <div class="num-tag">4 endpoints</div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/grades/me</span>
+      <span class="endpoint-desc">我的成绩（学生）</span>
+    </div>
+    <h4>响应</h4>
+    <pre>{
+  <span class="key">"code"</span>: <span class="number">0</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"gpa"</span>: <span class="number">3.72</span>,
+    <span class="key">"total_credits"</span>: <span class="number">128</span>,
+    <span class="key">"courses"</span>: [
+      {
+        <span class="key">"course_id"</span>: <span class="string">"c001"</span>,
+        <span class="key">"title"</span>: <span class="string">"高等数学"</span>,
+        <span class="key">"credit"</span>: <span class="number">4.0</span>,
+        <span class="key">"score"</span>: <span class="number">92</span>,
+        <span class="key">"grade"</span>: <span class="string">"A"</span>,
+        <span class="key">"semester"</span>: <span class="string">"2026-1"</span>
+      }
+    ]
+  }
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/courses/{id}/grades</span>
+      <span class="endpoint-desc">课程成绩列表（教师）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/courses/{id}/grades</span>
+      <span class="endpoint-desc">录入成绩（教师）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/grades/statistics</span>
+      <span class="endpoint-desc">成绩统计</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 07 · 直播 ============ -->
+<section class="section" id="s7">
+  <div class="section-header">
+    <h2>07 · 直播模块 <em>Live</em></h2>
+    <div class="num-tag">6 endpoints · 含 WebSocket</div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live</span>
+      <span class="endpoint-desc">创建直播（教师）</span>
+    </div>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"course_id"</span>: <span class="string">"c001"</span>,
+  <span class="key">"title"</span>: <span class="string">"第12讲 · 不定积分"</span>,
+  <span class="key">"scheduled_at"</span>: <span class="string">"2026-09-01T10:00:00+08:00"</span>,
+  <span class="key">"enable_recording"</span>: <span class="keyword">true</span>,
+  <span class="key">"enable_chat"</span>: <span class="keyword">true</span>,
+  <span class="key">"enable_hand_raise"</span>: <span class="keyword">true</span>
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/{id}/join</span>
+      <span class="endpoint-desc">加入直播</span>
+    </div>
+    <h4>响应</h4>
+    <pre>{
+  <span class="key">"code"</span>: <span class="number">0</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"rtc_url"</span>: <span class="string">"wss://rtc.lumina.edu/room/..."</span>,
+    <span class="key">"token"</span>: <span class="string">"rtc_token_..."</span>,
+    <span class="key">"room_id"</span>: <span class="string">"room_abc123"</span>,
+    <span class="key">"chat_ws_url"</span>: <span class="string">"wss://chat.lumina.edu/room/..."</span>
+  }
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method ws">WS</span>
+      <span class="endpoint-path">wss://chat.lumina.edu/room/{room_id}</span>
+      <span class="endpoint-desc">直播聊天</span>
+    </div>
+    <h4>消息格式</h4>
+    <pre><span class="comment">// 发送消息</span>
+{ <span class="key">"type"</span>: <span class="string">"chat"</span>, <span class="key">"content"</span>: <span class="string">"老师讲得清楚！"</span> }
+
+<span class="comment">// 举手</span>
+{ <span class="key">"type"</span>: <span class="string">"hand_raise"</span>, <span class="key">"action"</span>: <span class="string">"up"</span> }
+
+<span class="comment">// 收到消息</span>
+{ <span class="key">"type"</span>: <span class="string">"chat"</span>, <span class="key">"user"</span>: <span class="string">"林清"</span>, <span class="key">"content"</span>: <span class="string">"..."</span>, <span class="key">"ts"</span>: <span class="number">1725000000</span> }</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/live/{id}</span>
+      <span class="endpoint-desc">直播详情</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/{id}/recording</span>
+      <span class="endpoint-desc">开始/停止录制</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/live/{id}/replay</span>
+      <span class="endpoint-desc">获取回放地址</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 08 · AI ============ -->
+<section class="section" id="s8">
+  <div class="section-header">
+    <h2>08 · AI 模块 <em>AI-Powered</em></h2>
+    <div class="num-tag">6 endpoints · 国产模型</div>
+  </div>
+
+  <div class="info ai-box" style="background:var(--ai-soft); border:1px solid var(--ai);">
+    <div class="label" style="color:var(--ai);">🤖 AI 接口说明</div>
+    所有 AI 接口支持流式响应（SSE），通过 <code>Accept: text/event-stream</code> 请求头启用。<br/>
+    模型可指定：<code>X-Model: qwen-max</code>，不指定则由智能路由自动选择。
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/ai/chat</span>
+      <span class="endpoint-desc">AI 对话（苏格拉底导师）</span>
+    </div>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"conversation_id"</span>: <span class="string">"conv_abc123"</span>,  <span class="comment">// 可选，续对话</span>
+  <span class="key">"message"</span>: <span class="string">"这个积分怎么解？"</span>,
+  <span class="key">"context"</span>: {
+    <span class="key">"course_id"</span>: <span class="string">"c001"</span>,
+    <span class="key">"chapter_id"</span>: <span class="string">"ch004"</span>
+  },
+  <span class="key">"attachments"</span>: [
+    { <span class="key">"type"</span>: <span class="string">"image"</span>, <span class="key">"url"</span>: <span class="string">"https://cdn..."</span> }
+  ]
+}</pre>
+    <h4>流式响应（SSE）</h4>
+    <pre><span class="keyword">data</span>: {<span class="key">"type"</span>:<span class="string">"token"</span>,<span class="key">"content"</span>:<span class="string">"这个"</span>}
+
+<span class="keyword">data</span>: {<span class="key">"type"</span>:<span class="string">"token"</span>,<span class="key">"content"</span>:<span class="string">"积分"</span>}
+
+<span class="keyword">data</span>: {<span class="key">"type"</span>:<span class="string">"done"</span>,<span class="key">"conversation_id"</span>:<span class="string">"conv_abc123"</span>,<span class="key">"usage"</span>:{<span class="key">"tokens"</span>:<span class="number">42</span>}}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/ai/grade</span>
+      <span class="endpoint-desc">AI 辅助批阅</span>
+    </div>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"assignment_id"</span>: <span class="string">"a001"</span>,
+  <span class="key">"submission_id"</span>: <span class="string">"s123"</span>,
+  <span class="key">"rubric"</span>: [
+    { <span class="key">"criteria"</span>: <span class="string">"解题过程完整"</span>, <span class="key">"weight"</span>: <span class="number">0.4</span> }
+  ],
+  <span class="key">"file_urls"</span>: [<span class="string">"https://cdn.../submission.pdf"</span>]
+}</pre>
+    <h4>响应</h4>
+    <pre>{
+  <span class="key">"code"</span>: <span class="number">0</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"scores"</span>: [
+      { <span class="key">"criteria"</span>: <span class="string">"解题过程完整"</span>, <span class="key">"score"</span>: <span class="number">36</span>, <span class="key">"max"</span>: <span class="number">40</span>, <span class="key">"comment"</span>: <span class="string">"步骤完整..."</span> }
+    ],
+    <span class="key">"total"</span>: <span class="number">88</span>,
+    <span class="key">"feedback"</span>: <span class="string">"整体解题思路清晰..."</span>,
+    <span class="key">"model"</span>: <span class="string">"qwen-max"</span>,
+    <span class="key">"confidence"</span>: <span class="number">0.92</span>
+  }
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/ai/generate</span>
+      <span class="endpoint-desc">AI 内容生成（课件/题目）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/ai/speech-to-text</span>
+      <span class="endpoint-desc">语音识别（讯飞）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/ai/models</span>
+      <span class="endpoint-desc">可用模型列表</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/ai/conversations</span>
+      <span class="endpoint-desc">对话历史</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 09 · 错误码 ============ -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <h2>09 · 错误码 <em>Errors</em></h2>
+    <div class="num-tag">RFC 7807</div>
+  </div>
+
+  <div class="info error">
+    <div class="label">错误响应格式</div>
+    所有错误遵循 RFC 7807 Problem Details 规范。
+  </div>
+
+  <pre>{
+  <span class="key">"type"</span>: <span class="string">"https://api.lumina.edu/errors/unauthorized"</span>,
+  <span class="key">"status"</span>: <span class="number">401</span>,
+  <span class="key">"title"</span>: <span class="string">"Unauthorized"</span>,
+  <span class="key">"detail"</span>: <span class="string">"Access token expired"</span>,
+  <span class="key">"code"</span>: <span class="string">"AUTH_TOKEN_EXPIRED"</span>,
+  <span class="key">"request_id"</span>: <span class="string">"req_abc123"</span>
+}</pre>
+
+  <table>
+    <thead><tr><th>HTTP</th><th>错误码</th><th>说明</th><th>处理建议</th></tr></thead>
+    <tbody>
+      <tr><td><b>400</b></td><td><code>INVALID_REQUEST</code></td><td>请求参数错误</td><td>检查请求体格式</td></tr>
+      <tr><td><b>401</b></td><td><code>AUTH_TOKEN_EXPIRED</code></td><td>Token 过期</td><td>使用 refresh_token 刷新</td></tr>
+      <tr><td><b>401</b></td><td><code>AUTH_TOKEN_INVALID</code></td><td>Token 无效</td><td>重新登录</td></tr>
+      <tr><td><b>403</b></td><td><code>FORBIDDEN</code></td><td>无权限</td><td>检查角色权限</td></tr>
+      <tr><td><b>404</b></td><td><code>NOT_FOUND</code></td><td>资源不存在</td><td>检查 ID</td></tr>
+      <tr><td><b>409</b></td><td><code>CONFLICT</code></td><td>资源冲突</td><td>并发冲突，重试</td></tr>
+      <tr><td><b>422</b></td><td><code>VALIDATION_ERROR</code></td><td>数据校验失败</td><td>检查字段约束</td></tr>
+      <tr><td><b>429</b></td><td><code>RATE_LIMITED</code></td><td>请求过频</td><td>等待 <code>Retry-After</code></td></tr>
+      <tr><td><b>500</b></td><td><code>INTERNAL_ERROR</code></td><td>服务内部错误</td><td>联系管理员</td></tr>
+      <tr><td><b>503</b></td><td><code>SERVICE_UNAVAILABLE</code></td><td>服务不可用</td><td>稍后重试</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 10 · 限流 ============ -->
+<section class="section" id="s10">
+  <div class="section-header">
+    <h2>10 · 限流策略 <em>Rate Limit</em></h2>
+    <div class="num-tag">Token Bucket</div>
+  </div>
+
+  <table>
+    <thead><tr><th>接口类别</th><th>限制</th><th>响应头</th></tr></thead>
+    <tbody>
+      <tr><td><b>普通 API</b></td><td>100 次/分钟/用户</td><td><code>X-RateLimit-Limit: 100</code></td></tr>
+      <tr><td><b>AI 对话</b></td><td>20 次/分钟/用户</td><td><code>X-RateLimit-Remaining: 18</code></td></tr>
+      <tr><td><b>文件上传</b></td><td>10 次/分钟/用户</td><td><code>X-RateLimit-Reset: 1725000060</code></td></tr>
+      <tr><td><b>直播相关</b></td><td>60 次/分钟/用户</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info warn">
+    <div class="label">⚠️ 触发限流</div>
+    返回 <code>429 Too Many Requests</code>，响应头包含 <code>Retry-After</code>（秒数），客户端应据此等待后重试。
+  </div>
+</section>
+
+<!-- ============ 11 · SDK ============ -->
+<section class="section" id="s11">
+  <div class="section-header">
+    <h2>11 · SDK · 示例代码 <em>Examples</em></h2>
+    <div class="num-tag">TypeScript · Python</div>
+  </div>
+
+  <h3 class="sub">TypeScript 示例</h3>
+  <pre><span class="keyword">import</span> { LuminaClient } <span class="keyword">from</span> <span class="string">'@lumina/sdk'</span>;
+
+<span class="keyword">const</span> client = <span class="keyword">new</span> <span class="type">LuminaClient</span>({
+  baseUrl: <span class="string">'https://api.lumina.edu/api/v1'</span>,
+  token: <span class="string">'your_access_token'</span>,
+});
+
+<span class="comment">// 获取课程列表</span>
+<span class="keyword">const</span> courses = <span class="keyword">await</span> client.courses.list({
+  semester: <span class="string">'2026-1'</span>,
+  limit: <span class="number">20</span>,
+});
+
+<span class="comment">// AI 对话（流式）</span>
+<span class="keyword">const</span> stream = <span class="keyword">await</span> client.ai.chat({
+  message: <span class="string">'解释一下不定积分'</span>,
+  context: { courseId: <span class="string">'c001'</span> },
+});
+
+<span class="keyword">for await</span> (<span class="keyword">const</span> chunk <span class="keyword">of</span> stream) {
+  process.stdout.write(chunk.content);
+}</pre>
+
+  <h3 class="sub">Python 示例</h3>
+  <pre><span class="keyword">from</span> lumina <span class="keyword">import</span> <span class="type">LuminaClient</span>
+
+client = <span class="type">LuminaClient</span>(
+    base_url=<span class="string">"https://api.lumina.edu/api/v1"</span>,
+    token=<span class="string">"your_access_token"</span>,
+)
+
+<span class="comment"># 获取课程列表</span>
+courses = client.courses.list(semester=<span class="string">"2026-1"</span>)
+
+<span class="comment"># AI 辅助批阅</span>
+result = client.ai.grade(
+    assignment_id=<span class="string">"a001"</span>,
+    submission_id=<span class="string">"s123"</span>,
+    file_urls=[<span class="string">"https://cdn.../submission.pdf"</span>],
+)
+print(f<span class="string">"得分: {result.total}/100"</span>)</pre>
+
+  <h3 class="sub">cURL 示例</h3>
+  <pre><span class="comment"># 登录</span>
+curl -X POST https://api.lumina.edu/api/v1/auth/login \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{"username":"linqing","password":"..."}'</span>
+
+<span class="comment"># 获取课程</span>
+curl https://api.lumina.edu/api/v1/courses \
+  -H <span class="string">"Authorization: Bearer eyJhbG..."</span>
+
+<span class="comment"># AI 对话（流式）</span>
+curl -X POST https://api.lumina.edu/api/v1/ai/chat \
+  -H <span class="string">"Authorization: Bearer eyJhbG..."</span> \
+  -H <span class="string">"Accept: text/event-stream"</span> \
+  -d <span class="string">'{"message":"解释积分"}'</span></pre>
+</section>
+
+<footer>
+  <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · API Reference</div>
+  <div>v1.0 · 8 模块 · 42 接口 · 2026-08-25</div>
+  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">API-LUMINA-2026-001</div>
+</footer>
+
+</body>
+</html>

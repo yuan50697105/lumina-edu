@@ -26,6 +26,7 @@ edu/
 │   ├── lumina-00-index.html           # 📋 索引导航（入口）
 │   ├── lumina-prd.html                # 📋 产品需求文档 PRD v1.3
 │   ├── lumina-tdd.html                # 📋 技术设计文档 TDD v1.0
+│   ├── lumina-api.html                # 📋 API 接口文档 v1.0
 │   │
 │   ├── APP/phone/      (8 文件)       # 📱 手机 APP 原型
 │   ├── APP/tablet/     (6 文件)       # 📲 平板 APP 原型
@@ -48,7 +49,8 @@ edu/
 | **界面页面** | 160+ 个 |
 | **设计表面** | 6 个（学生/教师 × 移动/Web/桌面）|
 | **功能模块** | 20+ 个 |
-| **文档** | PRD v1.3 + TDD v1.0 + 索引 |
+| **文档** | PRD v1.3 + TDD v1.0 + API v1.0 + 索引 |
+| **API 接口** | 42 个端点（8 模块 · JWT · WebSocket）|
 
 ## 📖 文档体系
 
@@ -57,6 +59,7 @@ edu/
 | 📋 **设计索引** | 原型导航入口，按平台分类 | `lumina-00-index.html` |
 | 📋 **PRD v1.3** | 产品需求文档，18 章 | `lumina-prd.html` |
 | 📋 **TDD v1.0** | 技术设计文档，18 章 | `lumina-tdd.html` |
+| 📋 **API v1.0** | API 接口文档，11 章 · 42 端点 | `lumina-api.html` |
 
 ## 🎨 设计系统
 
@@ -145,6 +148,7 @@ python scripts/yuque-sync.py
 | 设计索引 | `原型/lumina-00-index.html` |
 | PRD 文档 | `原型/lumina-prd.html` |
 | TDD 文档 | `原型/lumina-tdd.html` |
+| API 文档 | `原型/lumina-api.html` |
 
 ## 📋 版本历史
 
@@ -155,6 +159,7 @@ python scripts/yuque-sync.py
 | **v1.2** | 2026-08-25 | 移动端双模式适配（手机+平板） |
 | **v1.3** | 2026-08-25 | 按平台目录重组，5 目录 33 文件 |
 | **TDD v1.0** | 2026-08-25 | 技术设计文档发布 |
+| **API v1.0** | 2026-08-25 | API 接口文档发布，42 端点 |
 
 ## 📄 许可证
 
