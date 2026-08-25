@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · 用户手册 v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding:56px 64px; max-width:1280px; margin:0 auto;}
+
+  .cover{padding:80px 0 64px; border-bottom:1px solid var(--line); margin-bottom:56px; display:grid; grid-template-columns:2fr 1fr; gap:48px; align-items:end;}
+  .cover .brand{display:flex; align-items:center; gap:14px; margin-bottom:32px;}
+  .cover .brand .logo{width:56px; height:56px; border-radius:14px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:28px; font-weight:500; font-style:italic;}
+  .cover .brand .name{font-family:var(--f-display); font-size:20px; font-weight:500;}
+  .cover .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:4px;}
+  .cover .doc-type{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--cobalt); background:var(--cobalt-soft); padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:20px;}
+  .cover h1{font-family:var(--f-display); font-weight:300; font-size:72px; letter-spacing:-0.04em; line-height:1;}
+  .cover h1 em{font-style:italic; color:var(--cobalt);}
+  .cover h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .cover .subtitle{font-size:18px; color:var(--inkwell-2); margin-top:20px; font-weight:300;}
+  .cover .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; line-height:2.2;}
+  .cover .meta .label{color:var(--inkwell-2); font-size:10px; display:block; margin-bottom:2px;}
+  .cover .meta .value{color:var(--inkwell); font-size:13px; text-transform:none; font-family:var(--f-body); font-weight:500;}
+  .cover .meta .row{padding:8px 0; border-top:1px solid var(--line);}
+
+  .stats{display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; margin-bottom:56px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px;}
+  .stat{text-align:center; padding:6px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .val{font-family:var(--f-display); font-size:26px; font-weight:300;}
+  .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  .toc{background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px 28px; margin-bottom:56px;}
+  .toc h3{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .toc-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:4px 32px;}
+  .toc-grid a{display:block; padding:6px 0; font-size:13px; color:var(--inkwell); text-decoration:none; border-bottom:1px dashed var(--line);}
+  .toc-grid a:hover{color:var(--cobalt);}
+  .toc-grid a .num{font-family:var(--f-mono); font-size:10px; color:var(--cobalt); margin-right:8px;}
+
+  .section{margin-bottom:64px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:24px; padding-bottom:14px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:36px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  h3.sub{font-family:var(--f-display); font-size:22px; font-weight:400; margin:32px 0 14px; letter-spacing:-0.01em;}
+  h3.sub em{font-style:italic; color:var(--cobalt);}
+
+  p{margin-bottom:12px; line-height:1.7;}
+  ul,ol{margin:0 0 16px 20px; line-height:1.8;}
+  li{margin-bottom:4px;}
+  b{font-weight:600;}
+  code{font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px; font-size:13px; border:1px solid var(--line);}
+
+  table{width:100%; border-collapse:collapse; margin:16px 0 24px; font-size:13px;}
+  th{background:var(--ricepaper); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-strong);}
+  td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  tr:hover td{background:rgba(250,246,236,0.5);}
+  .tag{display:inline-block; font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; padding:2px 7px; border-radius:4px;}
+  .tag.student{background:var(--cobalt); color:#fff;}
+  .tag.teacher{background:var(--growth); color:#fff;}
+  .tag.admin{background:var(--correction); color:#fff;}
+
+  pre{background:var(--inkwell); color:var(--ricepaper); padding:18px 20px; border-radius:10px; font-family:var(--f-mono); font-size:12px; line-height:1.7; overflow-x:auto; margin:8px 0 14px;}
+  pre .comment{color:rgba(250,246,236,0.5);}
+  .keyword{color:var(--highlighter);}
+  .string{color:var(--growth-soft);}
+
+  .info{padding:16px 20px; border-radius:10px; margin:16px 0 20px; font-size:13px; line-height:1.7;}
+  .info .label{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; font-weight:600;}
+  .info.tip{background:var(--growth-soft); border:1px solid var(--growth);}
+  .info.warn{background:var(--highlighter-soft); border:1px solid var(--highlighter);}
+  .info.note{background:var(--cobalt-soft); border:1px solid var(--cobalt);}
+
+  .faq{background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; margin:16px 0 20px;}
+  .faq-q{font-family:var(--f-display); font-size:16px; font-weight:500; color:var(--inkwell); margin-bottom:10px; display:flex; align-items:center; gap:8px;}
+  .faq-q::before{content:"Q"; font-family:var(--f-mono); font-size:11px; background:var(--cobalt); color:#fff; width:20px; height:20px; border-radius:4px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .faq-a{font-size:14px; color:var(--inkwell-2); line-height:1.7; padding-left:28px;}
+
+  footer{margin-top:64px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div>
+    <div class="brand">
+      <div class="logo">墨</div>
+      <div class="name">Lumina · 墨光<small>User Guide</small></div>
+    </div>
+    <div class="doc-type">User Guide · v1.0</div>
+    <h1>
+      <span class="hl">用户</span>手册<br/>
+      <em>使用指南</em>
+    </h1>
+    <div class="subtitle">学生指南 · 教师指南 · 管理员指南 · FAQ · 最佳实践</div>
+  </div>
+  <div class="meta">
+    <div class="row">
+      <span class="label">文档编号</span>
+      <span class="value">UG-LUMINA-2026-001</span>
+    </div>
+    <div class="row">
+      <span class="label">版本号</span>
+      <span class="value">v1.0 · 初始发布</span>
+    </div>
+    <div class="row">
+      <span class="label">适用对象</span>
+      <span class="value">学生 · 教师 · 管理员</span>
+    </div>
+    <div class="row">
+      <span class="label">平台</span>
+      <span class="value">移动端 · Web · 桌面端</span>
+    </div>
+    <div class="row">
+      <span class="label">状态</span>
+      <span class="value" style="color:var(--growth); font-weight:600;">● 已发布</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ STATS ============ -->
+<div class="stats">
+  <div class="stat"><div class="val hl">3</div><div class="lbl">用户角色</div></div>
+  <div class="stat"><div class="val hl">5</div><div class="lbl">平台</div></div>
+  <div class="stat"><div class="val">20+</div><div class="lbl">功能模块</div></div>
+  <div class="stat"><div class="val">30+</div><div class="lbl">FAQ</div></div>
+  <div class="stat"><div class="val">15</div><div class="lbl">最佳实践</div></div>
+</div>
+
+<!-- ============ TOC ============ -->
+<nav class="toc">
+  <h3>目录 · Table of Contents</h3>
+  <div class="toc-grid">
+    <a href="#s1"><span class="num">01</span>快速入门</a>
+    <a href="#s2"><span class="num">02</span>学生指南</a>
+    <a href="#s3"><span class="num">03</span>教师指南</a>
+    <a href="#s4"><span class="num">04</span>管理员指南</a>
+    <a href="#s5"><span class="num">05</span>AI 功能使用</a>
+    <a href="#s6"><span class="num">06</span>直播与协作</a>
+    <a href="#s7"><span class="num">07</span>移动端使用</a>
+    <a href="#s8"><span class="num">08</span>常见问题 FAQ</a>
+    <a href="#s9"><span class="num">09</span>最佳实践</a>
+    <a href="#s10"><span class="num">10</span>联系与支持</a>
+  </div>
+</nav>
+
+<!-- ============ 01 · 快速入门 ============ -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <h2>01 · 快速入门 <em>Quick Start</em></h2>
+    <div class="num-tag">5 分钟上手</div>
+  </div>
+
+  <h3 class="sub">1.1 登录系统</h3>
+  <p><b>访问地址</b>：https://lumina.edu.cn</p>
+  <p><b>登录方式</b>：</p>
+  <ol>
+    <li>打开浏览器，访问上述地址</li>
+    <li>输入学号/工号和密码</li>
+    <li>点击「登录」按钮</li>
+    <li>首次登录需修改初始密码</li>
+  </ol>
+
+  <div class="info tip">
+    <div class="label">💡 提示</div>
+    建议收藏登录地址，并启用「记住我」功能（仅限个人设备）。
+  </div>
+
+  <h3 class="sub">1.2 界面概览</h3>
+  <table>
+    <thead><tr><th>区域</th><th>功能</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><b>顶部导航</b></td><td>全局搜索 · 通知 · 个人中心</td><td>快速切换功能模块</td></tr>
+      <tr><td><b>侧边栏</b></td><td>功能菜单</td><td>课程 · 作业 · 成绩 · AI 助手</td></tr>
+      <tr><td><b>主内容区</b></td><td>当前功能内容</td><td>根据选择的功能展示</td></tr>
+      <tr><td><b>AI 助手</b></td><td>悬浮按钮</td><td>随时召唤 AI 导师</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">1.3 学生首次使用流程</h3>
+  <ol>
+    <li><b>完善个人信息</b>：头像 · 简介 · 联系方式</li>
+    <li><b>选课</b>：进入「课程」→「选课中心」，选择本学期课程</li>
+    <li><b>查看课表</b>：进入「我的课程」查看已选课程和时间安排</li>
+    <li><b>尝试 AI 助手</b>：点击右下角 AI 按钮，提问一个学习问题</li>
+  </ol>
+</section>
+
+<!-- ============ 02 · 学生指南 ============ -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <h2>02 · 学生指南 <em>Student Guide</em></h2>
+    <div class="num-tag"><span class="tag student">学生</span></div>
+  </div>
+
+  <h3 class="sub">2.1 课程学习</h3>
+  <p><b>查看课程</b>：</p>
+  <ul>
+    <li>进入「我的课程」查看所有已选课程</li>
+    <li>点击课程卡片进入课程详情</li>
+    <li>查看章节内容 · 下载课件 · 观看视频</li>
+  </ul>
+
+  <p><b>完成作业</b>：</p>
+  <ol>
+    <li>进入「作业」查看待完成作业</li>
+    <li>点击作业查看详情和截止时间</li>
+    <li>上传文件 · 填写答案 · 提交</li>
+    <li>查看批阅结果和教师反馈</li>
+  </ol>
+
+  <div class="info note">
+    <div class="label">📝 注意</div>
+    作业提交后不可撤回，请确认无误后再提交。迟交作业会自动标记。
+  </div>
+
+  <h3 class="sub">2.2 查看成绩</h3>
+  <p><b>查看方式</b>：</p>
+  <ul>
+    <li>进入「成绩」查看所有课程成绩</li>
+    <li>查看 GPA · 学分 · 排名</li>
+    <li>下载成绩单（PDF）</li>
+  </ul>
+
+  <h3 class="sub">2.3 使用 AI 助手</h3>
+  <p><b>AI 导师功能</b>：</p>
+  <ul>
+    <li><b>苏格拉底式问答</b>：引导式学习，不直接给答案</li>
+    <li><b>知识点解释</b>：解释复杂概念，提供多个例子</li>
+    <li><b>作业辅导</b>：帮助理解题目，提示解题思路</li>
+    <li><b>知识图谱</b>：可视化知识点关联</li>
+  </ul>
+
+  <p><b>使用技巧</b>：</p>
+  <ul>
+    <li>提问时尽量具体，说明是哪个课程的哪个知识点</li>
+    <li>可以上传题目截图，AI 会识别并解答</li>
+    <li>使用「继续对话」功能深入探讨</li>
+  </ul>
+</section>
+
+<!-- ============ 03 · 教师指南 ============ -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <h2>03 · 教师指南 <em>Teacher Guide</em></h2>
+    <div class="num-tag"><span class="tag teacher">教师</span></div>
+  </div>
+
+  <h3 class="sub">3.1 课程管理</h3>
+  <p><b>创建课程</b>：</p>
+  <ol>
+    <li>进入「我的课程」→「创建课程」</li>
+    <li>填写课程信息：名称 · 编号 · 学分 · 描述</li>
+    <li>设置上课时间和教室</li>
+    <li>发布课程，等待学生选课</li>
+  </ol>
+
+  <p><b>管理章节</b>：</p>
+  <ul>
+    <li>在课程详情页点击「章节管理」</li>
+    <li>添加章节：标题 · 内容 · 附件（PPT/PDF/视频）</li>
+    <li>调整章节顺序</li>
+    <li>设置章节开放时间</li>
+  </ul>
+
+  <h3 class="sub">3.2 作业批阅</h3>
+  <p><b>发布作业</b>：</p>
+  <ol>
+    <li>进入课程 →「作业」→「发布作业」</li>
+    <li>填写作业标题 · 说明 · 截止时间 · 满分</li>
+    <li>（可选）启用 AI 辅助批阅</li>
+    <li>设置评分标准（rubric）</li>
+  </ol>
+
+  <p><b>批阅作业</b>：</p>
+  <ul>
+    <li>查看学生提交列表</li>
+    <li>点击提交查看详情和附件</li>
+    <li>输入分数和反馈</li>
+    <li>（可选）使用 AI 批阅建议，人工确认</li>
+  </ul>
+
+  <div class="info tip">
+    <div class="label">💡 AI 批阅建议</div>
+    启用 AI 批阅后，系统会先给出评分建议，教师确认或调整后正式批阅。可节省 50% 以上批阅时间。
+  </div>
+
+  <h3 class="sub">3.3 直播授课</h3>
+  <p><b>创建直播</b>：</p>
+  <ol>
+    <li>进入课程 →「直播」→「创建直播」</li>
+    <li>设置直播标题 · 计划时间</li>
+    <li>开启录制 · 聊天 · 举手功能</li>
+    <li>到时间后点击「开始直播」</li>
+  </ol>
+
+  <p><b>直播中功能</b>：</p>
+  <ul>
+    <li><b>屏幕共享</b>：分享 PPT 或桌面</li>
+    <li><b>互动聊天</b>：实时回答学生问题</li>
+    <li><b>举手管理</b>：让学生语音提问</li>
+    <li><b>课堂录制</b>：自动保存到回放</li>
+  </ul>
+</section>
+
+<!-- ============ 04 · 管理员指南 ============ -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <h2>04 · 管理员指南 <em>Admin Guide</em></h2>
+    <div class="num-tag"><span class="tag admin">管理员</span></div>
+  </div>
+
+  <h3 class="sub">4.1 用户管理</h3>
+  <p><b>批量导入</b>：</p>
+  <ul>
+    <li>准备 Excel 模板（学号 · 姓名 · 院系 · 角色）</li>
+    <li>进入「用户管理」→「批量导入」</li>
+    <li>上传文件，系统自动创建账号</li>
+    <li>下载初始密码清单，分发给用户</li>
+  </ul>
+
+  <p><b>权限管理</b>：</p>
+  <ul>
+    <li>查看用户列表，筛选角色/院系</li>
+    <li>修改用户角色（学生/教师/管理员）</li>
+    <li>禁用/启用账号</li>
+    <li>重置密码</li>
+  </ul>
+
+  <h3 class="sub">4.2 课程审批</h3>
+  <p><b>审批流程</b>：</p>
+  <ol>
+    <li>教师创建课程后提交审批</li>
+    <li>管理员在「审批中心」查看待审批课程</li>
+    <li>审核课程信息（名称 · 学分 · 教师资质）</li>
+    <li>通过/驳回，填写审批意见</li>
+  </ol>
+
+  <h3 class="sub">4.3 AI 模型管理</h3>
+  <p><b>配置模型池</b>：</p>
+  <ul>
+    <li>进入「AI 管理」→「模型配置」</li>
+    <li>启用/禁用模型（通义千问 · 智谱 GLM · 讯飞星火等）</li>
+    <li>设置每个模型的配额和预算</li>
+    <li>配置智能路由规则</li>
+  </ul>
+
+  <p><b>监控用量</b>：</p>
+  <ul>
+    <li>查看 AI 调用统计（Token 消耗 · 成本）</li>
+    <li>按模型 · 用户 · 时间维度分析</li>
+    <li>设置预警阈值</li>
+  </ul>
+</section>
+
+<!-- ============ 05 · AI 功能 ============ -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <h2>05 · AI 功能使用 <em>AI-Powered</em></h2>
+    <div class="num-tag">国产大模型</div>
+  </div>
+
+  <h3 class="sub">5.1 AI 导师（学生）</h3>
+  <p><b>使用场景</b>：</p>
+  <ul>
+    <li><b>课前预习</b>：「帮我解释一下微积分的基本概念」</li>
+    <li><b>课后复习</b>：「总结今天课程的重点」</li>
+    <li><b>作业辅导</b>：上传题目，「这道题怎么解？」</li>
+    <li><b>考前复习</b>：「帮我梳理高数第三章的知识框架」</li>
+  </ul>
+
+  <p><b>提问技巧</b>：</p>
+  <ul>
+    <li>说明课程和章节：「高数第四章的不定积分」</li>
+    <li>描述具体问题：「这个公式怎么推导？」</li>
+    <li>上传截图：拍照上传题目</li>
+    <li>追问：「能再详细解释一下吗？」</li>
+  </ul>
+
+  <h3 class="sub">5.2 AI 批阅（教师）</h3>
+  <p><b>启用方式</b>：</p>
+  <ol>
+    <li>发布作业时勾选「启用 AI 批阅」</li>
+    <li>设置评分标准（rubric）</li>
+    <li>选择 AI 模型（推荐通义千问）</li>
+    <li>学生提交后，AI 自动生成批阅建议</li>
+    <li>教师查看建议，确认或调整后正式批阅</li>
+  </ol>
+
+  <div class="info warn">
+    <div class="label">⚠️ 重要提示</div>
+    AI 批阅仅为辅助建议，最终成绩必须由教师确认。AI 可能对主观题评分不准确。
+  </div>
+
+  <h3 class="sub">5.3 选择 AI 模型</h3>
+  <table>
+    <thead><tr><th>模型</th><th>特点</th><th>适用场景</th><th>成本</th></tr></thead>
+    <tbody>
+      <tr><td><b>通义千问</b></td><td>均衡 · 中文优秀</td><td>日常对话 · 作业辅导</td><td>¥</td></tr>
+      <tr><td><b>智谱 GLM</b></td><td>推理强</td><td>复杂问题 · 数学证明</td><td>¥¥</td></tr>
+      <tr><td><b>讯飞星火</b></td><td>教育专用</td><td>知识点讲解</td><td>¥</td></tr>
+      <tr><td><b>豆包 Lite</b></td><td>快速</td><td>简单问答</td><td>¥</td></tr>
+      <tr><td><b>Kimi</b></td><td>长文本</td><td>长文档分析</td><td>¥¥</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 06 · 直播 ============ -->
+<section class="section" id="s6">
+  <div class="section-header">
+    <h2>06 · 直播与协作 <em>Live & Collaboration</em></h2>
+    <div class="num-tag">实时互动</div>
+  </div>
+
+  <h3 class="sub">6.1 学生参与直播</h3>
+  <p><b>加入直播</b>：</p>
+  <ol>
+    <li>收到直播通知，点击「加入」</li>
+    <li>或在课程详情页点击「正在直播」</li>
+    <li>进入直播间，自动连接音视频</li>
+    <li>在聊天区提问 · 举手发言</li>
+  </ol>
+
+  <p><b>互动功能</b>：</p>
+  <ul>
+    <li><b>文字聊天</b>：随时提问</li>
+    <li><b>举手</b>：请求语音发言</li>
+    <li><b>表情反应</b>：点赞 · 鼓掌 · 困惑</li>
+  </ul>
+
+  <h3 class="sub">6.2 小组协作</h3>
+  <p><b>创建小组</b>：</p>
+  <ul>
+    <li>教师创建小组，分配学生</li>
+    <li>或学生自行组队，教师审批</li>
+    <li>小组有独立的讨论区和文件区</li>
+  </ul>
+
+  <p><b>协作功能</b>：</p>
+  <ul>
+    <li><b>共享文档</b>：多人实时编辑</li>
+    <li><b>任务分配</b>：待办事项 · 进度跟踪</li>
+    <li><b>小组讨论</b>：文字/语音消息</li>
+    <li><b>文件共享</b>：上传下载资料</li>
+  </ul>
+</section>
+
+<!-- ============ 07 · 移动端 ============ -->
+<section class="section" id="s7">
+  <div class="section-header">
+    <h2>07 · 移动端使用 <em>Mobile</em></h2>
+    <div class="num-tag">手机 · 平板</div>
+  </div>
+
+  <h3 class="sub">7.1 手机 APP</h3>
+  <p><b>下载安装</b>：</p>
+  <ul>
+    <li>iOS：App Store 搜索「Lumina 墨光」</li>
+    <li>Android：应用商店搜索或官网下载 APK</li>
+  </ul>
+
+  <p><b>主要功能</b>：</p>
+  <ul>
+    <li>查看课表 · 接收通知</li>
+    <li>观看课程视频</li>
+    <li>提交作业（拍照上传）</li>
+    <li>AI 对话 · 语音提问</li>
+    <li>参与直播</li>
+  </ul>
+
+  <h3 class="sub">7.2 平板优化</h3>
+  <p><b>平板特性</b>：</p>
+  <ul>
+    <li>分屏模式：左边视频，右边笔记</li>
+    <li>手写笔记：支持 Apple Pencil / 触控笔</li>
+    <li>离线缓存：下载视频 offline 观看</li>
+  </ul>
+
+  <div class="info tip">
+    <div class="label">💡 离线使用</div>
+    在 WiFi 环境下提前下载视频，地铁/公交上也能流畅观看。进入「设置」→「离线缓存」管理下载内容。
+  </div>
+</section>
+
+<!-- ============ 08 · FAQ ============ -->
+<section class="section" id="s8">
+  <div class="section-header">
+    <h2>08 · 常见问题 <em>FAQ</em></h2>
+    <div class="num-tag">30+ Questions</div>
+  </div>
+
+  <h3 class="sub">8.1 账号相关</h3>
+  <div class="faq">
+    <div class="faq-q">忘记密码怎么办？</div>
+    <div class="faq-a">点击登录页「忘记密码」，输入学号/工号和邮箱，系统会发送重置链接。或联系管理员手动重置。</div>
+  </div>
+
+  <div class="faq">
+    <div class="faq-q">如何修改个人信息？</div>
+    <div class="faq-a">登录后点击右上角头像 →「个人中心」→「编辑资料」，可修改头像、简介、联系方式等。</div>
+  </div>
+
+  <div class="faq">
+    <div class="faq-q">账号被锁定了怎么办？</div>
+    <div class="faq-a">连续 5 次输错密码会锁定账号 30 分钟。可等待解锁或联系管理员立即解锁。</div>
+  </div>
+
+  <h3 class="sub">8.2 课程相关</h3>
+  <div class="faq">
+    <div class="faq-q">如何选课/退课？</div>
+    <div class="faq-a">进入「课程」→「选课中心」，选择课程点击「选课」。退课在「我的课程」中操作。注意退课截止时间。</div>
+  </div>
+
+  <div class="faq">
+    <div class="faq-q">课程视频无法播放？</div>
+    <div class="faq-a">检查网络连接 · 尝试刷新页面 · 清除浏览器缓存 · 更换浏览器（推荐 Chrome）。仍无法解决请联系技术支持。</div>
+  </div>
+
+  <h3 class="sub">8.3 作业相关</h3>
+  <div class="faq">
+    <div class="faq-q">作业提交后可以修改吗？</div>
+    <div class="faq-a">截止前可以重新提交覆盖。截止后无法修改。建议提交前仔细检查。</div>
+  </div>
+
+  <div class="faq">
+    <div class="faq-q">迟交作业会扣分吗？</div>
+    <div class="faq-a">由教师设置。部分课程会迟交扣分，部分允许迟交但不扣分。具体看课程说明。</div>
+  </div>
+
+  <h3 class="sub">8.4 AI 相关</h3>
+  <div class="faq">
+    <div class="faq-q">AI 回答错了怎么办？</div>
+    <div class="faq-a">可以点击「👎 不准确」反馈。AI 会学习改进。也可以切换其他模型重试，或向教师求证。</div>
+  </div>
+
+  <div class="faq">
+    <div class="faq-q">AI 对话有次数限制吗？</div>
+    <div class="faq-a">每天 100 次对话（所有模型共享）。用完后第二天重置。紧急情况可联系管理员临时增加额度。</div>
+  </div>
+
+  <div class="faq">
+    <div class="faq-q">AI 批阅的成绩准确吗？</div>
+    <div class="faq-a">AI 批阅仅为辅助建议，最终成绩由教师确认。客观题准确率高，主观题仅供参考。</div>
+  </div>
+</section>
+
+<!-- ============ 09 · 最佳实践 ============ -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <h2>09 · 最佳实践 <em>Best Practices</em></h2>
+    <div class="num-tag">Tips & Tricks</div>
+  </div>
+
+  <h3 class="sub">9.1 学生学习技巧</h3>
+  <table>
+    <thead><tr><th>场景</th><th>建议</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><b>课前预习</b></td><td>用 AI 梳理知识框架</td><td>提前了解重点难点</td></tr>
+      <tr><td><b>课堂笔记</b></td><td>平板手写 + 录音</td><td>课后回顾更高效</td></tr>
+      <tr><td><b>作业完成</b></td><td>先独立思考，再求助 AI</td><td>培养解题能力</td></tr>
+      <tr><td><b>考前复习</b></td><td>让 AI 生成模拟题</td><td>查漏补缺</td></tr>
+      <tr><td><b>小组协作</b></td><td>明确分工 · 定期同步</td><td>使用任务管理功能</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">9.2 教师教学技巧</h3>
+  <table>
+    <thead><tr><th>场景</th><th>建议</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><b>课件制作</b></td><td>用 AI 生成大纲</td><td>节省时间 · 结构清晰</td></tr>
+      <tr><td><b>作业设计</b></td><td>分层设计 · 难度递进</td><td>照顾不同水平学生</td></tr>
+      <tr><td><b>批阅效率</b></td><td>启用 AI 批阅 + 人工确认</td><td>节省 50% 时间</td></tr>
+      <tr><td><b>直播互动</b></td><td>每 10 分钟设置互动点</td><td>保持学生注意力</td></tr>
+      <tr><td><b>学情分析</b></td><td>定期查看 AI 学情报告</td><td>及时干预问题学生</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">9.3 系统使用技巧</h3>
+  <ul>
+    <li><b>快捷键</b>：<code>Ctrl/Cmd + K</code> 全局搜索</li>
+    <li><b>离线模式</b>：提前下载视频，地铁也能看</li>
+    <li><b>通知管理</b>：在「设置」中自定义通知偏好</li>
+    <li><b>多设备同步</b>：手机/平板/电脑进度自动同步</li>
+    <li><b>数据导出</b>：成绩/笔记可导出为 PDF/Markdown</li>
+  </ul>
+</section>
+
+<!-- ============ 10 · 联系 ============ -->
+<section class="section" id="s10">
+  <div class="section-header">
+    <h2>10 · 联系与支持 <em>Support</em></h2>
+    <div class="num-tag">Get Help</div>
+  </div>
+
+  <h3 class="sub">10.1 技术支持渠道</h3>
+  <table>
+    <thead><tr><th>渠道</th><th>适用范围</th><th>响应时间</th><th>联系方式</th></tr></thead>
+    <tbody>
+      <tr><td><b>在线客服</b></td><td>使用问题 · 功能咨询</td><td>实时</td><td>系统内「帮助」按钮</td></tr>
+      <tr><td><b>邮件</b></td><td>复杂问题 · 反馈建议</td><td>24 小时</td><td>support@lumina.edu.cn</td></tr>
+      <tr><td><b>电话</b></td><td>紧急问题</td><td>即时</td><td>400-123-4567</td></tr>
+      <tr><td><b>FAQ</b></td><td>常见问题</td><td>—</td><td>本文档 §08</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">10.2 反馈建议</h3>
+  <p><b>功能建议</b>：</p>
+  <ul>
+    <li>系统内「反馈」按钮</li>
+    <li>邮件至 product@lumina.edu.cn</li>
+    <li>参与用户调研（不定期）</li>
+  </ul>
+
+  <p><b>Bug 报告</b>：</p>
+  <ul>
+    <li>描述问题现象</li>
+    <li>提供操作步骤（如何复现）</li>
+    <li>截图或录屏</li>
+    <li>说明设备/浏览器/版本</li>
+  </ul>
+
+  <div class="info note">
+    <div class="label">📮 感谢反馈</div>
+    您的每一条反馈都会认真查看。帮助我们持续改进产品体验！
+  </div>
+</section>
+
+<footer>
+  <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · User Guide</div>
+  <div>v1.0 · 3 角色 · 5 平台 · 20+ 模块</div>
+  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">UG-LUMINA-2026-001</div>
+</footer>
+
+</body>
+</html>
