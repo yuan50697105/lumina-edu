@@ -27,6 +27,7 @@ edu/
 │   ├── lumina-prd.html                # 📋 产品需求文档 PRD v1.3
 │   ├── lumina-tdd.html                # 📋 技术设计文档 TDD v1.0
 │   ├── lumina-api.html                # 📋 API 接口文档 v1.0
+│   ├── lumina-api-openapi.yaml        # 📋 OpenAPI 3.1 规范
 │   │
 │   ├── APP/phone/      (8 文件)       # 📱 手机 APP 原型
 │   ├── APP/tablet/     (6 文件)       # 📲 平板 APP 原型
@@ -60,6 +61,7 @@ edu/
 | 📋 **PRD v1.3** | 产品需求文档，18 章 | `lumina-prd.html` |
 | 📋 **TDD v1.0** | 技术设计文档，18 章 | `lumina-tdd.html` |
 | 📋 **API v1.0** | API 接口文档，11 章 · 42 端点 | `lumina-api.html` |
+| 📋 **OpenAPI 3.1** | 机器可读 API 规范（YAML） | `lumina-api-openapi.yaml` |
 
 ## 🎨 设计系统
 
@@ -149,6 +151,7 @@ python scripts/yuque-sync.py
 | PRD 文档 | `原型/lumina-prd.html` |
 | TDD 文档 | `原型/lumina-tdd.html` |
 | API 文档 | `原型/lumina-api.html` |
+| OpenAPI 规范 | `原型/lumina-api-openapi.yaml` |
 
 ## 📋 版本历史
 
@@ -160,6 +163,7 @@ python scripts/yuque-sync.py
 | **v1.3** | 2026-08-25 | 按平台目录重组，5 目录 33 文件 |
 | **TDD v1.0** | 2026-08-25 | 技术设计文档发布 |
 | **API v1.0** | 2026-08-25 | API 接口文档发布，42 端点 |
+| **OpenAPI 3.1** | 2026-08-25 | OpenAPI 规范文件，可生成 SDK/Mock |
 
 ## 📄 许可证
 

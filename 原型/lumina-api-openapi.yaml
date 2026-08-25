@@ -1,0 +1,1692 @@
+openapi: 3.1.0
+info:
+  title: Lumina 墨光 · API
+  version: 1.0.0
+  description: |
+    Lumina（墨光）教育应用 RESTful API，覆盖用户、课程、作业、成绩、直播、AI 等模块。
+
+    ## 特性
+    - JWT 双令牌认证（Access Token 15min + Refresh Token 7d）
+    - Cursor-based 分页
+    - RFC 7807 错误格式
+    - SSE 流式响应（AI 接口）
+    - WebSocket（直播聊天）
+
+  contact:
+    name: Lumina Team
+    url: https://github.com/yuan50697105/lumina-edu
+  license:
+    name: MIT
+
+servers:
+  - url: https://api.lumina.edu/api/v1
+    description: 生产环境
+  - url: https://api-staging.lumina.edu/api/v1
+    description: 预发布环境
+  - url: http://localhost:8080/api/v1
+    description: 本地开发
+
+tags:
+  - name: auth
+    description: 认证授权
+  - name: users
+    description: 用户模块
+  - name: courses
+    description: 课程模块
+  - name: assignments
+    description: 作业模块
+  - name: grades
+    description: 成绩模块
+  - name: live
+    description: 直播模块
+  - name: ai
+    description: AI 能力模块
+
+# ─── 全局安全 ───
+security:
+  - BearerAuth: []
+
+# ─── 路径 ───
+paths:
+
+  # ═══════ AUTH ═══════
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: 登录获取令牌
+      description: 使用账号密码登录，返回 Access Token 和 Refresh Token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/TokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh:
+    post:
+      tags: [auth]
+      summary: 刷新令牌
+      description: 使用 Refresh Token 获取新的 Access Token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIs..."
+      responses:
+        '200':
+          description: 刷新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/TokenResponse'
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: 注销
+      description: 注销当前会话，将 Access Token 加入黑名单
+      responses:
+        '200':
+          description: 注销成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/password:
+    post:
+      tags: [auth]
+      summary: 修改密码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [old_password, new_password]
+              properties:
+                old_password:
+                  type: string
+                new_password:
+                  type: string
+                  minLength: 8
+      responses:
+        '200':
+          description: 修改成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # ═══════ USERS ═══════
+  /users/me:
+    get:
+      tags: [users]
+      summary: 获取当前用户信息
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/User'
+    patch:
+      tags: [users]
+      summary: 更新个人信息
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                avatar_url:
+                  type: string
+                  format: uri
+                bio:
+                  type: string
+                  maxLength: 200
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/User'
+
+  /users/{id}:
+    get:
+      tags: [users]
+      summary: 查询用户详情
+      description: 教师/管理员可查询任意用户
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/User'
+
+  # ═══════ COURSES ═══════
+  /courses:
+    get:
+      tags: [courses]
+      summary: 课程列表
+      parameters:
+        - $ref: '#/components/parameters/Semester'
+        - $ref: '#/components/parameters/Department'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Course'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+    post:
+      tags: [courses]
+      summary: 创建课程
+      description: 教师创建新课程
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/Course'
+
+  /courses/{id}:
+    get:
+      tags: [courses]
+      summary: 课程详情
+      parameters:
+        - $ref: '#/components/parameters/CourseId'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/Course'
+
+  /courses/{id}/chapters:
+    get:
+      tags: [courses]
+      summary: 章节列表
+      parameters:
+        - $ref: '#/components/parameters/CourseId'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Chapter'
+
+  /courses/{id}/enroll:
+    post:
+      tags: [courses]
+      summary: 选课
+      description: 学生选课
+      parameters:
+        - $ref: '#/components/parameters/CourseId'
+      responses:
+        '200':
+          description: 选课成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    delete:
+      tags: [courses]
+      summary: 退课
+      description: 学生退课
+      parameters:
+        - $ref: '#/components/parameters/CourseId'
+      responses:
+        '200':
+          description: 退课成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /courses/{id}/students:
+    get:
+      tags: [courses]
+      summary: 选课学生列表
+      description: 教师查看已选课学生
+      parameters:
+        - $ref: '#/components/parameters/CourseId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /courses/{id}/announcements:
+    get:
+      tags: [courses]
+      summary: 课程公告
+      parameters:
+        - $ref: '#/components/parameters/CourseId'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Announcement'
+
+  # ═══════ ASSIGNMENTS ═══════
+  /assignments:
+    get:
+      tags: [assignments]
+      summary: 作业列表
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Assignment'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /courses/{course_id}/assignments:
+    post:
+      tags: [assignments]
+      summary: 发布作业
+      description: 教师发布课程作业
+      parameters:
+        - name: course_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/Assignment'
+
+  /assignments/{id}/submit:
+    post:
+      tags: [assignments]
+      summary: 提交作业
+      description: 学生提交作业（支持文件上传）
+      parameters:
+        - $ref: '#/components/parameters/AssignmentId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: 作业文件
+                text_answer:
+                  type: string
+                  description: 文字答案
+                submission_note:
+                  type: string
+                  description: 提交备注
+      responses:
+        '200':
+          description: 提交成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /assignments/{id}/grade:
+    post:
+      tags: [assignments]
+      summary: 批阅作业
+      description: 教师或 AI 批阅作业
+      parameters:
+        - $ref: '#/components/parameters/AssignmentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GradeRequest'
+      responses:
+        '200':
+          description: 批阅成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/GradeResult'
+
+  /assignments/{id}/submissions:
+    get:
+      tags: [assignments]
+      summary: 提交列表
+      description: 教师查看所有提交
+      parameters:
+        - $ref: '#/components/parameters/AssignmentId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Submission'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /assignments/{id}/submissions/me:
+    get:
+      tags: [assignments]
+      summary: 我的提交
+      description: 学生查看自己的提交
+      parameters:
+        - $ref: '#/components/parameters/AssignmentId'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/Submission'
+
+  # ═══════ GRADES ═══════
+  /grades/me:
+    get:
+      tags: [grades]
+      summary: 我的成绩
+      description: 学生查看个人成绩
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/GradeReport'
+
+  /courses/{id}/grades:
+    get:
+      tags: [grades]
+      summary: 课程成绩列表
+      description: 教师查看课程所有学生成绩
+      parameters:
+        - $ref: '#/components/parameters/CourseId'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StudentGrade'
+    post:
+      tags: [grades]
+      summary: 录入成绩
+      description: 教师录入学生成绩
+      parameters:
+        - $ref: '#/components/parameters/CourseId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required: [student_id, score]
+                properties:
+                  student_id:
+                    type: string
+                    format: uuid
+                  score:
+                    type: number
+                    minimum: 0
+                    maximum: 100
+                  grade:
+                    type: string
+                    enum: [A, B, C, D, F]
+      responses:
+        '200':
+          description: 录入成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /grades/statistics:
+    get:
+      tags: [grades]
+      summary: 成绩统计
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: object
+                    properties:
+                      gpa:
+                        type: number
+                        example: 3.72
+                      total_credits:
+                        type: integer
+                        example: 128
+                      rank:
+                        type: integer
+                        example: 15
+
+  # ═══════ LIVE ═══════
+  /live:
+    post:
+      tags: [live]
+      summary: 创建直播
+      description: 教师创建直播课程
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LiveCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/LiveSession'
+
+  /live/{id}:
+    get:
+      tags: [live]
+      summary: 直播详情
+      parameters:
+        - $ref: '#/components/parameters/LiveId'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/LiveSession'
+
+  /live/{id}/join:
+    post:
+      tags: [live]
+      summary: 加入直播
+      description: 获取 RTC 和聊天 WebSocket 连接信息
+      parameters:
+        - $ref: '#/components/parameters/LiveId'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: object
+                    properties:
+                      rtc_url:
+                        type: string
+                        format: uri
+                        example: "wss://rtc.lumina.edu/room/..."
+                      token:
+                        type: string
+                      room_id:
+                        type: string
+                      chat_ws_url:
+                        type: string
+                        format: uri
+
+  /live/{id}/recording:
+    post:
+      tags: [live]
+      summary: 开始/停止录制
+      parameters:
+        - $ref: '#/components/parameters/LiveId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action:
+                  type: string
+                  enum: [start, stop]
+      responses:
+        '200':
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /live/{id}/replay:
+    get:
+      tags: [live]
+      summary: 获取回放地址
+      parameters:
+        - $ref: '#/components/parameters/LiveId'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: object
+                    properties:
+                      replay_url:
+                        type: string
+                        format: uri
+                      duration:
+                        type: integer
+                        description: 回放时长（秒）
+
+  # ═══════ AI ═══════
+  /ai/chat:
+    post:
+      tags: [ai]
+      summary: AI 对话
+      description: |
+        苏格拉底式 AI 导师对话。支持流式响应（SSE），
+        通过 Accept: text/event-stream 启用。
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+            enum: [application/json, text/event-stream]
+          description: "text/event-stream 启用流式"
+        - name: X-Model
+          in: header
+          schema:
+            type: string
+            enum: [qwen-max, glm-4, spark-v4, doubao-lite, kimi, auto]
+          description: "指定模型，auto 为智能路由"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: 成功（非流式）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+            text/event-stream:
+              schema:
+                type: string
+                description: "SSE 流式数据，每行 data: {...}"
+
+  /ai/grade:
+    post:
+      tags: [ai]
+      summary: AI 辅助批阅
+      description: 使用 AI 模型自动批阅作业
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIGradeRequest'
+      responses:
+        '200':
+          description: 批阅结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/AIGradeResult'
+
+  /ai/generate:
+    post:
+      tags: [ai]
+      summary: AI 内容生成
+      description: AI 生成课件、题目等内容
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, prompt]
+              properties:
+                type:
+                  type: string
+                  enum: [slide, quiz, summary, outline]
+                prompt:
+                  type: string
+                context:
+                  type: object
+                  properties:
+                    course_id:
+                      type: string
+                    chapter_id:
+                      type: string
+      responses:
+        '200':
+          description: 生成结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: object
+                    properties:
+                      content:
+                        type: string
+                      format:
+                        type: string
+                      model:
+                        type: string
+
+  /ai/speech-to-text:
+    post:
+      tags: [ai]
+      summary: 语音识别
+      description: 讯飞语音转文字
+      requestBody:
+        required: true
+        content:
+          audio/wav:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: 识别结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: object
+                    properties:
+                      text:
+                        type: string
+                      confidence:
+                        type: number
+                      duration:
+                        type: number
+                        description: 音频时长（秒）
+
+  /ai/models:
+    get:
+      tags: [ai]
+      summary: 可用模型列表
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: "qwen-max"
+                        name:
+                          type: string
+                          example: "通义千问 Max"
+                        vendor:
+                          type: string
+                          example: "阿里云"
+                        capabilities:
+                          type: array
+                          items:
+                            type: string
+                        cost_per_1k_tokens:
+                          type: number
+                          example: 0.02
+
+  /ai/conversations:
+    get:
+      tags: [ai]
+      summary: 对话历史
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        model:
+                          type: string
+                        message_count:
+                          type: integer
+                        created_at:
+                          type: string
+                          format: date-time
+                        updated_at:
+                          type: string
+                          format: date-time
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+# ─── 组件 ───
+components:
+
+  # ─── 安全方案 ───
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "JWT Access Token（15 分钟有效）"
+
+  # ─── 通用参数 ───
+  parameters:
+    UserId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CourseId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    AssignmentId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    LiveId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Semester:
+      name: semester
+      in: query
+      schema:
+        type: string
+        example: "2026-1"
+      description: "学期筛选"
+    Department:
+      name: department
+      in: query
+      schema:
+        type: string
+      description: "院系筛选"
+    Cursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+      description: "分页游标"
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: "每页数量（默认 20，最大 100）"
+
+  # ─── 通用响应 ───
+  responses:
+    Unauthorized:
+      description: 未授权
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: 无权限
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  # ─── 数据模型 ───
+  schemas:
+
+    # --- 基础 ---
+    SuccessResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: "success"
+
+    Pagination:
+      type: object
+      properties:
+        cursor:
+          type: string
+        has_more:
+          type: boolean
+        total:
+          type: integer
+
+    Error:
+      type: object
+      description: "RFC 7807 Problem Details"
+      properties:
+        type:
+          type: string
+          format: uri
+          example: "https://api.lumina.edu/errors/unauthorized"
+        status:
+          type: integer
+          example: 401
+        title:
+          type: string
+          example: "Unauthorized"
+        detail:
+          type: string
+          example: "Access token expired"
+        code:
+          type: string
+          example: "AUTH_TOKEN_EXPIRED"
+        request_id:
+          type: string
+
+    # --- Auth ---
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: "linqing"
+        password:
+          type: string
+          format: password
+        device:
+          type: string
+          enum: [web, mobile, desktop]
+          default: web
+
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+          description: "秒"
+          example: 900
+        token_type:
+          type: string
+          example: "Bearer"
+        user:
+          $ref: '#/components/schemas/User'
+
+    # --- User ---
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        student_id:
+          type: string
+          description: "学号"
+          example: "2023010001"
+        name:
+          type: string
+          example: "林清"
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [student, teacher, admin]
+        department:
+          type: string
+        grade:
+          type: string
+          description: "入学年级"
+        avatar_url:
+          type: string
+          format: uri
+        bio:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    # --- Course ---
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          example: "CS201"
+        title:
+          type: string
+          example: "高等数学"
+        description:
+          type: string
+        teacher:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+        credits:
+          type: number
+          example: 4.0
+        students_count:
+          type: integer
+          example: 86
+        semester:
+          type: string
+          example: "2026-1"
+        department:
+          type: string
+        schedule:
+          type: array
+          items:
+            type: object
+            properties:
+              day:
+                type: integer
+                description: "1=周一"
+              start:
+                type: string
+                example: "08:00"
+              end:
+                type: string
+                example: "09:40"
+              room:
+                type: string
+        created_at:
+          type: string
+          format: date-time
+
+    CourseCreateRequest:
+      type: object
+      required: [title, code, credits]
+      properties:
+        title:
+          type: string
+        code:
+          type: string
+        description:
+          type: string
+        credits:
+          type: number
+        department:
+          type: string
+        schedule:
+          type: array
+          items:
+            type: object
+            properties:
+              day:
+                type: integer
+              start:
+                type: string
+              end:
+                type: string
+              room:
+                type: string
+
+    Chapter:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        order:
+          type: integer
+        content:
+          type: string
+        resources:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [video, pdf, link]
+              url:
+                type: string
+                format: uri
+              title:
+                type: string
+
+    Announcement:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        author:
+          $ref: '#/components/schemas/User'
+        pinned:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    # --- Assignment ---
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        course_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        due_at:
+          type: string
+          format: date-time
+        max_score:
+          type: integer
+          example: 100
+        ai_grading:
+          type: boolean
+        rubric:
+          type: array
+          items:
+            type: object
+            properties:
+              criteria:
+                type: string
+              weight:
+                type: number
+        status:
+          type: string
+          enum: [draft, published, closed]
+        created_at:
+          type: string
+          format: date-time
+
+    AssignmentCreateRequest:
+      type: object
+      required: [title, due_at, max_score]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        due_at:
+          type: string
+          format: date-time
+        max_score:
+          type: integer
+          minimum: 1
+        ai_grading:
+          type: boolean
+          default: false
+        rubric:
+          type: array
+          items:
+            type: object
+            properties:
+              criteria:
+                type: string
+              weight:
+                type: number
+                minimum: 0
+                maximum: 1
+
+    Submission:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        assignment_id:
+          type: string
+          format: uuid
+        student:
+          $ref: '#/components/schemas/User'
+        file_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+        text_answer:
+          type: string
+        submitted_at:
+          type: string
+          format: date-time
+        grade:
+          $ref: '#/components/schemas/GradeResult'
+
+    GradeRequest:
+      type: object
+      properties:
+        submission_id:
+          type: string
+          format: uuid
+        score:
+          type: number
+          minimum: 0
+        feedback:
+          type: string
+        rubric_scores:
+          type: array
+          items:
+            type: object
+            properties:
+              criteria:
+                type: string
+              score:
+                type: number
+              comment:
+                type: string
+
+    GradeResult:
+      type: object
+      properties:
+        total:
+          type: number
+        feedback:
+          type: string
+        rubric_scores:
+          type: array
+          items:
+            type: object
+            properties:
+              criteria:
+                type: string
+              score:
+                type: number
+              max:
+                type: number
+              comment:
+                type: string
+        graded_by:
+          type: string
+          description: "teacher 或 ai"
+        graded_at:
+          type: string
+          format: date-time
+
+    # --- Grade ---
+    GradeReport:
+      type: object
+      properties:
+        gpa:
+          type: number
+          example: 3.72
+        total_credits:
+          type: integer
+        courses:
+          type: array
+          items:
+            type: object
+            properties:
+              course_id:
+                type: string
+              title:
+                type: string
+              credit:
+                type: number
+              score:
+                type: number
+              grade:
+                type: string
+                enum: [A, B, C, D, F]
+              semester:
+                type: string
+
+    StudentGrade:
+      type: object
+      properties:
+        student:
+          $ref: '#/components/schemas/User'
+        score:
+          type: number
+        grade:
+          type: string
+        graded_at:
+          type: string
+          format: date-time
+
+    # --- Live ---
+    LiveSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        course_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        teacher:
+          $ref: '#/components/schemas/User'
+        scheduled_at:
+          type: string
+          format: date-time
+        started_at:
+          type: string
+          format: date-time
+        ended_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [scheduled, live, ended]
+        enable_recording:
+          type: boolean
+        enable_chat:
+          type: boolean
+        enable_hand_raise:
+          type: boolean
+        participant_count:
+          type: integer
+
+    LiveCreateRequest:
+      type: object
+      required: [course_id, title, scheduled_at]
+      properties:
+        course_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        scheduled_at:
+          type: string
+          format: date-time
+        enable_recording:
+          type: boolean
+          default: true
+        enable_chat:
+          type: boolean
+          default: true
+        enable_hand_raise:
+          type: boolean
+          default: true
+
+    # --- AI ---
+    ChatRequest:
+      type: object
+      required: [message]
+      properties:
+        conversation_id:
+          type: string
+          description: "续对话时传入"
+        message:
+          type: string
+          example: "这个积分怎么解？"
+        context:
+          type: object
+          properties:
+            course_id:
+              type: string
+            chapter_id:
+              type: string
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [image, audio, document]
+              url:
+                type: string
+                format: uri
+
+    ChatResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        data:
+          type: object
+          properties:
+            conversation_id:
+              type: string
+            content:
+              type: string
+            model:
+              type: string
+              example: "qwen-max"
+            usage:
+              type: object
+              properties:
+                prompt_tokens:
+                  type: integer
+                completion_tokens:
+                  type: integer
+                total_tokens:
+                  type: integer
+            created_at:
+              type: string
+              format: date-time
+
+    AIGradeRequest:
+      type: object
+      required: [assignment_id, submission_id]
+      properties:
+        assignment_id:
+          type: string
+          format: uuid
+        submission_id:
+          type: string
+          format: uuid
+        rubric:
+          type: array
+          items:
+            type: object
+            properties:
+              criteria:
+                type: string
+              weight:
+                type: number
+        file_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+
+    AIGradeResult:
+      type: object
+      properties:
+        scores:
+          type: array
+          items:
+            type: object
+            properties:
+              criteria:
+                type: string
+              score:
+                type: number
+              max:
+                type: number
+              comment:
+                type: string
+        total:
+          type: number
+        feedback:
+          type: string
+        model:
+          type: string
+          example: "qwen-max"
+        confidence:
+          type: number
+          example: 0.92
