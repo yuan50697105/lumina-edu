@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina · 03 · 学生移动端</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC;
+    --ricepaper-2:#F2EBD8;
+    --inkwell:#0F1020;
+    --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9;
+    --cobalt-soft:#E8EAFB;
+    --highlighter:#F5B800;
+    --highlighter-soft:#FDE68A;
+    --correction:#E85D3A;
+    --correction-soft:#FDE0D4;
+    --growth:#2A7F4F;
+    --growth-soft:#D4EDDC;
+    --line:rgba(15,16,32,0.12);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.5;}
+  body{padding:48px 56px;}
+
+  .page-header{
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding-bottom:32px; border-bottom:1px solid var(--line); margin-bottom:48px;
+  }
+  .page-header h1{font-family:var(--f-display); font-weight:380; font-size:48px; letter-spacing:-0.02em;}
+  .page-header h1 em{font-style:italic; color:var(--cobalt);}
+  .page-header .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.14em;}
+
+  .device-label{
+    font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em;
+    color:var(--inkwell-2); margin-bottom:14px; display:flex; justify-content:space-between;
+  }
+  .device-label .tag{color:var(--cobalt);}
+
+  .phone{
+    width:390px; margin:0 auto;
+    background:var(--inkwell); border-radius:42px; padding:14px;
+    box-shadow: var(--shadow), 0 0 0 1px rgba(0,0,0,0.3);
+  }
+  .phone-screen{
+    background:var(--ricepaper); border-radius:30px; overflow:hidden;
+    height:844px;
+    display:flex; flex-direction:column;
+    position:relative;
+  }
+  .phone-notch{
+    position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    width:120px; height:28px; background:var(--inkwell); border-radius:18px; z-index:5;
+  }
+  .phone-status{
+    display:flex; justify-content:space-between; padding:18px 28px 0; font-family:var(--f-mono); font-size:12px; font-weight:500;
+    position:relative; z-index:2;
+  }
+
+  .m-header{
+    padding:22px 22px 14px; display:flex; justify-content:space-between; align-items:flex-start;
+  }
+  .m-greet{font-family:var(--f-display); font-size:24px; font-weight:400; letter-spacing:-0.01em; line-height:1.15;}
+  .m-greet small{display:block; font-family:var(--f-body); font-size:12px; color:var(--inkwell-2); font-weight:400; margin-top:2px;}
+  .m-avatar{width:40px; height:40px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:16px;}
+
+  .m-search{
+    margin:4px 22px 14px; background:#fff; border:1px solid var(--line); border-radius:10px;
+    padding:10px 12px; display:flex; align-items:center; gap:8px; font-size:13px; color:var(--inkwell-2);
+  }
+
+  .m-section{padding:0 22px;}
+  .m-section h4{
+    font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.14em;
+    color:var(--inkwell-2); margin-bottom:8px; font-weight:500;
+    display:flex; justify-content:space-between; align-items:baseline;
+  }
+  .m-section h4 a{font-family:var(--f-body); font-size:12px; color:var(--cobalt); text-decoration:none; text-transform:none; letter-spacing:0;}
+
+  .m-course{
+    background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:8px;
+    display:grid; grid-template-columns: 1fr auto; gap:6px;
+  }
+  .m-course .name{font-size:14px; font-weight:500; letter-spacing:-0.005em;}
+  .m-course .meta{font-size:11px; color:var(--inkwell-2); font-family:var(--f-mono); grid-column:1 / -1;}
+  .m-course .now{
+    align-self:center; font-family:var(--f-mono); font-size:10px;
+    background:var(--highlighter); color:var(--inkwell); padding:3px 7px; border-radius:4px; font-weight:500;
+  }
+
+  .m-task{
+    background:#fff; border:1px solid var(--line); border-left:3px solid var(--correction);
+    border-radius:6px; padding:10px 12px; margin-bottom:6px;
+  }
+  .m-task.growth{border-left-color:var(--growth);}
+  .m-task .t-title{font-size:13px; font-weight:500;}
+  .m-task .t-meta{font-size:11px; color:var(--inkwell-2); margin-top:2px; font-family:var(--f-mono);}
+
+  .m-nav{
+    margin-top:auto; border-top:1px solid var(--line); background:#fff;
+    display:grid; grid-template-columns: repeat(5, 1fr); padding:8px 4px 14px;
+  }
+  .m-nav .item{display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; color:var(--inkwell-2);}
+  .m-nav .item svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.6;}
+  .m-nav .item.active{color:var(--cobalt);}
+  .m-nav .item.active svg{stroke:var(--cobalt);}
+</style>
+<!-- Icons: Feather Icons (https://feathericons.com) — MIT License, © Cole Bemis -->
+</head>
+<body>
+
+<header class="page-header">
+  <h1>学生移动端 <em>Student Mobile</em></h1>
+  <div class="meta">Lumina · 03 / 08 · iOS · 390×844</div>
+</header>
+
+<div class="device-label">
+  <span>Student · Mobile APP · 首页</span>
+  <span class="tag">今日课程 · 即将到来</span>
+</div>
+
+<div class="phone">
+  <div class="phone-screen">
+    <div class="phone-notch"></div>
+    <div class="phone-status">
+      <div class="stat-l"><span>9:41</span></div>
+      <div class="stat-r">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="14" width="3" height="6"/><rect x="8" y="10" width="3" height="10"/><rect x="13" y="6" width="3" height="14"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="18" r="1.5" fill="currentColor"/><path d="M8 14a6 6 0 0 1 8 0M5 11a10 10 0 0 1 14 0"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="16" height="8" rx="1.5"/><rect x="5" y="10" width="10" height="4" fill="currentColor"/><rect x="19" y="10" width="2" height="4" fill="currentColor"/></svg>
+      </div>
+    </div>
+
+    <div class="m-header">
+      <div class="m-greet">早上好，林清<small>周一 · 3 节课 · 1 份作业待交</small></div>
+      <div class="m-avatar">林</div>
+    </div>
+
+    <div class="m-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      搜索课程、作业、同学
+    </div>
+
+    <div class="m-section">
+      <h4><span>今日课程 · Today</span><a href="#">查看全部</a></h4>
+      <div class="m-course">
+        <div class="name">高等数学 · A 班</div>
+        <div class="now">现在</div>
+        <div class="meta">08:00 – 09:40 · 教三 201 · 王建国</div>
+      </div>
+      <div class="m-course">
+        <div class="name">线性代数</div>
+        <div class="meta" style="display:flex; justify-content:space-between;"><span>10:00 – 11:40 · 教一 405</span><span style="color:var(--cobalt);">笔记</span></div>
+      </div>
+      <div class="m-course">
+        <div class="name">西方哲学史</div>
+        <div class="meta" style="display:flex; justify-content:space-between;"><span>14:00 – 15:40 · 人文楼 301</span><span style="color:var(--inkwell-2);">预习 §4</span></div>
+      </div>
+    </div>
+
+    <div class="m-section" style="margin-top:14px;">
+      <h4><span>即将到来 · Upcoming</span><a href="#">日历</a></h4>
+      <div class="m-task">
+        <div class="t-title">高数 · 第四章习题</div>
+        <div class="t-meta">截止 · 明天 23:59</div>
+      </div>
+      <div class="m-task growth">
+        <div class="t-title">哲学读书报告</div>
+        <div class="t-meta">已提交 · 3 天前 · 待批阅</div>
+      </div>
+    </div>
+
+    <div class="m-nav">
+      <div class="item active">
+        <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+        课程
+      </div>
+      <div class="item">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h9"/></svg>
+        任务
+      </div>
+      <div class="item">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        讨论
+      </div>
+      <div class="item">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>
+        成绩
+      </div>
+      <div class="item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+        我的
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
