@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · 技术设计文档 TDD v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding:56px 64px; max-width:1280px; margin:0 auto;}
+
+  /* Cover */
+  .cover{padding:80px 0 64px; border-bottom:1px solid var(--line); margin-bottom:56px; display:grid; grid-template-columns:2fr 1fr; gap:48px; align-items:end;}
+  .cover .brand{display:flex; align-items:center; gap:14px; margin-bottom:32px;}
+  .cover .brand .logo{width:56px; height:56px; border-radius:14px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:28px; font-weight:500; font-style:italic;}
+  .cover .brand .name{font-family:var(--f-display); font-size:20px; font-weight:500;}
+  .cover .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:4px;}
+  .cover .doc-type{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--cobalt); background:var(--cobalt-soft); padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:20px;}
+  .cover h1{font-family:var(--f-display); font-weight:300; font-size:72px; letter-spacing:-0.04em; line-height:1;}
+  .cover h1 em{font-style:italic; color:var(--cobalt);}
+  .cover h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .cover .subtitle{font-size:18px; color:var(--inkwell-2); margin-top:20px; font-weight:300;}
+  .cover .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; line-height:2.2;}
+  .cover .meta .label{color:var(--inkwell-2); font-size:10px; display:block; margin-bottom:2px;}
+  .cover .meta .value{color:var(--inkwell); font-size:13px; text-transform:none; font-family:var(--f-body); font-weight:500;}
+  .cover .meta .row{padding:8px 0; border-top:1px solid var(--line);}
+  .cover .meta .row:first-child{border-top:none;}
+
+  /* Stats */
+  .stats{display:grid; grid-template-columns:repeat(6, 1fr); gap:12px; margin-bottom:56px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px;}
+  .stat{text-align:center; padding:6px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .val{font-family:var(--f-display); font-size:26px; font-weight:300;}
+  .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  /* TOC */
+  .toc{background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px 28px; margin-bottom:56px;}
+  .toc h3{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .toc-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:4px 32px;}
+  .toc-grid a{display:block; padding:6px 0; font-size:13px; color:var(--inkwell); text-decoration:none; border-bottom:1px dashed var(--line);}
+  .toc-grid a:hover{color:var(--cobalt);}
+  .toc-grid a .num{font-family:var(--f-mono); font-size:10px; color:var(--cobalt); margin-right:8px;}
+
+  /* Sections */
+  .section{margin-bottom:64px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:24px; padding-bottom:14px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:36px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  h3.sub{font-family:var(--f-display); font-size:22px; font-weight:400; margin:32px 0 14px; letter-spacing:-0.01em;}
+  h3.sub em{font-style:italic; color:var(--cobalt);}
+  h4.sub{font-family:var(--f-display); font-size:17px; font-weight:500; margin:20px 0 10px;}
+
+  p{margin-bottom:12px; line-height:1.7;}
+  p.lead{font-size:17px; color:var(--inkwell); line-height:1.7;}
+  ul,ol{margin:0 0 16px 20px; line-height:1.8;}
+  li{margin-bottom:4px;}
+  b{font-weight:600;}
+  code{font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px; font-size:13px; border:1px solid var(--line);}
+
+  /* Tables */
+  table{width:100%; border-collapse:collapse; margin:16px 0 24px; font-size:13px;}
+  th{background:var(--ricepaper); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-strong);}
+  td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  tr:hover td{background:rgba(250,246,236,0.5);}
+  .tag{display:inline-block; font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; padding:2px 7px; border-radius:4px; background:var(--ricepaper); color:var(--inkwell-2);}
+  .tag.p0{background:var(--correction); color:#fff;}
+  .tag.p1{background:var(--cobalt); color:#fff;}
+  .tag.p2{background:var(--growth); color:#fff;}
+  .tag.ai{background:var(--ai); color:#fff;}
+
+  /* Info boxes */
+  .info{padding:16px 20px; border-radius:10px; margin:16px 0 20px; font-size:13px; line-height:1.7;}
+  .info .label{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; font-weight:600;}
+  .info.note{background:var(--cobalt-soft); border:1px solid var(--cobalt);}
+  .info.warn{background:var(--highlighter-soft); border:1px solid var(--highlighter);}
+  .info.success{background:var(--growth-soft); border:1px solid var(--growth);}
+  .info.ai-box{background:var(--ai-soft); border:1px solid var(--ai);}
+
+  /* Cards grid */
+  .cards{display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin:16px 0 24px;}
+  .cards.col-2{grid-template-columns:repeat(2, 1fr);}
+  .card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px;}
+  .card h4{font-family:var(--f-display); font-size:16px; font-weight:500; margin-bottom:6px;}
+  .card .sub{font-size:12px; color:var(--inkwell-2); margin-bottom:10px; line-height:1.5;}
+  .card .list{font-size:12px; line-height:1.8;}
+  .card .list div{padding:3px 0; border-bottom:1px dashed var(--line);}
+  .card .list div:last-child{border-bottom:none;}
+
+  /* Architecture diagram */
+  .arch-diagram{background:#fff; border:1px solid var(--line); border-radius:14px; padding:28px; margin:20px 0 28px;}
+  .arch-row{display:flex; gap:12px; margin-bottom:12px; align-items:stretch;}
+  .arch-row:last-child{margin-bottom:0;}
+  .arch-box{flex:1; padding:14px; border-radius:8px; border:1px solid var(--line); font-size:12px; text-align:center;}
+  .arch-box .title{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin-bottom:6px;}
+  .arch-box .name{font-family:var(--f-display); font-size:16px; font-weight:500; margin-bottom:4px;}
+  .arch-box .desc{font-size:11px; color:var(--inkwell-2); line-height:1.5;}
+  .arch-box.cobalt{background:var(--cobalt-soft); border-color:var(--cobalt);}
+  .arch-box.growth{background:var(--growth-soft); border-color:var(--growth);}
+  .arch-box.highlight{background:var(--highlighter-soft); border-color:var(--highlighter);}
+  .arch-box.ai{background:var(--ai-soft); border-color:var(--ai);}
+  .arch-box.inkwell{background:var(--inkwell); color:var(--ricepaper); border-color:var(--inkwell);}
+  .arch-box.inkwell .title,.arch-box.inkwell .desc{color:rgba(250,246,236,0.7);}
+  .arch-box.inkwell .name{color:var(--ricepaper);}
+  .arch-arrow{text-align:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); padding:6px 0; letter-spacing:0.1em;}
+
+  /* Flow diagram */
+  .flow{display:flex; gap:8px; align-items:center; margin:16px 0; flex-wrap:wrap;}
+  .flow-step{padding:10px 16px; background:#fff; border:1px solid var(--line); border-radius:8px; font-size:12px; font-family:var(--f-mono);}
+  .flow-step.active{background:var(--cobalt); color:#fff; border-color:var(--cobalt);}
+  .flow-arrow{color:var(--inkwell-2); font-family:var(--f-mono); font-size:14px;}
+
+  /* Code block */
+  pre{background:var(--inkwell); color:var(--ricepaper); padding:18px 20px; border-radius:10px; font-family:var(--f-mono); font-size:12px; line-height:1.7; overflow-x:auto; margin:12px 0 20px;}
+  pre .comment{color:rgba(250,246,236,0.5);}
+  pre .keyword{color:var(--highlighter);}
+  pre .string{color:var(--growth);}
+  pre .type{color:var(--cobalt-soft);}
+
+  /* Footer */
+  footer{margin-top:64px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+
+  /* Revision */
+  .revision{margin:16px 0 24px;}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div>
+    <div class="brand">
+      <div class="logo">墨</div>
+      <div class="name">Lumina · 墨光<small>Technical Design Document</small></div>
+    </div>
+    <div class="doc-type">Technical Design Document · v1.0</div>
+    <h1>
+      <span class="hl">技术设计</span><br/>
+      文档 <em>TDD</em>
+    </h1>
+    <div class="subtitle">面向高校师生的跨端教学协作平台 · 系统架构 · 技术选型 · 部署方案 · 安全设计</div>
+  </div>
+  <div class="meta">
+    <div class="row">
+      <span class="label">文档编号</span>
+      <span class="value">TDD-LUMINA-2026-001</span>
+    </div>
+    <div class="row">
+      <span class="label">版本号</span>
+      <span class="value">v1.0 · 初始发布</span>
+    </div>
+    <div class="row">
+      <span class="label">作者</span>
+      <span class="value">架构与设计团队</span>
+    </div>
+    <div class="row">
+      <span class="label">发布日期</span>
+      <span class="value">2026-08-25</span>
+    </div>
+    <div class="row">
+      <span class="label">关联文档</span>
+      <span class="value">PRD v1.3 · 设计系统 v1.2</span>
+    </div>
+    <div class="row">
+      <span class="label">状态</span>
+      <span class="value" style="color:var(--growth); font-weight:600;">● 已评审</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ STATS ============ -->
+<div class="stats">
+  <div class="stat"><div class="val hl">6</div><div class="lbl">技术栈层</div></div>
+  <div class="stat"><div class="val hl">12</div><div class="lbl">核心服务</div></div>
+  <div class="stat"><div class="val">8</div><div class="lbl">国产 AI 模型</div></div>
+  <div class="stat"><div class="val">99.9%</div><div class="lbl">SLA 目标</div></div>
+  <div class="stat"><div class="val">&lt;200ms</div><div class="lbl">API P95</div></div>
+  <div class="stat"><div class="val">18</div><div class="lbl">章节</div></div>
+</div>
+
+<!-- ============ TOC ============ -->
+<nav class="toc">
+  <h3>目录 · Table of Contents</h3>
+  <div class="toc-grid">
+    <a href="#s1"><span class="num">01</span>修订历史</a>
+    <a href="#s2"><span class="num">02</span>设计目标与原则</a>
+    <a href="#s3"><span class="num">03</span>系统架构总览</a>
+    <a href="#s4"><span class="num">04</span>前端架构</a>
+    <a href="#s5"><span class="num">05</span>后端架构</a>
+    <a href="#s6"><span class="num">06</span>数据库设计</a>
+    <a href="#s7"><span class="num">07</span>API 设计规范</a>
+    <a href="#s8"><span class="num">08</span>AI 模块架构</a>
+    <a href="#s9"><span class="num">09</span>安全设计</a>
+    <a href="#s10"><span class="num">10</span>部署架构</a>
+    <a href="#s11"><span class="num">11</span>性能设计</a>
+    <a href="#s12"><span class="num">12</span>监控与日志</a>
+    <a href="#s13"><span class="num">13</span>容灾与备份</a>
+    <a href="#s14"><span class="num">14</span>技术选型清单</a>
+    <a href="#s15"><span class="num">15</span>开发规范</a>
+    <a href="#s16"><span class="num">16</span>里程碑与路线图</a>
+    <a href="#s17"><span class="num">17</span>风险评估</a>
+    <a href="#s18"><span class="num">18</span>附录 · 术语表</a>
+  </div>
+</nav>
+
+<!-- ============ 01 · 修订历史 ============ -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <h2>01 · 修订历史 <em>Revision</em></h2>
+    <div class="num-tag">Document Control</div>
+  </div>
+  <div class="revision">
+    <table>
+      <thead><tr><th style="width:90px;">版本</th><th style="width:110px;">日期</th><th style="width:100px;">作者</th><th>修订内容</th><th style="width:90px;">状态</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag p0">v0.1</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px;">2026-08-22</td>
+          <td>架构组</td>
+          <td>初稿 · 系统架构草案 · 技术选型调研</td>
+          <td style="color:var(--inkwell-2); font-family:var(--f-mono); font-size:10px;">草稿</td>
+        </tr>
+        <tr>
+          <td><span class="tag p1">v0.5</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px;">2026-08-24</td>
+          <td>架构+后端</td>
+          <td>完成微服务拆分 · 数据库设计 · API 规范</td>
+          <td style="color:var(--cobalt); font-family:var(--f-mono); font-size:10px;">评审</td>
+        </tr>
+        <tr style="background:var(--growth-soft);">
+          <td><span class="tag" style="background:var(--growth); color:#fff;">v1.0</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px; font-weight:500;">2026-08-25</td>
+          <td><b>架构团队</b></td>
+          <td><b>TDD 完整发布 · 18 章节 · 含 AI 模块架构 · 国产模型集成方案 · 通过评审</b></td>
+          <td style="color:var(--growth); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 02 · 设计目标 ============ -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <h2>02 · 设计目标与原则 <em>Goals</em></h2>
+    <div class="num-tag">Architecture Principles</div>
+  </div>
+
+  <h3 class="sub">2.1 设计目标</h3>
+  <table>
+    <thead><tr><th>目标</th><th>量化指标</th><th>技术策略</th></tr></thead>
+    <tbody>
+      <tr><td><b>高可用</b></td><td>SLA ≥ 99.9%（月度停机 ≤ 43 分钟）</td><td>多可用区部署 · 服务熔断 · 自动扩缩容</td></tr>
+      <tr><td><b>低延迟</b></td><td>API P95 ≤ 200ms · 直播 ≤ 2s</td><td>边缘缓存 · 读写分离 · WebSocket 长连接</td></tr>
+      <tr><td><b>可扩展</b></td><td>支持 10,000 并发用户</td><td>微服务 · 消息队列 · 水平扩展</td></tr>
+      <tr><td><b>跨端一致</b></td><td>设计 Token 复用率 ≥ 95%</td><td>Design System · 共享组件库 · 统一 API</td></tr>
+      <tr><td><b>AI 原生</b></td><td>AI 功能响应 ≤ 3s（首 token）</td><td>国产模型池 · 智能路由 · 流式响应</td></tr>
+      <tr><td><b>安全合规</b></td><td>等保三级 · 个保法合规</td><td>零信任 · 数据加密 · 审计追溯 7 年</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">2.2 设计原则</h3>
+  <div class="cards">
+    <div class="card">
+      <h4>🎯 领域驱动</h4>
+      <div class="sub">按教育业务领域拆分服务边界，避免技术驱动的过度抽象</div>
+    </div>
+    <div class="card">
+      <h4>📱 跨端优先</h4>
+      <div class="sub">API-First 设计，前端三端共用同一套 RESTful + WebSocket 接口</div>
+    </div>
+    <div class="card">
+      <h4>🤖 AI 可插拔</h4>
+      <div class="sub">AI 能力抽象为统一接口层，底层模型可热切换，支持多厂商并行</div>
+    </div>
+    <div class="card">
+      <h4>🔒 默认安全</h4>
+      <div class="sub">零信任网络 · 最小权限 · 全链路加密 · 审计日志不可篡改</div>
+    </div>
+    <div class="card">
+      <h4>📊 可观测</h4>
+      <div class="sub">Metrics + Tracing + Logging 三位一体，问题 5 分钟内定位</div>
+    </div>
+    <div class="card">
+      <h4>💰 成本可控</h4>
+      <div class="sub">智能路由分流 · 多级缓存 · 模型按需选择，AI 成本降低 60%+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 · 系统架构总览 ============ -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <h2>03 · 系统架构总览 <em>Overview</em></h2>
+    <div class="num-tag">System Architecture</div>
+  </div>
+
+  <h3 class="sub">3.1 分层架构</h3>
+  <div class="arch-diagram">
+    <div class="arch-row">
+      <div class="arch-box cobalt" style="flex:3;">
+        <div class="title">客户端层 · Client</div>
+        <div style="display:flex; gap:8px; justify-content:center; margin-top:8px;">
+          <div style="padding:6px 12px; background:#fff; border-radius:6px; font-size:11px;">📱 Mobile<br/><span style="font-size:9px; color:var(--inkwell-2);">iOS · Android</span></div>
+          <div style="padding:6px 12px; background:#fff; border-radius:6px; font-size:11px;">🌐 Web<br/><span style="font-size:9px; color:var(--inkwell-2);">React SPA</span></div>
+          <div style="padding:6px 12px; background:#fff; border-radius:6px; font-size:11px;">🖥️ Desktop<br/><span style="font-size:9px; color:var(--inkwell-2);">Electron</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="arch-arrow">▼ HTTPS · WSS · HTTP/2 ▼</div>
+    <div class="arch-row">
+      <div class="arch-box highlight" style="flex:3;">
+        <div class="title">接入层 · Edge</div>
+        <div style="display:flex; gap:8px; justify-content:center; margin-top:8px;">
+          <div style="padding:6px 12px; background:#fff; border-radius:6px; font-size:11px;">CDN<br/><span style="font-size:9px; color:var(--inkwell-2);">阿里云 CDN</span></div>
+          <div style="padding:6px 12px; background:#fff; border-radius:6px; font-size:11px;">WAF<br/><span style="font-size:9px; color:var(--inkwell-2);">Web 应用防火墙</span></div>
+          <div style="padding:6px 12px; background:#fff; border-radius:6px; font-size:11px;">API Gateway<br/><span style="font-size:9px; color:var(--inkwell-2);">Kong · 限流 · 鉴权</span></div>
+          <div style="padding:6px 12px; background:#fff; border-radius:6px; font-size:11px;">LB<br/><span style="font-size:9px; color:var(--inkwell-2);">Nginx · 负载均衡</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="arch-arrow">▼ 内部 gRPC / HTTP ▼</div>
+    <div class="arch-row">
+      <div class="arch-box growth">
+        <div class="title">业务服务层</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:8px;">
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">用户服务</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">课程服务</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">作业服务</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">成绩服务</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">直播服务</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">协作服务</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">通知服务</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">审批服务</div>
+        </div>
+      </div>
+      <div class="arch-box ai">
+        <div class="title">AI 服务层</div>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">🤖 AI 网关 · 路由</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">📝 批阅 · 生成</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">🎓 导师 · 路径</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">📊 预测 · 分析</div>
+        </div>
+      </div>
+    </div>
+    <div class="arch-arrow">▼ TCP / 连接池 ▼</div>
+    <div class="arch-row">
+      <div class="arch-box inkwell">
+        <div class="title">数据层 · Data</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:8px;">
+          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">PostgreSQL<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">主从 · RDS</span></div>
+          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">Redis<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">缓存 · 会话</span></div>
+          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">Elasticsearch<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">搜索 · 日志</span></div>
+          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">OSS<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">对象存储</span></div>
+          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">Kafka<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">消息队列</span></div>
+          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">Milvus<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">向量库</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">3.2 核心设计决策</h3>
+  <table>
+    <thead><tr><th>决策点</th><th>方案</th><th>备选方案</th><th>决策理由</th></tr></thead>
+    <tbody>
+      <tr><td><b>架构风格</b></td><td>微服务（12 个服务）</td><td>单体 / Serverless</td><td>业务边界清晰，团队可独立迭代</td></tr>
+      <tr><td><b>前端框架</b></td><td>React 18 + TypeScript</td><td>Vue 3 / Svelte</td><td>生态成熟，招聘容易，跨端共享逻辑</td></tr>
+      <tr><b>移动端</b></td><td>React Native</td><td>Flutter / 原生</td><td>与 Web 共享 TS 代码，热更新</td></tr>
+      <tr><td><b>桌面端</b></td><td>Electron + React</td><td>Tauri / Qt</td><td>复用 Web 代码，离线能力强</td></tr>
+      <tr><td><b>后端语言</b></td><td>Go（核心）+ Python（AI）</td><td>Java / Node.js</td><td>Go 高并发低延迟，Python AI 生态</td></tr>
+      <tr><td><b>数据库</b></td><td>PostgreSQL 16</td><td>MySQL 8</td><td>JSON 支持、全文搜索、扩展性</td></tr>
+      <tr><td><b>AI 模型</b></td><td>国产模型池（通义/智谱/讯飞）</td><td>OpenAI / Claude</td><td>合规 · 成本 · 数据主权</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 04 · 前端架构 ============ -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <h2>04 · 前端架构 <em>Frontend</em></h2>
+    <div class="num-tag">Cross-Platform Client</div>
+  </div>
+
+  <h3 class="sub">4.1 三端统一架构</h3>
+  <div class="info note">
+    <div class="label">核心理念 · 代码复用最大化</div>
+    Web、Mobile、Desktop 三端共享 <b>Design System · Business Logic · API Client</b>，仅 UI 渲染层按平台适配。代码复用率目标 ≥ 70%。
+  </div>
+
+  <table>
+    <thead><tr><th>层次</th><th>Web</th><th>Mobile</th><th>Desktop</th><th>共享</th></tr></thead>
+    <tbody>
+      <tr><td><b>渲染层</b></td><td>React DOM</td><td>React Native</td><td>Electron + React DOM</td><td>—</td></tr>
+      <tr><td><b>UI 组件</b></td><td>Web Components</td><td>Native Components</td><td>Web Components</td><td>Design Tokens</td></tr>
+      <tr><td><b>状态管理</b></td><td colspan="3" style="text-align:center;">Zustand · 统一 Store</td><td>✅ 100%</td></tr>
+      <tr><td><b>路由</b></td><td>React Router v6</td><td>React Navigation</td><td>React Router v6</td><td>路由表定义</td></tr>
+      <tr><td><b>API 层</b></td><td colspan="3" style="text-align:center;">TanStack Query + Axios 封装</td><td>✅ 100%</td></tr>
+      <tr><td><b>业务逻辑</b></td><td colspan="3" style="text-align:center;">TypeScript · Hooks · Services</td><td>✅ 100%</td></tr>
+      <tr><td><b>Design System</b></td><td colspan="3" style="text-align:center;">@lumina/tokens · @lumina/icons</td><td>✅ 100%</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">4.2 项目结构</h3>
+  <pre><span class="comment">// 前端 Monorepo（pnpm workspace）</span>
+<span class="keyword">packages/</span>
+├── <span class="type">tokens/</span>          <span class="comment"># Design Tokens · 颜色/字体/间距</span>
+├── <span class="type">icons/</span>           <span class="comment"># Feather Icons SVG · tree-shakable</span>
+├── <span class="type">ui/</span>              <span class="comment"># 通用 UI 组件 · Button/Card/Modal</span>
+├── <span class="type">api-client/</span>      <span class="comment"># API 封装 · 类型定义 · 拦截器</span>
+├── <span class="type">stores/</span>          <span class="comment"># Zustand stores · 状态管理</span>
+├── <span class="type">hooks/</span>           <span class="comment"># 通用 Hooks · useAuth/useCourse</span>
+├── <span class="type">utils/</span>           <span class="comment"># 工具函数 · 日期/格式化/校验</span>
+├── <span class="type">web/</span>             <span class="comment"># Web 端应用</span>
+├── <span class="type">mobile/</span>          <span class="comment"># React Native 应用</span>
+└── <span class="type">desktop/</span>         <span class="comment"># Electron 应用</span></pre>
+
+  <h3 class="sub">4.3 响应式断点</h3>
+  <table>
+    <thead><tr><th>断点</th><th>范围</th><th>布局策略</th><th>导航模式</th></tr></thead>
+    <tbody>
+      <tr><td><b>Mobile</b></td><td>&lt; 480px</td><td>单列 · 紧凑</td><td>底部 5 Tab</td></tr>
+      <tr><td><b>Tablet</b></td><td>768 – 1024px</td><td>双列/三列网格</td><td>侧边导航</td></tr>
+      <tr><td><b>Desktop</b></td><td>&gt; 1024px</td><td>多列 · 宽屏</td><td>侧边导航 + 面包屑</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">4.4 离线与同步</h3>
+  <div class="cards col-2">
+    <div class="card">
+      <h4>🌐 Web 端</h4>
+      <div class="list">
+        <div>Service Worker 缓存静态资源</div>
+        <div>IndexedDB 存储离线数据</div>
+        <div>恢复网络后增量同步</div>
+        <div>冲突检测：时间戳 + 字段级</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>🖥️ Desktop 端</h4>
+      <div class="list">
+        <div>本地 SQLite 完整数据副本</div>
+        <div>文件级离线下载（课件/视频）</div>
+        <div>后台增量同步 · 带宽感知</div>
+        <div>冲突解决：用户手动选择</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 · 后端架构 ============ -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <h2>05 · 后端架构 <em>Backend</em></h2>
+    <div class="num-tag">Microservices · Go + Python</div>
+  </div>
+
+  <h3 class="sub">5.1 微服务拆分</h3>
+  <table>
+    <thead><tr><th>服务</th><th>职责</th><th>技术</th><th>数据存储</th><th>SLA</th></tr></thead>
+    <tbody>
+      <tr><td><b>用户服务</b></td><td>注册/登录/RBAC/组织架构</td><td>Go · Gin</td><td>PostgreSQL</td><td>99.99%</td></tr>
+      <tr><td><b>课程服务</b></td><td>课程 CRUD · 章节 · 课件版本</td><td>Go · Gin</td><td>PostgreSQL · OSS</td><td>99.9%</td></tr>
+      <tr><td><b>作业服务</b></td><td>发布/提交/批阅/截止提醒</td><td>Go · Gin</td><td>PostgreSQL · OSS</td><td>99.9%</td></tr>
+      <tr><td><b>成绩服务</b></td><td>成绩录入 · GPA · 统计</td><td>Go · Gin</td><td>PostgreSQL</td><td>99.9%</td></tr>
+      <tr><td><b>直播服务</b></td><td>WebRTC · 录制 · 聊天 · 举手</td><td>Go · SFU</td><td>Redis · OSS</td><td>99.9%</td></tr>
+      <tr><td><b>协作服务</b></td><td>看板 · 文档协同 · 讨论</td><td>Go · CRDT</td><td>PostgreSQL · Redis</td><td>99.9%</td></tr>
+      <tr><td><b>通知服务</b></td><td>推送 · 邮件 · 短信 · 站内信</td><td>Go · Kafka</td><td>PostgreSQL · Redis</td><td>99.5%</td></tr>
+      <tr><td><b>审批服务</b></td><td>课程审批 · 流程引擎</td><td>Go · Gin</td><td>PostgreSQL</td><td>99.9%</td></tr>
+      <tr><td><b>审计服务</b></td><td>操作日志 · 合规追溯</td><td>Go · Kafka</td><td>Elasticsearch</td><td>99.9%</td></tr>
+      <tr style="background:var(--ai-soft);"><td><b style="color:var(--ai);">AI 网关</b></td><td style="color:var(--ai);">模型路由 · 负载均衡 · 限流</td><td>Go · gRPC</td><td>Redis</td><td>99.9%</td></tr>
+      <tr style="background:var(--ai-soft);"><td><b style="color:var(--ai);">AI 推理服务</b></td><td style="color:var(--ai);">批阅 · 生成 · 导师 · 预测</td><td>Python · FastAPI</td><td>Milvus · Redis</td><td>99.5%</td></tr>
+      <tr style="background:var(--ai-soft);"><td><b style="color:var(--ai);">AI 安全服务</b></td><td style="color:var(--ai);">内容审核 · 偏见检测</td><td>Python · FastAPI</td><td>PostgreSQL</td><td>99.9%</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">5.2 服务通信</h3>
+  <div class="flow">
+    <div class="flow-step">客户端</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step active">API Gateway</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">业务服务</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">数据层</div>
+  </div>
+  <table>
+    <thead><tr><th>通信方式</th><th>场景</th><th>技术</th></tr></thead>
+    <tbody>
+      <tr><td><b>同步 RPC</b></td><td>服务间实时调用（查询/写入）</td><td>gRPC · Protobuf · 超时 3s</td></tr>
+      <tr><td><b>异步消息</b></td><td>事件驱动（通知/审计/解耦）</td><td>Kafka · 至少一次投递</td></tr>
+      <tr><td><b>实时推送</b></td><td>直播 · 聊天 · 协同编辑</td><td>WebSocket · SSE</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 06 · 数据库设计 ============ -->
+<section class="section" id="s6">
+  <div class="section-header">
+    <h2>06 · 数据库设计 <em>Database</em></h2>
+    <div class="num-tag">PostgreSQL 16 · 分库分表</div>
+  </div>
+
+  <h3 class="sub">6.1 核心数据模型</h3>
+  <pre><span class="comment">-- 用户表</span>
+<span class="keyword">CREATE TABLE</span> <span class="type">users</span> (
+  id          <span class="type">UUID</span> <span class="keyword">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  student_id  <span class="type">VARCHAR(20)</span> <span class="keyword">UNIQUE</span>,      <span class="comment">-- 学号</span>
+  name        <span class="type">VARCHAR(50)</span> <span class="keyword">NOT NULL</span>,
+  role        <span class="type">ENUM</span>(<span class="string">'student'</span>,<span class="string">'teacher'</span>,<span class="string">'admin'</span>),
+  department  <span class="type">VARCHAR(100)</span>,
+  created_at  <span class="type">TIMESTAMPTZ</span> <span class="keyword">DEFAULT</span> now()
+);
+
+<span class="comment">-- 课程表</span>
+<span class="keyword">CREATE TABLE</span> <span class="type">courses</span> (
+  id          <span class="type">UUID</span> <span class="keyword">PRIMARY KEY</span>,
+  code        <span class="type">VARCHAR(20)</span> <span class="keyword">UNIQUE</span>,      <span class="comment">-- 课程编号</span>
+  title       <span class="type">VARCHAR(200)</span> <span class="keyword">NOT NULL</span>,
+  teacher_id  <span class="type">UUID</span> <span class="keyword">REFERENCES</span> users(id),
+  credits     <span class="type">DECIMAL</span>(3,1),
+  semester    <span class="type">VARCHAR(20)</span>,              <span class="comment">-- 2026-1</span>
+  status      <span class="type">ENUM</span>(<span class="string">'draft'</span>,<span class="string">'published'</span>,<span class="string">'archived'</span>)
+);
+
+<span class="comment">-- 作业表（含 AI 批阅字段）</span>
+<span class="keyword">CREATE TABLE</span> <span class="type">assignments</span> (
+  id            <span class="type">UUID</span> <span class="keyword">PRIMARY KEY</span>,
+  course_id     <span class="type">UUID</span> <span class="keyword">REFERENCES</span> courses(id),
+  title         <span class="type">VARCHAR(200)</span>,
+  due_at        <span class="type">TIMESTAMPTZ</span>,
+  ai_grading    <span class="type">BOOLEAN</span> <span class="keyword">DEFAULT</span> false,  <span class="comment">-- 启用 AI 辅助批阅</span>
+  rubric        <span class="type">JSONB</span>,                  <span class="comment">-- 评分标准</span>
+  ai_model      <span class="type">VARCHAR(50)</span>             <span class="comment">-- 指定 AI 模型</span>
+);</pre>
+
+  <h3 class="sub">6.2 数据分片策略</h3>
+  <table>
+    <thead><tr><th>数据表</th><th>分片键</th><th>策略</th><th>预计规模</th></tr></thead>
+    <tbody>
+      <tr><td>users</td><td>—</td><td>不分片（1,500 用户）</td><td>&lt; 1 GB</td></tr>
+      <tr><td>courses</td><td>semester</td><td>按学期分区</td><td>~ 500 门/学期</td></tr>
+      <tr><td>submissions</td><td>course_id</td><td>按课程哈希分片</td><td>10 万+/学期</td></tr>
+      <tr><td>audit_logs</td><td>created_at</td><td>按月分区 · 冷热分离</td><td>1 TB+/年</td></tr>
+      <tr><td>ai_conversations</td><td>user_id</td><td>按用户哈希分片</td><td>50 万+ 会话</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 07 · API 设计 ============ -->
+<section class="section" id="s7">
+  <div class="section-header">
+    <h2>07 · API 设计规范 <em>API Design</em></h2>
+    <div class="num-tag">RESTful · OpenAPI 3.1</div>
+  </div>
+
+  <h3 class="sub">7.1 统一规范</h3>
+  <table>
+    <thead><tr><th>规范项</th><th>约定</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><b>URL 风格</b></td><td>RESTful · 复数名词 · kebab-case</td><td><code>/api/v1/courses/{id}/assignments</code></td></tr>
+      <tr><td><b>版本控制</b></td><td>URL 路径前缀</td><td><code>/api/v1/</code> · <code>/api/v2/</code></td></tr>
+      <tr><td><b>认证</b></td><td>JWT Bearer Token</td><td><code>Authorization: Bearer eyJhbG...</code></td></tr>
+      <tr><td><b>分页</b></td><td>Cursor-based</td><td><code>?cursor=xxx&limit=20</code></td></tr>
+      <tr><td><b>错误格式</b></td><td>RFC 7807 Problem Details</td><td><code>{"type":"...","status":400,"title":"...","detail":"..."}</code></td></tr>
+      <tr><td><b>限流</b></td><td>令牌桶 · 响应头告知</td><td><code>X-RateLimit-Remaining: 98</code></td></tr>
+      <tr><td><b>压缩</b></td><td>gzip · Brotli</td><td><code>Accept-Encoding: br</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">7.2 核心 API 列表</h3>
+  <table>
+    <thead><tr><th>模块</th><th>端点</th><th>方法</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="3"><b>认证</b></td><td><code>/auth/login</code></td><td>POST</td><td>账号密码登录 → 返回 JWT</td></tr>
+      <tr><td><code>/auth/refresh</code></td><td>POST</td><td>刷新 Token</td></tr>
+      <tr><td><code>/auth/logout</code></td><td>POST</td><td>注销 · 黑名单 Token</td></tr>
+      <tr><td rowspan="3"><b>课程</b></td><td><code>/courses</code></td><td>GET</td><td>课程列表（分页/筛选）</td></tr>
+      <tr><td><code>/courses/{id}</code></td><td>GET</td><td>课程详情</td></tr>
+      <tr><td><code>/courses/{id}/chapters</code></td><td>GET</td><td>章节列表</td></tr>
+      <tr><td rowspan="3"><b>作业</b></td><td><code>/assignments</code></td><td>POST</td><td>创建作业</td></tr>
+      <tr><td><code>/assignments/{id}/submit</code></td><td>POST</td><td>提交作业</td></tr>
+      <tr><td><code>/assignments/{id}/grade</code></td><td>POST</td><td>批阅（触发 AI 辅助）</td></tr>
+      <tr><td rowspan="2"><b>直播</b></td><td><code>/live/{id}/join</code></td><td>POST</td><td>加入直播间 · 返回 RTC 配置</td></tr>
+      <tr><td><code>/live/{id}/chat</code></td><td>WS</td><td>WebSocket 聊天通道</td></tr>
+      <tr style="background:var(--ai-soft);"><td rowspan="2"><b style="color:var(--ai);">AI</b></td><td style="color:var(--ai);"><code>/ai/chat</code></td><td>POST (SSE)</td><td style="color:var(--ai);">AI 对话 · 流式响应</td></tr>
+      <tr style="background:var(--ai-soft);"><td style="color:var(--ai);"><code>/ai/grade</code></td><td>POST</td><td style="color:var(--ai);">AI 辅助批阅</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 08 · AI 模块架构 ============ -->
+<section class="section" id="s8">
+  <div class="section-header">
+    <h2>08 · AI 模块架构 <em>AI Architecture</em></h2>
+    <div class="num-tag">国产模型 · Multi-Agent · RAG</div>
+  </div>
+
+  <h3 class="sub">8.1 AI 分层架构</h3>
+  <div class="arch-diagram">
+    <div class="arch-row">
+      <div class="arch-box cobalt" style="flex:4;">
+        <div class="title">应用层 · AI 功能</div>
+        <div style="display:flex; gap:6px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">🎓 苏格拉底导师</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">📝 AI 批阅</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">📚 课件生成</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">🗺️ 知识图谱</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">📊 学情预测</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">🎙️ 语音助手</div>
+        </div>
+      </div>
+    </div>
+    <div class="arch-arrow">▼ 统一接口 ▼</div>
+    <div class="arch-row">
+      <div class="arch-box ai" style="flex:2;">
+        <div class="title">编排层 · Agent Orchestrator</div>
+        <div style="font-size:11px; line-height:1.6; margin-top:6px;">
+          Multi-Agent 协作<br/>
+          任务分解 · 工具调用<br/>
+          ReAct · Plan-and-Execute
+        </div>
+      </div>
+      <div class="arch-box ai" style="flex:2;">
+        <div class="title">增强层 · RAG Pipeline</div>
+        <div style="font-size:11px; line-height:1.6; margin-top:6px;">
+          向量检索 · Milvus<br/>
+          文档解析 · 分块 · 嵌入<br/>
+          课程知识库 · 题库
+        </div>
+      </div>
+    </div>
+    <div class="arch-arrow">▼ 模型路由 ▼</div>
+    <div class="arch-row">
+      <div class="arch-box growth" style="flex:4;">
+        <div class="title">模型层 · 国产模型池</div>
+        <div style="display:flex; gap:6px; justify-content:center; margin-top:8px; flex-wrap:wrap;">
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">通义千问<br/><span style="font-size:8px; color:var(--inkwell-2);">Qwen-Max</span></div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">智谱 GLM<br/><span style="font-size:8px; color:var(--inkwell-2);">GLM-4</span></div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">讯飞星火<br/><span style="font-size:8px; color:var(--inkwell-2);">V4.0</span></div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">豆包<br/><span style="font-size:8px; color:var(--inkwell-2);">Lite</span></div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">Kimi<br/><span style="font-size:8px; color:var(--inkwell-2);">Moonshot</span></div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">Qwen-VL<br/><span style="font-size:8px; color:var(--inkwell-2);">多模态</span></div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">讯飞语音<br/><span style="font-size:8px; color:var(--inkwell-2);">ASR/TTS</span></div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">百川<br/><span style="font-size:8px; color:var(--inkwell-2);">Embedding</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">8.2 智能路由策略</h3>
+  <table>
+    <thead><tr><th>场景</th><th>默认模型</th><th>备选</th><th>路由依据</th></tr></thead>
+    <tbody>
+      <tr><td><b>日常对话</b></td><td>豆包 Lite</td><td>讯飞星火</td><td>成本优先 · ≤ ¥0.005/千token</td></tr>
+      <tr><td><b>苏格拉底导师</b></td><td>通义千问 Max</td><td>智谱 GLM-4</td><td>推理质量 · 教育引导能力</td></tr>
+      <tr><td><b>AI 批阅</b></td><td>通义千问 Max</td><td>Kimi</td><td>长文本 · 评分一致性</td></tr>
+      <tr><td><b>课件生成</b></td><td>智谱 GLM-4</td><td>通义千问</td><td>结构化输出 · 教育专业性</td></tr>
+      <tr><td><b>图片理解</b></td><td>Qwen-VL</td><td>—</td><td>多模态 · 题目识别</td></tr>
+      <tr><td><b>语音识别</b></td><td>讯飞语音 V3</td><td>—</td><td>中文准确率 · 教育术语</td></tr>
+      <tr><td><b>文本嵌入</b></td><td>百川 Embedding</td><td>通义 Embedding</td><td>中文语义 · RAG 检索</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">8.3 RAG 流程</h3>
+  <div class="flow">
+    <div class="flow-step">用户提问</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Query 改写</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step active">向量检索</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Re-ranking</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Prompt 组装</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step active">LLM 生成</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">答案 + 引用</div>
+  </div>
+</section>
+
+<!-- ============ 09 · 安全设计 ============ -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <h2>09 · 安全设计 <em>Security</em></h2>
+    <div class="num-tag">Zero Trust · 等保三级</div>
+  </div>
+
+  <h3 class="sub">9.1 安全架构</h3>
+  <div class="cards">
+    <div class="card">
+      <h4>🔐 身份认证</h4>
+      <div class="list">
+        <div>JWT + Refresh Token 双令牌</div>
+        <div>Access Token 15 分钟过期</div>
+        <div>管理员强制 2FA（TOTP）</div>
+        <div>单设备登录 · 异地检测</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>🛡️ 权限控制</h4>
+      <div class="list">
+        <div>RBAC 角色 × 资源 × 操作</div>
+        <div>数据级权限（学生只看自己）</div>
+        <div>ABAC 属性策略（院系/学期）</div>
+        <div>API 级别鉴权中间件</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>🔒 数据加密</h4>
+      <div class="list">
+        <div>传输 TLS 1.3 · HSTS</div>
+        <div>存储 AES-256（敏感字段）</div>
+        <div>密码 bcrypt · 12 轮</div>
+        <div>密钥 KMS 托管 · 定期轮换</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>🕵️ 审计追溯</h4>
+      <div class="list">
+        <div>全操作日志 · 不可篡改</div>
+        <div>日志保留 7 年（合规要求）</div>
+        <div>敏感操作实时告警</div>
+        <div>AI 决策全链路追溯</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>🌐 网络安全</h4>
+      <div class="list">
+        <div>WAF · DDoS 防护</div>
+        <div>VPC 网络隔离</div>
+        <div>服务网格 mTLS</div>
+        <div>SQL 注入 · XSS · CSRF 防护</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>🤖 AI 安全</h4>
+      <div class="list">
+        <div>输入/输出内容审核</div>
+        <div>Prompt 注入检测</div>
+        <div>学生数据不用于训练</div>
+        <div>AI 决策可解释性报告</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">9.2 合规要求</h3>
+  <table>
+    <thead><tr><th>法规</th><th>要求</th><th>技术措施</th></tr></thead>
+    <tbody>
+      <tr><td><b>等保三级</b></td><td>身份鉴别 · 访问控制 · 安全审计</td><td>2FA · RBAC · 审计日志</td></tr>
+      <tr><td><b>个人信息保护法</b></td><td>最小必要 · 知情同意 · 数据删除</td><td>字段级脱敏 · 隐私协议 · 注销清理</td></tr>
+      <tr><td><b>教育数据安全指南</b></td><td>学生成绩保密 · 分级分类</td><td>成绩加密存储 · 教师只能看自己课程</td></tr>
+      <tr><td><b>生成式 AI 管理办法</b></td><td>内容标识 · 算法备案 · 安全评估</td><td>AI 生成内容标记 · 模型备案 · 审核</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 10 · 部署架构 ============ -->
+<section class="section" id="s10">
+  <div class="section-header">
+    <h2>10 · 部署架构 <em>Deployment</em></h2>
+    <div class="num-tag">阿里云 · K8s · 多可用区</div>
+  </div>
+
+  <h3 class="sub">10.1 基础设施</h3>
+  <div class="arch-diagram">
+    <div class="arch-row">
+      <div class="arch-box inkwell" style="flex:1;">
+        <div class="title">可用区 A</div>
+        <div style="font-size:11px; line-height:1.8; margin-top:6px; text-align:left; padding:0 10px; color:var(--ricepaper);">
+          <div>• K8s Node ×3</div>
+          <div>• PostgreSQL 主</div>
+          <div>• Redis 主</div>
+          <div>• Kafka Broker ×1</div>
+        </div>
+      </div>
+      <div class="arch-box inkwell" style="flex:1;">
+        <div class="title">可用区 B</div>
+        <div style="font-size:11px; line-height:1.8; margin-top:6px; text-align:left; padding:0 10px; color:var(--ricepaper);">
+          <div>• K8s Node ×3</div>
+          <div>• PostgreSQL 从</div>
+          <div>• Redis 从</div>
+          <div>• Kafka Broker ×2</div>
+        </div>
+      </div>
+      <div class="arch-box" style="flex:1; background:var(--correction-soft); border-color:var(--correction);">
+        <div class="title">灾备区（异地）</div>
+        <div style="font-size:11px; line-height:1.8; margin-top:6px; text-align:left; padding:0 10px;">
+          <div>• 数据异步复制</div>
+          <div>• OSS 跨区备份</div>
+          <div>• RPO ≤ 15 分钟</div>
+          <div>• RTO ≤ 1 小时</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">10.2 CI/CD 流水线</h3>
+  <div class="flow">
+    <div class="flow-step">Git Push</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Code Review</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step active">单元测试</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">构建镜像</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">部署 Dev</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">集成测试</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step active">部署 Prod</div>
+  </div>
+
+  <table>
+    <thead><tr><th>环境</th><th>用途</th><th>配置</th><th>部署方式</th></tr></thead>
+    <tbody>
+      <tr><td><b>Dev</b></td><td>开发自测</td><td>最小配置 · 单副本</td><td>Git push 自动</td></tr>
+      <tr><td><b>Staging</b></td><td>集成测试 · QA</td><td>模拟生产 · 数据脱敏</td><td>合并到 main 触发</td></tr>
+      <tr><td><b>Production</b></td><td>正式环境</td><td>多副本 · 多可用区</td><td>手动审批 · 灰度发布</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 11 · 性能设计 ============ -->
+<section class="section" id="s11">
+  <div class="section-header">
+    <h2>11 · 性能设计 <em>Performance</em></h2>
+    <div class="num-tag">缓存 · 异步 · 优化</div>
+  </div>
+
+  <h3 class="sub">11.1 多级缓存</h3>
+  <table>
+    <thead><tr><th>层级</th><th>技术</th><th>TTL</th><th>命中场景</th></tr></thead>
+    <tbody>
+      <tr><td><b>浏览器</b></td><td>HTTP Cache · Service Worker</td><td>静态 7d · API 1min</td><td>静态资源 · 课程列表</td></tr>
+      <tr><td><b>CDN</b></td><td>阿里云 CDN</td><td>课件 24h</td><td>课件文件 · 图片 · 视频</td></tr>
+      <tr><td><b>网关</b></td><td>Kong 缓存插件</td><td>GET 30s</td><td>课程详情 · 公告</td></tr>
+      <tr><td><b>应用</b></td><td>本地 LRU</td><td>10s</td><td>配置 · 用户信息</td></tr>
+      <tr><td><b>Redis</b></td><td>分布式缓存</td><td>按业务 1min – 1h</td><td>会话 · 排行榜 · 热数据</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">11.2 性能指标</h3>
+  <table>
+    <thead><tr><th>指标</th><th>目标</th><th>优化策略</th></tr></thead>
+    <tbody>
+      <tr><td><b>首页加载</b></td><td>≤ 1.5s（4G）</td><td>代码分割 · 懒加载 · 预渲染</td></tr>
+      <tr><td><b>API P95</b></td><td>≤ 200ms</td><td>索引优化 · 读写分离 · 连接池</td></tr>
+      <tr><b>直播延迟</b></td><td>≤ 2s</td><td>WebRTC · SFU · 边缘节点</td></tr>
+      <tr><td><b>AI 首 Token</b></td><td>≤ 3s</td><td>流式响应 · 模型预热 · 缓存</td></tr>
+      <tr><td><b>并发能力</b></td><td>10,000 QPS</td><td>水平扩展 · 无状态 · 限流</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 12 · 监控 ============ -->
+<section class="section" id="s12">
+  <div class="section-header">
+    <h2>12 · 监控与日志 <em>Observability</em></h2>
+    <div class="num-tag">Metrics · Tracing · Logging</div>
+  </div>
+
+  <h3 class="sub">12.1 三位一体</h3>
+  <div class="cards">
+    <div class="card">
+      <h4>📊 Metrics</h4>
+      <div class="sub">Prometheus + Grafana</div>
+      <div class="list">
+        <div>QPS / 延迟 / 错误率</div>
+        <div>CPU / 内存 / 磁盘</div>
+        <div>AI 调用量 / 成本</div>
+        <div>业务指标（DAU/提交数）</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>🔍 Tracing</h4>
+      <div class="sub">Jaeger · OpenTelemetry</div>
+      <div class="list">
+        <div>全链路追踪</div>
+        <div>跨服务调用可视化</div>
+        <div>慢请求分析</div>
+        <div>AI 推理链路</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>📝 Logging</h4>
+      <div class="sub">ELK Stack</div>
+      <div class="list">
+        <div>结构化 JSON 日志</div>
+        <div>TraceID 关联</div>
+        <div>审计日志独立存储</div>
+        <div>7 年归档 · 冷热分离</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">12.2 告警规则</h3>
+  <table>
+    <thead><tr><th>告警项</th><th>阈值</th><th>级别</th><th>通知方式</th></tr></thead>
+    <tbody>
+      <tr><td>API 错误率</td><td>> 1% (5min)</td><td><span class="tag p0">P0</span></td><td>电话 + 钉钉 + 邮件</td></tr>
+      <tr><td>API P99 延迟</td><td>> 1s (5min)</td><td><span class="tag p1">P1</span></td><td>钉钉 + 邮件</td></tr>
+      <tr><td>CPU 使用率</td><td>> 80% (10min)</td><td><span class="tag p1">P1</span></td><td>钉钉</td></tr>
+      <tr><td>AI 模型超时</td><td>> 5% (5min)</td><td><span class="tag p1">P1</span></td><td>钉钉 + 邮件</td></tr>
+      <tr><td>磁盘使用率</td><td>> 85%</td><td><span class="tag p2">P2</span></td><td>邮件</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 13 · 容灾 ============ -->
+<section class="section" id="s13">
+  <div class="section-header">
+    <h2>13 · 容灾与备份 <em>DR & Backup</em></h2>
+    <div class="num-tag">RPO ≤ 15min · RTO ≤ 1h</div>
+  </div>
+
+  <table>
+    <thead><tr><th>数据类型</th><th>备份策略</th><th>保留周期</th><th>恢复目标</th></tr></thead>
+    <tbody>
+      <tr><td><b>PostgreSQL</b></td><td>主从实时复制 + 每日全量</td><td>30 天</td><td>RPO ≈ 0 · RTO ≤ 15min</td></tr>
+      <tr><td><b>Redis</b></td><td>AOF 每秒 + RDB 每小时</td><td>7 天</td><td>RPO ≤ 1s · RTO ≤ 5min</td></tr>
+      <tr><td><b>OSS 文件</b></td><td>跨区异步复制</td><td>永久</td><td>RPO ≤ 15min</td></tr>
+      <tr><td><b>Kafka</b></td><td>3 副本 · 跨 AZ</td><td>7 天</td><td>零数据丢失</td></tr>
+      <tr><td><b>审计日志</b></td><td>实时写入 + 冷归档</td><td>7 年</td><td>合规要求</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 14 · 技术选型 ============ -->
+<section class="section" id="s14">
+  <div class="section-header">
+    <h2>14 · 技术选型清单 <em>Tech Stack</em></h2>
+    <div class="num-tag">Full List</div>
+  </div>
+
+  <table>
+    <thead><tr><th>层次</th><th>技术</th><th>版本</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="4"><b>前端</b></td><td>React</td><td>18.3</td><td>UI 框架</td></tr>
+      <tr><td>TypeScript</td><td>5.5</td><td>类型安全</td></tr>
+      <tr><td>React Native</td><td>0.74</td><td>移动端</td></tr>
+      <tr><td>Electron</td><td>31</td><td>桌面端</td></tr>
+      <tr><td rowspan="3"><b>后端</b></td><td>Go</td><td>1.22</td><td>业务服务</td></tr>
+      <tr><td>Python</td><td>3.12</td><td>AI 服务</td></tr>
+      <tr><td>gRPC</td><td>1.64</td><td>服务间通信</td></tr>
+      <tr><td rowspan="4"><b>数据</b></td><td>PostgreSQL</td><td>16</td><td>主数据库</td></tr>
+      <tr><td>Redis</td><td>7.2</td><td>缓存 · 会话</td></tr>
+      <tr><td>Elasticsearch</td><td>8.14</td><td>搜索 · 日志</td></tr>
+      <tr><td>Milvus</td><td>2.4</td><td>向量数据库</td></tr>
+      <tr><td rowspan="3"><b>中间件</b></td><td>Kafka</td><td>3.7</td><td>消息队列</td></tr>
+      <tr><td>Kong</td><td>3.7</td><td>API 网关</td></tr>
+      <tr><td>Nginx</td><td>1.26</td><td>负载均衡</td></tr>
+      <tr><td rowspan="3"><b>基础设施</b></td><td>Kubernetes</td><td>1.30</td><td>容器编排</td></tr>
+      <tr><td>Docker</td><td>27</td><td>容器化</td></tr>
+      <tr><td>Terraform</td><td>1.9</td><td>IaC</td></tr>
+      <tr><td rowspan="3"><b>监控</b></td><td>Prometheus</td><td>2.53</td><td>指标采集</td></tr>
+      <tr><td>Grafana</td><td>11</td><td>可视化</td></tr>
+      <tr><td>Jaeger</td><td>1.58</td><td>链路追踪</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 15 · 开发规范 ============ -->
+<section class="section" id="s15">
+  <div class="section-header">
+    <h2>15 · 开发规范 <em>Standards</em></h2>
+    <div class="num-tag">Code · Git · Review</div>
+  </div>
+
+  <h3 class="sub">15.1 代码规范</h3>
+  <table>
+    <thead><tr><th>语言</th><th>格式化工具</th><th>Linter</th><th>提交规范</th></tr></thead>
+    <tbody>
+      <tr><td>TypeScript</td><td>Prettier</td><td>ESLint</td><td>Conventional Commits</td></tr>
+      <tr><td>Go</td><td>gofmt</td><td>golangci-lint</td><td>Conventional Commits</td></tr>
+      <tr><td>Python</td><td>Black</td><td>Ruff</td><td>Conventional Commits</td></tr>
+      <tr><td>SQL</td><td>sqlfmt</td><td>sqlfluff</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">15.2 Git 工作流</h3>
+  <pre><span class="comment"># 分支策略：Git Flow</span>
+<span class="keyword">main</span>         <span class="comment">← 生产分支 · 受保护</span>
+  └── <span class="keyword">develop</span>    <span class="comment">← 集成分支</span>
+       ├── <span class="type">feature/</span>  <span class="comment">← 功能分支</span>
+       ├── <span class="type">fix/</span>      <span class="comment">← 修复分支</span>
+       └── <span class="type">release/</span>  <span class="comment">← 发布分支</span>
+
+<span class="comment"># Commit 格式</span>
+<span class="string">feat(auth): add OAuth2 login</span>
+<span class="string">fix(course): resolve N+1 query</span>
+<span class="string">docs(api): update endpoints</span></pre>
+
+  <h3 class="sub">15.3 Code Review</h3>
+  <div class="info note">
+    <div class="label">Review 规则</div>
+    ✓ 所有合并到 develop/main 必须经过 PR + 至少 1 人 Approve<br/>
+    ✓ CI 测试通过率 100% · 覆盖率 ≥ 80%<br/>
+    ✓ 安全扫描无高危漏洞<br/>
+    ✓ AI 相关变更需 AI 团队 Approve
+  </div>
+</section>
+
+<!-- ============ 16 · 里程碑 ============ -->
+<section class="section" id="s16">
+  <div class="section-header">
+    <h2>16 · 里程碑与路线图 <em>Roadmap</em></h2>
+    <div class="num-tag">12 Months</div>
+  </div>
+
+  <table>
+    <thead><tr><th>阶段</th><th>时间</th><th>目标</th><th>交付物</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--growth-soft);">
+        <td><span class="tag" style="background:var(--growth); color:#fff;">Phase 0</span></td>
+        <td>2026-08</td>
+        <td><b>原型设计 ✓ 已完成</b></td>
+        <td>33 原型 · PRD v1.3 · TDD v1.0</td>
+      </tr>
+      <tr>
+        <td><span class="tag p0">Phase 1</span></td>
+        <td>2026-09 – 10</td>
+        <td><b>基础平台 MVP</b></td>
+        <td>用户 · 课程 · 作业 · 成绩 · 成绩</td>
+      </tr>
+      <tr>
+        <td><span class="tag p1">Phase 2</span></td>
+        <td>2026-11 – 12</td>
+        <td><b>直播 + 协作</b></td>
+        <td>直播服务 · 看板 · 文档协同 · 讨论</td>
+      </tr>
+      <tr style="background:var(--ai-soft);">
+        <td><span class="tag ai">Phase 3</span></td>
+        <td>2027-01 – 03</td>
+        <td><b>AI 模块集成</b></td>
+        <td>AI 网关 · 导师 · 批阅 · 课件 · RAG</td>
+      </tr>
+      <tr>
+        <td><span class="tag p2">Phase 4</span></td>
+        <td>2027-04 – 06</td>
+        <td><b>优化 + 扩展</b></td>
+        <td>性能优化 · 管理端 · 审批流 · 移动端</td>
+      </tr>
+      <tr>
+        <td><span class="tag">Phase 5</span></td>
+        <td>2027-07 – 08</td>
+        <td><b>全校推广</b></td>
+        <td>压测 · 安全审计 · 培训 · 全校上线</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 17 · 风险 ============ -->
+<section class="section" id="s17">
+  <div class="section-header">
+    <h2>17 · 风险评估 <em>Risk</em></h2>
+    <div class="num-tag">Identify · Mitigate</div>
+  </div>
+
+  <table>
+    <thead><tr><th>风险</th><th>等级</th><th>影响</th><th>缓解措施</th></tr></thead>
+    <tbody>
+      <tr><td><b>AI 模型不稳定</b></td><td><span class="tag p0">高</span></td><td>AI 功能降级</td><td>多模型冗余 · 自动降级 · 本地模型兜底</td></tr>
+      <tr><td><b>直播高并发</b></td><td><span class="tag p0">高</span></td><td>卡顿 · 掉线</td><td>CDN 加速 · SFU 分布式 · 限流</td></tr>
+      <tr><td><b>数据泄露</b></td><td><span class="tag p0">高</span></td><td>合规 · 声誉</td><td>全链路加密 · 零信任 · 审计</td></tr>
+      <tr><td><b>跨端一致性</b></td><td><span class="tag p1">中</span></td><td>体验割裂</td><td>Design System · 共享组件 · 跨端测试</td></tr>
+      <tr><td><b>性能瓶颈</b></td><td><span class="tag p1">中</span></td><td>用户体验差</td><td>压测 · 监控 · 弹性扩缩容</td></tr>
+      <tr><td><b>国产模型合规</b></td><td><span class="tag p2">低</span></td><td>政策变化</td><td>关注政策 · 多厂商 · 快速切换能力</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 18 · 附录 ============ -->
+<section class="section" id="s18">
+  <div class="section-header">
+    <h2>18 · 附录 · 术语表 <em>Glossary</em></h2>
+    <div class="num-tag">Appendix</div>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:180px;">术语</th><th>定义</th></tr></thead>
+    <tbody>
+      <tr><td><b>SLA</b></td><td>Service Level Agreement，服务等级协议，定义可用性指标（如 99.9%）</td></tr>
+      <tr><td><b>RPO / RTO</b></td><td>Recovery Point Objective（数据丢失容忍度）/ Recovery Time Objective（恢复时间目标）</td></tr>
+      <tr><td><b>RAG</b></td><td>Retrieval-Augmented Generation，检索增强生成，结合知识库提升 LLM 准确性</td></tr>
+      <tr><td><b>SFU</b></td><td>Selective Forwarding Unit，WebRTC 视频架构，选择性转发媒体流</td></tr>
+      <tr><td><b>CRDT</b></td><td>Conflict-free Replicated Data Type，无冲突复制数据类型，用于实时协同编辑</td></tr>
+      <tr><td><b>mTLS</b></td><td>mutual TLS，双向 TLS 认证，服务间通信加密 + 身份验证</td></tr>
+      <tr><td><b>ReAct</b></td><td>Reasoning + Acting，AI Agent 推理-行动循环范式</td></tr>
+      <tr><td><b>Design Token</b></td><td>设计令牌，存储视觉设计决策（颜色/字体/间距）的最小单元</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · 技术设计文档</div>
+  <div>TDD v1.0 · 18 章节 · 2026-08-25</div>
+  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">TDD-LUMINA-2026-001</div>
+</footer>
+
+</body>
+</html>
