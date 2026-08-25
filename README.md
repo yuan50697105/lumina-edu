@@ -29,6 +29,7 @@ edu/
 │   ├── lumina-api.html                # 📋 API 接口文档 v1.0
 │   ├── lumina-api-openapi.yaml        # 📋 OpenAPI 3.1 规范
 │   ├── lumina-database.html           # 📋 数据库设计文档 v1.0
+│   ├── lumina-operations.html         # 📋 部署运维手册 v1.0
 │   │
 │   ├── APP/phone/      (8 文件)       # 📱 手机 APP 原型
 │   ├── APP/tablet/     (6 文件)       # 📲 平板 APP 原型
@@ -51,7 +52,7 @@ edu/
 | **界面页面** | 160+ 个 |
 | **设计表面** | 6 个（学生/教师 × 移动/Web/桌面）|
 | **功能模块** | 20+ 个 |
-| **文档** | PRD v1.3 + TDD v1.0 + API v1.0 + DB v1.0 + 索引 |
+| **文档** | PRD v1.3 + TDD v1.0 + API v1.0 + DB v1.0 + OPS v1.0 + 索引 |
 | **API 接口** | 42 个端点（8 模块 · JWT · WebSocket）|
 
 ## 📖 文档体系
@@ -64,6 +65,7 @@ edu/
 | 📋 **API v1.0** | API 接口文档，11 章 · 42 端点 | `lumina-api.html` |
 | 📋 **OpenAPI 3.1** | 机器可读 API 规范（YAML） | `lumina-api-openapi.yaml` |
 | 📋 **DB v1.0** | 数据库设计文档，10 章 · 24 表 | `lumina-database.html` |
+| 📋 **OPS v1.0** | 部署运维手册，10 章 | `lumina-operations.html` |
 
 ## 🎨 设计系统
 
@@ -155,6 +157,7 @@ python scripts/yuque-sync.py
 | API 文档 | `原型/lumina-api.html` |
 | OpenAPI 规范 | `原型/lumina-api-openapi.yaml` |
 | 数据库设计 | `原型/lumina-database.html` |
+| 部署运维 | `原型/lumina-operations.html` |
 
 ## 📋 版本历史
 
@@ -168,6 +171,7 @@ python scripts/yuque-sync.py
 | **API v1.0** | 2026-08-25 | API 接口文档发布，42 端点 |
 | **OpenAPI 3.1** | 2026-08-25 | OpenAPI 规范文件，可生成 SDK/Mock |
 | **DB v1.0** | 2026-08-25 | 数据库设计文档发布，24 表 |
+| **OPS v1.0** | 2026-08-25 | 部署运维手册发布，K8s 部署 |
 
 ## 📄 许可证
 
