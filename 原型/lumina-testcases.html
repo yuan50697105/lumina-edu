@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · 测试用例文档 v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding:56px 64px; max-width:1280px; margin:0 auto;}
+
+  .cover{padding:80px 0 64px; border-bottom:1px solid var(--line); margin-bottom:56px; display:grid; grid-template-columns:2fr 1fr; gap:48px; align-items:end;}
+  .cover .brand{display:flex; align-items:center; gap:14px; margin-bottom:32px;}
+  .cover .brand .logo{width:56px; height:56px; border-radius:14px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:28px; font-weight:500; font-style:italic;}
+  .cover .brand .name{font-family:var(--f-display); font-size:20px; font-weight:500;}
+  .cover .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:4px;}
+  .cover .doc-type{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--cobalt); background:var(--cobalt-soft); padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:20px;}
+  .cover h1{font-family:var(--f-display); font-weight:300; font-size:72px; letter-spacing:-0.04em; line-height:1;}
+  .cover h1 em{font-style:italic; color:var(--cobalt);}
+  .cover h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .cover .subtitle{font-size:18px; color:var(--inkwell-2); margin-top:20px; font-weight:300;}
+  .cover .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; line-height:2.2;}
+  .cover .meta .label{color:var(--inkwell-2); font-size:10px; display:block; margin-bottom:2px;}
+  .cover .meta .value{color:var(--inkwell); font-size:13px; text-transform:none; font-family:var(--f-body); font-weight:500;}
+  .cover .meta .row{padding:8px 0; border-top:1px solid var(--line);}
+
+  .stats{display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; margin-bottom:56px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px;}
+  .stat{text-align:center; padding:6px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .val{font-family:var(--f-display); font-size:26px; font-weight:300;}
+  .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  .toc{background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px 28px; margin-bottom:56px;}
+  .toc h3{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .toc-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:4px 32px;}
+  .toc-grid a{display:block; padding:6px 0; font-size:13px; color:var(--inkwell); text-decoration:none; border-bottom:1px dashed var(--line);}
+  .toc-grid a:hover{color:var(--cobalt);}
+  .toc-grid a .num{font-family:var(--f-mono); font-size:10px; color:var(--cobalt); margin-right:8px;}
+
+  .section{margin-bottom:64px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:24px; padding-bottom:14px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:36px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  h3.sub{font-family:var(--f-display); font-size:22px; font-weight:400; margin:32px 0 14px; letter-spacing:-0.01em;}
+  h3.sub em{font-style:italic; color:var(--cobalt);}
+
+  p{margin-bottom:12px; line-height:1.7;}
+  ul,ol{margin:0 0 16px 20px; line-height:1.8;}
+  li{margin-bottom:4px;}
+  b{font-weight:600;}
+  code{font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px; font-size:13px; border:1px solid var(--line);}
+
+  table{width:100%; border-collapse:collapse; margin:16px 0 24px; font-size:13px;}
+  th{background:var(--ricepaper); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-strong);}
+  td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  tr:hover td{background:rgba(250,246,236,0.5);}
+  .tag{display:inline-block; font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; padding:2px 7px; border-radius:4px;}
+  .tag.p0{background:var(--correction); color:#fff;}
+  .tag.p1{background:var(--highlighter); color:var(--inkwell);}
+  .tag.p2{background:var(--cobalt-soft); color:var(--cobalt);}
+  .tag.pass{background:var(--growth); color:#fff;}
+  .tag.fail{background:var(--correction); color:#fff;}
+  .tag.skip{background:var(--ricepaper-2); color:var(--inkwell-2);}
+
+  pre{background:var(--inkwell); color:var(--ricepaper); padding:18px 20px; border-radius:10px; font-family:var(--f-mono); font-size:12px; line-height:1.7; overflow-x:auto; margin:8px 0 14px;}
+  pre .comment{color:rgba(250,246,236,0.5);}
+  .keyword{color:var(--highlighter);}
+  .type{color:#A78BFA;}
+  .string{color:var(--growth-soft);}
+
+  .info{padding:16px 20px; border-radius:10px; margin:16px 0 20px; font-size:13px; line-height:1.7;}
+  .info .label{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; font-weight:600;}
+  .info.note{background:var(--cobalt-soft); border:1px solid var(--cobalt);}
+  .info.warn{background:var(--highlighter-soft); border:1px solid var(--highlighter);}
+  .info.success{background:var(--growth-soft); border:1px solid var(--growth);}
+
+  .test-case{background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; margin:16px 0 20px;}
+  .test-header{display:flex; align-items:center; gap:12px; margin-bottom:14px; padding-bottom:14px; border-bottom:1px dashed var(--line);}
+  .test-id{font-family:var(--f-mono); font-size:11px; color:var(--cobalt); font-weight:600;}
+  .test-title{font-family:var(--f-body); font-size:15px; font-weight:600; color:var(--inkwell);}
+  .test-priority{margin-left:auto;}
+
+  footer{margin-top:64px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div>
+    <div class="brand">
+      <div class="logo">墨</div>
+      <div class="name">Lumina · 墨光<small>Test Cases</small></div>
+    </div>
+    <div class="doc-type">Test Cases · v1.0</div>
+    <h1>
+      <span class="hl">测试</span>用例<br/>
+      <em>文档</em>
+    </h1>
+    <div class="subtitle">功能测试 · 接口测试 · 性能测试 · 验收标准 · 自动化覆盖</div>
+  </div>
+  <div class="meta">
+    <div class="row">
+      <span class="label">文档编号</span>
+      <span class="value">QA-LUMINA-2026-001</span>
+    </div>
+    <div class="row">
+      <span class="label">版本号</span>
+      <span class="value">v1.0 · 初始发布</span>
+    </div>
+    <div class="row">
+      <span class="label">测试框架</span>
+      <span class="value">Jest · Cypress · k6</span>
+    </div>
+    <div class="row">
+      <span class="label">覆盖率目标</span>
+      <span class="value">≥ 80%</span>
+    </div>
+    <div class="row">
+      <span class="label">状态</span>
+      <span class="value" style="color:var(--growth); font-weight:600;">● 已发布</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ STATS ============ -->
+<div class="stats">
+  <div class="stat"><div class="val hl">8</div><div class="lbl">测试模块</div></div>
+  <div class="stat"><div class="val hl">156</div><div class="lbl">测试用例</div></div>
+  <div class="stat"><div class="val">42</div><div class="lbl">API 测试</div></div>
+  <div class="stat"><div class="val">80%</div><div class="lbl">覆盖率</div></div>
+  <div class="stat"><div class="val">3</div><div class="lbl">性能场景</div></div>
+</div>
+
+<!-- ============ TOC ============ -->
+<nav class="toc">
+  <h3>目录 · Table of Contents</h3>
+  <div class="toc-grid">
+    <a href="#s1"><span class="num">01</span>测试策略与框架</a>
+    <a href="#s2"><span class="num">02</span>用户模块测试</a>
+    <a href="#s3"><span class="num">03</span>课程模块测试</a>
+    <a href="#s4"><span class="num">04</span>作业模块测试</a>
+    <a href="#s5"><span class="num">05</span>成绩模块测试</a>
+    <a href="#s6"><span class="num">06</span>直播模块测试</a>
+    <a href="#s7"><span class="num">07</span>AI 模块测试</a>
+    <a href="#s8"><span class="num">08</span>性能与压力测试</a>
+    <a href="#s9"><span class="num">09</span>自动化测试</a>
+    <a href="#s10"><span class="num">10</span>验收标准</a>
+  </div>
+</nav>
+
+<!-- ============ 01 · 测试策略 ============ -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <h2>01 · 测试策略与框架 <em>Strategy</em></h2>
+    <div class="num-tag">Pyramid</div>
+  </div>
+
+  <h3 class="sub">1.1 测试金字塔</h3>
+  <table>
+    <thead><tr><th>层级</th><th>类型</th><th>数量</th><th>工具</th><th>执行时间</th></tr></thead>
+    <tbody>
+      <tr><td><b>① 单元测试</b></td><td>函数/方法级别</td><td>~800</td><td>Jest · Go testing</td><td>&lt; 30s</td></tr>
+      <tr><td><b>② 集成测试</b></td><td>模块间交互</td><td>~200</td><td>Jest · Supertest</td><td>~2 min</td></tr>
+      <tr><td><b>③ API 测试</b></td><td>接口契约</td><td>42</td><td>Postman · Newman</td><td>~5 min</td></tr>
+      <tr><td><b>④ E2E 测试</b></td><td>用户流程</td><td>~30</td><td>Cypress</td><td>~15 min</td></tr>
+      <tr><td><b>⑤ 性能测试</b></td><td>压力/负载</td><td>3 场景</td><td>k6 · Locust</td><td>~30 min</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">1.2 测试环境</h3>
+  <table>
+    <thead><tr><th>环境</th><th>用途</th><th>数据</th><th>触发方式</th></tr></thead>
+    <tbody>
+      <tr><td><b>Local</b></td><td>开发调试</td><td>Mock 数据</td><td>手动</td></tr>
+      <tr><td><b>CI</b></td><td>自动化测试</td><td>测试数据集</td><td>PR 提交</td></tr>
+      <tr><td><b>Staging</b></td><td>集成测试 · UAT</td><td>脱敏生产数据</td><td>合并 main</td></tr>
+      <tr><td><b>Performance</b></td><td>性能测试</td><td>生产数据副本</td><td>手动/定时</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">1.3 测试数据管理</h3>
+  <pre><span class="comment">// 测试数据工厂</span>
+<span class="keyword">const</span> userFactory = {
+  <span class="key">create</span>: (overrides = {}) => ({
+    id: <span class="string">'550e8400-e29b-41d4-a716-446655440000'</span>,
+    student_id: <span class="string">'2023010001'</span>,
+    name: <span class="string">'林清'</span>,
+    email: <span class="string">'linqing@test.edu.cn'</span>,
+    role: <span class="string">'student'</span>,
+    ...overrides
+  }),
+  <span class="key">createTeacher</span>: (overrides = {}) => ({
+    ...userFactory.create({ role: <span class="string">'teacher'</span> }),
+    department: <span class="string">'计算机科学与技术'</span>,
+    ...overrides
+  })
+};</pre>
+</section>
+
+<!-- ============ 02 · 用户模块 ============ -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <h2>02 · 用户模块测试 <em>Users</em></h2>
+    <div class="num-tag">18 cases</div>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-USER-001</span>
+      <span class="test-title">用户登录 · 正常流程</span>
+      <span class="test-priority"><span class="tag p0">P0</span></span>
+    </div>
+    <p><b>前置条件</b>：用户已注册 · 账号状态正常</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /auth/login</code>，传入正确的用户名和密码</li>
+      <li>检查响应状态码 200</li>
+      <li>验证返回 access_token 和 refresh_token</li>
+      <li>验证 token 格式正确（JWT）</li>
+    </ol>
+    <p><b>预期结果</b>：登录成功 · 返回有效令牌</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-USER-002</span>
+      <span class="test-title">用户登录 · 密码错误</span>
+      <span class="test-priority"><span class="tag p0">P0</span></span>
+    </div>
+    <p><b>前置条件</b>：用户已注册</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /auth/login</code>，传入错误密码</li>
+      <li>检查响应状态码 401</li>
+      <li>验证错误码 <code>AUTH_INVALID_CREDENTIALS</code></li>
+    </ol>
+    <p><b>预期结果</b>：登录失败 · 返回 401</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-USER-003</span>
+      <span class="test-title">Token 刷新 · 正常流程</span>
+      <span class="test-priority"><span class="tag p1">P1</span></span>
+    </div>
+    <p><b>前置条件</b>：用户已登录 · 持有有效 refresh_token</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /auth/refresh</code>，传入 refresh_token</li>
+      <li>检查响应状态码 200</li>
+      <li>验证返回新的 access_token</li>
+      <li>验证旧 access_token 失效</li>
+    </ol>
+    <p><b>预期结果</b>：刷新成功 · 新 token 有效</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-USER-004</span>
+      <span class="test-title">获取当前用户信息</span>
+      <span class="test-priority"><span class="tag p1">P1</span></span>
+    </div>
+    <p><b>前置条件</b>：用户已登录</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>GET /users/me</code>，携带 Authorization 头</li>
+      <li>检查响应状态码 200</li>
+      <li>验证返回用户信息完整（id · name · role）</li>
+      <li>验证返回的是当前登录用户</li>
+    </ol>
+    <p><b>预期结果</b>：返回当前用户信息</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+</section>
+
+<!-- ============ 03 · 课程模块 ============ -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <h2>03 · 课程模块测试 <em>Courses</em></h2>
+    <div class="num-tag">22 cases</div>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-COURSE-001</span>
+      <span class="test-title">获取课程列表 · 分页</span>
+      <span class="test-priority"><span class="tag p1">P1</span></span>
+    </div>
+    <p><b>前置条件</b>：存在多门课程</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>GET /courses?limit=10</code></li>
+      <li>检查响应状态码 200</li>
+      <li>验证返回课程数量 ≤ 10</li>
+      <li>验证 pagination.cursor 存在</li>
+      <li>使用 cursor 请求下一页</li>
+    </ol>
+    <p><b>预期结果</b>：分页正常 · 数据不重复</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-COURSE-002</span>
+      <span class="test-title">学生选课 · 正常流程</span>
+      <span class="test-priority"><span class="tag p0">P0</span></span>
+    </div>
+    <p><b>前置条件</b>：学生未选该课 · 课程有余量</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /courses/{id}/enroll</code></li>
+      <li>检查响应状态码 200</li>
+      <li>查询选课记录确认成功</li>
+      <li>验证课程 students_count +1</li>
+    </ol>
+    <p><b>预期结果</b>：选课成功 · 计数更新</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-COURSE-003</span>
+      <span class="test-title">学生选课 · 课程已满</span>
+      <span class="test-priority"><span class="tag p1">P1</span></span>
+    </div>
+    <p><b>前置条件</b>：课程已满（students_count = max_students）</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /courses/{id}/enroll</code></li>
+      <li>检查响应状态码 409</li>
+      <li>验证错误码 <code>COURSE_FULL</code></li>
+    </ol>
+    <p><b>预期结果</b>：选课失败 · 返回 409</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+</section>
+
+<!-- ============ 04 · 作业模块 ============ -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <h2>04 · 作业模块测试 <em>Assignments</em></h2>
+    <div class="num-tag">24 cases</div>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-ASSIGN-001</span>
+      <span class="test-title">教师发布作业</span>
+      <span class="test-priority"><span class="tag p0">P0</span></span>
+    </div>
+    <p><b>前置条件</b>：教师已登录 · 课程存在</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /courses/{id}/assignments</code></li>
+      <li>传入 title · due_at · max_score · rubric</li>
+      <li>检查响应状态码 201</li>
+      <li>验证作业状态为 published</li>
+    </ol>
+    <p><b>预期结果</b>：作业创建成功</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-ASSIGN-002</span>
+      <span class="test-title">学生提交作业 · 文件上传</span>
+      <span class="test-priority"><span class="tag p0">P0</span></span>
+    </div>
+    <p><b>前置条件</b>：学生已选课 · 作业已发布</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /assignments/{id}/submit</code>（multipart/form-data）</li>
+      <li>上传文件 + 文字答案</li>
+      <li>检查响应状态码 200</li>
+      <li>验证提交记录创建成功</li>
+      <li>验证文件存储到 MinIO</li>
+    </ol>
+    <p><b>预期结果</b>：提交成功 · 文件存储正确</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-ASSIGN-003</span>
+      <span class="test-title">迟交作业 · 标记</span>
+      <span class="test-priority"><span class="tag p2">P2</span></span>
+    </div>
+    <p><b>前置条件</b>：作业截止时间已过</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>学生提交作业</li>
+      <li>检查提交记录的 late 字段</li>
+      <li>验证 late = true</li>
+    </ol>
+    <p><b>预期结果</b>：迟交标记正确</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+</section>
+
+<!-- ============ 05 · 成绩模块 ============ -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <h2>05 · 成绩模块测试 <em>Grades</em></h2>
+    <div class="num-tag">16 cases</div>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-GRADE-001</span>
+      <span class="test-title">教师录入成绩</span>
+      <span class="test-priority"><span class="tag p0">P0</span></span>
+    </div>
+    <p><b>前置条件</b>：作业已批阅</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /courses/{id}/grades</code></li>
+      <li>传入学生 ID 和分数</li>
+      <li>检查响应状态码 200</li>
+      <li>查询成绩记录确认正确</li>
+    </ol>
+    <p><b>预期结果</b>：成绩录入成功</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-GRADE-002</span>
+      <span class="test-title">学生查看 GPA</span>
+      <span class="test-priority"><span class="tag p1">P1</span></span>
+    </div>
+    <p><b>前置条件</b>：学生有多门课程成绩</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>GET /grades/me</code></li>
+      <li>检查响应状态码 200</li>
+      <li>验证 GPA 计算正确</li>
+      <li>验证 total_credits 正确</li>
+    </ol>
+    <p><b>预期结果</b>：GPA 计算准确</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+</section>
+
+<!-- ============ 06 · 直播模块 ============ -->
+<section class="section" id="s6">
+  <div class="section-header">
+    <h2>06 · 直播模块测试 <em>Live</em></h2>
+    <div class="num-tag">20 cases</div>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-LIVE-001</span>
+      <span class="test-title">教师创建直播</span>
+      <span class="test-priority"><span class="tag p1">P1</span></span>
+    </div>
+    <p><b>前置条件</b>：教师已登录 · 课程存在</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /live</code></li>
+      <li>传入 course_id · title · scheduled_at</li>
+      <li>检查响应状态码 201</li>
+      <li>验证直播状态为 scheduled</li>
+    </ol>
+    <p><b>预期结果</b>：直播创建成功</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-LIVE-002</span>
+      <span class="test-title">学生加入直播 · WebSocket 连接</span>
+      <span class="test-priority"><span class="tag p0">P0</span></span>
+    </div>
+    <p><b>前置条件</b>：直播已开始 · 学生已选课</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /live/{id}/join</code> 获取连接信息</li>
+      <li>使用返回的 chat_ws_url 建立 WebSocket 连接</li>
+      <li>发送聊天消息</li>
+      <li>验证其他参与者收到消息</li>
+    </ol>
+    <p><b>预期结果</b>：WebSocket 连接成功 · 消息实时推送</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+</section>
+
+<!-- ============ 07 · AI 模块 ============ -->
+<section class="section" id="s7">
+  <div class="section-header">
+    <h2>07 · AI 模块测试 <em>AI-Powered</em></h2>
+    <div class="num-tag">28 cases</div>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-AI-001</span>
+      <span class="test-title">AI 对话 · 非流式响应</span>
+      <span class="test-priority"><span class="tag p0">P0</span></span>
+    </div>
+    <p><b>前置条件</b>：用户已登录 · AI 服务可用</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /ai/chat</code>（Accept: application/json）</li>
+      <li>传入 message: "你好"</li>
+      <li>检查响应状态码 200</li>
+      <li>验证返回 content 和 conversation_id</li>
+      <li>验证 usage 字段存在</li>
+    </ol>
+    <p><b>预期结果</b>：对话成功 · 返回完整响应</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-AI-002</span>
+      <span class="test-title">AI 对话 · 流式响应（SSE）</span>
+      <span class="test-priority"><span class="tag p0">P0</span></span>
+    </div>
+    <p><b>前置条件</b>：用户已登录</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /ai/chat</code>（Accept: text/event-stream）</li>
+      <li>逐行读取 SSE 数据</li>
+      <li>验证每行格式为 <code>data: {...}</code></li>
+      <li>验证最后一条为 <code>{"type": "done"}</code></li>
+    </ol>
+    <p><b>预期结果</b>：流式响应正常 · 数据完整</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-AI-003</span>
+      <span class="test-title">AI 批阅 · 作业评分</span>
+      <span class="test-priority"><span class="tag p1">P1</span></span>
+    </div>
+    <p><b>前置条件</b>：作业启用 AI 批阅 · 有评分标准</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /ai/grade</code></li>
+      <li>传入 assignment_id · submission_id · rubric</li>
+      <li>检查响应状态码 200</li>
+      <li>验证返回 scores · total · feedback</li>
+      <li>验证 confidence 在合理范围（0-1）</li>
+    </ol>
+    <p><b>预期结果</b>：AI 批阅成功 · 评分合理</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-AI-004</span>
+      <span class="test-title">AI 模型切换</span>
+      <span class="test-priority"><span class="tag p2">P2</span></span>
+    </div>
+    <p><b>前置条件</b>：多个模型可用</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /ai/chat</code>，X-Model: glm-4</li>
+      <li>验证响应的 model 字段为 glm-4</li>
+      <li>切换到 qwen-max，重复测试</li>
+    </ol>
+    <p><b>预期结果</b>：模型切换生效</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+</section>
+
+<!-- ============ 08 · 性能测试 ============ -->
+<section class="section" id="s8">
+  <div class="section-header">
+    <h2>08 · 性能与压力测试 <em>Performance</em></h2>
+    <div class="num-tag">k6 · Locust</div>
+  </div>
+
+  <h3 class="sub">8.1 性能指标</h3>
+  <table>
+    <thead><tr><th>指标</th><th>目标</th><th>测量方式</th></tr></thead>
+    <tbody>
+      <tr><td><b>响应时间 P50</b></td><td>&lt; 100ms</td><td>k6</td></tr>
+      <tr><td><b>响应时间 P95</b></td><td>&lt; 300ms</td><td>k6</td></tr>
+      <tr><td><b>响应时间 P99</b></td><td>&lt; 500ms</td><td>k6</td></tr>
+      <tr><td><b>错误率</b></td><td>&lt; 0.1%</td><td>k6</td></tr>
+      <tr><td><b>吞吐量</b></td><td>&gt; 1000 QPS</td><td>k6</td></tr>
+      <tr><td><b>并发用户</b></td><td>500</td><td>Locust</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">8.2 测试场景</h3>
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">PERF-001</span>
+      <span class="test-title">课程列表查询 · 高并发</span>
+      <span class="test-priority"><span class="tag p1">P1</span></span>
+    </div>
+    <p><b>场景描述</b>：模拟 500 并发用户查询课程列表</p>
+    <p><b>测试脚本</b>：</p>
+    <pre><span class="comment">// k6 脚本</span>
+<span class="keyword">import</span> http <span class="keyword">from</span> <span class="string">'k6/http'</span>;
+<span class="keyword">import</span> { check, sleep } <span class="keyword">from</span> <span class="string">'k6'</span>;
+
+<span class="keyword">export const</span> options = {
+  stages: [
+    { duration: <span class="string">'1m'</span>, target: <span class="number">100</span> },
+    { duration: <span class="string">'3m'</span>, target: <span class="number">500</span> },
+    { duration: <span class="string">'1m'</span>, target: <span class="number">0</span> },
+  ],
+};
+
+<span class="keyword">export default function</span> () {
+  <span class="keyword">const</span> res = http.get(<span class="string">'https://api-staging.lumina.edu/api/v1/courses'</span>);
+  check(res, {
+    <span class="string">'status is 200'</span>: (r) => r.status === <span class="number">200</span>,
+    <span class="string">'response time &lt; 500ms'</span>: (r) => r.timings.duration &lt; <span class="number">500</span>,
+  });
+  sleep(<span class="number">1</span>);
+}</pre>
+    <p><b>预期结果</b>：P99 &lt; 500ms · 错误率 &lt; 0.1%</p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">PERF-002</span>
+      <span class="test-title">AI 对话 · 流式响应延迟</span>
+      <span class="test-priority"><span class="tag p1">P1</span></span>
+    </div>
+    <p><b>场景描述</b>：测试 AI 对话流式响应的首字节时间</p>
+    <p><b>指标</b>：TTFB（Time to First Byte）&lt; 1s</p>
+    <p><b>预期结果</b>：流式响应流畅 · 无明显卡顿</p>
+  </div>
+</section>
+
+<!-- ============ 09 · 自动化 ============ -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <h2>09 · 自动化测试 <em>Automation</em></h2>
+    <div class="num-tag">CI Integration</div>
+  </div>
+
+  <h3 class="sub">9.1 测试覆盖率</h3>
+  <table>
+    <thead><tr><th>模块</th><th>单元测试</th><th>集成测试</th><th>API 测试</th><th>E2E</th><th>总覆盖率</th></tr></thead>
+    <tbody>
+      <tr><td><b>用户模块</b></td><td>92%</td><td>85%</td><td>100%</td><td>80%</td><td><b>89%</b></td></tr>
+      <tr><td><b>课程模块</b></td><td>88%</td><td>82%</td><td>100%</td><td>75%</td><td><b>86%</b></td></tr>
+      <tr><td><b>作业模块</b></td><td>90%</td><td>80%</td><td>100%</td><td>70%</td><td><b>85%</b></td></tr>
+      <tr><td><b>成绩模块</b></td><td>95%</td><td>88%</td><td>100%</td><td>85%</td><td><b>92%</b></td></tr>
+      <tr><td><b>直播模块</b></td><td>85%</td><td>78%</td><td>100%</td><td>60%</td><td><b>81%</b></td></tr>
+      <tr><td><b>AI 模块</b></td><td>82%</td><td>75%</td><td>100%</td><td>65%</td><td><b>80%</b></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">9.2 CI 集成</h3>
+  <pre><span class="comment"># .github/workflows/test.yaml</span>
+<span class="keyword">name</span>: Test
+<span class="keyword">on</span>: [push, pull_request]
+
+<span class="keyword">jobs</span>:
+  <span class="key">unit-test</span>:
+    runs-on: ubuntu-latest
+    <span class="keyword">steps</span>:
+    - uses: actions/checkout@v4
+    - <span class="key">name</span>: <span class="string">Run Unit Tests</span>
+      <span class="key">run</span>: make test-unit
+    - <span class="key">name</span>: <span class="string">Upload Coverage</span>
+      <span class="key">run</span>: bash &lt;(curl -s https://codecov.io/bash)
+
+  <span class="key">integration-test</span>:
+    needs: unit-test
+    runs-on: ubuntu-latest
+    <span class="keyword">services</span>:
+      <span class="key">postgres</span>:
+        image: postgres:16
+        env:
+          <span class="key">POSTGRES_DB</span>: lumina_test
+    <span class="keyword">steps</span>:
+    - <span class="key">name</span>: <span class="string">Run Integration Tests</span>
+      <span class="key">run</span>: make test-integration
+
+  <span class="key">api-test</span>:
+    needs: integration-test
+    runs-on: ubuntu-latest
+    <span class="keyword">steps</span>:
+    - <span class="key">name</span>: <span class="string">Run API Tests</span>
+      <span class="key">run</span>: newman run tests/api/lumina-api.postman_collection.json</pre>
+</section>
+
+<!-- ============ 10 · 验收 ============ -->
+<section class="section" id="s10">
+  <div class="section-header">
+    <h2>10 · 验收标准 <em>Acceptance</em></h2>
+    <div class="num-tag">Definition of Done</div>
+  </div>
+
+  <h3 class="sub">10.1 发布前检查清单</h3>
+  <table>
+    <thead><tr><th>检查项</th><th>标准</th><th>责任人</th></tr></thead>
+    <tbody>
+      <tr><td><b>单元测试</b></td><td>全部通过 · 覆盖率 ≥ 80%</td><td>开发</td></tr>
+      <tr><td><b>集成测试</b></td><td>全部通过</td><td>开发</td></tr>
+      <tr><td><b>API 测试</b></td><td>42 个端点 100% 覆盖</td><td>QA</td></tr>
+      <tr><td><b>E2E 测试</b></td><td>核心流程全部通过</td><td>QA</td></tr>
+      <tr><td><b>性能测试</b></td><td>P99 &lt; 500ms · 无内存泄漏</td><td>SRE</td></tr>
+      <tr><td><b>安全扫描</b></td><td>无高危漏洞</td><td>安全</td></tr>
+      <tr><td><b>代码审查</b></td><td>至少 2 人 Approve</td><td>Tech Lead</td></tr>
+      <tr><td><b>文档更新</b></td><td>API 文档同步</td><td>开发</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">10.2 缺陷分级</h3>
+  <table>
+    <thead><tr><th>级别</th><th>定义</th><th>修复时限</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag p0">P0</span></td><td>阻塞性问题</td><td>4 小时</td><td>登录失败 · 数据丢失</td></tr>
+      <tr><td><span class="tag p1">P1</span></td><td>严重问题</td><td>1 天</td><td>核心功能异常</td></tr>
+      <tr><td><span class="tag p2">P2</span></td><td>一般问题</td><td>3 天</td><td>非核心功能异常</td></tr>
+      <tr><td><span class="tag" style="background:var(--ricepaper-2); color:var(--inkwell-2);">P3</span></td><td>轻微问题</td><td>7 天</td><td>UI 瑕疵</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info success">
+    <div class="label">✅ 验收通过标准</div>
+    <ul style="margin:0;">
+      <li>P0/P1 缺陷数 = 0</li>
+      <li>P2 缺陷数 ≤ 3（需有规避方案）</li>
+      <li>测试覆盖率 ≥ 80%</li>
+      <li>性能指标达标</li>
+      <li>安全扫描无高危</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Test Cases</div>
+  <div>v1.0 · 156 用例 · 8 模块 · 80% 覆盖率</div>
+  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">QA-LUMINA-2026-001</div>
+</footer>
+
+</body>
+</html>
