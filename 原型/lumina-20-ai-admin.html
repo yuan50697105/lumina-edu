@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · AI 平台智能</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE; --ai-2:#A78BFA; --ai-grad:linear-gradient(135deg, #7C3AED, #3D46C9);
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.5;}
+  body{padding:56px 64px; max-width:1440px; margin:0 auto;}
+
+  .topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:40px; padding-bottom:24px; border-bottom:1px solid var(--line);}
+  .topbar .brand{display:flex; align-items:center; gap:14px;}
+  .topbar .brand .logo{width:44px; height:44px; border-radius:10px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:24px; font-style:italic;}
+  .topbar .brand .name{font-family:var(--f-display); font-size:18px; font-weight:500;}
+  .topbar .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:2px;}
+  .topbar .nav{display:flex; gap:8px; align-items:center;}
+  .topbar .nav a{padding:8px 14px; font-size:12px; color:var(--inkwell-2); text-decoration:none; border-radius:6px; font-family:var(--f-mono); letter-spacing:0.05em;}
+  .topbar .nav a:hover{background:#fff; color:var(--inkwell);}
+  .topbar .nav a.back{color:var(--cobalt);}
+
+  .hero{padding:32px 0 40px; border-bottom:1px solid var(--line); margin-bottom:40px; display:grid; grid-template-columns:1.5fr 1fr; gap:48px; align-items:end;}
+  .hero .tag{display:inline-block; padding:5px 11px; background:var(--ai-soft); color:var(--ai); border-radius:12px; font-family:var(--f-mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; font-weight:500; margin-bottom:16px;}
+  .hero h1{font-family:var(--f-display); font-weight:300; font-size:76px; letter-spacing:-0.04em; line-height:1;}
+  .hero h1 em{font-style:italic; color:var(--ai);}
+  .hero h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .hero .sub{font-size:15px; color:var(--inkwell-2); margin-top:20px; line-height:1.6; max-width:560px;}
+  .hero .stats{display:flex; flex-direction:column; gap:10px;}
+  .hero .stats .s{display:flex; justify-content:space-between; padding:10px 14px; background:#fff; border:1px solid var(--line); border-radius:8px;}
+  .hero .stats .s .lbl{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2);}
+  .hero .stats .s .val{font-family:var(--f-mono); font-size:12px; font-weight:500;}
+
+  .section{margin-bottom:56px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:32px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--ai);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  .phones, .browsers, .desktops{display:grid; gap:24px; margin-bottom:32px;}
+  .phones{grid-template-columns:repeat(3, 1fr); max-width:1200px; margin-left:auto; margin-right:auto;}
+  .browsers, .desktops{grid-template-columns:1fr;}
+
+  .phone{background:#1a1a1a; border-radius:44px; padding:14px; box-shadow:var(--shadow); position:relative;}
+  .phone::before{content:""; position:absolute; top:18px; left:50%; transform:translateX(-50%); width:110px; height:28px; background:#000; border-radius:20px; z-index:2;}
+  .phone-screen{background:var(--ricepaper); border-radius:32px; overflow:hidden; min-height:620px; position:relative;}
+  .phone-status{height:44px; padding:0 28px; display:flex; align-items:center; justify-content:space-between; font-family:var(--f-mono); font-size:11px; font-weight:600; color:var(--inkwell); position:relative; z-index:1;}
+
+  .browser, .desktop{background:#fff; border:1px solid var(--line-strong); border-radius:10px; overflow:hidden; box-shadow:var(--shadow);}
+  .browser-bar, .desktop-bar{background:#f1f1f1; border-bottom:1px solid var(--line); padding:10px 14px; display:flex; align-items:center; gap:10px;}
+  .lights{display:flex; gap:6px;}
+  .lights i{width:10px; height:10px; border-radius:50%; background:#ddd;}
+  .lights i:nth-child(1){background:#ff5f57;} .lights i:nth-child(2){background:#febc2e;} .lights i:nth-child(3){background:#28c840;}
+  .addr{flex:1; background:#fff; border-radius:4px; padding:4px 10px; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);}
+  .browser-content, .desktop-content{min-height:560px;}
+  .desktop-bar{background:linear-gradient(180deg, #fafafa, #eaeaea);}
+  .desktop-bar .title{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.05em;}
+
+  .admin-topbar{background:var(--inkwell); color:var(--ricepaper); padding:14px 20px; display:flex; align-items:center; gap:14px;}
+  .admin-topbar .brand{display:flex; align-items:center; gap:10px; font-family:var(--f-display); font-size:16px;}
+  .admin-topbar .brand .tag{font-family:var(--f-mono); font-size:9px; padding:2px 6px; background:var(--ai-grad); color:#fff; border-radius:4px; letter-spacing:0.08em;}
+  .admin-topbar .search{flex:1; max-width:400px; padding:6px 12px; background:var(--inkwell-2); color:var(--ricepaper); border-radius:6px; font-family:var(--f-mono); font-size:10px; display:flex; justify-content:space-between;}
+  .admin-topbar .actions{margin-left:auto; display:flex; gap:10px; align-items:center;}
+
+  .d-layout{display:grid; grid-template-columns:260px 1fr 280px; min-height:560px;}
+  .d-left{background:#fff; border-right:1px solid var(--line); padding:16px;}
+  .d-center{padding:20px; background:var(--ricepaper);}
+  .d-right{background:#fff; border-left:1px solid var(--line); padding:16px;}
+  .web-layout{display:grid; grid-template-columns:240px 1fr; min-height:560px;}
+  .web-sidebar{background:#fff; border-right:1px solid var(--line); padding:18px 14px;}
+  .web-main{padding:24px; background:var(--ricepaper);}
+
+  .sb-title{font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); padding:12px 10px 6px;}
+  .nav-item{display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:7px; font-size:12px; color:var(--inkwell); cursor:pointer; margin-bottom:2px;}
+  .nav-item:hover{background:var(--ricepaper);}
+  .nav-item svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2;}
+  .nav-item.active{background:var(--ai-soft); color:var(--ai); font-weight:500;}
+  .nav-item .badge{margin-left:auto; font-family:var(--f-mono); font-size:9px; padding:2px 6px; border-radius:6px; background:var(--ai); color:#fff;}
+  .nav-item .ai-tag{font-family:var(--f-mono); font-size:8px; padding:2px 5px; background:var(--ai-grad); color:#fff; border-radius:4px; letter-spacing:0.08em; margin-left:auto;}
+
+  .app-header{padding:14px 18px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); background:#fff;}
+  .app-title{font-family:var(--f-display); font-size:18px; font-weight:500; letter-spacing:-0.01em;}
+  .app-title small{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); letter-spacing:0.1em; text-transform:uppercase; margin-left:8px;}
+
+  .widget{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:12px;}
+  .widget h4{font-family:var(--f-display); font-size:13px; font-weight:500; margin-bottom:10px; display:flex; justify-content:space-between; align-items:baseline;}
+  .widget h4 .ai-badge{font-family:var(--f-mono); font-size:9px; padding:2px 7px; background:var(--ai-grad); color:#fff; border-radius:6px; letter-spacing:0.08em; font-weight:500;}
+  .stat-big{font-family:var(--f-display); font-size:28px; font-weight:300; letter-spacing:-0.02em; line-height:1;}
+  .stat-big .u{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em; margin-left:4px;}
+  .stat-delta{font-family:var(--f-mono); font-size:10px; color:var(--growth); margin-top:4px;}
+
+  .btn{padding:6px 12px; border-radius:6px; font-size:11px; border:1px solid var(--line); background:#fff; cursor:pointer; font-family:var(--f-body); color:var(--inkwell);}
+  .btn.primary{background:var(--ai-grad); color:#fff; border-color:var(--ai);}
+  .btn.sm{padding:3px 8px; font-size:10px;}
+  .kbd{font-family:var(--f-mono); font-size:9px; padding:2px 6px; background:var(--ricepaper-2); border:1px solid var(--line); border-radius:3px; color:var(--inkwell-2);}
+  .ai-pill{display:inline-flex; align-items:center; gap:4px; padding:3px 8px; background:var(--ai-soft); color:var(--ai); border-radius:10px; font-family:var(--f-mono); font-size:9px; letter-spacing:0.08em; text-transform:uppercase;}
+  .ai-pill svg{width:10px; height:10px; fill:none; stroke:currentColor; stroke-width:2;}
+  .tag-sm{font-family:var(--f-mono); font-size:9px; padding:2px 6px; background:var(--ricepaper); border:1px solid var(--line); border-radius:4px; color:var(--inkwell-2);}
+  .tag-sm.ai{background:var(---soft); border-color:var(--ai); color:var(--ai);}
+  .tag-sm.safe{background:var(--growth-soft); border-color:var(--growth); color:var(--growth);}
+  .tag-sm.warn{background:var(--highlighter-soft); border-color:var(--highlighter); color:#8A6500;}
+  .tag-sm.danger{background:var(--correction-soft); border-color:var(--correction); color:var(--correction);}
+
+  .row{display:flex; gap:10px; margin-bottom:12px;}
+  .row > *{flex:1;}
+
+  /* Agent card */
+  .agent-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:8px; position:relative;}
+  .agent-card.running{border-color:var(--growth);}
+  .agent-card.running::before{content:""; position:absolute; top:12px; right:12px; width:6px; height:6px; border-radius:50%; background:var(--growth); animation:blink 1.5s infinite;}
+  .agent-card.paused{border-color:var(--highlighter);}
+  .agent-card.error{border-color:var(--correction);}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+  .agent-card .a-head{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+  .agent-card .a-icon{width:36px; height:36px; border-radius:8px; background:var(--ai-grad); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:18px; font-style:italic;}
+  .agent-card .a-name{font-family:var(--f-display); font-size:14px; font-weight:500;}
+  .agent-card .a-role{font-family:var(--f-mono); font-size:9px; color:var(--ai); text-transform:uppercase; letter-spacing:0.1em;}
+  .agent-card .a-status{font-family:var(--f-mono); font-size:10px; display:flex; justify-content:space-between; color:var(--inkwell-2); margin-top:6px;}
+  .agent-card .a-metrics{display:flex; gap:8px; margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);}
+  .agent-card .a-metrics .m{flex:1; font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-align:center;}
+  .agent-card .a-metrics .m b{display:block; font-family:var(--f-display); font-size:16px; font-weight:300; color:var(--inkwell); margin-bottom:2px;}
+
+  /* Moderation */
+  .moderation-item{background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:8px; display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center;}
+  .moderation-item .sev{width:8px; height:40px; border-radius:3px;}
+  .moderation-item .sev.high{background:var(--correction);}
+  .moderation-item .sev.medium{background:var(--highlighter);}
+  .moderation-item .sev.low{background:var(--growth);}
+  .moderation-item .content{font-size:11px; line-height:1.5;}
+  .moderation-item .meta{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); margin-top:3px;}
+  .moderation-item .actions{display:flex; flex-direction:column; gap:4px;}
+
+  /* Cost chart */
+  .cost-chart{display:flex; align-items:end; gap:6px; height:120px; padding:10px 0;}
+  .cost-chart .bar-group{flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;}
+  .cost-chart .bar{width:100%; background:linear-gradient(180deg, var(--ai-2), var(--ai)); border-radius:3px 3px 0 0;}
+  .cost-chart .label{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);}
+  .cost-chart .val{font-family:var(--f-mono); font-size:9px; color:var(--ai); font-weight:500;}
+
+  /* Log stream */
+  .log-stream{background:var(--inkwell); color:var(--ricepaper); border-radius:8px; padding:12px; font-family:var(--f-mono); font-size:10px; line-height:1.7; min-height:200px;}
+  .log-stream .line{display:flex; gap:8px;}
+  .log-stream .time{color:var(--inkwell-2); min-width:70px;}
+  .log-stream .level{min-width:40px;}
+  .log-stream .level.info{color:var(--cobalt);}
+  .log-stream .level.warn{color:var(--highlighter);}
+  .log-stream .level.error{color:var(--correction);}
+  .log-stream .level.ai{color:var(--ai-2);}
+  .log-stream .msg{flex:1;}
+
+  footer{margin-top:56px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none; letter-spacing:0;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="logo">墨</div>
+    <div class="name">Lumina · 墨光<small>AI · Platform Intelligence</small></div>
+  </div>
+  <div class="nav">
+    <a class="back" href="lumina-00-index.html">← 索引</a>
+    <a href="lumina-18-ai-student.html">学生 AI</a>
+    <a href="lumina-19-ai-teacher.html">教师 AI</a>
+    <a href="lumina-20-ai-admin.html" style="background:var(--ai-soft); color:var(--ai);">平台 AI</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div>
+    <div class="tag">🤖 AI-Powered · Multi-Agent Orchestration</div>
+    <h1>AI <em>平台</em><br/><span class="hl">智能中枢</span></h1>
+    <div class="sub">管理整个平台的 AI 能力：编排数十个 AI Agent、监控内容安全、优化模型成本、保障合规审计。让管理员拥有 AI 驱动的智能运维控制台。</div>
+  </div>
+  <div class="stats">
+    <div class="s"><span class="lbl">运行中 Agent</span><span class="val">18 个 · 全部健康</span></div>
+    <div class="s"><span class="lbl">日均调用</span><span class="val">48,000+ LLM 请求</span></div>
+    <div class="s"><span class="lbl">内容审核</span><span class="val">自动拦截 99.2%</span></div>
+    <div class="s"><span class="lbl">月度成本</span><span class="val">¥ 82,400 · 优化 23%</span></div>
+  </div>
+</header>
+
+<!-- ============ SECTION 1 · Multi-Agent 编排 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>场景一 · <em>Multi-Agent 编排</em></h2>
+    <div class="num-tag">Agent Orchestration · 18 Agents Live</div>
+  </div>
+
+  <div class="desktops">
+    <div class="desktop">
+      <div class="desktop-bar">
+        <div class="lights"><i></i><i></i><i></i></div>
+        <div class="title">Lumina Admin · AI Agent 编排中心 · 18 个 Agent · 全部健康</div>
+        <div style="margin-left:auto; font-family:var(--f-mono); font-size:10px; color:var(--growth);">● 全部正常 · 0 警报</div>
+      </div>
+      <div class="desktop-content" style="background:var(--ricepaper);">
+        <div class="admin-topbar">
+          <div class="brand">Lumina · 墨光 <span class="tag">Admin</span></div>
+          <div class="search"><span>🔍 搜索 Agent、任务、日志…</span><span style="color:var(--ricepaper); opacity:0.5;">⌘K</span></div>
+          <div class="actions">
+            <span style="font-family:var(--f-mono); font-size:10px;">👤 刘思源</span>
+            <span style="font-family:var(--f-mono); font-size:10px; color:var(--ai-2);">🤖 18 Agent</span>
+          </div>
+        </div>
+
+        <div class="d-layout" style="min-height:500px;">
+          <div class="d-left">
+            <div class="sb-title">Agent 分类</div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/></svg>全部 Agent <span class="badge">18</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>学生服务 · 7</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 7h-3V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v2H8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>教师服务 · 6</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>平台运维 · 5</div>
+
+            <div class="sb-title">健康度</div>
+            <div style="padding:10px; background:var(--growth-soft); border:1px solid var(--growth); border-radius:8px;">
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                <span style="font-family:var(--f-mono); font-size:9px; color:var(--growth); text-transform:uppercase; letter-spacing:0.1em;">● 全部健康</span>
+                <span style="font-family:var(--f-display); font-size:20px; font-weight:300; color:var(--growth);">100%</span>
+              </div>
+              <div style="font-size:10px; color:var(--inkwell); line-height:1.5;">
+                过去 24h 无错误<br/>平均响应 245ms
+              </div>
+            </div>
+
+            <div style="margin-top:10px;">
+              <button class="btn primary sm" style="width:100%;">+ 创建新 Agent</button>
+            </div>
+          </div>
+
+          <div class="d-center">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <div>
+                <div style="font-family:var(--f-mono); font-size:10px; color:var(--ai); letter-spacing:0.1em; margin-bottom:4px;">🤖 AI Agent 编排中心</div>
+                <h2 style="font-family:var(--f-display); font-size:20px; font-weight:500;">正在运行的 Agent</h2>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button class="btn sm">📊 全览</button>
+                <button class="btn sm">🔄 刷新</button>
+              </div>
+            </div>
+
+            <div class="row" style="grid-template-columns:repeat(4, 1fr);">
+              <div class="widget" style="margin:0;">
+                <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); letter-spacing:0.1em;">运行中</div>
+                <div class="stat-big">18</div>
+              </div>
+              <div class="widget" style="margin:0;">
+                <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); letter-spacing:0.1em;">今日调用</div>
+                <div class="stat-big">48.2<span class="u">K</span></div>
+              </div>
+              <div class="widget" style="margin:0;">
+                <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); letter-spacing:0.1em;">平均延迟</div>
+                <div class="stat-big">245<span class="u">ms</span></div>
+              </div>
+              <div class="widget" style="margin:0;">
+                <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); letter-spacing:0.1em;">成功率</div>
+                <div class="stat-big">99.8<span class="u">%</span></div>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
+              <div class="agent-card running">
+                <div class="a-head">
+                  <div class="a-icon">墨</div>
+                  <div>
+                    <div class="a-name">墨导师 Agent</div>
+                    <div class="a-role">Student Tutor · 通义千问 Qwen-Max</div>
+                  </div>
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>12.4K</b>调用/日</div>
+                  <div class="m"><b>280ms</b>延迟</div>
+                  <div class="m"><b>99.9%</b>成功</div>
+                </div>
+              </div>
+
+              <div class="agent-card running">
+                <div class="a-head">
+                  <div class="a-icon">阅</div>
+                  <div>
+                    <div class="a-name">AI 批阅 Agent</div>
+                    <div class="a-role">Grading · 通义千问 Qwen-Max</div>
+                  </div>
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>3.2K</b>调用/日</div>
+                  <div class="m"><b>1.2s</b>延迟</div>
+                  <div class="m"><b>99.7%</b>成功</div>
+                </div>
+              </div>
+
+              <div class="agent-card running">
+                <div class="a-head">
+                  <div class="a-icon">课</div>
+                  <div>
+                    <div class="a-name">AI 课件 Agent</div>
+                    <div class="a-role">Content Gen · 通义千问-VL</div>
+                  </div>
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>480</b>调用/日</div>
+                  <div class="m"><b>4.5s</b>延迟</div>
+                  <div class="m"><b>99.5%</b>成功</div>
+                </div>
+              </div>
+
+              <div class="agent-card running">
+                <div class="a-head">
+                  <div class="a-icon">听</div>
+                  <div>
+                    <div class="a-name">讯飞语音 转写 Agent</div>
+                    <div class="a-role">Live Transcription · V3 Large</div>
+                  </div>
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>1.8K</b>调用/日</div>
+                  <div class="m"><b>实时</b>延迟</div>
+                  <div class="m"><b>100%</b>成功</div>
+                </div>
+              </div>
+
+              <div class="agent-card running">
+                <div class="a-head">
+                  <div class="a-icon">盾</div>
+                  <div>
+                    <div class="a-name">内容安全 Agent</div>
+                    <div class="a-role">Moderation · 多模态检测</div>
+                  </div>
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>28K</b>调用/日</div>
+                  <div class="m"><b>45ms</b>延迟</div>
+                  <div class="m"><b>100%</b>成功</div>
+                </div>
+              </div>
+
+              <div class="agent-card running">
+                <div class="a-head">
+                  <div class="a-icon">预</div>
+                  <div>
+                    <div class="a-name">学情预测 Agent</div>
+                    <div class="a-role">Predictive · XGBoost + LLM</div>
+                  </div>
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>860</b>调用/日</div>
+                  <div class="m"><b>180ms</b>延迟</div>
+                  <div class="m"><b>99.9%</b>成功</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-right">
+            <div class="sb-title">🤖 AI 运维洞察</div>
+            <div class="widget" style="background:var(--ai-soft); border-color:var(--ai);">
+              <h4 style="font-size:11px;">✨ 优化建议</h4>
+              <div style="font-size:10px; line-height:1.6; margin-bottom:8px;">
+                <b>AI 批阅 Agent</b> 高峰期（周一 9-11 点）延迟升高到 3.5s。<br/>
+                建议：预热 2 个备份实例
+              </div>
+              <button class="btn primary sm" style="width:100%;">⚡ 自动扩容</button>
+            </div>
+
+            <div class="widget">
+              <h4>📊 模型路由</h4>
+              <div style="font-size:10px; line-height:1.8;">
+                <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--line);">
+                  <span>通义千问 Qwen-Max</span>
+                  <span style="font-family:var(--f-mono);">62%</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--line);">
+                  <span>通义千问-VL</span>
+                  <span style="font-family:var(--f-mono);">24%</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--line);">
+                  <span>通义千问-Turbo</span>
+                  <span style="font-family:var(--f-mono);">12%</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding:4px 0;">
+                  <span>讯飞语音 V3</span>
+                  <span style="font-family:var(--f-mono);">2%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sb-title">实时日志</div>
+            <div class="log-stream" style="min-height:160px;">
+              <div class="line"><span class="time">14:32:18</span><span class="level ai">AI</span><span class="msg">墨导师 · 回答林清的积分问题</span></div>
+              <div class="line"><span class="time">14:32:17</span><span class="level info">OK</span><span class="msg">批阅 Agent 完成 12 份作业</span></div>
+              <div class="line"><span class="time">14:32:15</span><span class="level ai">AI</span><span class="msg">课件 Agent 生成《西方哲学》L15</span></div>
+              <div class="line"><span class="time">14:32:12</span><span class="level info">OK</span><span class="msg">讯飞语音 转写王老师课堂</span></div>
+              <div class="line"><span class="time">14:32:08</span><span class="level ai">AI</span><span class="msg">内容安全 Agent 通过 45 条审核</span></div>
+              <div class="line"><span class="time">14:32:05</span><span class="level warn">△</span><span class="msg">批阅 Agent P95 延迟升至 1.8s</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 2 · AI 内容安全 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>场景二 · <em>AI 内容安全</em></h2>
+    <div class="num-tag">Content Moderation · 99.2% Auto-Block</div>
+  </div>
+
+  <div class="browsers">
+    <div class="browser">
+      <div class="browser-bar">
+        <div class="lights"><i></i><i></i><i></i></div>
+        <div class="addr">🔒 admin.lumina.edu/ai/moderation</div>
+      </div>
+      <div class="browser-content">
+        <div class="web-layout">
+          <div class="web-sidebar">
+            <div class="sb-title">审核队列</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/></svg>待审核<span class="badge">24</span></div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>AI 审核中</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>已通过 · 1.2K</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>已拦截 · 18</div>
+
+            <div class="sb-title">检测类型</div>
+            <div style="font-size:10px; line-height:1.8; padding:0 10px;">
+              <div>✓ 学术不端 (AI 代写)</div>
+              <div>✓ 敏感内容 (政治)</div>
+              <div>✓ 不当言论 (辱骂)</div>
+              <div>✓ 版权内容</div>
+              <div>✓ 隐私泄露 (PII)</div>
+            </div>
+
+            <div class="widget" style="margin-top:10px; background:var(--growth-soft); border-color:var(--growth);">
+              <h4 style="font-size:11px;">🛡 今日审核</h4>
+              <div class="stat-big">2,847<span class="u">条</span></div>
+              <div class="stat-delta">99.2% 自动</div>
+              <div style="font-size:10px; color:var(--inkwell-2); margin-top:6px;">
+                仅 24 条转人工
+              </div>
+            </div>
+          </div>
+
+          <div class="web-main">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <div>
+                <div style="font-family:var(--f-mono); font-size:10px; color:var(--ai); letter-spacing:0.1em; margin-bottom:4px;">🛡 AI 内容安全审核</div>
+                <h2 style="font-family:var(--f-display); font-size:20px; font-weight:500;">待人工复核 · 24 条</h2>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button class="btn sm">🔄 刷新</button>
+                <button class="btn primary sm">⚡ 批量处理</button>
+              </div>
+            </div>
+
+            <div class="moderation-item">
+              <div class="sev high"></div>
+              <div class="content">
+                <div><b>学生作业 · 《西方哲学史》论文</b> · 林某的提交</div>
+                <div class="meta">🤖 AI 置信度 94% · 学术不端 · 疑似 AI 代写 · 5 分钟前</div>
+                <div style="margin-top:6px; font-size:10px; padding:6px; background:var(--correction-soft); border-radius:4px;">
+                  <b style="color:var(--correction);">AI 分析</b>：文本 知网 AIGC 检测 评分 0.92，句式结构高度符合 LLM 输出模式，建议约谈学生
+                </div>
+              </div>
+              <div class="actions">
+                <button class="btn sm">⚠ 标记违规</button>
+                <button class="btn sm">✓ 通过</button>
+              </div>
+            </div>
+
+            <div class="moderation-item">
+              <div class="sev medium"></div>
+              <div class="content">
+                <div><b>讨论区 · 《数据结构》帖子</b> · 王明</div>
+                <div class="meta">🤖 AI 置信度 78% · 边界内容 · 可能涉及政治</div>
+                <div style="margin-top:6px; font-size:10px; padding:6px; background:var(--highlighter-soft); border-radius:4px;">
+                  <b style="color:#8A6500;">AI 分析</b>：涉及「算法伦理」话题，语义边界，建议教师复核后决定
+                </div>
+              </div>
+              <div class="actions">
+                <button class="btn sm">⚠ 标记</button>
+                <button class="btn sm">✓ 通过</button>
+              </div>
+            </div>
+
+            <div class="moderation-item">
+              <div class="sev low"></div>
+              <div class="content">
+                <div><b>课件资源 · 视频</b> · 王老师上传</div>
+                <div class="meta">🤖 AI 置信度 98% · 版权问题 · 背景音乐有版权</div>
+                <div style="margin-top:6px; font-size:10px; padding:6px; background:var(--growth-soft); border-radius:4px;">
+                  <b style="color:var(--growth);">AI 分析</b>：检测到 YouTube Audio Library 音乐，建议替换为免版权音乐
+                </div>
+              </div>
+              <div class="actions">
+                <button class="btn sm">⚠ 拒绝</button>
+                <button class="btn sm">✓ 通过</button>
+              </div>
+            </div>
+
+            <div class="widget" style="margin-top:14px; background:var(--ai-soft); border-color:var(--ai);">
+              <h4>✨ AI 合规建议</h4>
+              <div style="font-size:11px; line-height:1.6;">
+                本月<b style="color:var(--ai);">学术不端检出率 2.3%</b>，同比上升 0.8%。<br/>
+                建议：① 在教师端添加 AI 写作声明模板 ② 对大一新生开展 AI 使用规范培训 ③ 启用 知网 AMLC 集成
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 3 · AI 成本与资源 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>场景三 · <em>AI 成本优化</em></h2>
+    <div class="num-tag">Cost & Resource Analytics</div>
+  </div>
+
+  <div class="desktops">
+    <div class="desktop">
+      <div class="desktop-bar">
+        <div class="lights"><i></i><i></i><i></i></div>
+        <div class="title">Lumina Admin · AI 资源管理 · 月度成本分析</div>
+        <div style="margin-left:auto; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">2026 年 8 月</div>
+      </div>
+      <div class="desktop-content">
+        <div class="d-layout" style="min-height:500px;">
+          <div class="d-left">
+            <div class="sb-title">成本概览</div>
+            <div class="widget" style="background:var(--ai-soft); border-color:var(--ai);">
+              <h4>💰 本月支出</h4>
+              <div class="stat-big">¥82,400</div>
+              <div class="stat-delta" style="color:var(--growth);">↓ 23% vs 上月</div>
+              <div style="font-size:10px; color:var(--inkwell-2); margin-top:6px;">
+                预算 ¥120,000 · 剩余 31%
+              </div>
+            </div>
+
+            <div class="sb-title">按服务分类</div>
+            <div style="font-size:10px; line-height:1.8; padding:0 10px;">
+              <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--line);">
+                <span>🤖 LLM 调用</span>
+                <span style="font-family:var(--f-mono);">¥58,200</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--line);">
+                <span>🎙 语音识别</span>
+                <span style="font-family:var(--f-mono);">¥12,400</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--line);">
+                <span>👁 视觉模型</span>
+                <span style="font-family:var(--f-mono);">¥8,200</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding:4px 0;">
+                <span>🔧 其他</span>
+                <span style="font-family:var(--f-mono);">¥3,600</span>
+              </div>
+            </div>
+
+            <div class="sb-title">按角色分类</div>
+            <div style="font-size:10px; line-height:1.8; padding:0 10px;">
+              <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--line);">
+                <span>👨‍🎓 学生</span>
+                <span style="font-family:var(--f-mono);">¥32,400</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--line);">
+                <span>👨‍🏫 教师</span>
+                <span style="font-family:var(--f-mono);">¥42,100</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding:4px 0;">
+                <span>🔧 平台</span>
+                <span style="font-family:var(--f-mono);">¥7,900</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-center">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <div>
+                <div style="font-family:var(--f-mono); font-size:10px; color:var(--ai); letter-spacing:0.1em; margin-bottom:4px;">💰 月度成本趋势</div>
+                <h2 style="font-family:var(--f-display); font-size:20px; font-weight:500;">AI 成本分析</h2>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button class="btn sm">📅 月</button>
+                <button class="btn sm">📊 周</button>
+                <button class="btn sm">📥 导出</button>
+              </div>
+            </div>
+
+            <div class="widget">
+              <h4>📊 30 天成本趋势</h4>
+              <div class="cost-chart">
+                <div class="bar-group"><div class="val">¥2.1K</div><div class="bar" style="height:50px;"></div><div class="label">8/1</div></div>
+                <div class="bar-group"><div class="val">¥2.4K</div><div class="bar" style="height:58px;"></div><div class="label">8/5</div></div>
+                <div class="bar-group"><div class="val">¥3.8K</div><div class="bar" style="height:85px;"></div><div class="label">8/10</div></div>
+                <div class="bar-group"><div class="val">¥2.9K</div><div class="bar" style="height:70px;"></div><div class="label">8/15</div></div>
+                <div class="bar-group"><div class="val">¥3.2K</div><div class="bar" style="height:78px;"></div><div class="label">8/20</div></div>
+                <div class="bar-group"><div class="val">¥2.7K</div><div class="bar" style="height:65px;"></div><div class="label">今日</div></div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="widget" style="margin:0;">
+                <h4>🎯 成本优化</h4>
+                <div style="font-size:11px; line-height:1.6; margin-bottom:6px;">
+                  通过模型路由策略优化，本月节省 <b style="color:var(--growth);">¥24,000</b>
+                </div>
+                <div style="font-size:10px; color:var(--inkwell-2); line-height:1.6;">
+                  ✓ 简单问题 → 通义千问-Turbo<br/>
+                  ✓ 复杂推理 → 通义千问 Qwen-Max<br/>
+                  ✓ 视觉任务 → 通义千问-VL
+                </div>
+              </div>
+              <div class="widget" style="margin:0; background:var(--ai-soft); border-color:var(--ai);">
+                <h4>✨ AI 优化建议</h4>
+                <div style="font-size:10px; line-height:1.6;">
+                  建议启用<b>语义缓存</b>，预计额外节省 15%。相同问题不重复调用 LLM。
+                </div>
+                <button class="btn primary sm" style="margin-top:8px; width:100%;">⚡ 启用缓存</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-right">
+            <div class="sb-title">Token 使用统计</div>
+            <div class="widget">
+              <h4>🎯 本月 Tokens</h4>
+              <div class="stat-big">842<span class="u">M</span></div>
+              <div style="font-size:10px; color:var(--inkwell-2); margin-top:4px;">输入 520M / 输出 322M</div>
+              <div style="margin-top:10px;">
+                <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:4px;">
+                  <span>输入</span>
+                  <span style="font-family:var(--f-mono);">62%</span>
+                </div>
+                <div style="height:6px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden; display:flex;">
+                  <div style="width:62%; background:var(--ai);"></div>
+                  <div style="width:38%; background:var(--ai-2);"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:10px; margin-top:4px;">
+                  <span>输出</span>
+                  <span style="font-family:var(--f-mono);">38%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="widget">
+              <h4>🔥 热门场景</h4>
+              <div style="font-size:10px; line-height:1.8;">
+                <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--line);">
+                  <span>1. 墨导师答疑</span>
+                  <span style="font-family:var(--f-mono);">284M</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--line);">
+                  <span>2. AI 批阅</span>
+                  <span style="font-family:var(--f-mono);">198M</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--line);">
+                  <span>3. 课件生成</span>
+                  <span style="font-family:var(--f-mono);">142M</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding:4px 0;">
+                  <span>4. 内容审核</span>
+                  <span style="font-family:var(--f-mono);">98M</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="widget" style="background:var(--growth-soft); border-color:var(--growth);">
+              <h4 style="color:var(--growth);">✓ 效率指标</h4>
+              <div style="font-size:10px; line-height:1.8;">
+                <div>每次调用成本 <b>¥0.097</b></div>
+                <div>每学生成本 <b>¥64</b></div>
+                <div>教师时间节省 <b>180 小时/月</b></div>
+                <div>ROI <b style="color:var(--growth);">+340%</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 4 · AI 合规与审计 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>场景四 · <em>AI 合规审计</em></h2>
+    <div class="num-tag">Compliance & Audit Trail · 7 Years Retention</div>
+  </div>
+
+  <div class="phones">
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="phone-status"><span>9:41</span><span>••• 5G</span></div>
+        <div style="min-height:620px; background:var(--ricepaper);">
+          <div class="app-header" style="background:linear-gradient(135deg, var(--ai-soft), #fff);">
+            <div class="app-title">AI 合规总览 <small>Compliance</small></div>
+            <span class="ai-pill"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 合规</span>
+          </div>
+          <div style="padding:14px;">
+            <div class="widget" style="background:var(--growth-soft); border-color:var(--growth);">
+              <h4 style="color:var(--growth);">✓ 合规状态</h4>
+              <div style="display:flex; justify-content:space-around; margin-top:10px;">
+                <div style="text-align:center;">
+                  <div style="font-family:var(--f-display); font-size:22px; font-weight:300; color:var(--growth);">A+</div>
+                  <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);">整体评级</div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-family:var(--f-display); font-size:22px; font-weight:300; color:var(--growth);">100%</div>
+                  <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);">PII 保护</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sb-title" style="padding-left:0;">合规清单</div>
+
+            <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:8px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <b style="font-size:11px;">🔒 数据保护（PIPL）</b>
+                <span class="tag-sm safe">✓ 符合</span>
+              </div>
+              <div style="font-size:10px; line-height:1.6; color:var(--inkwell-2);">
+                ✓ 学生数据脱敏 · 100%<br/>
+                ✓ 跨境传输合规<br/>
+                ✓ 用户授权完备
+              </div>
+            </div>
+
+            <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:8px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <b style="font-size:11px;">🤖 AI 透明度</b>
+                <span class="tag-sm safe">✓ 符合</span>
+              </div>
+              <div style="font-size:10px; line-height:1.6; color:var(--inkwell-2);">
+                ✓ AI 输出均有标注<br/>
+                ✓ 用户知晓使用 AI<br/>
+                ✓ 模型来源可追溯
+              </div>
+            </div>
+
+            <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <b style="font-size:11px;">📜 审计日志</b>
+                <span class="tag-sm safe">✓ 符合</span>
+              </div>
+              <div style="font-size:10px; line-height:1.6; color:var(--inkwell-2);">
+                ✓ 保留期 7 年<br/>
+                ✓ 不可篡改<br/>
+                ✓ 可导出 PDF
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="phone-status"><span>9:41</span><span>••• 5G</span></div>
+        <div style="min-height:620px; background:var(--ricepaper);">
+          <div class="app-header" style="background:linear-gradient(135deg, var(--ai-soft), #fff);">
+            <div class="app-title">AI 决策追溯 <small>Audit Trail</small></div>
+            <span class="ai-pill"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 追溯</span>
+          </div>
+          <div style="padding:14px;">
+            <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:10px;">
+              <div style="font-family:var(--f-mono); font-size:9px; color:var(--ai); letter-spacing:0.1em; margin-bottom:6px;">🔍 查询决策记录</div>
+              <div style="font-size:11px; line-height:1.6;">
+                <b>决策 ID</b>: AI-2026-08-24-78421<br/>
+                <b>Agent</b>: 墨导师<br/>
+                <b>时间</b>: 2026-08-24 14:32:18<br/>
+                <b>用户</b>: 林清 (20230001)
+              </div>
+            </div>
+
+            <div style="font-family:var(--f-mono); font-size:9px; color:var(--ai); letter-spacing:0.1em; margin-bottom:6px;">🤖 完整决策链路</div>
+
+            <div style="position:relative; padding-left:20px;">
+              <div style="position:absolute; left:6px; top:8px; bottom:8px; width:2px; background:var(--ai);"></div>
+
+              <div style="position:relative; padding:8px 10px; background:#fff; border:1px solid var(--line); border-radius:6px; margin-bottom:6px;">
+                <div style="position:absolute; left:-17px; top:12px; width:10px; height:10px; border-radius:50%; background:var(--ai); border:2px solid var(--ricepaper);"></div>
+                <div style="font-family:var(--f-mono); font-size:9px; color:var(--ai); margin-bottom:3px;">14:32:18 · 用户输入</div>
+                <div style="font-size:10px; line-height:1.5;">"∫sin(x)dx 怎么求？"</div>
+              </div>
+
+              <div style="position:relative; padding:8px 10px; background:#fff; border:1px solid var(--line); border-radius:6px; margin-bottom:6px;">
+                <div style="position:absolute; left:-17px; top:12px; width:10px; height:10px; border-radius:50%; background:var(--ai); border:2px solid var(--ricepaper);"></div>
+                <div style="font-family:var(--f-mono); font-size:9px; color:var(--ai); margin-bottom:3px;">14:32:19 · 内容审核</div>
+                <div style="font-size:10px; line-height:1.5;">✓ 通过 · 无违规内容</div>
+              </div>
+
+              <div style="position:relative; padding:8px 10px; background:#fff; border:1px solid var(--line); border-radius:6px; margin-bottom:6px;">
+                <div style="position:absolute; left:-17px; top:12px; width:10px; height:10px; border-radius:50%; background:var(--ai); border:2px solid var(--ricepaper);"></div>
+                <div style="font-family:var(--f-mono); font-size:9px; color:var(--ai); margin-bottom:3px;">14:32:20 · 模型路由</div>
+                <div style="font-size:10px; line-height:1.5;">数学题 → 通义千问 Qwen-Max</div>
+              </div>
+
+              <div style="position:relative; padding:8px 10px; background:var(--ai-soft); border:1px solid var(--ai); border-radius:6px; margin-bottom:6px;">
+                <div style="position:absolute; left:-17px; top:12px; width:10px; height:10px; border-radius:50%; background:var(--ai); border:2px solid var(--ricepaper);"></div>
+                <div style="font-family:var(--f-mono); font-size:9px; color:var(--ai); margin-bottom:3px;">14:32:23 · 苏格拉底式回答</div>
+                <div style="font-size:10px; line-height:1.5;">不直接给答案，反问引导思考</div>
+              </div>
+
+              <div style="position:relative; padding:8px 10px; background:#fff; border:1px solid var(--line); border-radius:6px;">
+                <div style="position:absolute; left:-17px; top:12px; width:10px; height:10px; border-radius:50%; background:var(--ai); border:2px solid var(--ricepaper);"></div>
+                <div style="font-family:var(--f-mono); font-size:9px; color:var(--ai); margin-bottom:3px;">14:32:25 · 输出</div>
+                <div style="font-size:10px; line-height:1.5;">耗时 280ms · Tokens 142/86</div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px; display:flex; gap:6px;">
+              <button class="btn sm">📥 导出 PDF</button>
+              <button class="btn sm">🔗 分享链接</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="phone-status"><span>9:41</span><span>••• 5G</span></div>
+        <div style="min-height:620px; background:var(--ricepaper);">
+          <div class="app-header" style="background:linear-gradient(135deg, var(--ai-soft), #fff);">
+            <div class="app-title">AI 伦理与偏见 <small>Ethics</small></div>
+            <span class="ai-pill"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 伦理</span>
+          </div>
+          <div style="padding:14px;">
+            <div class="widget" style="background:var(--ai-soft); border-color:var(--ai);">
+              <h4>🎯 AI 伦理准则</h4>
+              <div style="font-size:10px; line-height:1.7; margin-top:6px;">
+                <div style="padding:6px 0; border-bottom:1px dashed var(--line);">
+                  <b style="color:var(--ai);">✓ 透明</b>：所有 AI 输出均有标识
+                </div>
+                <div style="padding:6px 0; border-bottom:1px dashed var(--line);">
+                  <b style="color:var(--ai);">✓ 公平</b>：评分算法无性别/地域偏见
+                </div>
+                <div style="padding:6px 0; border-bottom:1px dashed var(--line);">
+                  <b style="color:var(--ai);">✓ 可控</b>：教师始终拥有最终决定权
+                </div>
+                <div style="padding:6px 0;">
+                  <b style="color:var(--ai);">✓ 隐私</b>：学生数据绝不训练公共模型
+                </div>
+              </div>
+            </div>
+
+            <div style="font-family:var(--f-mono); font-size:9px; color:var(--ai); letter-spacing:0.1em; margin-bottom:6px;">📊 偏见监测（月度）</div>
+
+            <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:10px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <b style="font-size:11px;">评分一致性</b>
+                <span class="tag-sm safe">✓ 无偏见</span>
+              </div>
+              <div style="display:flex; justify-content:space-around; margin-top:8px;">
+                <div style="text-align:center;">
+                  <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);">男生</div>
+                  <div style="font-family:var(--f-display); font-size:16px;">78.2</div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);">女生</div>
+                  <div style="font-family:var(--f-display); font-size:16px;">78.6</div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);">差异</div>
+                  <div style="font-family:var(--f-display); font-size:16px; color:var(--growth);">+0.5%</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:10px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <b style="font-size:11px;">模型幻觉率</b>
+                <span class="tag-sm safe">✓ 优秀</span>
+              </div>
+              <div style="font-size:10px; color:var(--inkwell); line-height:1.6;">
+                本月 AI 输出事实错误率 <b style="color:var(--growth);">0.42%</b>，目标 &lt; 2%
+              </div>
+              <div style="height:6px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden; margin-top:6px;">
+                <div style="width:21%; height:100%; background:var(--growth);"></div>
+              </div>
+            </div>
+
+            <div style="background:var(--highlighter-soft); border:1px solid var(--highlighter); border-radius:8px; padding:10px;">
+              <div style="font-family:var(--f-mono); font-size:9px; color:#8A6500; letter-spacing:0.1em; margin-bottom:6px;">⚠ 改进计划</div>
+              <div style="font-size:10px; line-height:1.6;">
+                下一步：① 引入红队测试 ② 每季度第三方审计 ③ 学生反馈通道
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 5 · 模型池管理 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>场景五 · <em>模型池管理</em></h2>
+    <div class="num-tag">Model Pool Management · 双层自主选择</div>
+  </div>
+
+  <div class="info success">
+    <div class="label">✨ 双层模型选择系统</div>
+    <b>层面一 · 管理端配置</b>：管理员配置可用模型池（启用/禁用/配额/优先级/成本预算）<br/>
+    <b>层面二 · 用户端选择</b>：师生在使用 AI 功能时可自主选择合适的模型（按场景/成本/能力）
+  </div>
+
+  <div class="desktops">
+    <div class="desktop">
+      <div class="desktop-bar">
+        <div class="lights"><i></i><i></i><i></i></div>
+        <div class="title">Lumina Admin · 模型池管理 · 国产模型配置</div>
+        <div style="margin-left:auto; font-family:var(--f-mono); font-size:10px; color:var(--growth);">● 8 个模型在线</div>
+      </div>
+      <div class="desktop-content" style="background:var(--ricepaper);">
+        <div class="admin-topbar">
+          <div class="brand">Lumina · 墨光 <span class="tag">Admin</span></div>
+          <div class="search"><span>🔍 搜索模型、Agent、配置…</span><span style="color:var(--ricepaper); opacity:0.5;">⌘K</span></div>
+          <div class="actions">
+            <span style="font-family:var(--f-mono); font-size:10px;">👤 刘思源</span>
+          </div>
+        </div>
+
+        <div class="d-layout" style="min-height:500px;">
+          <div class="d-left">
+            <div class="sb-title">模型管理</div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/></svg>模型池 <span class="badge">8</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 7h-3V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v2H8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>API Key 管理</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>路由策略</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>配额控制</div>
+
+            <div class="sb-title">模型分类</div>
+            <div style="font-size:10px; line-height:1.8; padding:0 10px;">
+              <div>✓ 大语言模型 (4)</div>
+              <div>✓ 多模态视觉 (2)</div>
+              <div>✓ 语音识别 (1)</div>
+              <div>✓ 向量模型 (1)</div>
+            </div>
+
+            <div class="widget" style="margin-top:10px; background:var(--ai-soft); border-color:var(--ai);">
+              <h4 style="font-size:11px;">🎯 本月成本</h4>
+              <div class="stat-big">¥82.4<span class="u">K</span></div>
+              <div class="stat-delta">↓ 23% vs 上月</div>
+            </div>
+          </div>
+
+          <div class="d-center">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <div>
+                <div style="font-family:var(--f-mono); font-size:10px; color:var(--ai); letter-spacing:0.1em; margin-bottom:4px;">🎛 模型池配置</div>
+                <h2 style="font-family:var(--f-display); font-size:20px; font-weight:500;">可用模型 · 8 个</h2>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button class="btn sm">+ 添加模型</button>
+                <button class="btn primary sm">💾 保存配置</button>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="agent-card running">
+                <div class="a-head">
+                  <div class="a-icon" style="background:linear-gradient(135deg, #FF6A00, #FF9500);">通</div>
+                  <div>
+                    <div class="a-name">通义千问 Qwen-Max</div>
+                    <div class="a-role">阿里云 · 大语言 · 主力模型</div>
+                  </div>
+                </div>
+                <div style="font-size:10px; line-height:1.6; color:var(--inkwell-2); margin:6px 0;">
+                  用于：AI 导师、批阅、课件生成<br/>
+                  状态：<span style="color:var(--growth);">● 已启用</span> · 配额：无限
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>62%</b>流量</div>
+                  <div class="m"><b>¥0.02</b>/千 token</div>
+                  <div class="m"><b>280ms</b>延迟</div>
+                </div>
+              </div>
+
+              <div class="agent-card running">
+                <div class="a-head">
+                  <div class="a-icon" style="background:linear-gradient(135deg, #667EEA, #764BA2);">智</div>
+                  <div>
+                    <div class="a-name">智谱 GLM-4</div>
+                    <div class="a-role">智谱 AI · 大语言 · 备选模型</div>
+                  </div>
+                </div>
+                <div style="font-size:10px; line-height:1.6; color:var(--inkwell-2); margin:6px 0;">
+                  用于：AI 导师备选、复杂推理<br/>
+                  状态：<span style="color:var(--growth);">● 已启用</span> · 配额：500K/日
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>15%</b>流量</div>
+                  <div class="m"><b>¥0.05</b>/千 token</div>
+                  <div class="m"><b>320ms</b>延迟</div>
+                </div>
+              </div>
+
+              <div class="agent-card running">
+                <div class="a-head">
+                  <div class="a-icon" style="background:linear-gradient(135deg, #00C9FF, #92FE9D);">讯</div>
+                  <div>
+                    <div class="a-name">讯飞星火 V4</div>
+                    <div class="a-role">科大讯飞 · 教育专用</div>
+                  </div>
+                </div>
+                <div style="font-size:10px; line-height:1.6; color:var(--inkwell-2); margin:6px 0;">
+                  用于：教育场景优化、作文批改<br/>
+                  状态：<span style="color:var(--growth);">● 已启用</span> · 配额：200K/日
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>8%</b>流量</div>
+                  <div class="m"><b>¥0.03</b>/千 token</div>
+                  <div class="m"><b>245ms</b>延迟</div>
+                </div>
+              </div>
+
+              <div class="agent-card running">
+                <div class="a-head">
+                  <div class="a-icon" style="background:linear-gradient(135deg, #FE3585, #FC547A);">豆</div>
+                  <div>
+                    <div class="a-name">豆包 Lite</div>
+                    <div class="a-role">字节跳动 · 轻量快速</div>
+                  </div>
+                </div>
+                <div style="font-size:10px; line-height:1.6; color:var(--inkwell-2); margin:6px 0;">
+                  用于：简单问答、快速响应<br/>
+                  状态：<span style="color:var(--growth);">● 已启用</span> · 配额：1M/日
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>12%</b>流量</div>
+                  <div class="m"><b>¥0.005</b>/千 token</div>
+                  <div class="m"><b>120ms</b>延迟</div>
+                </div>
+              </div>
+
+              <div class="agent-card running">
+                <div class="a-head">
+                  <div class="a-icon" style="background:linear-gradient(135deg, #667EEA, #764BA2);">视</div>
+                  <div>
+                    <div class="a-name">通义千问-VL</div>
+                    <div class="a-role">阿里云 · 多模态视觉</div>
+                  </div>
+                </div>
+                <div style="font-size:10px; line-height:1.6; color:var(--inkwell-2); margin:6px 0;">
+                  用于：拍照解题、PPT 理解<br/>
+                  状态：<span style="color:var(--growth);">● 已启用</span> · 配额：100K/日
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>24%</b>视觉</div>
+                  <div class="m"><b>¥0.08</b>/千 token</div>
+                  <div class="m"><b>1.2s</b>延迟</div>
+                </div>
+              </div>
+
+              <div class="agent-card running">
+                <div class="a-head">
+                  <div class="a-icon" style="background:linear-gradient(135deg, #FA709A, #FEE140);">音</div>
+                  <div>
+                    <div class="a-name">讯飞语音 V3</div>
+                    <div class="a-role">科大讯飞 · 语音识别</div>
+                  </div>
+                </div>
+                <div style="font-size:10px; line-height:1.6; color:var(--inkwell-2); margin:6px 0;">
+                  用于：课堂实时转写、语音助手<br/>
+                  状态：<span style="color:var(--growth);">● 已启用</span> · 配额：1000h/月
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>100%</b>语音</div>
+                  <div class="m"><b>¥0.33</b>/分钟</div>
+                  <div class="m"><b>实时</b>延迟</div>
+                </div>
+              </div>
+
+              <div class="agent-card paused">
+                <div class="a-head">
+                  <div class="a-icon" style="background:linear-gradient(135deg, #30cfd0, #330867);">月</div>
+                  <div>
+                    <div class="a-name">月之暗面 Kimi</div>
+                    <div class="a-role">Moonshot · 长文本专家</div>
+                  </div>
+                </div>
+                <div style="font-size:10px; line-height:1.6; color:var(--inkwell-2); margin:6px 0;">
+                  用于：超长文本处理（待启用）<br/>
+                  状态：<span style="color:var(--highlighter);">● 待审批</span> · 配额：未设置
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>-</b>流量</div>
+                  <div class="m"><b>¥0.06</b>/千 token</div>
+                  <div class="m"><b>-</b>延迟</div>
+                </div>
+              </div>
+
+              <div class="agent-card running">
+                <div class="a-head">
+                  <div class="a-icon" style="background:linear-gradient(135deg, #4facfe, #00f2fe);">百</div>
+                  <div>
+                    <div class="a-name">百川 Embedding</div>
+                    <div class="a-role">百川 AI · 向量嵌入</div>
+                  </div>
+                </div>
+                <div style="font-size:10px; line-height:1.6; color:var(--inkwell-2); margin:6px 0;">
+                  用于：RAG 检索、知识图谱<br/>
+                  状态：<span style="color:var(--growth);">● 已启用</span> · 配额：5M/日
+                </div>
+                <div class="a-metrics">
+                  <div class="m"><b>100%</b>向量</div>
+                  <div class="m"><b>¥0.001</b>/千 token</div>
+                  <div class="m"><b>45ms</b>延迟</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-right">
+            <div class="sb-title">路由策略</div>
+            <div class="widget" style="background:var(--ai-soft); border-color:var(--ai);">
+              <h4 style="font-size:11px;">🔀 智能路由</h4>
+              <div style="font-size:10px; line-height:1.6; margin-bottom:8px;">
+                系统根据任务类型、成本、延迟自动选择最优模型：
+              </div>
+              <div style="font-size:10px; line-height:1.8;">
+                <div style="padding:4px 0; border-bottom:1px dashed var(--line);">
+                  <b style="color:var(--ai);">复杂推理</b> → Qwen-Max
+                </div>
+                <div style="padding:4px 0; border-bottom:1px dashed var(--line);">
+                  <b style="color:var(--ai);">简单问答</b> → 豆包 Lite
+                </div>
+                <div style="padding:4px 0; border-bottom:1px dashed var(--line);">
+                  <b style="color:var(--ai);">视觉任务</b> → Qwen-VL
+                </div>
+                <div style="padding:4px 0;">
+                  <b style="color:var(--ai);">语音转写</b> → 讯飞语音
+                </div>
+              </div>
+            </div>
+
+            <div class="widget">
+              <h4>💰 成本控制</h4>
+              <div style="font-size:10px; line-height:1.6;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                  <span>月度预算</span>
+                  <span style="font-family:var(--f-mono);">¥120K</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                  <span>已使用</span>
+                  <span style="font-family:var(--f-mono);">¥82.4K</span>
+                </div>
+                <div style="height:6px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden;">
+                  <div style="width:68%; height:100%; background:var(--ai-grad);"></div>
+                </div>
+                <div style="margin-top:6px; font-family:var(--f-mono); font-size:9px; color:var(--growth);">
+                  ✓ 预算健康 · 预计月底 ¥98K
+                </div>
+              </div>
+            </div>
+
+            <div class="widget">
+              <h4>🔑 API Key 状态</h4>
+              <div style="font-size:10px; line-height:1.8;">
+                <div>✓ 通义千问 · 有效</div>
+                <div>✓ 智谱 GLM · 有效</div>
+                <div>✓ 讯飞星火 · 有效</div>
+                <div>✓ 豆包 · 有效</div>
+                <div style="color:var(--highlighter);">⚠ Kimi · 待配置</div>
+              </div>
+            </div>
+
+            <button class="btn primary" style="width:100%;">⚙️ 高级配置</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · AI 平台智能</div>
+  <div>lumina-20-ai-admin.html · edu/原型/</div>
+  <div>2026-08-25</div>
+</footer>
+
+</body>
+</html>

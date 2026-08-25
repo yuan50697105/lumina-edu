@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina · 05 · 学生桌面端 · 补充页面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.5;}
+  body{padding:48px 56px;}
+
+  .page-header{display:flex; justify-content:space-between; align-items:baseline; padding-bottom:32px; border-bottom:1px solid var(--line); margin-bottom:48px;}
+  .page-header h1{font-family:var(--f-display); font-weight:380; font-size:48px; letter-spacing:-0.02em;}
+  .page-header h1 em{font-style:italic; color:var(--cobalt);}
+  .page-header .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.14em;}
+
+  .section{margin-bottom:60px;}
+  .section-title{font-family:var(--f-mono); font-size:12px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+
+  .desktop{
+    background:#fff; border:1px solid var(--line-strong); border-radius:10px; overflow:hidden;
+    box-shadow:var(--shadow); display:flex; flex-direction:column;
+  }
+  .desktop-bar{
+    background:linear-gradient(180deg, #EDE8D8 0%, #E3DCC8 100%);
+    border-bottom:1px solid var(--line);
+    padding:8px 14px; display:flex; align-items:center; gap:10px;
+  }
+  .desktop-bar .dots{display:flex; gap:6px;}
+  .desktop-bar .dots span{width:10px; height:10px; border-radius:50%;}
+  .desktop-bar .dots span:nth-child(1){background:#F3856C;}
+  .desktop-bar .dots span:nth-child(2){background:#F5B800;}
+  .desktop-bar .dots span:nth-child(3){background:#6BBF6E;}
+  .desktop-bar .title{flex:1; text-align:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);}
+  .desktop-body{background:var(--ricepaper); display:flex; min-height:640px;}
+
+  .device-label{
+    font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em;
+    color:var(--inkwell-2); margin-bottom:12px; display:flex; justify-content:space-between;
+  }
+  .device-label .tag{color:var(--cobalt);}
+
+  .d-side{
+    width:220px; background:#FDFBF3; border-right:1px solid var(--line); padding:20px 16px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .d-side .logo{font-family:var(--f-display); font-size:20px; font-weight:500; display:flex; align-items:center; gap:8px; margin-bottom:18px;}
+  .d-side .logo .dot{width:10px; height:10px; border-radius:50%; background:var(--highlighter);}
+  .d-side .nav-item{
+    display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:6px;
+    font-size:13px; color:var(--inkwell-2);
+  }
+  .d-side .nav-item.active{background:var(--cobalt-soft); color:var(--cobalt); font-weight:500;}
+  .d-side .nav-item svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.7;}
+  .d-side .divider{height:1px; background:var(--line); margin:10px 0;}
+
+  .d-main{flex:1; padding:24px 28px;}
+
+  /* Notes */
+  .notes-layout{display:grid; grid-template-columns:260px 1fr; gap:20px;}
+  .notes-list{display:flex; flex-direction:column; gap:8px;}
+  .note-item{background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px; cursor:pointer;}
+  .note-item:hover{border-color:var(--cobalt);}
+  .note-item.active{border-color:var(--cobalt); background:var(--cobalt-soft);}
+  .note-item .title{font-size:13px; font-weight:500; margin-bottom:4px;}
+  .note-item .meta{font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono);}
+  .note-item .preview{font-size:11px; color:var(--inkwell-2); margin-top:6px; line-height:1.4; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
+
+  .note-editor{background:#fff; border:1px solid var(--line); border-radius:10px; padding:24px; min-height:540px;}
+  .note-editor .note-head{margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--line);}
+  .note-editor h2{font-family:var(--f-display); font-size:28px; font-weight:380; letter-spacing:-0.02em; margin-bottom:4px;}
+  .note-editor .meta{font-size:11px; color:var(--inkwell-2); font-family:var(--f-mono);}
+  .note-editor .content{font-size:14px; line-height:1.8;}
+  .note-editor .content p{margin-bottom:12px;}
+  .note-editor .hl{background:linear-gradient(180deg, transparent 60%, var(--highlighter) 60%, var(--highlighter) 90%, transparent 90%); padding:0 3px;}
+
+  /* Downloads */
+  .downloads-layout{display:grid; grid-template-columns:1fr 320px; gap:20px;}
+  .downloads-list{display:grid; grid-template-columns:repeat(2, 1fr); gap:12px;}
+  .download-item{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .download-item .head{display:flex; gap:10px; align-items:center;}
+  .download-item .ic{width:40px; height:40px; border-radius:8px; background:var(--cobalt-soft); color:var(--cobalt); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600;}
+  .download-item .ic.pdf{background:var(--correction-soft); color:var(--correction);}
+  .download-item .ic.video{background:var(--cobalt-soft); color:var(--cobalt);}
+  .download-item .title{font-size:13px; font-weight:500;}
+  .download-item .meta{font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono);}
+  .download-item .progress{height:3px; background:var(--ricepaper-2); border-radius:2px; overflow:hidden;}
+  .download-item .progress .bar{height:100%; background:var(--cobalt); border-radius:2px;}
+  .download-item .progress.synced .bar{background:var(--growth);}
+  .download-item .actions{display:flex; gap:6px; font-size:11px;}
+  .download-item .actions button{background:none; border:none; color:var(--cobalt); cursor:pointer; font-family:var(--f-body); font-size:11px; padding:0;}
+  .download-item .actions .delete{color:var(--correction);}
+
+  .storage-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px;}
+  .storage-card h5{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin-bottom:12px; font-weight:500;}
+  .storage-bar{height:8px; background:var(--ricepaper-2); border-radius:4px; overflow:hidden; display:flex; margin-bottom:10px;}
+  .storage-bar .seg{height:100%;}
+  .storage-legend{display:flex; flex-direction:column; gap:6px; font-size:12px;}
+  .storage-legend .row{display:flex; gap:8px; align-items:center;}
+  .storage-legend .dot{width:10px; height:10px; border-radius:2px;}
+
+  /* Multi-course */
+  .courses-view{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .course-card{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:20px; position:relative; overflow:hidden;
+  }
+  .course-card .tag{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em;}
+  .course-card .title{font-family:var(--f-display); font-size:22px; font-weight:380; letter-spacing:-0.01em; margin:6px 0 10px; line-height:1.2;}
+  .course-card .info{font-size:11px; color:var(--inkwell-2); font-family:var(--f-mono); margin-bottom:10px;}
+  .course-card .progress{height:4px; background:var(--ricepaper-2); border-radius:2px; overflow:hidden; margin-top:10px;}
+  .course-card .progress .bar{height:100%; background:var(--cobalt); border-radius:2px;}
+  .course-card .footer{display:flex; justify-content:space-between; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:8px;}
+  .course-card.cobalt{background:var(--cobalt); color:#fff; border-color:var(--cobalt);}
+  .course-card.cobalt .tag, .course-card.cobalt .info, .course-card.cobalt .footer{color:rgba(255,255,255,0.7);}
+  .course-card.cobalt .progress{background:rgba(255,255,255,0.2);}
+  .course-card.cobalt .progress .bar{background:var(--highlighter);}
+  .course-card.hl{background:var(--highlighter); border-color:var(--highlighter);}
+  .course-card.hl .progress{background:rgba(15,16,32,0.12);}
+  .course-card.hl .progress .bar{background:var(--inkwell);}
+
+  /* Settings */
+  .settings-layout{display:grid; grid-template-columns:240px 1fr; gap:20px;}
+  .settings-nav{background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px; height:fit-content;}
+  .settings-nav .item{padding:8px 12px; border-radius:6px; font-size:13px; cursor:pointer; color:var(--inkwell-2);}
+  .settings-nav .item:hover{background:var(--ricepaper);}
+  .settings-nav .item.active{background:var(--cobalt-soft); color:var(--cobalt); font-weight:500;}
+
+  .settings-main{display:flex; flex-direction:column; gap:16px;}
+  .setting-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:20px;}
+  .setting-card h3{font-family:var(--f-display); font-size:18px; font-weight:400; margin-bottom:4px;}
+  .setting-card .desc{font-size:12px; color:var(--inkwell-2); margin-bottom:16px;}
+  .setting-row{display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line);}
+  .setting-row:last-child{border-bottom:none;}
+  .setting-row .label{font-size:13px; font-weight:500;}
+  .setting-row .sub{font-size:11px; color:var(--inkwell-2); font-family:var(--f-mono); margin-top:2px;}
+  .toggle{width:40px; height:22px; background:var(--line-strong); border-radius:11px; position:relative; cursor:pointer;}
+  .toggle::after{content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; background:#fff; border-radius:50%; transition:left 0.2s;}
+  .toggle.on{background:var(--cobalt);}
+  .toggle.on::after{left:20px;}
+  select.setting-input{padding:6px 10px; border:1px solid var(--line); border-radius:6px; font-size:12px; font-family:var(--f-body);}
+</style>
+<!-- Icons: Feather Icons (https://feathericons.com) — MIT License, © Cole Bemis -->
+</head>
+<body>
+
+<header class="page-header">
+  <h1>学生桌面端 · <em>补充页面</em></h1>
+  <div class="meta">Lumina · 05 · Extended · Notes / Downloads / Courses / Settings</div>
+</header>
+
+<!-- ============ NOTES ============ -->
+<section class="section">
+  <div class="section-title">01 · 笔记管理 / Notes</div>
+  <div class="device-label">
+    <span>Student · Desktop · 我的笔记</span>
+    <span class="tag">Markdown · 自动同步</span>
+  </div>
+  <div class="desktop">
+    <div class="desktop-bar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="title">Lumina · 我的笔记 · 高等数学 4.4 第二类换元法</div>
+      <div style="width:42px;"></div>
+    </div>
+    <div class="desktop-body">
+      <div class="d-side">
+        <div class="logo"><span class="dot"></span> Lumina</div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+          学习首页
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+          我的课程
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h9"/></svg>
+          作业与测验
+        </div>
+        <div class="nav-item active">
+          <svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg>
+          我的笔记
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
+          下载管理
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          设置
+        </div>
+      </div>
+
+      <div class="d-main">
+        <div class="notes-layout">
+          <div class="notes-list">
+            <div style="font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin-bottom:4px;">全部笔记 · 24</div>
+            <div class="note-item active">
+              <div class="title">4.4 第二类换元法</div>
+              <div class="meta">高等数学 · 2 小时前</div>
+              <div class="preview">三角换元的关键是被积函数含有 √(a²-x²) 形式时，令 x = a·sin(t)，此时 dx = a·cos(t)dt...</div>
+            </div>
+            <div class="note-item">
+              <div class="title">4.3 第一类换元法</div>
+              <div class="meta">高等数学 · 昨天</div>
+              <div class="preview">第一类换元的核心是凑微分，将被积函数写成 f(g(x))·g'(x)dx 的形式...</div>
+            </div>
+            <div class="note-item">
+              <div class="title">康德的先验分析论</div>
+              <div class="meta">西方哲学 · 3 天前</div>
+              <div class="preview">先验分析论探讨的是知性的纯粹概念，即范畴。康德将范畴分为四类...</div>
+            </div>
+            <div class="note-item">
+              <div class="title">二叉搜索树的插入</div>
+              <div class="meta">数据结构 · 5 天前</div>
+              <div class="preview">BST 插入的时间复杂度平均为 O(log n)，最坏情况为 O(n)...</div>
+            </div>
+            <div class="note-item">
+              <div class="title">矩阵特征值的几何意义</div>
+              <div class="meta">线性代数 · 1 周前</div>
+              <div class="preview">特征值表示矩阵在某个方向上的缩放因子，特征向量则是该方向...</div>
+            </div>
+          </div>
+
+          <div class="note-editor">
+            <div class="note-head">
+              <h2>4.4 第二类换元法</h2>
+              <div class="meta">高等数学 · 2026-08-24 14:32 · 已自动保存</div>
+            </div>
+            <div class="content">
+              <p><strong>核心思想：</strong>通过引入新变量 t = g(x)，将复杂积分化为更简单的形式。</p>
+              <p><strong>三类常见换元：</strong></p>
+              <p>1. <span class="hl">三角换元</span> — 适用于含 √(a²-x²), √(a²+x²), √(x²-a²) 的被积函数。</p>
+              <p>例：∫√(1-x²)dx，令 x = sin(t)，则 dx = cos(t)dt，原式变为 ∫cos²(t)dt。</p>
+              <p>2. <span class="hl">倒代换</span> — 适用于分母幂次较高的情况，令 x = 1/t。</p>
+              <p>3. <span class="hl">根式换元</span> — 适用于含 n 次根号的情况。</p>
+              <p><strong><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg> 注意：</strong>换元后不要忘记替换 dx，且最终结果要换回 x。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DOWNLOADS ============ -->
+<section class="section">
+  <div class="section-title">02 · 下载管理 / Downloads</div>
+  <div class="device-label">
+    <span>Student · Desktop · 离线内容</span>
+    <span class="tag">已用 1.2 GB / 5 GB</span>
+  </div>
+  <div class="desktop">
+    <div class="desktop-bar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="title">Lumina · 下载管理</div>
+      <div style="width:42px;"></div>
+    </div>
+    <div class="desktop-body">
+      <div class="d-side">
+        <div class="logo"><span class="dot"></span> Lumina</div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+          学习首页
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+          我的课程
+        </div>
+        <div class="nav-item active">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
+          下载管理
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg>
+          专注模式
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4"/></svg>
+          设置
+        </div>
+      </div>
+
+      <div class="d-main">
+        <div class="downloads-layout">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <h2 style="font-family:var(--f-display); font-size:24px; font-weight:400;">已下载内容 · 14 项</h2>
+              <div style="display:flex; gap:8px;">
+                <button style="padding:6px 12px; background:#fff; border:1px solid var(--line); border-radius:6px; font-size:12px; cursor:pointer;">全部</button>
+                <button style="padding:6px 12px; background:var(--cobalt); color:#fff; border:1px solid var(--cobalt); border-radius:6px; font-size:12px; cursor:pointer;">视频</button>
+                <button style="padding:6px 12px; background:#fff; border:1px solid var(--line); border-radius:6px; font-size:12px; cursor:pointer;">讲义</button>
+              </div>
+            </div>
+            <div class="downloads-list">
+              <div class="download-item">
+                <div class="head">
+                  <div class="ic video">MP4</div>
+                  <div>
+                    <div class="title">4.4 第二类换元法</div>
+                    <div class="meta">1080p · 186 MB · 高数</div>
+                  </div>
+                </div>
+                <div class="progress synced"><div class="bar" style="width:100%;"></div></div>
+                <div class="actions">
+                  <button>打开</button>
+                  <button>分享</button>
+                  <button class="delete">删除</button>
+                </div>
+              </div>
+              <div class="download-item">
+                <div class="head">
+                  <div class="ic pdf">PDF</div>
+                  <div>
+                    <div class="title">第四章 · 讲义</div>
+                    <div class="meta">12.4 MB · 高数</div>
+                  </div>
+                </div>
+                <div class="progress synced"><div class="bar" style="width:100%;"></div></div>
+                <div class="actions">
+                  <button>打开</button>
+                  <button>分享</button>
+                  <button class="delete">删除</button>
+                </div>
+              </div>
+              <div class="download-item">
+                <div class="head">
+                  <div class="ic pdf">PDF</div>
+                  <div>
+                    <div class="title">第四章习题集 · 带解答</div>
+                    <div class="meta">2.1 MB · 高数</div>
+                  </div>
+                </div>
+                <div class="progress synced"><div class="bar" style="width:100%;"></div></div>
+                <div class="actions">
+                  <button>打开</button>
+                  <button>分享</button>
+                  <button class="delete">删除</button>
+                </div>
+              </div>
+              <div class="download-item">
+                <div class="head">
+                  <div class="ic video">MP4</div>
+                  <div>
+                    <div class="title">4.3 第一类换元法</div>
+                    <div class="meta">1080p · 215 MB · 下载中</div>
+                  </div>
+                </div>
+                <div class="progress"><div class="bar" style="width:64%;"></div></div>
+                <div class="actions">
+                  <button>暂停</button>
+                  <button>取消</button>
+                </div>
+              </div>
+              <div class="download-item">
+                <div class="head">
+                  <div class="ic pdf">PDF</div>
+                  <div>
+                    <div class="title">第三章 · 微分中值定理</div>
+                    <div class="meta">10.8 MB · 高数</div>
+                  </div>
+                </div>
+                <div class="progress synced"><div class="bar" style="width:100%;"></div></div>
+                <div class="actions">
+                  <button>打开</button>
+                  <button>分享</button>
+                  <button class="delete">删除</button>
+                </div>
+              </div>
+              <div class="download-item">
+                <div class="head">
+                  <div class="ic" style="background:var(--highlighter-soft); color:#8A6500;">JNB</div>
+                  <div>
+                    <div class="title">积分推导 · 交互笔记</div>
+                    <div class="meta">0.8 MB · 高数</div>
+                  </div>
+                </div>
+                <div class="progress synced"><div class="bar" style="width:100%;"></div></div>
+                <div class="actions">
+                  <button>打开</button>
+                  <button>分享</button>
+                  <button class="delete">删除</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div class="storage-card">
+              <h5>存储空间</h5>
+              <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px;">
+                <span>已用 1.2 GB / 5 GB</span>
+                <span style="font-family:var(--f-display); font-size:16px;">24%</span>
+              </div>
+              <div class="storage-bar">
+                <div class="seg" style="width:40%; background:var(--cobalt);"></div>
+                <div class="seg" style="width:25%; background:var(--highlighter);"></div>
+                <div class="seg" style="width:15%; background:var(--growth);"></div>
+              </div>
+              <div class="storage-legend">
+                <div class="row"><div class="dot" style="background:var(--cobalt);"></div><span>视频 · 720 MB</span></div>
+                <div class="row"><div class="dot" style="background:var(--highlighter);"></div><span>讲义 · 430 MB</span></div>
+                <div class="row"><div class="dot" style="background:var(--growth);"></div><span>笔记 · 50 MB</span></div>
+              </div>
+            </div>
+            <div class="storage-card">
+              <h5>同步状态</h5>
+              <div style="display:flex; gap:10px; align-items:center; padding:8px 0;">
+                <div style="width:30px; height:30px; border-radius:50%; background:var(--growth-soft); color:var(--growth); display:flex; align-items:center; justify-content:center;">✓</div>
+                <div>
+                  <div style="font-size:13px; font-weight:500;">全部同步完成</div>
+                  <div style="font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono);">最后同步 · 5 分钟前</div>
+                </div>
+              </div>
+            </div>
+            <div class="storage-card" style="background:var(--inkwell); color:var(--ricepaper); border:none;">
+              <h5 style="color:var(--highlighter);"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12c1 1 2 2 2 4h4c0-2 1-3 2-4a7 7 0 0 0-4-12z"/></svg> 离线小贴士</h5>
+              <div style="font-size:12px; line-height:1.6; opacity:0.9;">
+                已下载内容在断网时也可使用。重新连接后，笔记和进度会自动同步到云端。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SETTINGS ============ -->
+<section class="section">
+  <div class="section-title">03 · 设置 / Settings</div>
+  <div class="device-label">
+    <span>Student · Desktop · 应用设置</span>
+    <span class="tag">偏好 · 存储 · 同步</span>
+  </div>
+  <div class="desktop">
+    <div class="desktop-bar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="title">Lumina · 设置</div>
+      <div style="width:42px;"></div>
+    </div>
+    <div class="desktop-body">
+      <div class="d-side">
+        <div class="logo"><span class="dot"></span> Lumina</div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+          学习首页
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+          我的课程
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
+          下载管理
+        </div>
+        <div class="nav-item active">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9"/></svg>
+          设置
+        </div>
+      </div>
+
+      <div class="d-main">
+        <div class="settings-layout">
+          <div class="settings-nav">
+            <div class="item active">通用</div>
+            <div class="item">外观</div>
+            <div class="item">通知</div>
+            <div class="item">专注模式</div>
+            <div class="item">存储</div>
+            <div class="item">账号与安全</div>
+            <div class="item">关于</div>
+          </div>
+
+          <div class="settings-main">
+            <h2 style="font-family:var(--f-display); font-size:28px; font-weight:380; letter-spacing:-0.02em;">通用设置</h2>
+
+            <div class="setting-card">
+              <h3>语言与地区</h3>
+              <div class="desc">设置应用界面语言和时区</div>
+              <div class="setting-row">
+                <div>
+                  <div class="label">界面语言</div>
+                  <div class="sub">应用内显示的语言</div>
+                </div>
+                <select class="setting-input"><option>简体中文</option><option>English</option></select>
+              </div>
+              <div class="setting-row">
+                <div>
+                  <div class="label">时区</div>
+                  <div class="sub">用于日期和时间的显示</div>
+                </div>
+                <select class="setting-input"><option>Asia/Shanghai (UTC+8)</option></select>
+              </div>
+            </div>
+
+            <div class="setting-card">
+              <h3>下载与同步</h3>
+              <div class="desc">管理离线内容和云端同步</div>
+              <div class="setting-row">
+                <div>
+                  <div class="label">Wi-Fi 下自动下载</div>
+                  <div class="sub">在 Wi-Fi 连接时自动下载订阅的课程内容</div>
+                </div>
+                <div class="toggle on"></div>
+              </div>
+              <div class="setting-row">
+                <div>
+                  <div class="label">视频画质</div>
+                  <div class="sub">下载视频时的默认画质</div>
+                </div>
+                <select class="setting-input"><option>1080p 高清</option><option>720p</option><option>480p</option></select>
+              </div>
+              <div class="setting-row">
+                <div>
+                  <div class="label">云端同步</div>
+                  <div class="sub">自动同步笔记、进度和作业</div>
+                </div>
+                <div class="toggle on"></div>
+              </div>
+            </div>
+
+            <div class="setting-card">
+              <h3>快捷键</h3>
+              <div class="desc">自定义常用操作的快捷键</div>
+              <div class="setting-row">
+                <div>
+                  <div class="label">进入专注模式</div>
+                </div>
+                <div style="font-family:var(--f-mono); font-size:12px; padding:4px 10px; background:var(--ricepaper); border:1px solid var(--line); border-radius:4px;">⌘ + K</div>
+              </div>
+              <div class="setting-row">
+                <div>
+                  <div class="label">快速搜索</div>
+                </div>
+                <div style="font-family:var(--f-mono); font-size:12px; padding:4px 10px; background:var(--ricepaper); border:1px solid var(--line); border-radius:4px;">⌘ + F</div>
+              </div>
+              <div class="setting-row">
+                <div>
+                  <div class="label">新建笔记</div>
+                </div>
+                <div style="font-family:var(--f-mono); font-size:12px; padding:4px 10px; background:var(--ricepaper); border:1px solid var(--line); border-radius:4px;">⌘ + N</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

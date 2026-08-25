@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina · 13 · 教师深度功能 · Web 端</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.5;}
+  body{padding:48px 56px;}
+
+  .page-header{display:flex; justify-content:space-between; align-items:baseline; padding-bottom:32px; border-bottom:1px solid var(--line); margin-bottom:48px;}
+  .page-header h1{font-family:var(--f-display); font-weight:380; font-size:48px; letter-spacing:-0.02em;}
+  .page-header h1 em{font-style:italic; color:var(--cobalt);}
+  .page-header .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.14em;}
+
+  .section{margin-bottom:60px;}
+  .section-title{font-family:var(--f-mono); font-size:12px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .section-desc{font-size:14px; color:var(--inkwell-2); margin:-12px 0 20px; max-width:720px;}
+
+  /* Browser frame */
+  .browser{
+    background:#fff; border:1px solid var(--line-strong); border-radius:12px;
+    box-shadow:var(--shadow); overflow:hidden; margin-bottom:32px;
+  }
+  .browser-bar{
+    background:#F2EBD8; border-bottom:1px solid var(--line); padding:10px 14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .browser-bar .lights{display:flex; gap:6px;}
+  .browser-bar .lights span{width:11px; height:11px; border-radius:50%; background:var(--line-strong);}
+  .browser-bar .lights span:nth-child(1){background:#ED6A5E;}
+  .browser-bar .lights span:nth-child(2){background:#F4BF4F;}
+  .browser-bar .lights span:nth-child(3){background:#61C554;}
+  .browser-bar .url{
+    flex:1; background:#fff; border:1px solid var(--line); border-radius:6px;
+    padding:5px 10px; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);
+  }
+  .browser-bar .nav-btns{display:flex; gap:4px;}
+  .browser-bar .nav-btns svg{width:16px; height:16px; fill:none; stroke:var(--inkwell-2); stroke-width:1.8;}
+
+  .browser-content{padding:0; background:var(--ricepaper); min-height:480px; overflow:hidden;}
+
+  /* Generic web layout */
+  .web-layout{display:grid; grid-template-columns:220px 1fr; min-height:480px;}
+  .web-sidebar{
+    background:#fff; border-right:1px solid var(--line); padding:20px 14px;
+  }
+  .web-sidebar .brand{
+    font-family:var(--f-display); font-size:18px; font-weight:400;
+    padding-bottom:14px; margin-bottom:14px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:8px;
+  }
+  .web-sidebar .brand .logo{
+    width:22px; height:22px; border-radius:5px;
+    background:var(--inkwell); color:var(--highlighter);
+    font-family:var(--f-display); font-style:italic; font-weight:500;
+    display:flex; align-items:center; justify-content:center; font-size:13px;
+  }
+  .web-sidebar .nav-group{margin-bottom:16px;}
+  .web-sidebar .nav-group .label{
+    font-family:var(--f-mono); font-size:9px; text-transform:uppercase;
+    letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:6px;
+  }
+  .web-sidebar .nav-item{
+    display:flex; align-items:center; gap:8px; padding:7px 9px;
+    border-radius:6px; font-size:12px; cursor:pointer; margin-bottom:2px;
+    color:var(--inkwell-2);
+  }
+  .web-sidebar .nav-item svg{width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:1.8;}
+  .web-sidebar .nav-item:hover{background:var(--ricepaper);}
+  .web-sidebar .nav-item.active{background:var(--cobalt); color:#fff;}
+  .web-sidebar .nav-item.active svg{stroke:#fff;}
+
+  .web-main{padding:22px 28px; overflow-y:auto;}
+  .web-main .topbar{
+    display:flex; justify-content:space-between; align-items:center;
+    padding-bottom:14px; margin-bottom:18px; border-bottom:1px solid var(--line);
+  }
+  .web-main .topbar .crumbs{
+    font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);
+    text-transform:uppercase; letter-spacing:0.12em;
+  }
+  .web-main .topbar h2{font-family:var(--f-display); font-size:24px; font-weight:380; letter-spacing:-0.01em;}
+  .web-main .topbar .actions{display:flex; gap:8px; align-items:center;}
+  .web-main .topbar .actions .btn{
+    padding:6px 12px; border-radius:6px; font-size:11px; font-weight:500; cursor:pointer; border:1px solid var(--line); background:#fff;
+    display:flex; align-items:center; gap:6px;
+  }
+  .web-main .topbar .actions .btn svg{width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:1.8;}
+  .web-main .topbar .actions .btn.primary{background:var(--cobalt); color:#fff; border-color:var(--cobalt);}
+  .web-main .topbar .actions .avatar{
+    width:28px; height:28px; border-radius:50%; background:var(--cobalt); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:12px;
+  }
+
+  /* Cards */
+  .card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px;}
+  .card h4{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:10px; font-weight:500;}
+  .card.dark{background:var(--inkwell); color:#fff; border-color:var(--inkwell);}
+  .card.dark h4{color:rgba(255,255,255,0.6);}
+  .card.cobalt{background:var(--cobalt); color:#fff; border-color:var(--cobalt);}
+  .card.cobalt h4{color:rgba(255,255,255,0.7);}
+  .card.hl{background:var(--highlighter-soft); border-color:var(--highlighter);}
+  .card.growth{background:var(--growth-soft); border-color:var(--growth);}
+  .card.correction{background:var(--correction-soft); border-color:var(--correction);}
+
+  /* Grid helpers */
+  .g2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .g3{display:grid; grid-template-columns:repeat(3, 1fr); gap:14px;}
+  .g4{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;}
+
+  /* Live Teaching */
+  .live-hero{display:grid; grid-template-columns:2fr 1fr; gap:14px; margin-bottom:14px;}
+  .video-stage{
+    background:linear-gradient(135deg, var(--inkwell) 0%, #2A2B3D 100%);
+    border-radius:10px; aspect-ratio:16/9; position:relative;
+    display:flex; align-items:center; justify-content:center;
+    color:rgba(255,255,255,0.4); font-family:var(--f-mono); font-size:11px;
+    text-transform:uppercase; letter-spacing:0.1em;
+  }
+  .video-stage .badge{position:absolute; top:10px; left:10px; display:flex; gap:6px;}
+  .video-stage .badge .rec{
+    background:var(--correction); color:#fff; font-family:var(--f-mono); font-size:10px; font-weight:600;
+    padding:3px 8px; border-radius:4px; display:flex; align-items:center; gap:5px;
+  }
+  .video-stage .badge .rec .dot{width:6px; height:6px; border-radius:50%; background:#fff; animation: pulse 1.5s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.3;}}
+  .video-stage .badge .info{background:rgba(0,0,0,0.5); color:#fff; font-family:var(--f-mono); font-size:10px; padding:3px 8px; border-radius:4px;}
+  .video-stage .teacher-cam{
+    position:absolute; bottom:12px; right:12px; width:110px; height:82px;
+    background:var(--cobalt); border:2px solid rgba(255,255,255,0.3); border-radius:8px;
+    display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--f-display); font-size:24px;
+  }
+  .video-stage .pip{
+    position:absolute; top:12px; right:12px; display:flex; flex-direction:column; gap:6px;
+  }
+  .video-stage .pip .cam{
+    width:90px; height:68px; background:var(--inkwell-2); border:1px solid rgba(255,255,255,0.15);
+    border-radius:6px; display:flex; align-items:center; justify-content:center;
+    color:rgba(255,255,255,0.5); font-family:var(--f-display); font-size:14px;
+  }
+
+  .chat-side{
+    background:#fff; border:1px solid var(--line); border-radius:10px;
+    display:flex; flex-direction:column; min-height:280px;
+  }
+  .chat-side .chat-head{
+    padding:12px 14px; border-bottom:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .chat-side .chat-head .title{font-size:12px; font-weight:500;}
+  .chat-side .chat-head .count{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);}
+  .chat-side .chat-list{flex:1; padding:10px 14px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; max-height:280px;}
+  .chat-side .msg{display:flex; gap:8px; align-items:flex-start;}
+  .chat-side .msg .av{
+    width:24px; height:24px; border-radius:50%; background:var(--cobalt); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:10px; flex-shrink:0;
+  }
+  .chat-side .msg .content{flex:1;}
+  .chat-side .msg .name{font-size:10px; font-weight:500; margin-bottom:2px;}
+  .chat-side .msg .name .time{color:var(--inkwell-2); font-family:var(--f-mono); font-weight:400; margin-left:6px; font-size:9px;}
+  .chat-side .msg .text{font-size:11px; line-height:1.5; color:var(--inkwell);}
+  .chat-side .msg .text.answered{background:var(--growth-soft); padding:4px 8px; border-radius:6px; color:var(--growth);}
+  .chat-side .chat-input{padding:10px 14px; border-top:1px solid var(--line); display:flex; gap:8px;}
+  .chat-side .chat-input input{
+    flex:1; padding:6px 10px; border:1px solid var(--line); border-radius:6px; font-size:11px; background:var(--ricepaper);
+    font-family:var(--f-body); outline:none;
+  }
+  .chat-side .chat-input button{padding:6px 12px; background:var(--cobalt); color:#fff; border:none; border-radius:6px; font-size:11px; cursor:pointer;}
+
+  .control-bar{
+    display:flex; gap:8px; padding:12px 14px; background:#fff; border:1px solid var(--line); border-radius:10px;
+    align-items:center;
+  }
+  .control-bar .tool{
+    display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 12px;
+    border-radius:6px; background:var(--ricepaper); border:1px solid var(--line); cursor:pointer;
+    min-width:64px;
+  }
+  .control-bar .tool svg{width:16px; height:16px; fill:none; stroke:var(--inkwell); stroke-width:1.7;}
+  .control-bar .tool span{font-size:10px;}
+  .control-bar .tool.active{background:var(--cobalt); border-color:var(--cobalt);}
+  .control-bar .tool.active svg{stroke:#fff;}
+  .control-bar .tool.active span{color:#fff;}
+  .control-bar .spacer{flex:1;}
+  .control-bar .end-btn{
+    padding:8px 18px; background:var(--correction); color:#fff; border:none; border-radius:6px;
+    font-size:11px; font-weight:500; cursor:pointer;
+  }
+
+  /* Analytics */
+  .stat-row{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:14px;}
+  .stat-card{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px;
+  }
+  .stat-card .label{font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:4px;}
+  .stat-card .val{font-family:var(--f-display); font-size:28px; font-weight:380; letter-spacing:-0.01em;}
+  .stat-card .delta{font-family:var(--f-mono); font-size:10px; margin-top:4px;}
+  .stat-card .delta.up{color:var(--growth);}
+  .stat-card .delta.down{color:var(--correction);}
+  .stat-card.hl{background:var(--highlighter-soft); border-color:var(--highlighter);}
+  .stat-card.grow{background:var(--growth-soft); border-color:var(--growth);}
+  .stat-card.warn{background:var(--correction-soft); border-color:var(--correction);}
+
+  /* Risk table */
+  .risk-table{width:100%; border-collapse:collapse;}
+  .risk-table th{
+    font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em;
+    color:var(--inkwell-2); text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); font-weight:500;
+  }
+  .risk-table td{padding:10px; border-bottom:1px dashed var(--line); font-size:12px; vertical-align:middle;}
+  .risk-table .av{
+    width:28px; height:28px; border-radius:50%; background:var(--cobalt); color:#fff;
+    display:inline-flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:11px; vertical-align:middle;
+  }
+  .risk-table .av.warn{background:var(--correction);}
+  .risk-table .av.warn2{background:var(--highlighter); color:#8A6500;}
+  .risk-table .pill{padding:3px 8px; border-radius:6px; font-size:10px; font-weight:500;}
+  .risk-table .pill.high{background:var(--correction-soft); color:var(--correction);}
+  .risk-table .pill.med{background:var(--highlighter-soft); color:#8A6500;}
+  .risk-table .pill.low{background:var(--growth-soft); color:var(--growth);}
+  .risk-table .bar-cell{display:flex; align-items:center; gap:6px;}
+  .risk-table .bar-cell .bar{flex:1; height:5px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden;}
+  .risk-table .bar-cell .bar .fill{height:100%; border-radius:3px;}
+  .risk-table .bar-cell .pct{font-family:var(--f-mono); font-size:10px; min-width:30px;}
+
+  /* Question bank */
+  .filter-row{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center;}
+  .filter-chip{
+    padding:5px 11px; background:#fff; border:1px solid var(--line); border-radius:14px;
+    font-size:11px; cursor:pointer; color:var(--inkwell-2);
+  }
+  .filter-chip.active{background:var(--cobalt); color:#fff; border-color:var(--cobalt);}
+  .filter-search{
+    flex:1; padding:5px 11px; border:1px solid var(--line); border-radius:14px;
+    font-size:11px; background:#fff; outline:none; font-family:var(--f-body);
+  }
+
+  .q-table{width:100%; border-collapse:collapse;}
+  .q-table th{
+    font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em;
+    color:var(--inkwell-2); text-align:left; padding:10px; border-bottom:1px solid var(--line); font-weight:500;
+  }
+  .q-table td{padding:12px 10px; border-bottom:1px dashed var(--line); font-size:12px; vertical-align:top;}
+  .q-table .qtype{display:inline-block; padding:2px 7px; border-radius:6px; font-size:9px; font-weight:500; font-family:var(--f-mono); text-transform:uppercase; letter-spacing:0.05em;}
+  .q-table .qtype.mc{background:var(--highlighter-soft); color:#8A6500;}
+  .q-table .qtype.tf{background:var(--growth-soft); color:var(--growth);}
+  .q-table .qtype.essay{background:var(--correction-soft); color:var(--correction);}
+  .q-table .qtype.fill{background:var(--cobalt-soft); color:var(--cobalt);}
+  .q-table .row:hover{background:var(--ricepaper);}
+  .q-table .stars{color:var(--highlighter); font-size:10px; letter-spacing:1px;}
+  .q-table .row-act{display:flex; gap:4px;}
+  .q-table .row-act button{padding:3px 8px; font-size:10px; border-radius:4px; cursor:pointer; border:1px solid var(--line); background:#fff;}
+  .q-table .row-act button.primary{background:var(--cobalt); color:#fff; border-color:var(--cobalt);}
+
+  /* Evaluation */
+  .eval-grid{display:grid; grid-template-columns:1fr 2fr; gap:14px;}
+  .eval-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px;}
+  .eval-card .head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid var(--line);}
+  .eval-card .title{font-family:var(--f-display); font-size:16px; font-weight:400;}
+  .eval-card .status{font-size:10px; padding:3px 8px; border-radius:10px; font-weight:500;}
+  .eval-card .status.open{background:var(--growth-soft); color:var(--growth);}
+  .eval-card .status.closed{background:var(--ricepaper-2); color:var(--inkwell-2);}
+
+  .dim-row{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .dim-row .lbl{font-size:12px; min-width:90px;}
+  .dim-row .bar{flex:1; height:8px; background:var(--ricepaper-2); border-radius:4px; overflow:hidden;}
+  .dim-row .bar .fill{height:100%; border-radius:4px;}
+  .dim-row .score{font-family:var(--f-mono); font-size:11px; min-width:30px; text-align:right; font-weight:500;}
+
+  .comment-item{
+    padding:10px; background:var(--ricepaper); border-radius:6px; margin-bottom:8px;
+    font-size:12px; line-height:1.6; font-style:italic;
+  }
+  .comment-item.pos{background:var(--growth-soft); color:var(--growth); font-style:normal;}
+
+  .term-compare{display:grid; grid-template-columns:repeat(5, 1fr); gap:8px;}
+  .term-compare .term{
+    text-align:center; padding:12px 8px; border-radius:8px; background:var(--ricepaper);
+  }
+  .term-compare .term.current{background:var(--cobalt); color:#fff;}
+  .term-compare .term .t{font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; opacity:0.7;}
+  .term-compare .term .v{font-family:var(--f-display); font-size:22px; font-weight:400; margin:4px 0;}
+  .term-compare .term .d{font-family:var(--f-mono); font-size:9px;}
+</style>
+<!-- Icons: Feather Icons (https://feathericons.com) — MIT License, © Cole Bemis -->
+</head>
+<body>
+
+<header class="page-header">
+  <h1>教师深度功能 <em>Teacher · Deep</em></h1>
+  <div class="meta">Lumina · 13 · Web · Live Teaching / Analytics / Question Bank / Eval</div>
+</header>
+
+<!-- ============ LIVE TEACHING ============ -->
+<section class="section">
+  <div class="section-title">01 · 直播授课 / Live Teaching · Teacher Control</div>
+  <div class="section-desc">Web 端直播控制：主画面 + 摄像头画中画 + 学生举手队列 + 实时答题 + 聊天弹幕。</div>
+
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="lights"><span></span><span></span><span></span></div>
+      <div class="url">lumina.app / live / gaoshu-a-03</div>
+      <div class="nav-btns">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </div>
+    </div>
+    <div class="browser-content">
+      <div class="web-layout">
+        <aside class="web-sidebar">
+          <div class="brand"><div class="logo">L</div>Lumina</div>
+          <div class="nav-group">
+            <div class="label">教学</div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>直播授课</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>课程管理</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>题库试卷</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>考勤评分</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">学生</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>学生列表</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>辅导记录</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">分析</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>学情分析</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>教学评估</div>
+          </div>
+        </aside>
+
+        <main class="web-main">
+          <div class="topbar">
+            <div>
+              <div class="crumbs">直播 / 高等数学 A · 第三教学班</div>
+              <h2>直播授课 · 第四章 三角换元</h2>
+            </div>
+            <div class="actions">
+              <div class="btn"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>麦克风</div>
+              <div class="btn"><svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>摄像头</div>
+              <div class="btn primary"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>共享屏幕</div>
+              <div class="avatar">王</div>
+            </div>
+          </div>
+
+          <div class="live-hero">
+            <div>
+              <div class="video-stage">
+                · 主讲画面 · 课件共享中 ·
+                <div class="badge">
+                  <div class="rec"><span class="dot"></span>REC</div>
+                  <div class="info">01:23:45</div>
+                  <div class="info">128 人在线</div>
+                </div>
+                <div class="pip">
+                  <div class="cam">陈</div>
+                  <div class="cam">林</div>
+                </div>
+                <div class="teacher-cam">王</div>
+              </div>
+
+              <div class="control-bar" style="margin-top:14px;">
+                <div class="tool active"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg><span>麦克风</span></div>
+                <div class="tool active"><svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg><span>摄像头</span></div>
+                <div class="tool"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span>共享</span></div>
+                <div class="tool"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span>课件</span></div>
+                <div class="tool"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>提问</span></div>
+                <div class="tool"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg><span>投票</span></div>
+                <div class="tool"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>点名</span></div>
+                <div class="spacer"></div>
+                <button class="end-btn">结束直播</button>
+              </div>
+            </div>
+
+            <div class="chat-side">
+              <div class="chat-head">
+                <div class="title">举手 · 5 人</div>
+                <div class="count">随机 · 优先</div>
+              </div>
+              <div class="chat-list">
+                <div class="msg">
+                  <div class="av" style="background:var(--growth);">陈</div>
+                  <div class="content">
+                    <div class="name">陈浩然 <span class="time">等 2:14</span></div>
+                    <div class="text">"老师，三角换元的符号怎么定？"</div>
+                  </div>
+                </div>
+                <div class="msg">
+                  <div class="av" style="background:var(--cobalt);">林</div>
+                  <div class="content">
+                    <div class="name">林思语 <span class="time">等 1:40</span></div>
+                    <div class="text">"sin 换元与 cos 换元的区别是什么？"</div>
+                  </div>
+                </div>
+                <div class="msg">
+                  <div class="av" style="background:var(--correction-soft); color:var(--correction);">周</div>
+                  <div class="content">
+                    <div class="name">周子涵 <span class="time">等 0:32</span></div>
+                    <div class="text">"积分上限变化后如何调整？"</div>
+                  </div>
+                </div>
+                <div class="msg">
+                  <div class="av" style="background:var(--cobalt);">张</div>
+                  <div class="content">
+                    <div class="name">张雅文 <span class="time">等 0:18</span></div>
+                    <div class="text">"dx 的换元公式记不住"</div>
+                  </div>
+                </div>
+                <div class="msg">
+                  <div class="av" style="background:var(--highlighter); color:#8A6500;">李</div>
+                  <div class="content">
+                    <div class="name">李泽宇 <span class="time">等 0:05</span></div>
+                    <div class="text">"刚举手"</div>
+                  </div>
+                </div>
+              </div>
+              <div class="chat-input">
+                <input placeholder="回复学生..." />
+                <button>发送</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="g2">
+            <div class="card cobalt">
+              <h4>实时答题 · 第 3 题</h4>
+              <div style="font-family:var(--f-display); font-size:18px; font-weight:380; margin-bottom:8px;">三角换元的适用条件</div>
+              <div style="display:flex; gap:8px; font-size:11px; opacity:0.85; margin-bottom:10px;">
+                <span>已作答 98 / 128</span>
+                <span>· 剩余 42 秒</span>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:5px;">
+                <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                  <span style="font-family:var(--f-mono); font-weight:500; min-width:16px; color:rgba(255,255,255,0.8);">A</span>
+                  <div style="flex:1; height:8px; background:rgba(255,255,255,0.15); border-radius:4px; overflow:hidden;"><div style="width:42%; height:100%; background:var(--highlighter); border-radius:4px;"></div></div>
+                  <span style="font-family:var(--f-mono); min-width:60px; text-align:right;">42% · 54 人</span>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                  <span style="font-family:var(--f-mono); font-weight:500; min-width:16px; color:rgba(255,255,255,0.8);">B</span>
+                  <div style="flex:1; height:8px; background:rgba(255,255,255,0.15); border-radius:4px; overflow:hidden;"><div style="width:18%; height:100%; background:rgba(255,255,255,0.4); border-radius:4px;"></div></div>
+                  <span style="font-family:var(--f-mono); min-width:60px; text-align:right;">18% · 23 人</span>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                  <span style="font-family:var(--f-mono); font-weight:500; min-width:16px; color:rgba(255,255,255,0.8);">C</span>
+                  <div style="flex:1; height:8px; background:rgba(255,255,255,0.15); border-radius:4px; overflow:hidden;"><div style="width:32%; height:100%; background:rgba(255,255,255,0.4); border-radius:4px;"></div></div>
+                  <span style="font-family:var(--f-mono); min-width:60px; text-align:right;">32% · 41 人</span>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                  <span style="font-family:var(--f-mono); font-weight:500; min-width:16px; color:rgba(255,255,255,0.8);">D</span>
+                  <div style="flex:1; height:8px; background:rgba(255,255,255,0.15); border-radius:4px; overflow:hidden;"><div style="width:8%; height:100%; background:var(--correction); border-radius:4px;"></div></div>
+                  <span style="font-family:var(--f-mono); min-width:60px; text-align:right;">8% · 10 人</span>
+                </div>
+              </div>
+              <div style="margin-top:12px; padding:8px 10px; background:rgba(255,255,255,0.15); border-radius:6px; font-size:11px;">
+                ✓ 正确答案：<b>A</b> · 54 人答对
+              </div>
+            </div>
+
+            <div class="card">
+              <h4>课堂统计</h4>
+              <div class="g2">
+                <div>
+                  <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em;">出勤</div>
+                  <div style="font-family:var(--f-display); font-size:22px; font-weight:400; color:var(--growth);">93%</div>
+                </div>
+                <div>
+                  <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em;">参与度</div>
+                  <div style="font-family:var(--f-display); font-size:22px; font-weight:400; color:var(--cobalt);">87%</div>
+                </div>
+                <div>
+                  <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em;">答题正确率</div>
+                  <div style="font-family:var(--f-display); font-size:22px; font-weight:400;">76%</div>
+                </div>
+                <div>
+                  <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em;">举手提问</div>
+                  <div style="font-family:var(--f-display); font-size:22px; font-weight:400; color:var(--highlighter);">14</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ANALYTICS ============ -->
+<section class="section">
+  <div class="section-title">02 · 数据分析仪表盘 / Analytics Dashboard</div>
+  <div class="section-desc">课程级数据看板：成绩分布、学情趋势、学生预警、关键洞察；教师可快速做出教学决策。</div>
+
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="lights"><span></span><span></span><span></span></div>
+      <div class="url">lumina.app / analytics / gaoshu-a</div>
+      <div class="nav-btns">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </div>
+    </div>
+    <div class="browser-content">
+      <div class="web-layout">
+        <aside class="web-sidebar">
+          <div class="brand"><div class="logo">L</div>Lumina</div>
+          <div class="nav-group">
+            <div class="label">教学</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>直播授课</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>课程管理</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>题库试卷</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>考勤评分</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">学生</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>学生列表</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>辅导记录</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">分析</div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>学情分析</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>教学评估</div>
+          </div>
+        </aside>
+
+        <main class="web-main">
+          <div class="topbar">
+            <div>
+              <div class="crumbs">分析 / 高等数学 A · 第三教学班</div>
+              <h2>学情分析 · 2026 春季学期</h2>
+            </div>
+            <div class="actions">
+              <div class="btn"><svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>筛选</div>
+              <div class="btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</div>
+              <div class="avatar">王</div>
+            </div>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-card hl">
+              <div class="label">班级均分</div>
+              <div class="val">87</div>
+              <div class="delta up">↑ 3 vs 期中</div>
+            </div>
+            <div class="stat-card grow">
+              <div class="label">出勤率</div>
+              <div class="val">93%</div>
+              <div class="delta up">↑ 2%</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">作业完成率</div>
+              <div class="val">96%</div>
+              <div class="delta up">↑ 4%</div>
+            </div>
+            <div class="stat-card warn">
+              <div class="label">风险学生</div>
+              <div class="val">7</div>
+              <div class="delta down">↑ 2 需关注</div>
+            </div>
+          </div>
+
+          <div class="g2">
+            <div class="card">
+              <h4>学情趋势 · 近 8 周</h4>
+              <svg viewBox="0 0 540 220" style="width:100%; height:auto;">
+                <defs>
+                  <linearGradient id="trendGrad2" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#3D46C9" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#3D46C9" stop-opacity="0"/>
+                  </linearGradient>
+                  <linearGradient id="trendGrad3" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#2A7F4F" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="#2A7F4F" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <g stroke="#F2EBD8" stroke-width="1">
+                  <line x1="40" y1="30" x2="520" y2="30"/>
+                  <line x1="40" y1="80" x2="520" y2="80"/>
+                  <line x1="40" y1="130" x2="520" y2="130"/>
+                  <line x1="40" y1="180" x2="520" y2="180"/>
+                </g>
+                <!--院均分线 -->
+                <path d="M40,130 L108,125 L176,128 L244,122 L312,118 L380,115 L448,112 L516,108" fill="none" stroke="#2A7F4F" stroke-width="1.5" stroke-dasharray="3 3"/>
+                <path d="M40,130 L108,125 L176,128 L244,122 L312,118 L380,115 L448,112 L516,108 L516,180 L40,180 Z" fill="url(#trendGrad3)"/>
+                <!--班级线 -->
+                <path d="M40,145 L108,132 L176,138 L244,108 L312,98 L380,82 L448,75 L516,58" fill="none" stroke="#3D46C9" stroke-width="2.5"/>
+                <path d="M40,145 L108,132 L176,138 L244,108 L312,98 L380,82 L448,75 L516,58 L516,180 L40,180 Z" fill="url(#trendGrad2)"/>
+                <g fill="#3D46C9">
+                  <circle cx="40" cy="145" r="3"/><circle cx="108" cy="132" r="3"/><circle cx="176" cy="138" r="3"/>
+                  <circle cx="244" cy="108" r="3"/><circle cx="312" cy="98" r="3"/><circle cx="380" cy="82" r="3"/>
+                  <circle cx="448" cy="75" r="3"/><circle cx="516" cy="58" r="3"/>
+                </g>
+                <g font-family="JetBrains Mono" font-size="9" fill="#2A2B3D">
+                  <text x="15" y="34">100</text><text x="20" y="84">80</text><text x="20" y="134">60</text><text x="20" y="184">40</text>
+                </g>
+                <g font-family="JetBrains Mono" font-size="9" fill="#2A2B3D">
+                  <text x="30" y="200">W1</text><text x="98" y="200">W2</text><text x="166" y="200">W3</text><text x="234" y="200">W4</text>
+                  <text x="302" y="200">W5</text><text x="370" y="200">W6</text><text x="438" y="200">W7</text><text x="506" y="200">W8</text>
+                </g>
+              </svg>
+              <div style="display:flex; gap:14px; font-size:10px; font-family:var(--f-mono); color:var(--inkwell-2); margin-top:6px;">
+                <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:2px; background:var(--cobalt); display:inline-block;"></span>班级均分</div>
+                <div style="display:flex; align-items:center; gap:5px;"><span style="width:12px; height:2px; background:var(--growth); display:inline-block; border-top:1px dashed var(--growth);"></span>院均分</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h4>成绩分布 · 期中</h4>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                  <span style="font-family:var(--f-mono); min-width:52px; color:var(--inkwell-2);">90-100</span>
+                  <div style="flex:1; height:10px; background:var(--ricepaper-2); border-radius:5px; overflow:hidden;"><div style="width:38%; height:100%; background:var(--growth); border-radius:5px;"></div></div>
+                  <span style="font-family:var(--f-mono); min-width:50px; text-align:right;">48 人 · 38%</span>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                  <span style="font-family:var(--f-mono); min-width:52px; color:var(--inkwell-2);">80-89</span>
+                  <div style="flex:1; height:10px; background:var(--ricepaper-2); border-radius:5px; overflow:hidden;"><div style="width:46%; height:100%; background:var(--cobalt); border-radius:5px;"></div></div>
+                  <span style="font-family:var(--f-mono); min-width:50px; text-align:right;">59 人 · 46%</span>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                  <span style="font-family:var(--f-mono); min-width:52px; color:var(--inkwell-2);">70-79</span>
+                  <div style="flex:1; height:10px; background:var(--ricepaper-2); border-radius:5px; overflow:hidden;"><div style="width:18%; height:100%; background:var(--highlighter); border-radius:5px;"></div></div>
+                  <span style="font-family:var(--f-mono); min-width:50px; text-align:right;">23 人 · 18%</span>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                  <span style="font-family:var(--f-mono); min-width:52px; color:var(--inkwell-2);">60-69</span>
+                  <div style="flex:1; height:10px; background:var(--ricepaper-2); border-radius:5px; overflow:hidden;"><div style="width:6%; height:100%; background:var(--correction); border-radius:5px;"></div></div>
+                  <span style="font-family:var(--f-mono); min-width:50px; text-align:right;">8 人 · 6%</span>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                  <span style="font-family:var(--f-mono); min-width:52px; color:var(--inkwell-2);">&lt;60</span>
+                  <div style="flex:1; height:10px; background:var(--ricepaper-2); border-radius:5px; overflow:hidden;"><div style="width:3%; height:100%; background:var(--correction); border-radius:5px;"></div></div>
+                  <span style="font-family:var(--f-mono); min-width:50px; text-align:right;">4 人 · 3%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="g2">
+            <div class="card hl">
+              <h4>📊 关键洞察</h4>
+              <div style="font-size:12px; line-height:1.6; margin-bottom:10px;">
+                本周 <b>第三章"三角换元"</b> 难度较高，<b>23%</b> 学生连续两次测验下降。<br/>
+                建议安排一次 <b>补讲</b> + 专题答疑。
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button style="padding:6px 12px; background:var(--cobalt); color:#fff; border:none; border-radius:6px; font-size:11px; cursor:pointer;">安排补讲</button>
+                <button style="padding:6px 12px; background:#fff; color:var(--inkwell); border:1px solid var(--line); border-radius:6px; font-size:11px; cursor:pointer;">查看详情</button>
+              </div>
+            </div>
+
+            <div class="card growth">
+              <h4>✓ 本周进步</h4>
+              <div style="font-size:12px; line-height:1.6;">
+                <b>张雅文</b> 从 68 → 82 <b>（+14）</b><br/>
+                <b>吴昊天</b> 主动提问 3 次，作业完成率 100%<br/>
+                建议给予 <b>课堂表扬</b> 或奖励积分。
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <h4 style="margin:0;">风险学生 · 7 人需关注</h4>
+              <div style="display:flex; gap:6px;">
+                <span style="padding:3px 8px; background:var(--correction-soft); color:var(--correction); border-radius:8px; font-size:10px; font-weight:500; font-family:var(--f-mono);">高 3</span>
+                <span style="padding:3px 8px; background:var(--highlighter-soft); color:#8A6500; border-radius:8px; font-size:10px; font-weight:500; font-family:var(--f-mono);">中 4</span>
+                <span style="padding:3px 8px; background:var(--ricepaper-2); color:var(--inkwell-2); border-radius:8px; font-size:10px; font-family:var(--f-mono);">低 12</span>
+              </div>
+            </div>
+            <table class="risk-table">
+              <thead>
+                <tr>
+                  <th>学生</th>
+                  <th>风险</th>
+                  <th>原因</th>
+                  <th>成绩趋势</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="av warn">周</span> 周子涵</td>
+                  <td><span class="pill high">高</span></td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">连续 3 次缺席 · 作业 38%</td>
+                  <td><div class="bar-cell"><div class="bar"><div class="fill" style="width:38%; background:var(--correction);"></div></div><span class="pct">38</span></div></td>
+                  <td><div class="row-act"><button class="primary">约谈</button><button>反馈</button></div></td>
+                </tr>
+                <tr>
+                  <td><span class="av warn">李</span> 李泽宇</td>
+                  <td><span class="pill high">高</span></td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">期中 42 分 · 趋势下降</td>
+                  <td><div class="bar-cell"><div class="bar"><div class="fill" style="width:42%; background:var(--correction);"></div></div><span class="pct">42</span></div></td>
+                  <td><div class="row-act"><button class="primary">约谈</button><button>反馈</button></div></td>
+                </tr>
+                <tr>
+                  <td><span class="av warn">赵</span> 赵敏</td>
+                  <td><span class="pill high">高</span></td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">两周未登录 · 消息未读</td>
+                  <td><div class="bar-cell"><div class="bar"><div class="fill" style="width:55%; background:var(--correction);"></div></div><span class="pct">55</span></div></td>
+                  <td><div class="row-act"><button class="primary">约谈</button><button>反馈</button></div></td>
+                </tr>
+                <tr>
+                  <td><span class="av warn2">林</span> 林思语</td>
+                  <td><span class="pill med">中</span></td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">测验连续两次下降</td>
+                  <td><div class="bar-cell"><div class="bar"><div class="fill" style="width:72%; background:var(--highlighter);"></div></div><span class="pct">72</span></div></td>
+                  <td><div class="row-act"><button>关注</button><button>反馈</button></div></td>
+                </tr>
+                <tr>
+                  <td><span class="av warn2">陈</span> 陈浩然</td>
+                  <td><span class="pill med">中</span></td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">作业迟交 2 次</td>
+                  <td><div class="bar-cell"><div class="bar"><div class="fill" style="width:75%; background:var(--highlighter);"></div></div><span class="pct">75</span></div></td>
+                  <td><div class="row-act"><button>关注</button><button>反馈</button></div></td>
+                </tr>
+                <tr>
+                  <td><span class="av warn2">吴</span> 吴昊天</td>
+                  <td><span class="pill med">中</span></td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">课堂沉默</td>
+                  <td><div class="bar-cell"><div class="bar"><div class="fill" style="width:78%; background:var(--highlighter);"></div></div><span class="pct">78</span></div></td>
+                  <td><div class="row-act"><button>关注</button><button>反馈</button></div></td>
+                </tr>
+                <tr>
+                  <td><span class="av warn2">孙</span> 孙一凡</td>
+                  <td><span class="pill med">中</span></td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">出勤偏低 · 90%</td>
+                  <td><div class="bar-cell"><div class="bar"><div class="fill" style="width:80%; background:var(--highlighter);"></div></div><span class="pct">80</span></div></td>
+                  <td><div class="row-act"><button>关注</button><button>反馈</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUESTION BANK ============ -->
+<section class="section">
+  <div class="section-title">03 · 题库与试卷 / Question Bank & Exams</div>
+  <div class="section-desc">题目管理、智能组卷、知识点/难度标签、自动评分规则。</div>
+
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="lights"><span></span><span></span><span></span></div>
+      <div class="url">lumina.app / questions / gaoshu-a</div>
+      <div class="nav-btns">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </div>
+    </div>
+    <div class="browser-content">
+      <div class="web-layout">
+        <aside class="web-sidebar">
+          <div class="brand"><div class="logo">L</div>Lumina</div>
+          <div class="nav-group">
+            <div class="label">教学</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>直播授课</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>课程管理</div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>题库试卷</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>考勤评分</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">学生</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>学生列表</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>辅导记录</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">分析</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>学情分析</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>教学评估</div>
+          </div>
+        </aside>
+
+        <main class="web-main">
+          <div class="topbar">
+            <div>
+              <div class="crumbs">题库 / 高等数学 A</div>
+              <h2>题库管理 · 284 题</h2>
+            </div>
+            <div class="actions">
+              <div class="btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>导入</div>
+              <div class="btn primary"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新建题目</div>
+              <div class="avatar">王</div>
+            </div>
+          </div>
+
+          <div class="filter-row">
+            <div class="filter-chip active">全部 284</div>
+            <div class="filter-chip">选择题 126</div>
+            <div class="filter-chip">判断题 68</div>
+            <div class="filter-chip">填空题 52</div>
+            <div class="filter-chip">解答题 38</div>
+            <input class="filter-search" placeholder="搜索题目..." />
+          </div>
+
+          <div class="card">
+            <table class="q-table">
+              <thead>
+                <tr>
+                  <th style="width:30px;"><input type="checkbox" /></th>
+                  <th>题型</th>
+                  <th>题干</th>
+                  <th>知识点</th>
+                  <th>难度</th>
+                  <th>分值</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="row">
+                  <td><input type="checkbox" /></td>
+                  <td><span class="qtype mc">选择</span></td>
+                  <td>函数 f(x) = ln(x² + 1) 在 x = 0 处取得极值，则该极值为：</td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">第四章 · 极值与最值</td>
+                  <td><span class="stars">★★★</span></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">5</td>
+                  <td><div class="row-act"><button>预览</button><button>编辑</button><button class="primary">组卷</button></div></td>
+                </tr>
+                <tr class="row">
+                  <td><input type="checkbox" /></td>
+                  <td><span class="qtype tf">判断</span></td>
+                  <td>若矩阵 A 可逆，则 A 的行列式不为零。</td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">第二章 · 矩阵与行列式</td>
+                  <td><span class="stars">★★</span></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">3</td>
+                  <td><div class="row-act"><button>预览</button><button>编辑</button><button class="primary">组卷</button></div></td>
+                </tr>
+                <tr class="row">
+                  <td><input type="checkbox" /></td>
+                  <td><span class="qtype essay">解答</span></td>
+                  <td>证明：若函数 f(x) 在闭区间 [a,b] 上连续，则 f(x) 在 [a,b] 上可积。</td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">第五章 · 定积分</td>
+                  <td><span class="stars">★★★★★</span></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">15</td>
+                  <td><div class="row-act"><button>预览</button><button>编辑</button><button class="primary">组卷</button></div></td>
+                </tr>
+                <tr class="row">
+                  <td><input type="checkbox" /></td>
+                  <td><span class="qtype mc">选择</span></td>
+                  <td>向量 a = (1, 2, 3) 与 b = (2, -1, 0) 的点积为：</td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">第三章 · 向量空间</td>
+                  <td><span class="stars">★★</span></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">5</td>
+                  <td><div class="row-act"><button>预览</button><button>编辑</button><button class="primary">组卷</button></div></td>
+                </tr>
+                <tr class="row">
+                  <td><input type="checkbox" /></td>
+                  <td><span class="qtype fill">填空</span></td>
+                  <td>设 A 为 n 阶方阵，|A| = 2，则 |3A| = ____。</td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">第二章 · 行列式性质</td>
+                  <td><span class="stars">★★★</span></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">4</td>
+                  <td><div class="row-act"><button>预览</button><button>编辑</button><button class="primary">组卷</button></div></td>
+                </tr>
+                <tr class="row">
+                  <td><input type="checkbox" /></td>
+                  <td><span class="qtype essay">解答</span></td>
+                  <td>求不定积分 ∫ x·e^x dx。</td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">第五章 · 分部积分</td>
+                  <td><span class="stars">★★★★</span></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">10</td>
+                  <td><div class="row-act"><button>预览</button><button>编辑</button><button class="primary">组卷</button></div></td>
+                </tr>
+                <tr class="row">
+                  <td><input type="checkbox" /></td>
+                  <td><span class="qtype mc">选择</span></td>
+                  <td>极限 lim(x→0) sin(x)/x 的值为：</td>
+                  <td style="font-size:11px; color:var(--inkwell-2);">第一章 · 极限</td>
+                  <td><span class="stars">★</span></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">5</td>
+                  <td><div class="row-act"><button>预览</button><button>编辑</button><button class="primary">组卷</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; padding-top:14px; border-top:1px solid var(--line);">
+              <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">显示 1-7 / 共 284</div>
+              <div style="display:flex; gap:4px;">
+                <button style="padding:5px 10px; border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; font-size:11px;">‹</button>
+                <button style="padding:5px 10px; border:1px solid var(--cobalt); background:var(--cobalt); color:#fff; border-radius:4px; cursor:pointer; font-size:11px;">1</button>
+                <button style="padding:5px 10px; border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; font-size:11px;">2</button>
+                <button style="padding:5px 10px; border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; font-size:11px;">3</button>
+                <button style="padding:5px 10px; border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; font-size:11px;">›</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="g2">
+            <div class="card cobalt">
+              <h4>智能组卷</h4>
+              <div style="font-size:12px; margin-bottom:10px; opacity:0.9;">
+                按难度、题型、知识点分布自动生成试卷
+              </div>
+              <div style="display:flex; gap:8px; margin-bottom:12px;">
+                <div style="flex:1; padding:8px; background:rgba(255,255,255,0.15); border-radius:6px; font-size:11px;">
+                  <div style="opacity:0.7; font-size:9px; font-family:var(--f-mono);">题目数</div>
+                  <div style="font-size:16px; font-weight:500;">25</div>
+                </div>
+                <div style="flex:1; padding:8px; background:rgba(255,255,255,0.15); border-radius:6px; font-size:11px;">
+                  <div style="opacity:0.7; font-size:9px; font-family:var(--f-mono);">总分</div>
+                  <div style="font-size:16px; font-weight:500;">100</div>
+                </div>
+                <div style="flex:1; padding:8px; background:rgba(255,255,255,0.15); border-radius:6px; font-size:11px;">
+                  <div style="opacity:0.7; font-size:9px; font-family:var(--f-mono);">时长</div>
+                  <div style="font-size:16px; font-weight:500;">120 分</div>
+                </div>
+              </div>
+              <button style="width:100%; padding:9px; background:#fff; color:var(--cobalt); border:none; border-radius:8px; font-size:12px; font-weight:500; cursor:pointer;">开始生成</button>
+            </div>
+
+            <div class="card">
+              <h4>知识点覆盖</h4>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                  <span style="min-width:80px;">极限与连续</span>
+                  <div style="flex:1; height:6px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden;"><div style="width:25%; height:100%; background:var(--cobalt); border-radius:3px;"></div></div>
+                  <span style="font-family:var(--f-mono); min-width:40px; text-align:right;">72 题</span>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                  <span style="min-width:80px;">导数应用</span>
+                  <div style="flex:1; height:6px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden;"><div style="width:30%; height:100%; background:var(--growth); border-radius:3px;"></div></div>
+                  <span style="font-family:var(--f-mono); min-width:40px; text-align:right;">86 题</span>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                  <span style="min-width:80px;">积分计算</span>
+                  <div style="flex:1; height:6px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden;"><div style="width:25%; height:100%; background:var(--highlighter); border-radius:3px;"></div></div>
+                  <span style="font-family:var(--f-mono); min-width:40px; text-align:right;">70 题</span>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; font-size:11px;">
+                  <span style="min-width:80px;">线性代数</span>
+                  <div style="flex:1; height:6px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden;"><div style="width:20%; height:100%; background:var(--correction); border-radius:3px;"></div></div>
+                  <span style="font-family:var(--f-mono); min-width:40px; text-align:right;">56 题</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EVALUATION ============ -->
+<section class="section">
+  <div class="section-title">04 · 课程评估 / Course Evaluation</div>
+  <div class="section-desc">多维度教学反馈、匿名留言、学期对比、行动建议。</div>
+
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="lights"><span></span><span></span><span></span></div>
+      <div class="url">lumina.app / evaluation / gaoshu-a-03</div>
+      <div class="nav-btns">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </div>
+    </div>
+    <div class="browser-content">
+      <div class="web-layout">
+        <aside class="web-sidebar">
+          <div class="brand"><div class="logo">L</div>Lumina</div>
+          <div class="nav-group">
+            <div class="label">教学</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>直播授课</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>课程管理</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>题库试卷</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>考勤评分</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">学生</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>学生列表</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>辅导记录</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">分析</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>学情分析</div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>教学评估</div>
+          </div>
+        </aside>
+
+        <main class="web-main">
+          <div class="topbar">
+            <div>
+              <div class="crumbs">评估 / 期中教学反馈</div>
+              <h2>期中评估 · 2026 春季</h2>
+            </div>
+            <div class="actions">
+              <div class="btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出</div>
+              <div class="btn primary"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新建问卷</div>
+              <div class="avatar">王</div>
+            </div>
+          </div>
+
+          <div class="card dark" style="background:var(--growth);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <h4 style="color:rgba(255,255,255,0.7);">综合满意度</h4>
+                <div style="font-family:var(--f-display); font-size:48px; font-weight:380; letter-spacing:-0.02em; line-height:1;">4.6 <span style="font-size:20px; opacity:0.7;">/ 5.0</span></div>
+                <div style="font-size:12px; opacity:0.85; margin-top:8px;">较上学期 +0.3 · 高于院均 0.4</div>
+              </div>
+              <div style="display:flex; gap:20px;">
+                <div style="text-align:center;">
+                  <div style="font-family:var(--f-display); font-size:28px; font-weight:400; color:#fff;">118</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; opacity:0.8; text-transform:uppercase;">反馈数</div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-family:var(--f-display); font-size:28px; font-weight:400; color:#fff;">92%</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; opacity:0.8; text-transform:uppercase;">满意</div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-family:var(--f-display); font-size:28px; font-weight:400; color:#fff;">24</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; opacity:0.8; text-transform:uppercase;">留言</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="eval-grid">
+            <div class="eval-card">
+              <div class="head">
+                <div class="title">分项评分</div>
+                <span style="font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono);">满分 5.0</span>
+              </div>
+              <div class="dim-row">
+                <span class="lbl">教学态度</span>
+                <div class="bar"><div class="fill" style="width:96%; background:var(--growth);"></div></div>
+                <span class="score">4.8</span>
+              </div>
+              <div class="dim-row">
+                <span class="lbl">讲课清晰度</span>
+                <div class="bar"><div class="fill" style="width:88%; background:var(--cobalt);"></div></div>
+                <span class="score">4.4</span>
+              </div>
+              <div class="dim-row">
+                <span class="lbl">课堂互动</span>
+                <div class="bar"><div class="fill" style="width:92%; background:var(--cobalt);"></div></div>
+                <span class="score">4.6</span>
+              </div>
+              <div class="dim-row">
+                <span class="lbl">作业批改</span>
+                <div class="bar"><div class="fill" style="width:80%; background:var(--highlighter);"></div></div>
+                <span class="score">4.0</span>
+              </div>
+              <div class="dim-row">
+                <span class="lbl">课件质量</span>
+                <div class="bar"><div class="fill" style="width:86%; background:var(--cobalt);"></div></div>
+                <span class="score">4.3</span>
+              </div>
+              <div class="dim-row">
+                <span class="lbl">辅导答疑</span>
+                <div class="bar"><div class="fill" style="width:90%; background:var(--cobalt);"></div></div>
+                <span class="score">4.5</span>
+              </div>
+            </div>
+
+            <div class="eval-card">
+              <div class="head">
+                <div class="title">学生留言（匿名）</div>
+                <span style="font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono);">共 24 条</span>
+              </div>
+              <div class="comment-item pos">
+                ✓ "课堂提问很有趣，激发了我的思考。" — 12 人赞同
+              </div>
+              <div class="comment-item">
+                "老师讲得很细致，但有时候节奏偏慢，希望第三章能加快。"
+              </div>
+              <div class="comment-item">
+                "例题丰富，但课后题偏难，建议配套讲解视频。"
+              </div>
+              <div class="comment-item pos">
+                ✓ "直播回放功能非常好用，期末复习全靠它。" — 20 人赞同
+              </div>
+              <div class="comment-item">
+                "希望能增加一些课堂小测，帮助巩固知识点。"
+              </div>
+              <button style="padding:6px 12px; background:#fff; color:var(--inkwell); border:1px solid var(--line); border-radius:6px; font-size:11px; cursor:pointer; margin-top:8px;">查看全部 24 条留言</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h4>学期对比</h4>
+            <div class="term-compare">
+              <div class="term">
+                <div class="t">2024 秋</div>
+                <div class="v">4.1</div>
+                <div class="d" style="color:var(--inkwell-2);">102 份</div>
+              </div>
+              <div class="term">
+                <div class="t">2025 春</div>
+                <div class="v">4.2</div>
+                <div class="d" style="color:var(--growth);">↑ 0.1</div>
+              </div>
+              <div class="term">
+                <div class="t">2025 秋</div>
+                <div class="v">4.3</div>
+                <div class="d" style="color:var(--growth);">↑ 0.1</div>
+              </div>
+              <div class="term current">
+                <div class="t">2026 春</div>
+                <div class="v">4.6</div>
+                <div class="d">↑ 0.3</div>
+              </div>
+              <div class="term">
+                <div class="t">院平均</div>
+                <div class="v">4.2</div>
+                <div class="d" style="color:var(--inkwell-2);">18 班</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card hl">
+            <h4>📝 行动建议</h4>
+            <div style="font-size:12px; line-height:1.7;">
+              · 作业批改评分 4.0 低于其他项，建议 <b>增加个性化评语</b> 或 <b>引入助教批改</b>。<br/>
+              · 学生希望 <b>配套讲解视频</b>，可考虑为每章难点录制 5-10 分钟短视频。<br/>
+              · 课堂节奏评价两极，可在 <b>第三章后设置一次调研</b> 实时调整。
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer style="margin-top:60px; padding-top:32px; border-top:1px solid var(--line); display:flex; justify-content:space-between; font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);">
+  <div>Lumina · 13 · Web · Teacher Deep Features · 4 scenarios · Browser frame</div>
+  <div>Feather MIT · Fraunces + Inter + JetBrains Mono · OFL 1.1</div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina · 08 · 教师桌面端</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC;
+    --ricepaper-2:#F2EBD8;
+    --inkwell:#0F1020;
+    --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9;
+    --cobalt-soft:#E8EAFB;
+    --highlighter:#F5B800;
+    --highlighter-soft:#FDE68A;
+    --correction:#E85D3A;
+    --correction-soft:#FDE0D4;
+    --growth:#2A7F4F;
+    --growth-soft:#D4EDDC;
+    --line:rgba(15,16,32,0.12);
+    --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.5;}
+  body{padding:48px 56px;}
+
+  .page-header{
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding-bottom:32px; border-bottom:1px solid var(--line); margin-bottom:48px;
+  }
+  .page-header h1{font-family:var(--f-display); font-weight:380; font-size:48px; letter-spacing:-0.02em;}
+  .page-header h1 em{font-style:italic; color:var(--cobalt);}
+  .page-header .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.14em;}
+
+  .device-label{
+    font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em;
+    color:var(--inkwell-2); margin-bottom:14px; display:flex; justify-content:space-between;
+  }
+  .device-label .tag{color:var(--cobalt);}
+
+  .desktop{
+    background:#fff; border:1px solid var(--line-strong); border-radius:10px; overflow:hidden;
+    box-shadow: var(--shadow);
+  }
+  .desktop-bar{
+    background:linear-gradient(180deg, #EDE8D8 0%, #E3DCC8 100%);
+    border-bottom:1px solid var(--line);
+    padding:8px 14px; display:flex; align-items:center; gap:10px;
+  }
+  .desktop-bar .dots{display:flex; gap:6px;}
+  .desktop-bar .dots span{width:10px; height:10px; border-radius:50%;}
+  .desktop-bar .dots span:nth-child(1){background:#F3856C;}
+  .desktop-bar .dots span:nth-child(2){background:#F5B800;}
+  .desktop-bar .dots span:nth-child(3){background:#6BBF6E;}
+  .desktop-bar .title{flex:1; text-align:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);}
+  .desktop-body{background:var(--ricepaper); display:flex; min-height:700px;}
+
+  .t-side{
+    width:240px; background:#FDFBF3; border-right:1px solid var(--line); padding:20px 16px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .t-side .logo{font-family:var(--f-display); font-size:20px; font-weight:500; display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+  .t-side .logo .dot{width:10px; height:10px; border-radius:50%; background:var(--highlighter);}
+  .t-side .who{font-size:11px; color:var(--inkwell-2); padding-left:18px; margin-bottom:14px; font-family:var(--f-mono);}
+  .t-side .group{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin:10px 10px 4px; font-weight:500;}
+  .t-side .nav-item{
+    display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:6px;
+    font-size:13px; color:var(--inkwell-2); cursor:pointer;
+  }
+  .t-side .nav-item:hover{background:var(--ricepaper-2);}
+  .t-side .nav-item.active{background:var(--cobalt-soft); color:var(--cobalt); font-weight:500;}
+  .t-side .nav-item svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.7;}
+  .t-side .nav-item .count{margin-left:auto; font-family:var(--f-mono); font-size:10px; background:var(--correction); color:#fff; padding:1px 6px; border-radius:8px;}
+
+  .t-side .offline-indicator{
+    margin-top:auto; padding:12px; background:var(--growth-soft); border:1px solid var(--growth);
+    border-radius:8px; font-size:11px;
+  }
+  .t-side .offline-indicator .badge{
+    display:flex; align-items:center; gap:6px; font-weight:500; color:var(--growth); margin-bottom:4px;
+  }
+  .t-side .offline-indicator .badge .dot{width:6px; height:6px; border-radius:50%; background:var(--growth); animation: pulse 2s infinite;}
+  @keyframes pulse{
+    0%, 100%{opacity:1;}
+    50%{opacity:0.3;}
+  }
+  .t-side .offline-indicator .info{font-size:10px; color:var(--inkwell-2); line-height:1.4;}
+
+  .t-main{flex:1; padding:24px 32px;}
+  .t-top{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--line);}
+  .t-top h1{font-family:var(--f-display); font-weight:380; font-size:32px; letter-spacing:-0.02em; line-height:1.1;}
+  .t-top h1 em{font-style:italic; color:var(--cobalt);}
+  .t-top .sub{font-size:13px; color:var(--inkwell-2); margin-top:4px;}
+  .t-top .actions{display:flex; gap:8px; align-items:center;}
+  .btn{
+    font-family:var(--f-body); font-size:12px; font-weight:500; padding:8px 14px; border-radius:6px; border:1px solid var(--line);
+    background:#fff; color:var(--inkwell); cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn:hover{background:var(--ricepaper);}
+  .btn.primary{background:var(--cobalt); color:#fff; border-color:var(--cobalt);}
+  .btn svg{width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2;}
+
+  .t-grid{display:grid; grid-template-columns: 1.8fr 1fr; gap:20px;}
+
+  .batch-grading{background:#fff; border:1px solid var(--line); border-radius:10px; padding:20px;}
+  .batch-grading h3{font-family:var(--f-display); font-size:20px; font-weight:400; margin-bottom:4px; letter-spacing:-0.01em;}
+  .batch-grading .desc{font-size:13px; color:var(--inkwell-2); margin-bottom:20px;}
+
+  .grading-stats{display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:20px;}
+  .grading-stat{background:var(--ricepaper); border:1px solid var(--line); border-radius:8px; padding:12px; text-align:center;}
+  .grading-stat .lbl{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:4px;}
+  .grading-stat .val{font-family:var(--f-display); font-size:28px; font-weight:380; letter-spacing:-0.02em;}
+  .grading-stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .grading-stat .val.urgent{color:var(--correction);}
+
+  .submission-list{display:flex; flex-direction:column; gap:10px;}
+  .submission-item{
+    background:var(--ricepaper); border:1px solid var(--line); border-radius:8px; padding:14px;
+    display:grid; grid-template-columns: auto 1fr auto auto; gap:14px; align-items:center;
+  }
+  .submission-item:hover{border-color:var(--cobalt);}
+  .submission-item .av{
+    width:36px; height:36px; border-radius:50%; background:var(--cobalt); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:14px;
+  }
+  .submission-item .info{flex:1;}
+  .submission-item .name{font-size:14px; font-weight:500; margin-bottom:2px;}
+  .submission-item .meta{font-size:11px; color:var(--inkwell-2); font-family:var(--f-mono);}
+  .submission-item .file{
+    display:flex; align-items:center; gap:6px; padding:6px 10px;
+    background:#fff; border:1px solid var(--line); border-radius:6px; font-size:11px;
+  }
+  .submission-item .grade-btn{
+    padding:8px 16px; background:var(--cobalt); color:#fff; border:none; border-radius:6px;
+    font-size:12px; font-weight:500; cursor:pointer;
+  }
+  .submission-item .grade-btn:hover{background:var(--inkwell);}
+  .submission-item .grade-btn.done{background:var(--growth);}
+
+  .sidebar-panels{display:flex; flex-direction:column; gap:16px;}
+  .panel{background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px;}
+  .panel h5{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:12px; font-weight:500;}
+
+  .quick-actions{display:grid; grid-template-columns: 1fr 1fr; gap:8px;}
+  .quick-action{
+    background:var(--ricepaper); border:1px solid var(--line); border-radius:8px; padding:12px;
+    text-align:center; cursor:pointer;
+  }
+  .quick-action:hover{background:var(--cobalt-soft); border-color:var(--cobalt);}
+  .quick-action .ic{font-size:24px; margin-bottom:6px;}
+  .quick-action .lbl{font-size:12px; font-weight:500;}
+  .quick-action .sub{font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono); margin-top:2px;}
+
+  .recent-activity{display:flex; flex-direction:column; gap:8px;}
+  .activity-item{
+    display:flex; gap:10px; padding:8px 0; border-bottom:1px dashed var(--line); font-size:12px;
+  }
+  .activity-item:last-child{border-bottom:none;}
+  .activity-item .time{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); min-width:50px;}
+  .activity-item .desc{flex:1;}
+
+  .sync-status{
+    background:var(--inkwell); color:var(--ricepaper); border-radius:10px; padding:16px;
+  }
+  .sync-status h5{color:var(--highlighter); margin-bottom:10px;}
+  .sync-status .bar{height:6px; background:rgba(250,246,236,0.2); border-radius:3px; overflow:hidden; margin-top:8px;}
+  .sync-status .bar .fill{height:100%; background:var(--highlighter); border-radius:3px;}
+  .sync-status .info{display:flex; justify-content:space-between; font-size:11px; margin-top:6px; opacity:0.8;}
+</style>
+<!-- Icons: Feather Icons (https://feathericons.com) — MIT License, © Cole Bemis -->
+</head>
+<body>
+
+<header class="page-header">
+  <h1>教师桌面端 <em>Teacher Desktop</em></h1>
+  <div class="meta">Lumina · 08 / 08 · macOS / Windows · Batch Grading</div>
+</header>
+
+<div class="device-label">
+  <span>Teacher · Desktop APP · 批量批阅</span>
+  <span class="tag">离线模式 · 桌面通知 · 本地存储</span>
+</div>
+
+<div class="desktop">
+  <div class="desktop-bar">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div class="title">Lumina · 高等数学 A 班 · 批量批阅 · 12 份待批</div>
+    <div style="width:42px;"></div>
+  </div>
+  <div class="desktop-body">
+    <div class="t-side">
+      <div class="logo"><span class="dot"></span> Lumina</div>
+      <div class="who">王建国 · 副教授</div>
+
+      <div class="group">教学 · Teaching</div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+        工作台
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+        我的课程
+      </div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h9"/></svg>
+        批量批阅
+        <span class="count">12</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>
+        成绩册
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M17 11l2 2 4-4"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/></svg>
+        学生名单
+      </div>
+
+      <div class="group">工具 · Tools</div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>
+        数据分析
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="1"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        日程
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        答疑讨论
+        <span class="count">3</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg>
+        本地文件
+      </div>
+
+      <div class="offline-indicator">
+        <div class="badge"><span class="dot"></span> 离线可用</div>
+        <div class="info">已同步 2.3 GB · 最后更新 5 分钟前</div>
+      </div>
+    </div>
+
+    <div class="t-main">
+      <div class="t-top">
+        <div>
+          <h1>批量批阅 · <em>第四章习题 (二)</em></h1>
+          <div class="sub">高等数学 · A 班 · MOD-203 · 截止 2026-08-25 23:59</div>
+        </div>
+        <div class="actions">
+          <button class="btn">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
+            导出成绩
+          </button>
+          <button class="btn primary">
+            <svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h9"/></svg>
+            发布成绩
+          </button>
+        </div>
+      </div>
+
+      <div class="t-grid">
+        <div class="batch-grading">
+          <h3>待批阅作业</h3>
+          <div class="desc">点击学生姓名或文件可在新窗口打开详情。支持快捷键：← → 切换，空格标记完成。</div>
+
+          <div class="grading-stats">
+            <div class="grading-stat">
+              <div class="lbl">已提交</div>
+              <div class="val hl">38</div>
+            </div>
+            <div class="grading-stat">
+              <div class="lbl">已批阅</div>
+              <div class="val" style="color:var(--growth);">26</div>
+            </div>
+            <div class="grading-stat">
+              <div class="lbl">待批阅</div>
+              <div class="val urgent">12</div>
+            </div>
+            <div class="grading-stat">
+              <div class="lbl">平均分</div>
+              <div class="val">78</div>
+            </div>
+          </div>
+
+          <div class="submission-list">
+            <div class="submission-item">
+              <div class="av" style="background:var(--correction-soft); color:var(--correction);">周</div>
+              <div class="info">
+                <div class="name">周子涵</div>
+                <div class="meta">提交于 08-25 22:47 · PDF · 2.1 MB</div>
+              </div>
+              <div class="file">
+                <span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8"/></svg></span>
+                <span>作业_周子涵.pdf</span>
+              </div>
+              <button class="grade-btn">批阅</button>
+            </div>
+
+            <div class="submission-item">
+              <div class="av">林</div>
+              <div class="info">
+                <div class="name">林思语</div>
+                <div class="meta">提交于 08-25 21:15 · PDF · 1.8 MB</div>
+              </div>
+              <div class="file">
+                <span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8"/></svg></span>
+                <span>作业_林思语.pdf</span>
+              </div>
+              <button class="grade-btn">批阅</button>
+            </div>
+
+            <div class="submission-item">
+              <div class="av" style="background:var(--growth);">陈</div>
+              <div class="info">
+                <div class="name">陈浩然</div>
+                <div class="meta">提交于 08-25 20:30 · PDF · 2.4 MB</div>
+              </div>
+              <div class="file">
+                <span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8"/></svg></span>
+                <span>作业_陈浩然.pdf</span>
+              </div>
+              <button class="grade-btn done">✓ 92</button>
+            </div>
+
+            <div class="submission-item">
+              <div class="av">张</div>
+              <div class="info">
+                <div class="name">张雅文</div>
+                <div class="meta">提交于 08-25 19:58 · PDF · 1.6 MB</div>
+              </div>
+              <div class="file">
+                <span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8"/></svg></span>
+                <span>作业_张雅文.pdf</span>
+              </div>
+              <button class="grade-btn done">✓ 85</button>
+            </div>
+
+            <div class="submission-item">
+              <div class="av">李</div>
+              <div class="info">
+                <div class="name">李泽宇</div>
+                <div class="meta">提交于 08-25 19:22 · PDF · 2.0 MB</div>
+              </div>
+              <div class="file">
+                <span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8"/></svg></span>
+                <span>作业_李泽宇.pdf</span>
+              </div>
+              <button class="grade-btn">批阅</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-panels">
+          <div class="panel">
+            <h5>快捷操作</h5>
+            <div class="quick-actions">
+              <div class="quick-action">
+                <div class="ic"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></div>
+                <div class="lbl">发布作业</div>
+                <div class="sub">新建</div>
+              </div>
+              <div class="quick-action">
+                <div class="ic"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+                <div class="lbl">发通知</div>
+                <div class="sub">全班</div>
+              </div>
+              <div class="quick-action">
+                <div class="ic">✓</div>
+                <div class="lbl">考勤</div>
+                <div class="sub">今日</div>
+              </div>
+              <div class="quick-action">
+                <div class="ic"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+                <div class="lbl">答疑</div>
+                <div class="sub">3 条新</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h5>最近活动</h5>
+            <div class="recent-activity">
+              <div class="activity-item">
+                <div class="time">2 分钟前</div>
+                <div class="desc">陈浩然 提交了作业</div>
+              </div>
+              <div class="activity-item">
+                <div class="time">15 分钟前</div>
+                <div class="desc">你批阅了 张雅文 的作业 (85分)</div>
+              </div>
+              <div class="activity-item">
+                <div class="time">1 小时前</div>
+                <div class="desc">王建国 在讨论区回答了问题</div>
+              </div>
+              <div class="activity-item">
+                <div class="time">2 小时前</div>
+                <div class="desc">林清 在讨论区提问</div>
+              </div>
+              <div class="activity-item">
+                <div class="time">3 小时前</div>
+                <div class="desc">系统同步完成 (2.3 GB)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sync-status">
+            <h5><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg> 云端同步</h5>
+            <div style="font-size:12px; margin-bottom:8px;">本地数据与云端保持一致</div>
+            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+              <span>已同步</span>
+              <span>2.3 / 2.3 GB</span>
+            </div>
+            <div class="bar"><div class="fill" style="width:100%;"></div></div>
+            <div class="info">
+              <span>最后同步：5 分钟前</span>
+              <span style="color:var(--highlighter);">✓ 正常</span>
+            </div>
+          </div>
+
+          <div class="panel" style="background:var(--highlighter-soft); border-color:var(--highlighter);">
+            <h5 style="color:#8A6500;"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12c1 1 2 2 2 4h4c0-2 1-3 2-4a7 7 0 0 0-4-12z"/></svg> 桌面端特性</h5>
+            <div style="font-size:12px; line-height:1.6; color:var(--inkwell-2);">
+              • <strong>批量批阅</strong>：快捷键快速切换<br/>
+              • <strong>离线模式</strong>：无网络也可批阅<br/>
+              • <strong>桌面通知</strong>：新提交实时提醒<br/>
+              • <strong>本地存储</strong>：作业文件自动缓存
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

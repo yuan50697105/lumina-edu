@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina · 16 · 管理端 · Desktop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.5;}
+  body{padding:48px 56px;}
+
+  .page-header{display:flex; justify-content:space-between; align-items:baseline; padding-bottom:32px; border-bottom:1px solid var(--line); margin-bottom:48px;}
+  .page-header h1{font-family:var(--f-display); font-weight:380; font-size:48px; letter-spacing:-0.02em;}
+  .page-header h1 em{font-style:italic; color:var(--cobalt);}
+  .page-header .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.14em;}
+
+  .section{margin-bottom:60px;}
+  .section-title{font-family:var(--f-mono); font-size:12px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .section-desc{font-size:14px; color:var(--inkwell-2); margin:-12px 0 20px; max-width:720px;}
+
+  .desktop{background:#fff; border:1px solid var(--line-strong); border-radius:10px; box-shadow:var(--shadow); overflow:hidden; margin-bottom:32px;}
+  .desktop-bar{background:#F2EBD8; border-bottom:1px solid var(--line); padding:10px 14px; display:flex; align-items:center; gap:10px;}
+  .desktop-bar .lights{display:flex; gap:6px;}
+  .desktop-bar .lights span{width:11px; height:11px; border-radius:50%;}
+  .desktop-bar .lights span:nth-child(1){background:#ED6A5E;}
+  .desktop-bar .lights span:nth-child(2){background:#F4BF4F;}
+  .desktop-bar .lights span:nth-child(3){background:#61C554;}
+  .desktop-bar .title{flex:1; text-align:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); padding:3px 10px; background:#fff; border:1px solid var(--line); border-radius:4px; max-width:400px; margin:0 auto;}
+  .desktop-bar .spacer{width:52px;}
+
+  .desktop-content{padding:0; background:var(--ricepaper); min-height:540px; overflow:hidden;}
+
+  .d-layout{display:grid; grid-template-columns:220px 1fr; min-height:540px;}
+  .d-topbar{
+    grid-column:1 / -1; background:var(--inkwell); color:var(--ricepaper);
+    padding:10px 22px; display:flex; align-items:center; gap:16px;
+  }
+  .d-topbar .brand{display:flex; align-items:center; gap:10px; flex:0 0 auto;}
+  .d-topbar .brand .logo{width:26px; height:26px; border-radius:6px; background:var(--highlighter); color:var(--inkwell); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-weight:500; font-style:italic; font-size:15px;}
+  .d-topbar .brand .name{font-family:var(--f-display); font-size:15px; font-weight:400;}
+  .d-topbar .brand .tag{font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; background:var(--cobalt); color:#fff; padding:2px 6px; border-radius:4px; margin-left:8px;}
+  .d-topbar .search{flex:1; max-width:520px; display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); padding:6px 12px; border-radius:6px;}
+  .d-topbar .search svg{width:14px; height:14px; fill:none; stroke:rgba(255,255,255,0.6); stroke-width:1.8;}
+  .d-topbar .search input{flex:1; background:transparent; border:none; color:var(--ricepaper); font-size:12px; outline:none; font-family:var(--f-body);}
+  .d-topbar .search input::placeholder{color:rgba(255,255,255,0.4);}
+  .d-topbar .search .kbd{font-family:var(--f-mono); font-size:9px; color:rgba(255,255,255,0.5); background:rgba(255,255,255,0.08); padding:2px 5px; border-radius:3px;}
+  .d-topbar .spacer{flex:1;}
+  .d-topbar .actions{display:flex; align-items:center; gap:10px;}
+  .d-topbar .icon-btn{width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;}
+  .d-topbar .icon-btn svg{width:14px; height:14px; fill:none; stroke:var(--ricepaper); stroke-width:1.8;}
+  .d-topbar .icon-btn .badge{position:absolute; top:-3px; right:-3px; width:14px; height:14px; border-radius:50%; background:var(--correction); color:#fff; font-size:8px; font-family:var(--f-mono); font-weight:600; display:flex; align-items:center; justify-content:center; border:2px solid var(--inkwell);}
+  .d-topbar .divider{width:1px; height:20px; background:rgba(255,255,255,0.15);}
+  .d-topbar .admin-user{display:flex; align-items:center; gap:8px; cursor:pointer;}
+  .d-topbar .admin-user .avatar{width:28px; height:28px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:12px;}
+  .d-topbar .admin-user .info{display:flex; flex-direction:column; line-height:1.2;}
+  .d-topbar .admin-user .name{font-size:12px; font-weight:500;}
+  .d-topbar .admin-user .role{font-family:var(--f-mono); font-size:9px; opacity:0.6; text-transform:uppercase; letter-spacing:0.1em;}
+
+  .d-sidebar{background:#fff; border-right:1px solid var(--line); padding:16px 12px; overflow-y:auto;}
+  .d-sidebar .nav-group{margin-bottom:18px;}
+  .d-sidebar .nav-group .label{font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:8px; padding-left:8px;}
+  .d-sidebar .nav-item{display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:6px; font-size:12px; color:var(--inkwell-2); cursor:pointer; margin-bottom:2px;}
+  .d-sidebar .nav-item svg{width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:1.8;}
+  .d-sidebar .nav-item:hover{background:var(--ricepaper);}
+  .d-sidebar .nav-item.active{background:var(--inkwell); color:var(--ricepaper);}
+  .d-sidebar .nav-item.active svg{stroke:var(--highlighter);}
+  .d-sidebar .nav-item .count{margin-left:auto; font-family:var(--f-mono); font-size:9px; padding:1px 6px; background:var(--ricepaper); border-radius:8px;}
+  .d-sidebar .nav-item.active .count{background:rgba(255,255,255,0.15); color:var(--highlighter);}
+  .d-sidebar .nav-item .kbd{margin-left:auto; font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); background:var(--ricepaper); padding:1px 5px; border-radius:3px;}
+  .d-sidebar .nav-item.active .kbd{background:rgba(255,255,255,0.2); color:#fff;}
+
+  .d-main{padding:22px 28px; overflow-y:auto;}
+  .d-main .topbar{display:flex; justify-content:space-between; align-items:flex-end; padding-bottom:14px; margin-bottom:18px; border-bottom:1px solid var(--line);}
+  .d-main .topbar .crumbs{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:4px;}
+  .d-main .topbar h2{font-family:var(--f-display); font-size:24px; font-weight:380; letter-spacing:-0.01em;}
+  .d-main .topbar .actions{display:flex; gap:8px; align-items:center;}
+  .d-main .topbar .actions .btn{padding:7px 13px; border-radius:6px; font-size:11px; font-weight:500; cursor:pointer; border:1px solid var(--line); background:#fff; display:flex; align-items:center; gap:6px;}
+  .d-main .topbar .actions .btn svg{width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:1.8;}
+  .d-main .topbar .actions .btn.primary{background:var(--inkwell); color:var(--ricepaper); border-color:var(--inkwell);}
+  .d-main .topbar .actions .btn .kbd{font-family:var(--f-mono); font-size:9px; padding:1px 4px; background:rgba(255,255,255,0.2); border-radius:3px; margin-left:4px;}
+
+  .card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px;}
+  .card h4{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:10px; font-weight:500;}
+  .card.dark{background:var(--inkwell); color:#fff; border-color:var(--inkwell);}
+  .card.dark h4{color:rgba(255,255,255,0.6);}
+  .card.hl{background:var(--highlighter-soft); border-color:var(--highlighter);}
+
+  .g2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .g3{display:grid; grid-template-columns:repeat(3, 1fr); gap:14px;}
+  .g4{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px;}
+  .g6{display:grid; grid-template-columns:repeat(6, 1fr); gap:12px;}
+
+  .stat-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px;}
+  .stat-card .label{font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:4px;}
+  .stat-card .val{font-family:var(--f-display); font-size:28px; font-weight:380; letter-spacing:-0.01em;}
+  .stat-card .delta{font-family:var(--f-mono); font-size:10px; margin-top:4px;}
+  .stat-card .delta.up{color:var(--growth);}
+  .stat-card .delta.down{color:var(--correction);}
+  .stat-card.hl{background:var(--highlighter-soft); border-color:var(--highlighter);}
+  .stat-card.grow{background:var(--growth-soft); border-color:var(--growth);}
+  .stat-card.warn{background:var(--correction-soft); border-color:var(--correction);}
+  .stat-card.cobalt{background:var(--cobalt-soft); border-color:var(--cobalt);}
+
+  .data-table{width:100%; border-collapse:collapse;}
+  .data-table th{font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); font-weight:500;}
+  .data-table td{padding:10px; border-bottom:1px dashed var(--line); font-size:12px; vertical-align:middle;}
+  .data-table .av{width:28px; height:28px; border-radius:50%; background:var(--cobalt); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:11px; vertical-align:middle; margin-right:8px;}
+  .data-table .pill{padding:3px 8px; border-radius:6px; font-size:10px; font-weight:500;}
+  .data-table .pill.active{background:var(--growth-soft); color:var(--growth);}
+  .data-table .pill.pending{background:var(--highlighter-soft); color:#8A6500;}
+  .data-table .pill.suspended{background:var(--correction-soft); color:var(--correction);}
+  .data-table .row-act{display:flex; gap:4px;}
+  .data-table .row-act button{padding:3px 8px; font-size:10px; border-radius:4px; cursor:pointer; border:1px solid var(--line); background:#fff;}
+  .data-table .row-act button.primary{background:var(--inkwell); color:var(--ricepaper); border-color:var(--inkwell);}
+
+  /* Live metrics */
+  .live-metrics{display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; padding:10px; background:var(--inkwell); border-radius:8px; margin-bottom:14px;}
+  .live-metrics .metric{padding:10px; background:rgba(255,255,255,0.05); border-radius:6px;}
+  .live-metrics .metric .lbl{font-family:var(--f-mono); font-size:9px; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:2px;}
+  .live-metrics .metric .val{font-family:var(--f-display); font-size:22px; font-weight:400; color:#fff;}
+  .live-metrics .metric .val.grow{color:var(--growth);}
+  .live-metrics .metric .val.hl{color:var(--highlighter);}
+  .live-metrics .metric .delta{font-family:var(--f-mono); font-size:9px; color:rgba(255,255,255,0.6); margin-top:2px;}
+
+  .filter-row{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center;}
+  .filter-chip{padding:5px 11px; background:#fff; border:1px solid var(--line); border-radius:14px; font-size:11px; cursor:pointer; color:var(--inkwell-2);}
+  .filter-chip.active{background:var(--inkwell); color:var(--ricepaper); border-color:var(--inkwell);}
+  .filter-search{flex:1; padding:5px 11px; border:1px solid var(--line); border-radius:14px; font-size:11px; background:#fff; outline:none; font-family:var(--f-body);}
+
+  .audit-log{display:flex; flex-direction:column; gap:6px; max-height:300px; overflow-y:auto;}
+  .audit-entry{display:flex; gap:10px; align-items:flex-start; padding:8px 10px; background:var(--ricepaper); border-radius:6px; font-size:11px;}
+  .audit-entry .ts{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); min-width:64px;}
+  .audit-entry .actor{font-weight:500; min-width:70px;}
+  .audit-entry .action{flex:1; color:var(--inkwell);}
+  .audit-entry .action b{color:var(--cobalt);}
+  .audit-entry .tag{font-family:var(--f-mono); font-size:9px; padding:2px 6px; border-radius:4px; background:var(--ricepaper-2); color:var(--inkwell-2);}
+  .audit-entry .tag.write{background:var(--highlighter-soft); color:#8A6500;}
+  .audit-entry .tag.delete{background:var(--correction-soft); color:var(--correction);}
+
+  .approval-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:10px;}
+  .approval-card .head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;}
+  .approval-card .head .title{font-family:var(--f-display); font-size:16px; font-weight:400;}
+  .approval-card .head .status{font-size:10px; padding:3px 8px; border-radius:10px; font-weight:500;}
+  .approval-card .head .status.pending{background:var(--highlighter-soft); color:#8A6500;}
+  .approval-card .meta{display:flex; gap:12px; font-size:11px; color:var(--inkwell-2); font-family:var(--f-mono); margin-bottom:10px;}
+  .approval-card .desc{font-size:12px; line-height:1.5; color:var(--inkwell); padding:10px; background:var(--ricepaper); border-radius:6px; margin-bottom:10px;}
+  .approval-card .footer{display:flex; justify-content:space-between; align-items:center;}
+  .approval-card .submitter{display:flex; align-items:center; gap:8px; font-size:11px;}
+  .approval-card .submitter .av{width:24px; height:24px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:10px;}
+  .approval-card .actions{display:flex; gap:6px;}
+  .approval-card .actions button{padding:6px 12px; border-radius:6px; font-size:11px; cursor:pointer; border:1px solid var(--line); background:#fff; font-weight:500;}
+  .approval-card .actions button.approve{background:var(--growth); color:#fff; border-color:var(--growth);}
+  .approval-card .actions button.reject{background:#fff; color:var(--correction); border-color:var(--correction);}
+</style>
+<!-- Icons: Feather Icons (https://feathericons.com) — MIT License, © Cole Bemis -->
+</head>
+<body>
+
+<header class="page-header">
+  <h1>管理端 · <em>Admin Console</em></h1>
+  <div class="meta">Lumina · 16 · Desktop · Dashboard / Users / Approvals / Audit</div>
+</header>
+
+<!-- ============ DASHBOARD ============ -->
+<section class="section">
+  <div class="section-title">01 · 数据总览 / Admin Dashboard (Desktop)</div>
+  <div class="section-desc">桌面端：实时指标条、6 列统计卡、平台健康、审计日志并列展示。</div>
+
+  <div class="desktop">
+    <div class="desktop-bar">
+      <div class="lights"><span></span><span></span><span></span></div>
+      <div class="title">Lumina Admin · 数据总览 · 2026 春</div>
+      <div class="spacer"></div>
+    </div>
+    <div class="desktop-content">
+      <div class="d-layout">
+        <div class="d-topbar">
+          <div class="brand">
+            <div class="logo">墨</div>
+            <div class="name">Lumina 墨光<span class="tag">Admin</span></div>
+          </div>
+          <div class="search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input placeholder="搜索用户、课程、订单..." />
+            <span class="kbd">⌘K</span>
+          </div>
+          <div class="actions">
+            <div class="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="badge">12</span></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg></div>
+            <div class="divider"></div>
+            <div class="admin-user"><div class="avatar">刘</div><div class="info"><div class="name">刘思源</div><div class="role">超级管理员</div></div></div>
+          </div>
+        </div>
+
+        <aside class="d-sidebar">
+          <div class="nav-group">
+            <div class="label">概览</div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览 <span class="kbd">⌘1</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>系统监控 <span class="kbd">⌘2</span></div>
+          </div>
+          <div class="nav-group">
+            <div class="label">用户</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>学生管理 <span class="count">1,284</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>教师管理 <span class="count">86</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg>角色权限</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">内容</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>课程审批 <span class="count">7</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>内容审核</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>举报处理 <span class="count">3</span></div>
+          </div>
+          <div class="nav-group">
+            <div class="label">财务</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>订单与账单</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>退款处理</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">系统</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg>系统设置 <span class="kbd">⌘,</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>审计日志</div>
+          </div>
+        </aside>
+
+        <main class="d-main">
+          <div class="topbar">
+            <div>
+              <div class="crumbs">概览 / 实时指标 · 2026-08-25 14:23:45</div>
+              <h2>数据总览 · 全平台</h2>
+            </div>
+            <div class="actions">
+              <div class="btn"><svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>刷新 <span class="kbd">⌘R</span></div>
+              <div class="btn primary"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出 PDF <span class="kbd">⌘P</span></div>
+            </div>
+          </div>
+
+          <div class="live-metrics">
+            <div class="metric">
+              <div class="lbl">在线用户</div>
+              <div class="val grow">847</div>
+              <div class="delta">↑ 12% vs 同时段</div>
+            </div>
+            <div class="metric">
+              <div class="lbl">当前直播</div>
+              <div class="val hl">24</div>
+              <div class="delta">18 门课程</div>
+            </div>
+            <div class="metric">
+              <div class="lbl">API 延迟 P95</div>
+              <div class="val">32ms</div>
+              <div class="delta">正常</div>
+            </div>
+            <div class="metric">
+              <div class="lbl">待处理事项</div>
+              <div class="val" style="color:var(--correction);">22</div>
+              <div class="delta">7 审批 · 3 举报</div>
+            </div>
+          </div>
+
+          <div class="g6">
+            <div class="stat-card cobalt">
+              <div class="label">学生</div>
+              <div class="val">1,284</div>
+              <div class="delta up">↑ 86</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">教师</div>
+              <div class="val">86</div>
+              <div class="delta up">↑ 4</div>
+            </div>
+            <div class="stat-card hl">
+              <div class="label">课程</div>
+              <div class="val">312</div>
+              <div class="delta up">↑ 18</div>
+            </div>
+            <div class="stat-card grow">
+              <div class="label">DAU</div>
+              <div class="val">847</div>
+              <div class="delta up">↑ 12%</div>
+            </div>
+            <div class="stat-card warn">
+              <div class="label">高风险</div>
+              <div class="val">7</div>
+              <div class="delta down">↑ 2</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">月营收</div>
+              <div class="val">¥86<span style="font-size:14px; opacity:0.6;">k</span></div>
+              <div class="delta up">↑ 18%</div>
+            </div>
+          </div>
+
+          <div class="g3" style="grid-template-columns:1.2fr 1fr 1fr;">
+            <div class="card">
+              <h4>用户增长 · 12 月</h4>
+              <svg viewBox="0 0 540 200" style="width:100%; height:auto;">
+                <defs>
+                  <linearGradient id="dg1a" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#3D46C9" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#3D46C9" stop-opacity="0"/>
+                  </linearGradient>
+                  <linearGradient id="dg1b" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#F5B800" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#F5B800" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <g stroke="#F2EBD8" stroke-width="1">
+                  <line x1="40" y1="30" x2="520" y2="30"/>
+                  <line x1="40" y1="80" x2="520" y2="80"/>
+                  <line x1="40" y1="130" x2="520" y2="130"/>
+                  <line x1="40" y1="180" x2="520" y2="180"/>
+                </g>
+                <path d="M40,160 L84,152 L128,148 L172,140 L216,132 L260,122 L304,112 L348,100 L392,88 L436,75 L480,60 L520,45" fill="none" stroke="#3D46C9" stroke-width="2.5"/>
+                <path d="M40,160 L84,152 L128,148 L172,140 L216,132 L260,122 L304,112 L348,100 L392,88 L436,75 L480,60 L520,45 L520,180 L40,180 Z" fill="url(#dg1a)"/>
+                <path d="M40,175 L84,172 L128,170 L172,168 L216,166 L260,162 L304,158 L348,155 L392,150 L436,146 L480,142 L520,138" fill="none" stroke="#F5B800" stroke-width="2"/>
+                <path d="M40,175 L84,172 L128,170 L172,168 L216,166 L260,162 L304,158 L348,155 L392,150 L436,146 L480,142 L520,138 L520,180 L40,180 Z" fill="url(#dg1b)"/>
+                <g fill="#3D46C9">
+                  <circle cx="520" cy="45" r="3"/>
+                </g>
+                <g fill="#F5B800">
+                  <circle cx="520" cy="138" r="3"/>
+                </g>
+                <g font-family="JetBrains Mono" font-size="9" fill="#2A2B3D">
+                  <text x="15" y="34">1500</text><text x="20" y="84">1000</text><text x="20" y="134">500</text><text x="30" y="184">0</text>
+                </g>
+                <g font-family="JetBrains Mono" font-size="9" fill="#2A2B3D">
+                  <text x="30" y="195">5月</text><text x="74" y="195">6</text><text x="118" y="195">7</text><text x="162" y="195">8</text>
+                  <text x="206" y="195">9</text><text x="250" y="195">10</text><text x="294" y="195">11</text><text x="338" y="195">12</text>
+                  <text x="382" y="195">1</text><text x="426" y="195">2</text><text x="470" y="195">3</text><text x="514" y="195">4</text>
+                </g>
+              </svg>
+            </div>
+
+            <div class="card">
+              <h4>平台健康度</h4>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:var(--growth-soft); border-radius:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span style="font-size:11px; font-weight:500;">API</span>
+                  </div>
+                  <span style="font-family:var(--f-mono); font-size:10px; color:var(--growth); font-weight:500;">99.98% · 32ms</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:var(--growth-soft); border-radius:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span style="font-size:11px; font-weight:500;">视频流</span>
+                  </div>
+                  <span style="font-family:var(--f-mono); font-size:10px; color:var(--growth); font-weight:500;">99.95% · 180ms</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:var(--growth-soft); border-radius:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span style="font-size:11px; font-weight:500;">存储</span>
+                  </div>
+                  <span style="font-family:var(--f-mono); font-size:10px; color:var(--growth); font-weight:500;">100% · 2.1TB</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:var(--highlighter-soft); border-radius:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A6500" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                    <span style="font-size:11px; font-weight:500;">CDN 华南</span>
+                  </div>
+                  <span style="font-family:var(--f-mono); font-size:10px; color:#8A6500; font-weight:500;">94.2% 降级</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card hl">
+              <h4>待处理事项 · 22</h4>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#fff; border-radius:6px; border:1px solid var(--line);">
+                  <div style="display:flex; align-items:center; gap:8px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--highlighter);"></span><span style="font-size:11px;">课程审批</span></div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-family:var(--f-mono); font-size:10px; font-weight:500;">7</span>
+                    <button style="padding:3px 7px; font-size:9px; background:var(--inkwell); color:#fff; border:none; border-radius:4px; cursor:pointer;">处理</button>
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#fff; border-radius:6px; border:1px solid var(--line);">
+                  <div style="display:flex; align-items:center; gap:8px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--correction);"></span><span style="font-size:11px;">举报</span></div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-family:var(--f-mono); font-size:10px; font-weight:500;">3</span>
+                    <button style="padding:3px 7px; font-size:9px; background:var(--inkwell); color:#fff; border:none; border-radius:4px; cursor:pointer;">处理</button>
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#fff; border-radius:6px; border:1px solid var(--line);">
+                  <div style="display:flex; align-items:center; gap:8px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--cobalt);"></span><span style="font-size:11px;">认证</span></div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-family:var(--f-mono); font-size:10px; font-weight:500;">4</span>
+                    <button style="padding:3px 7px; font-size:9px; background:var(--inkwell); color:#fff; border:none; border-radius:4px; cursor:pointer;">处理</button>
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#fff; border-radius:6px; border:1px solid var(--line);">
+                  <div style="display:flex; align-items:center; gap:8px;"><span style="width:6px; height:6px; border-radius:50%; background:var(--growth);"></span><span style="font-size:11px;">退款</span></div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-family:var(--f-mono); font-size:10px; font-weight:500;">8</span>
+                    <button style="padding:3px 7px; font-size:9px; background:var(--inkwell); color:#fff; border:none; border-radius:4px; cursor:pointer;">处理</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <h4 style="margin:0;">最近审计日志</h4>
+              <button style="padding:4px 10px; background:#fff; border:1px solid var(--line); border-radius:4px; font-size:10px; cursor:pointer;">查看全部 →</button>
+            </div>
+            <div class="audit-log">
+              <div class="audit-entry">
+                <span class="ts">10:23:45</span>
+                <span class="actor">刘思源</span>
+                <span class="action">审批通过 <b>高等数学 A</b> 开课申请</span>
+                <span class="tag write">write</span>
+              </div>
+              <div class="audit-entry">
+                <span class="ts">10:18:12</span>
+                <span class="actor">系统</span>
+                <span class="action">自动封禁用户 <b>u_2841</b> · 异常登录</span>
+                <span class="tag delete">delete</span>
+              </div>
+              <div class="audit-entry">
+                <span class="ts">09:54:30</span>
+                <span class="actor">陈助理</span>
+                <span class="action">处理举报 · 讨论区内容 #4928</span>
+                <span class="tag write">write</span>
+              </div>
+              <div class="audit-entry">
+                <span class="ts">09:42:08</span>
+                <span class="actor">刘思源</span>
+                <span class="action">调整角色 <b>张讲师</b> 权限</span>
+                <span class="tag write">write</span>
+              </div>
+              <div class="audit-entry">
+                <span class="ts">09:15:00</span>
+                <span class="actor">系统</span>
+                <span class="action">自动备份完成 · 2.1 TB</span>
+                <span class="tag">system</span>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ USER MANAGEMENT ============ -->
+<section class="section">
+  <div class="section-title">02 · 用户管理 / User Management (Desktop)</div>
+  <div class="section-desc">桌面端：宽屏表格、侧栏用户详情、批量操作工具栏。</div>
+
+  <div class="desktop">
+    <div class="desktop-bar">
+      <div class="lights"><span></span><span></span><span></span></div>
+      <div class="title">Lumina Admin · 学生管理 · 周子涵</div>
+      <div class="spacer"></div>
+    </div>
+    <div class="desktop-content">
+      <div class="d-layout">
+        <div class="d-topbar">
+          <div class="brand"><div class="logo">墨</div><div class="name">Lumina 墨光<span class="tag">Admin</span></div></div>
+          <div class="search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input placeholder="搜索学号、姓名、邮箱..." value="周子涵" />
+            <span class="kbd">⌘K</span>
+          </div>
+          <div class="actions">
+            <div class="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="badge">12</span></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg></div>
+            <div class="divider"></div>
+            <div class="admin-user"><div class="avatar">刘</div><div class="info"><div class="name">刘思源</div><div class="role">超级管理员</div></div></div>
+          </div>
+        </div>
+
+        <aside class="d-sidebar">
+          <div class="nav-group">
+            <div class="label">概览</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览 <span class="kbd">⌘1</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>系统监控</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">用户</div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>学生管理 <span class="count">1,284</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>教师管理 <span class="count">86</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg>角色权限</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">内容</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>课程审批 <span class="count">7</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>内容审核</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>举报处理 <span class="count">3</span></div>
+          </div>
+          <div class="nav-group">
+            <div class="label">财务</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>订单与账单</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>退款处理</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">系统</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg>系统设置 <span class="kbd">⌘,</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>审计日志</div>
+          </div>
+        </aside>
+
+        <main class="d-main">
+          <div class="topbar">
+            <div>
+              <div class="crumbs">用户 / 学生管理 · 选中 1</div>
+              <h2>学生账户 · 1,284</h2>
+            </div>
+            <div class="actions">
+              <div class="btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>导入 <span class="kbd">⌘I</span></div>
+              <div class="btn primary"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>添加 <span class="kbd">⌘N</span></div>
+            </div>
+          </div>
+
+          <div class="filter-row">
+            <div class="filter-chip active">全部 1,284</div>
+            <div class="filter-chip">正常 1,261</div>
+            <div class="filter-chip">预警 16</div>
+            <div class="filter-chip">封禁 7</div>
+            <input class="filter-search" placeholder="按院系、年级、入学年份筛选..." />
+          </div>
+
+          <div class="g3" style="grid-template-columns:1fr 280px;">
+            <div class="card" style="padding:0; overflow:hidden;">
+              <table class="data-table" style="margin:0;">
+                <thead>
+                  <tr>
+                    <th style="width:30px; padding-left:14px;"><input type="checkbox" checked /></th>
+                    <th>学号 / 姓名</th>
+                    <th>院系 · 年级</th>
+                    <th>状态</th>
+                    <th>最后登录</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="background:var(--highlighter-soft);">
+                    <td style="padding-left:14px;"><input type="checkbox" checked /></td>
+                    <td><span class="av" style="background:var(--correction);">周</span><b>周子涵</b><div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">2023110284</div></td>
+                    <td style="font-size:11px; color:var(--inkwell-2);">计算机 · 大三</td>
+                    <td><span class="pill suspended">高风险</span></td>
+                    <td style="font-family:var(--f-mono); font-size:11px; color:var(--correction);">14 天前</td>
+                    <td><div class="row-act"><button class="primary">详情</button></div></td>
+                  </tr>
+                  <tr>
+                    <td style="padding-left:14px;"><input type="checkbox" /></td>
+                    <td><span class="av" style="background:var(--growth);">张</span><b>张雅文</b><div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">2023110156</div></td>
+                    <td style="font-size:11px; color:var(--inkwell-2);">数学 · 大三</td>
+                    <td><span class="pill active">正常</span></td>
+                    <td style="font-family:var(--f-mono); font-size:11px;">2 小时前</td>
+                    <td><div class="row-act"><button class="primary">详情</button></div></td>
+                  </tr>
+                  <tr>
+                    <td style="padding-left:14px;"><input type="checkbox" /></td>
+                    <td><span class="av">林</span><b>林思语</b><div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">2023110201</div></td>
+                    <td style="font-size:11px; color:var(--inkwell-2);">哲学 · 大三</td>
+                    <td><span class="pill pending">预警</span></td>
+                    <td style="font-family:var(--f-mono); font-size:11px;">6 小时前</td>
+                    <td><div class="row-act"><button class="primary">详情</button></div></td>
+                  </tr>
+                  <tr>
+                    <td style="padding-left:14px;"><input type="checkbox" /></td>
+                    <td><span class="av">陈</span><b>陈浩然</b><div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">2023110189</div></td>
+                    <td style="font-size:11px; color:var(--inkwell-2);">软件 · 大三</td>
+                    <td><span class="pill active">正常</span></td>
+                    <td style="font-family:var(--f-mono); font-size:11px;">1 小时前</td>
+                    <td><div class="row-act"><button class="primary">详情</button></div></td>
+                  </tr>
+                  <tr>
+                    <td style="padding-left:14px;"><input type="checkbox" /></td>
+                    <td><span class="av" style="background:var(--correction);">李</span><b>李泽宇</b><div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">2022110342</div></td>
+                    <td style="font-size:11px; color:var(--inkwell-2);">自动化 · 大四</td>
+                    <td><span class="pill suspended">高风险</span></td>
+                    <td style="font-family:var(--f-mono); font-size:11px; color:var(--correction);">28 天前</td>
+                    <td><div class="row-act"><button class="primary">详情</button></div></td>
+                  </tr>
+                  <tr>
+                    <td style="padding-left:14px;"><input type="checkbox" /></td>
+                    <td><span class="av">吴</span><b>吴昊天</b><div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">2024110072</div></td>
+                    <td style="font-size:11px; color:var(--inkwell-2);">数据科学 · 大二</td>
+                    <td><span class="pill active">正常</span></td>
+                    <td style="font-family:var(--f-mono); font-size:11px;">刚刚</td>
+                    <td><div class="row-act"><button class="primary">详情</button></div></td>
+                  </tr>
+                  <tr>
+                    <td style="padding-left:14px;"><input type="checkbox" /></td>
+                    <td><span class="av" style="background:var(--highlighter); color:#8A6500;">赵</span><b>赵敏</b><div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">2023110098</div></td>
+                    <td style="font-size:11px; color:var(--inkwell-2);">信息管理 · 大三</td>
+                    <td><span class="pill suspended">已封禁</span></td>
+                    <td style="font-family:var(--f-mono); font-size:11px; color:var(--correction);">—</td>
+                    <td><div class="row-act"><button class="primary">详情</button></div></td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style="padding:12px 14px; border-top:1px solid var(--line); background:var(--inkwell); color:var(--ricepaper); display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-family:var(--f-mono); font-size:10px;">已选 1 人 · 显示 1-7 / 1,284</div>
+                <div style="display:flex; gap:6px;">
+                  <button style="padding:5px 10px; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:4px; font-size:10px; cursor:pointer;">发送通知</button>
+                  <button style="padding:5px 10px; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:4px; font-size:10px; cursor:pointer;">调整状态</button>
+                  <button style="padding:5px 10px; background:var(--highlighter); color:var(--inkwell); border:none; border-radius:4px; font-size:10px; cursor:pointer; font-weight:500;">导出档案</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h4>用户详情 · 周子涵</h4>
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--line);">
+                <div style="width:48px; height:48px; border-radius:50%; background:var(--correction); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:20px;">周</div>
+                <div>
+                  <div style="font-family:var(--f-display); font-size:16px; font-weight:400;">周子涵</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">2023110284</div>
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:80px 1fr; gap:8px 12px; font-size:11px; margin-bottom:14px;">
+                <div style="color:var(--inkwell-2); font-family:var(--f-mono); text-transform:uppercase; letter-spacing:0.1em; font-size:9px;">院系</div>
+                <div>计算机科学</div>
+                <div style="color:var(--inkwell-2); font-family:var(--f-mono); text-transform:uppercase; letter-spacing:0.1em; font-size:9px;">年级</div>
+                <div>大三</div>
+                <div style="color:var(--inkwell-2); font-family:var(--f-mono); text-transform:uppercase; letter-spacing:0.1em; font-size:9px;">入学</div>
+                <div style="font-family:var(--f-mono);">2023-09</div>
+                <div style="color:var(--inkwell-2); font-family:var(--f-mono); text-transform:uppercase; letter-spacing:0.1em; font-size:9px;">GPA</div>
+                <div style="font-family:var(--f-mono); color:var(--correction); font-weight:500;">2.34</div>
+                <div style="color:var(--inkwell-2); font-family:var(--f-mono); text-transform:uppercase; letter-spacing:0.1em; font-size:9px;">状态</div>
+                <div><span class="pill suspended" style="display:inline-block;">高风险</span></div>
+              </div>
+
+              <div style="padding:10px; background:var(--correction-soft); border-radius:6px; margin-bottom:10px; font-size:11px;">
+                <div style="font-weight:500; color:var(--correction); margin-bottom:4px;">⚠ 预警信号</div>
+                <div style="line-height:1.5; color:var(--inkwell);">
+                  · 连续 3 次缺席<br/>
+                  · 作业完成率 38%<br/>
+                  · 14 天未登录
+                </div>
+              </div>
+
+              <div style="padding:10px; background:var(--ricepaper); border-radius:6px; margin-bottom:10px;">
+                <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:6px;">成绩趋势</div>
+                <svg viewBox="0 0 240 60" style="width:100%; height:auto;">
+                  <path d="M10,15 L50,25 L90,20 L130,35 L170,42 L210,48 L230,52" fill="none" stroke="var(--correction)" stroke-width="1.5"/>
+                  <g fill="var(--correction)">
+                    <circle cx="10" cy="15" r="2"/><circle cx="50" cy="25" r="2"/><circle cx="90" cy="20" r="2"/>
+                    <circle cx="130" cy="35" r="2"/><circle cx="170" cy="42" r="2"/><circle cx="210" cy="48" r="2"/>
+                    <circle cx="230" cy="52" r="2"/>
+                  </g>
+                </svg>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <button style="padding:7px; background:var(--cobalt); color:#fff; border:none; border-radius:6px; font-size:11px; cursor:pointer;">发送私信</button>
+                <button style="padding:7px; background:#fff; color:var(--inkwell); border:1px solid var(--line); border-radius:6px; font-size:11px; cursor:pointer;">查看学习档案</button>
+                <button style="padding:7px; background:var(--correction-soft); color:var(--correction); border:1px solid var(--correction); border-radius:6px; font-size:11px; cursor:pointer;">暂时封禁</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ APPROVALS ============ -->
+<section class="section">
+  <div class="section-title">03 · 课程审批 / Course Approval (Desktop)</div>
+  <div class="section-desc">桌面端：左右分栏 — 审批列表 + 详情预览 + 快捷操作。</div>
+
+  <div class="desktop">
+    <div class="desktop-bar">
+      <div class="lights"><span></span><span></span><span></span></div>
+      <div class="title">Lumina Admin · 课程审批 · 西方哲学史 · 导论篇</div>
+      <div class="spacer"></div>
+    </div>
+    <div class="desktop-content">
+      <div class="d-layout">
+        <div class="d-topbar">
+          <div class="brand"><div class="logo">墨</div><div class="name">Lumina 墨光<span class="tag">Admin</span></div></div>
+          <div class="search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input placeholder="搜索课程..." />
+            <span class="kbd">⌘K</span>
+          </div>
+          <div class="actions">
+            <div class="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="badge">12</span></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg></div>
+            <div class="divider"></div>
+            <div class="admin-user"><div class="avatar">刘</div><div class="info"><div class="name">刘思源</div><div class="role">超级管理员</div></div></div>
+          </div>
+        </div>
+
+        <aside class="d-sidebar">
+          <div class="nav-group">
+            <div class="label">概览</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>系统监控</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">用户</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>学生管理</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>教师管理</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg>角色权限</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">内容</div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>课程审批 <span class="count">7</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>内容审核</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>举报处理</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">财务</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>订单与账单</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>退款处理</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">系统</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg>系统设置</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>审计日志</div>
+          </div>
+        </aside>
+
+        <main class="d-main">
+          <div class="topbar">
+            <div>
+              <div class="crumbs">内容 / 课程审批 · 西方哲学史 · 导论篇</div>
+              <h2>审批详情</h2>
+            </div>
+            <div class="actions">
+              <div class="btn"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>返回列表 <span class="kbd">⌘←</span></div>
+              <div class="btn" style="color:var(--correction); border-color:var(--correction);"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>驳回</div>
+              <div class="btn primary"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>批准开课 <span class="kbd">⌘↵</span></div>
+            </div>
+          </div>
+
+          <div class="g3" style="grid-template-columns:280px 1fr;">
+            <div class="card" style="padding:0; overflow:hidden;">
+              <div style="padding:12px 14px; background:var(--ricepaper); border-bottom:1px solid var(--line); font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2);">审批队列 · 7</div>
+              <div style="padding:10px;">
+                <div style="padding:10px; background:var(--highlighter-soft); border-radius:6px; margin-bottom:6px; border:1px solid var(--highlighter);">
+                  <div style="font-size:12px; font-weight:500;">西方哲学史 · 导论篇</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">孙文心 · 待审批</div>
+                </div>
+                <div style="padding:10px; background:#fff; border-radius:6px; margin-bottom:6px; border:1px solid var(--line);">
+                  <div style="font-size:12px; font-weight:500;">数据结构 · 进阶</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">王建国 · 待审批</div>
+                </div>
+                <div style="padding:10px; background:#fff; border-radius:6px; margin-bottom:6px; border:1px solid var(--line);">
+                  <div style="font-size:12px; font-weight:500;">线性代数 · 应用导向</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">张明德 · 待审批</div>
+                </div>
+                <div style="padding:10px; background:#fff; border-radius:6px; margin-bottom:6px; border:1px solid var(--line);">
+                  <div style="font-size:12px; font-weight:500;">Python 科学计算</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; color:var(--growth); margin-top:2px;">李晓峰 · ✓ 已批准</div>
+                </div>
+                <div style="padding:10px; background:#fff; border-radius:6px; margin-bottom:6px; border:1px solid var(--line);">
+                  <div style="font-size:12px; font-weight:500;">机器学习基础</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">陈思远 · 待审批</div>
+                </div>
+                <div style="padding:10px; background:#fff; border-radius:6px; margin-bottom:6px; border:1px solid var(--line);">
+                  <div style="font-size:12px; font-weight:500;">现代西哲 · 存在主义</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">孙文心 · 待审批</div>
+                </div>
+                <div style="padding:10px; background:#fff; border-radius:6px; border:1px solid var(--line);">
+                  <div style="font-size:12px; font-weight:500;">数据库系统原理</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">王建国 · 待审批</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:14px;">
+              <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+                  <div>
+                    <div style="font-family:var(--f-display); font-size:24px; font-weight:380;">西方哲学史 · 导论篇</div>
+                    <div style="font-size:12px; color:var(--inkwell-2); margin-top:4px;">通识选修 · 2 学分 · 线上 · 120 人</div>
+                  </div>
+                  <span class="pill pending">待审批</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; padding:12px; background:var(--ricepaper); border-radius:8px; margin-bottom:14px;">
+                  <div>
+                    <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:4px;">讲师</div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <div style="width:28px; height:28px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:11px;">孙</div>
+                      <div style="font-size:12px;">
+                        <div>孙文心</div>
+                        <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">副教授</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:4px;">开课日期</div>
+                    <div style="font-family:var(--f-mono); font-size:12px;">2026-09-01</div>
+                  </div>
+                  <div>
+                    <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:4px;">提交时间</div>
+                    <div style="font-family:var(--f-mono); font-size:12px;">08-20 14:32</div>
+                  </div>
+                  <div>
+                    <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:4px;">资料完整度</div>
+                    <div style="font-size:12px; color:var(--growth); font-weight:500;">✓ 100%</div>
+                  </div>
+                </div>
+
+                <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:8px;">课程简介</div>
+                <div style="padding:12px; background:var(--ricepaper); border-radius:6px; font-size:12px; line-height:1.6; margin-bottom:14px;">
+                  从苏格拉底到后现代，系统梳理西方哲学 2500 年发展脉络。重点讨论认识论、伦理学与存在主义三大主题，配套原著选读与课堂辩论。
+                </div>
+
+                <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:8px;">审批清单</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
+                  <div style="display:flex; align-items:center; gap:8px; padding:8px; background:var(--growth-soft); border-radius:6px; font-size:11px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    讲师资质
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px; padding:8px; background:var(--growth-soft); border-radius:6px; font-size:11px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    教学大纲
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px; padding:8px; background:var(--growth-soft); border-radius:6px; font-size:11px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    教材列表
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px; padding:8px; background:var(--growth-soft); border-radius:6px; font-size:11px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    考核方式
+                  </div>
+                </div>
+              </div>
+
+              <div class="card dark">
+                <h4>审批批注</h4>
+                <textarea placeholder="可添加审批意见（可选）..." style="width:100%; min-height:70px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:10px; color:var(--ricepaper); font-size:12px; font-family:var(--f-body); outline:none; resize:vertical;"></textarea>
+                <div style="display:flex; gap:8px; margin-top:10px;">
+                  <button style="flex:1; padding:8px; background:var(--growth); color:#fff; border:none; border-radius:6px; font-size:11px; cursor:pointer; font-weight:500;">⌘↵ 批准开课</button>
+                  <button style="flex:1; padding:8px; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:6px; font-size:11px; cursor:pointer;">驳回 · 需补充</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AUDIT LOG ============ -->
+<section class="section">
+  <div class="section-title">04 · 审计日志 / Audit Log (Desktop)</div>
+  <div class="section-desc">桌面端：完整操作追踪，筛选、搜索、导出。</div>
+
+  <div class="desktop">
+    <div class="desktop-bar">
+      <div class="lights"><span></span><span></span><span></span></div>
+      <div class="title">Lumina Admin · 审计日志</div>
+      <div class="spacer"></div>
+    </div>
+    <div class="desktop-content">
+      <div class="d-layout">
+        <div class="d-topbar">
+          <div class="brand"><div class="logo">墨</div><div class="name">Lumina 墨光<span class="tag">Admin</span></div></div>
+          <div class="search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input placeholder="搜索操作、对象、用户..." />
+            <span class="kbd">⌘K</span>
+          </div>
+          <div class="actions">
+            <div class="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="badge">12</span></div>
+            <div class="icon-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg></div>
+            <div class="divider"></div>
+            <div class="admin-user"><div class="avatar">刘</div><div class="info"><div class="name">刘思源</div><div class="role">超级管理员</div></div></div>
+          </div>
+        </div>
+
+        <aside class="d-sidebar">
+          <div class="nav-group">
+            <div class="label">概览</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>数据总览</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>系统监控</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">用户</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>学生管理</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>教师管理</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg>角色权限</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">内容</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>课程审批</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>内容审核</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>举报处理</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">财务</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>订单与账单</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>退款处理</div>
+          </div>
+          <div class="nav-group">
+            <div class="label">系统</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg>系统设置</div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>审计日志</div>
+          </div>
+        </aside>
+
+        <main class="d-main">
+          <div class="topbar">
+            <div>
+              <div class="crumbs">系统 / 审计日志 · 近 7 天</div>
+              <h2>审计日志 · 全部操作</h2>
+            </div>
+            <div class="actions">
+              <div class="btn"><svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>筛选</div>
+              <div class="btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>导出 CSV</div>
+            </div>
+          </div>
+
+          <div class="filter-row">
+            <div class="filter-chip active">全部 1,284</div>
+            <div class="filter-chip">写入 write 428</div>
+            <div class="filter-chip">删除 delete 23</div>
+            <div class="filter-chip">登录 auth 186</div>
+            <div class="filter-chip">系统 system 42</div>
+            <input class="filter-search" placeholder="按用户、对象、操作类型筛选..." />
+          </div>
+
+          <div class="card" style="padding:0; overflow:hidden;">
+            <table class="data-table" style="margin:0;">
+              <thead>
+                <tr>
+                  <th style="width:90px;">时间</th>
+                  <th style="width:80px;">操作者</th>
+                  <th style="width:80px;">类型</th>
+                  <th>操作</th>
+                  <th style="width:120px;">对象</th>
+                  <th style="width:100px;">IP</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-family:var(--f-mono); font-size:11px;">10:23:45</td>
+                  <td><span class="av" style="background:var(--cobalt); width:20px; height:20px; font-size:9px;">刘</span>刘思源</td>
+                  <td><span class="pill" style="background:var(--highlighter-soft); color:#8A6500;">write</span></td>
+                  <td>审批通过课程开课申请</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">高等数学 A</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">10.0.0.12</td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--f-mono); font-size:11px;">10:18:12</td>
+                  <td><span style="font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);">系统</span></td>
+                  <td><span class="pill" style="background:var(--correction-soft); color:var(--correction);">delete</span></td>
+                  <td>自动封禁用户 · 异常登录</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">u_2841</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">192.168.1.x</td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--f-mono); font-size:11px;">09:54:30</td>
+                  <td><span class="av" style="background:var(--growth); width:20px; height:20px; font-size:9px;">陈</span>陈助理</td>
+                  <td><span class="pill" style="background:var(--highlighter-soft); color:#8A6500;">write</span></td>
+                  <td>处理举报 · 讨论区内容</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">#4928</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">10.0.0.8</td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--f-mono); font-size:11px;">09:42:08</td>
+                  <td><span class="av" style="background:var(--cobalt); width:20px; height:20px; font-size:9px;">刘</span>刘思源</td>
+                  <td><span class="pill" style="background:var(--highlighter-soft); color:#8A6500;">write</span></td>
+                  <td>调整用户角色权限</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">张讲师</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">10.0.0.12</td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--f-mono); font-size:11px;">09:15:00</td>
+                  <td><span style="font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);">系统</span></td>
+                  <td><span class="pill" style="background:var(--ricepaper-2); color:var(--inkwell-2);">system</span></td>
+                  <td>自动备份完成</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">2.1 TB</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">localhost</td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--f-mono); font-size:11px;">08:45:22</td>
+                  <td><span class="av" style="background:var(--cobalt); width:20px; height:20px; font-size:9px;">王</span>王教授</td>
+                  <td><span class="pill" style="background:var(--cobalt-soft); color:var(--cobalt);">auth</span></td>
+                  <td>登录系统（双因素）</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">—</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">223.5.x.x</td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--f-mono); font-size:11px;">08:12:10</td>
+                  <td><span class="av" style="background:var(--cobalt); width:20px; height:20px; font-size:9px;">刘</span>刘思源</td>
+                  <td><span class="pill" style="background:var(--highlighter-soft); color:#8A6500;">write</span></td>
+                  <td>批量添加学生 · CSV 导入</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">+24 人</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">10.0.0.12</td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--f-mono); font-size:11px;">07:30:00</td>
+                  <td><span style="font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);">系统</span></td>
+                  <td><span class="pill" style="background:var(--ricepaper-2); color:var(--inkwell-2);">system</span></td>
+                  <td>日志归档 · 前 30 天</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">28,412 条</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">localhost</td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--f-mono); font-size:11px;">07:05:48</td>
+                  <td><span class="av" style="background:var(--correction); width:20px; height:20px; font-size:9px;">赵</span>赵财务</td>
+                  <td><span class="pill" style="background:var(--highlighter-soft); color:#8A6500;">write</span></td>
+                  <td>处理退款申请 · 学生</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">¥1,200</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">10.0.0.18</td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--f-mono); font-size:11px;">06:28:34</td>
+                  <td><span style="font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);">系统</span></td>
+                  <td><span class="pill" style="background:var(--correction-soft); color:var(--correction);">delete</span></td>
+                  <td>清理临时文件</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">1.8 GB</td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">localhost</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="padding:12px 14px; border-top:1px solid var(--line); background:var(--ricepaper); display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">显示 1-10 / 共 1,284 条 · 近 7 天</div>
+              <div style="display:flex; gap:4px;">
+                <button style="padding:5px 10px; border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; font-size:11px;">‹</button>
+                <button style="padding:5px 10px; border:1px solid var(--inkwell); background:var(--inkwell); color:var(--ricepaper); border-radius:4px; cursor:pointer; font-size:11px;">1</button>
+                <button style="padding:5px 10px; border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; font-size:11px;">2</button>
+                <button style="padding:5px 10px; border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; font-size:11px;">3</button>
+                <button style="padding:5px 10px; border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; font-size:11px;">...</button>
+                <button style="padding:5px 10px; border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; font-size:11px;">129</button>
+                <button style="padding:5px 10px; border:1px solid var(--line); background:#fff; border-radius:4px; cursor:pointer; font-size:11px;">›</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="g3">
+            <div class="card hl">
+              <h4>⚠ 安全提醒</h4>
+              <div style="font-size:11px; line-height:1.5;">
+                检测到 3 次来自异常 IP 的登录尝试，建议关注账户 <b>u_2841</b> 活动。
+              </div>
+            </div>
+            <div class="card">
+              <h4>操作分布</h4>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <div style="display:flex; gap:6px; align-items:center; font-size:11px;">
+                  <span style="min-width:50px;">write</span>
+                  <div style="flex:1; height:6px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden;"><div style="width:45%; height:100%; background:var(--highlighter); border-radius:3px;"></div></div>
+                  <span style="font-family:var(--f-mono); font-size:10px;">428</span>
+                </div>
+                <div style="display:flex; gap:6px; align-items:center; font-size:11px;">
+                  <span style="min-width:50px;">auth</span>
+                  <div style="flex:1; height:6px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden;"><div style="width:20%; height:100%; background:var(--cobalt); border-radius:3px;"></div></div>
+                  <span style="font-family:var(--f-mono); font-size:10px;">186</span>
+                </div>
+                <div style="display:flex; gap:6px; align-items:center; font-size:11px;">
+                  <span style="min-width:50px;">system</span>
+                  <div style="flex:1; height:6px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden;"><div style="width:5%; height:100%; background:var(--inkwell-2); border-radius:3px;"></div></div>
+                  <span style="font-family:var(--f-mono); font-size:10px;">42</span>
+                </div>
+                <div style="display:flex; gap:6px; align-items:center; font-size:11px;">
+                  <span style="min-width:50px;">delete</span>
+                  <div style="flex:1; height:6px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden;"><div style="width:3%; height:100%; background:var(--correction); border-radius:3px;"></div></div>
+                  <span style="font-family:var(--f-mono); font-size:10px;">23</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <h4>保留策略</h4>
+              <div style="font-size:11px; line-height:1.6;">
+                · 热数据：近 7 天<br/>
+                · 温数据：30 天内<br/>
+                · 冷归档：30 天以上<br/>
+                · 合规保留：7 年
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer style="margin-top:60px; padding-top:32px; border-top:1px solid var(--line); display:flex; justify-content:space-between; font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);">
+  <div>Lumina · 16 · Desktop · Admin Console · 4 scenarios · macOS window</div>
+  <div>Feather MIT · Fraunces + Inter + JetBrains Mono · OFL 1.1</div>
+</footer>
+
+</body>
+</html>

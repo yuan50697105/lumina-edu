@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina · 08 · 教师桌面端 · 补充页面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.5;}
+  body{padding:48px 56px;}
+
+  .page-header{display:flex; justify-content:space-between; align-items:baseline; padding-bottom:32px; border-bottom:1px solid var(--line); margin-bottom:48px;}
+  .page-header h1{font-family:var(--f-display); font-weight:380; font-size:48px; letter-spacing:-0.02em;}
+  .page-header h1 em{font-style:italic; color:var(--cobalt);}
+  .page-header .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.14em;}
+
+  .section{margin-bottom:60px;}
+  .section-title{font-family:var(--f-mono); font-size:12px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+
+  .desktop{background:#fff; border:1px solid var(--line-strong); border-radius:10px; overflow:hidden; box-shadow:var(--shadow); display:flex; flex-direction:column;}
+  .desktop-bar{background:linear-gradient(180deg, #EDE8D8 0%, #E3DCC8 100%); border-bottom:1px solid var(--line); padding:8px 14px; display:flex; align-items:center; gap:10px;}
+  .desktop-bar .dots{display:flex; gap:6px;}
+  .desktop-bar .dots span{width:10px; height:10px; border-radius:50%;}
+  .desktop-bar .dots span:nth-child(1){background:#F3856C;}
+  .desktop-bar .dots span:nth-child(2){background:#F5B800;}
+  .desktop-bar .dots span:nth-child(3){background:#6BBF6E;}
+  .desktop-bar .title{flex:1; text-align:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);}
+  .desktop-body{background:var(--ricepaper); display:flex; min-height:640px;}
+
+  .device-label{
+    font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em;
+    color:var(--inkwell-2); margin-bottom:12px; display:flex; justify-content:space-between;
+  }
+  .device-label .tag{color:var(--cobalt);}
+
+  .d-side{
+    width:220px; background:#FDFBF3; border-right:1px solid var(--line); padding:20px 16px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .d-side .logo{font-family:var(--f-display); font-size:20px; font-weight:500; display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+  .d-side .logo .dot{width:10px; height:10px; border-radius:50%; background:var(--highlighter);}
+  .d-side .who{font-size:11px; color:var(--inkwell-2); padding-left:18px; margin-bottom:12px; font-family:var(--f-mono);}
+  .d-side .group{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin:10px 10px 4px; font-weight:500;}
+  .d-side .nav-item{display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:6px; font-size:13px; color:var(--inkwell-2); cursor:pointer;}
+  .d-side .nav-item:hover{background:var(--ricepaper-2);}
+  .d-side .nav-item.active{background:var(--cobalt-soft); color:var(--cobalt); font-weight:500;}
+  .d-side .nav-item svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.7;}
+  .d-side .nav-item .count{margin-left:auto; font-family:var(--f-mono); font-size:10px; background:var(--correction); color:#fff; padding:1px 6px; border-radius:8px;}
+  .d-side .offline-indicator{margin-top:auto; padding:12px; background:var(--growth-soft); border:1px solid var(--growth); border-radius:8px; font-size:11px;}
+  .d-side .offline-indicator .badge{display:flex; align-items:center; gap:6px; font-weight:500; color:var(--growth); margin-bottom:4px;}
+  .d-side .offline-indicator .badge .dot{width:6px; height:6px; border-radius:50%; background:var(--growth); animation: pulse 2s infinite;}
+  @keyframes pulse{0%, 100%{opacity:1;} 50%{opacity:0.3;}}
+  .d-side .offline-indicator .info{font-size:10px; color:var(--inkwell-2); line-height:1.4;}
+
+  .d-main{flex:1; padding:24px 28px;}
+
+  .top-bar{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--line);}
+  .top-bar h1{font-family:var(--f-display); font-weight:380; font-size:28px; letter-spacing:-0.02em;}
+  .top-bar h1 em{font-style:italic; color:var(--cobalt);}
+  .top-bar .sub{font-size:12px; color:var(--inkwell-2); margin-top:4px;}
+  .btn{font-family:var(--f-body); font-size:12px; font-weight:500; padding:7px 12px; border-radius:6px; border:1px solid var(--line); background:#fff; color:var(--inkwell); cursor:pointer; display:inline-flex; align-items:center; gap:6px;}
+  .btn.primary{background:var(--cobalt); color:#fff; border-color:var(--cobalt);}
+  .btn svg{width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:2;}
+
+  /* Grade Entry */
+  .grade-layout{display:grid; grid-template-columns:1fr 300px; gap:20px;}
+  .grade-table{background:#fff; border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+  .grade-table table{width:100%; border-collapse:collapse; font-size:13px;}
+  .grade-table th{
+    background:var(--ricepaper); padding:10px 12px; text-align:left;
+    font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em;
+    color:var(--inkwell-2); font-weight:500; border-bottom:1px solid var(--line);
+  }
+  .grade-table td{padding:12px; border-bottom:1px solid var(--line); vertical-align:middle;}
+  .grade-table tr:last-child td{border-bottom:none;}
+  .grade-table .av{width:30px; height:30px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:12px;}
+  .grade-table input[type="number"]{
+    width:60px; padding:6px 8px; border:1px solid var(--line); border-radius:6px; font-family:var(--f-mono); font-size:12px; text-align:center;
+  }
+  .grade-table input:focus{outline:none; border-color:var(--cobalt);}
+  .grade-table .total{font-family:var(--f-display); font-size:18px; font-weight:400; letter-spacing:-0.02em;}
+  .grade-table .total.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .grade-table .total.warn{color:var(--correction);}
+
+  .grade-summary{display:flex; flex-direction:column; gap:12px;}
+  .grade-stat-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px;}
+  .grade-stat-card h5{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:10px; font-weight:500;}
+  .dist-row{display:flex; gap:4px; margin-bottom:6px;}
+  .dist-row .bar{flex:1; height:24px; border-radius:3px; display:flex; align-items:center; justify-content:center; font-family:var(--f-mono); font-size:10px; color:#fff;}
+  .criteria-list{display:flex; flex-direction:column; gap:8px;}
+  .criteria-row{display:flex; justify-content:space-between; font-size:12px;}
+  .criteria-row .name{color:var(--inkwell-2);}
+  .criteria-row .weight{font-family:var(--f-mono); font-weight:500;}
+
+  /* Course Editor */
+  .editor-layout{display:grid; grid-template-columns:320px 1fr; gap:20px;}
+  .editor-preview{background:#fff; border:1px solid var(--line); border-radius:10px; padding:20px;}
+  .editor-preview .course-cover{
+    height:140px; border-radius:8px; background:linear-gradient(135deg, var(--cobalt) 0%, var(--inkwell) 100%);
+    display:flex; align-items:center; justify-content:center; color:#fff; margin-bottom:16px; position:relative;
+  }
+  .editor-preview .course-cover .edit-btn{
+    position:absolute; bottom:10px; right:10px; padding:4px 10px; background:rgba(255,255,255,0.2); backdrop-filter:blur(10px);
+    border-radius:6px; font-size:10px; cursor:pointer; border:1px solid rgba(255,255,255,0.3);
+  }
+  .editor-preview .course-title{font-family:var(--f-display); font-size:22px; font-weight:380; letter-spacing:-0.01em; margin-bottom:4px;}
+  .editor-preview .course-code{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em;}
+  .editor-preview .course-meta{display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin:14px 0;}
+  .editor-preview .meta-box{background:var(--ricepaper); border:1px solid var(--line); border-radius:8px; padding:10px; text-align:center;}
+  .editor-preview .meta-box .val{font-family:var(--f-display); font-size:18px; font-weight:400;}
+  .editor-preview .meta-box .lbl{font-size:9px; color:var(--inkwell-2); font-family:var(--f-mono); text-transform:uppercase; letter-spacing:0.08em;}
+
+  .editor-form{background:#fff; border:1px solid var(--line); border-radius:10px; padding:20px;}
+  .form-section{margin-bottom:18px; padding-bottom:18px; border-bottom:1px solid var(--line);}
+  .form-section:last-child{border-bottom:none; padding-bottom:0; margin-bottom:0;}
+  .form-section h4{font-family:var(--f-display); font-size:16px; font-weight:400; margin-bottom:4px;}
+  .form-section .desc{font-size:11px; color:var(--inkwell-2); margin-bottom:12px;}
+  .form-row{display:flex; flex-direction:column; gap:4px; margin-bottom:10px;}
+  .form-row:last-child{margin-bottom:0;}
+  .form-row label{font-size:11px; font-family:var(--f-mono); text-transform:uppercase; letter-spacing:0.08em; color:var(--inkwell-2);}
+  .form-row input, .form-row textarea, .form-row select{
+    padding:8px 10px; border:1px solid var(--line); border-radius:6px; font-family:var(--f-body); font-size:13px; background:#fff;
+  }
+  .form-row textarea{min-height:70px; resize:vertical;}
+  .form-row input:focus, .form-row textarea:focus, .form-row select:focus{outline:none; border-color:var(--cobalt);}
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+
+  /* Q&A Management */
+  .qa-layout{display:grid; grid-template-columns:280px 1fr; gap:20px;}
+  .qa-filters{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px;}
+  .qa-filters h5{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:10px; font-weight:500;}
+  .qa-filter-item{
+    display:flex; justify-content:space-between; align-items:center; padding:8px 10px;
+    border-radius:6px; cursor:pointer; font-size:13px;
+  }
+  .qa-filter-item:hover{background:var(--ricepaper);}
+  .qa-filter-item.active{background:var(--cobalt-soft); color:var(--cobalt); font-weight:500;}
+  .qa-filter-item .count{font-family:var(--f-mono); font-size:11px;}
+
+  .qa-list{display:flex; flex-direction:column; gap:10px;}
+  .qa-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px; position:relative;}
+  .qa-card:hover{border-color:var(--cobalt);}
+  .qa-card .head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;}
+  .qa-card .title{font-family:var(--f-display); font-size:16px; font-weight:400; letter-spacing:-0.01em; line-height:1.3; flex:1;}
+  .qa-card .status{
+    padding:3px 8px; border-radius:10px; font-size:10px; font-weight:500; white-space:nowrap;
+  }
+  .qa-card .status.unanswered{background:var(--correction-soft); color:var(--correction);}
+  .qa-card .status.answering{background:var(--highlighter-soft); color:#8A6500;}
+  .qa-card .status.answered{background:var(--growth-soft); color:var(--growth);}
+  .qa-card .content{font-size:13px; line-height:1.6; color:var(--inkwell-2); margin-bottom:10px; padding:10px; background:var(--ricepaper); border-radius:6px;}
+  .qa-card .foot{display:flex; justify-content:space-between; align-items:center; font-size:11px;}
+  .qa-card .foot .author{display:flex; align-items:center; gap:8px;}
+  .qa-card .foot .av{width:24px; height:24px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:10px;}
+  .qa-card .foot .time{font-family:var(--f-mono); color:var(--inkwell-2); font-size:10px;}
+  .qa-card .foot .stats{display:flex; gap:12px; font-family:var(--f-mono); color:var(--inkwell-2);}
+  .qa-card .foot .stats span{display:flex; align-items:center; gap:4px;}
+
+  /* Sync Management */
+  .sync-layout{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  .sync-main{display:flex; flex-direction:column; gap:12px;}
+  .sync-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px;}
+  .sync-card.dark{background:var(--inkwell); color:var(--ricepaper); border:none;}
+  .sync-card.dark h5{color:var(--highlighter);}
+  .sync-card h5{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:10px; font-weight:500;}
+
+  .sync-row{
+    display:flex; justify-content:space-between; align-items:center; padding:10px 0;
+    border-bottom:1px solid var(--line); font-size:13px;
+  }
+  .sync-row:last-child{border-bottom:none;}
+  .sync-row .left{display:flex; align-items:center; gap:10px;}
+  .sync-row .ic{width:32px; height:32px; border-radius:8px; background:var(--cobalt-soft); color:var(--cobalt); display:flex; align-items:center; justify-content:center; font-size:12px; font-family:var(--f-mono); font-weight:500;}
+  .sync-row .ic.grow{background:var(--growth-soft); color:var(--growth);}
+  .sync-row .ic.warn{background:var(--correction-soft); color:var(--correction);}
+  .sync-row .status-pill{padding:3px 8px; border-radius:10px; font-size:10px; font-weight:500;}
+  .sync-row .status-pill.ok{background:var(--growth-soft); color:var(--growth);}
+  .sync-row .status-pill.pending{background:var(--highlighter-soft); color:#8A6500;}
+  .sync-row .status-pill.err{background:var(--correction-soft); color:var(--correction);}
+
+  .sync-progress{height:6px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden; margin-top:8px;}
+  .sync-progress .bar{height:100%; background:var(--cobalt); border-radius:3px; transition:width 0.3s;}
+  .sync-progress .bar.synced{background:var(--growth);}
+
+  .log-list{display:flex; flex-direction:column; gap:6px; max-height:240px; overflow-y:auto;}
+  .log-item{display:flex; gap:10px; padding:6px 0; border-bottom:1px dashed var(--line); font-size:11px;}
+  .log-item:last-child{border-bottom:none;}
+  .log-item .time{font-family:var(--f-mono); color:var(--inkwell-2); min-width:60px; font-size:10px;}
+  .log-item .msg{flex:1; color:var(--inkwell-2); line-height:1.4;}
+  .log-item .status{font-family:var(--f-mono); font-size:10px; font-weight:500;}
+  .log-item .status.ok{color:var(--growth);}
+  .log-item .status.warn{color:var(--correction);}
+
+  .conflict-card{background:var(--correction-soft); border:1px solid var(--correction); border-radius:10px; padding:14px;}
+  .conflict-card .head{display:flex; gap:10px; align-items:center; margin-bottom:8px;}
+  .conflict-card .ic{width:32px; height:32px; border-radius:8px; background:var(--correction); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px;}
+  .conflict-card .title{font-size:13px; font-weight:500;}
+  .conflict-card .desc{font-size:11px; color:var(--inkwell-2); line-height:1.5; margin-bottom:10px;}
+  .conflict-card .actions{display:flex; gap:6px;}
+</style>
+<!-- Icons: Feather Icons (https://feathericons.com) — MIT License, © Cole Bemis -->
+</head>
+<body>
+
+<header class="page-header">
+  <h1>教师桌面端 · <em>补充页面</em></h1>
+  <div class="meta">Lumina · 08 · Extended · Grade Entry / Course Editor / Q&A / Sync</div>
+</header>
+
+<!-- ============ GRADE ENTRY ============ -->
+<section class="section">
+  <div class="section-title">01 · 成绩录入 / Grade Entry</div>
+  <div class="device-label">
+    <span>Teacher · Desktop · 成绩册</span>
+    <span class="tag">第四章习题 (二) · A 班</span>
+  </div>
+  <div class="desktop">
+    <div class="desktop-bar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="title">Lumina · 成绩录入 · 高等数学 A 班 · 第四章习题 (二)</div>
+      <div style="width:42px;"></div>
+    </div>
+    <div class="desktop-body">
+      <div class="d-side">
+        <div class="logo"><span class="dot"></span> Lumina</div>
+        <div class="who">王建国 · 副教授</div>
+        <div class="group">教学 · Teaching</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>工作台</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>我的课程</div>
+        <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>成绩册</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M17 11l2 2 4-4"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/></svg>学生名单</div>
+        <div class="group">工具 · Tools</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg>数据分析</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="1"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>日程</div>
+        <div class="offline-indicator">
+          <div class="badge"><span class="dot"></span> 离线可用</div>
+          <div class="info">已同步 2.3 GB · 最后更新 2 分钟前</div>
+        </div>
+      </div>
+
+      <div class="d-main">
+        <div class="top-bar">
+          <div>
+            <h1>成绩录入 · <em>第四章习题 (二)</em></h1>
+            <div class="sub">高等数学 · A 班 · MOD-203 · 截止 2026-08-25 23:59</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>导出 Excel</button>
+            <button class="btn primary"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h9"/></svg>保存成绩</button>
+          </div>
+        </div>
+
+        <div class="grade-layout">
+          <div class="grade-table">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:50px;">学生</th>
+                  <th>学号</th>
+                  <th>正确性 (40)</th>
+                  <th>完整性 (30)</th>
+                  <th>表达 (20)</th>
+                  <th>态度 (10)</th>
+                  <th>总分</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="av" style="background:var(--cobalt);">陈</div></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">2023110018</td>
+                  <td><input type="number" value="38"></td>
+                  <td><input type="number" value="28"></td>
+                  <td><input type="number" value="18"></td>
+                  <td><input type="number" value="8"></td>
+                  <td><span class="total hl">92</span></td>
+                </tr>
+                <tr>
+                  <td><div class="av" style="background:var(--cobalt-soft); color:var(--cobalt);">林</div></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">2023110012</td>
+                  <td><input type="number" value="32"></td>
+                  <td><input type="number" value="26"></td>
+                  <td><input type="number" value="16"></td>
+                  <td><input type="number" value="9"></td>
+                  <td><span class="total">83</span></td>
+                </tr>
+                <tr>
+                  <td><div class="av" style="background:var(--growth);">张</div></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">2023110025</td>
+                  <td><input type="number" value="34"></td>
+                  <td><input type="number" value="25"></td>
+                  <td><input type="number" value="17"></td>
+                  <td><input type="number" value="9"></td>
+                  <td><span class="total">85</span></td>
+                </tr>
+                <tr>
+                  <td><div class="av" style="background:var(--cobalt);">李</div></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">2023110008</td>
+                  <td><input type="number" value="30"></td>
+                  <td><input type="number" value="24"></td>
+                  <td><input type="number" value="15"></td>
+                  <td><input type="number" value="7"></td>
+                  <td><span class="total">76</span></td>
+                </tr>
+                <tr>
+                  <td><div class="av" style="background:var(--highlighter-soft); color:#8A6500;">王</div></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">2023110031</td>
+                  <td><input type="number" value="28"></td>
+                  <td><input type="number" value="22"></td>
+                  <td><input type="number" value="14"></td>
+                  <td><input type="number" value="8"></td>
+                  <td><span class="total">72</span></td>
+                </tr>
+                <tr>
+                  <td><div class="av" style="background:var(--correction-soft); color:var(--correction);">周</div></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">2023110042</td>
+                  <td><input type="number" value="18"></td>
+                  <td><input type="number" value="15"></td>
+                  <td><input type="number" value="10"></td>
+                  <td><input type="number" value="5"></td>
+                  <td><span class="total warn">48</span></td>
+                </tr>
+                <tr>
+                  <td><div class="av" style="background:var(--cobalt-soft); color:var(--cobalt);">刘</div></td>
+                  <td style="font-family:var(--f-mono); font-size:11px;">2023110056</td>
+                  <td><input type="number"></td>
+                  <td><input type="number"></td>
+                  <td><input type="number"></td>
+                  <td><input type="number"></td>
+                  <td><span class="total" style="color:var(--inkwell-2);">—</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="grade-summary">
+            <div class="grade-stat-card">
+              <h5>成绩分布</h5>
+              <div class="dist-row">
+                <div class="bar" style="flex:2; background:var(--cobalt);">60-79</div>
+                <div class="bar" style="flex:5; background:var(--cobalt);">80-89 · 20</div>
+                <div class="bar" style="flex:2; background:var(--growth);">90-100 · 8</div>
+              </div>
+              <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-top:8px; font-size:11px; text-align:center;">
+                <div>
+                  <div style="font-family:var(--f-display); font-size:18px;">68</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">最低分</div>
+                </div>
+                <div>
+                  <div style="font-family:var(--f-display); font-size:18px; color:var(--cobalt);">79</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">平均分</div>
+                </div>
+                <div>
+                  <div style="font-family:var(--f-display); font-size:18px; color:var(--growth);">92</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">最高分</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grade-stat-card">
+              <h5>评分标准</h5>
+              <div class="criteria-list">
+                <div class="criteria-row"><span class="name">正确性 · 解题步骤与答案</span><span class="weight">40%</span></div>
+                <div class="criteria-row"><span class="name">完整性 · 全部小题完成</span><span class="weight">30%</span></div>
+                <div class="criteria-row"><span class="name">表达 · 书写规范</span><span class="weight">20%</span></div>
+                <div class="criteria-row"><span class="name">态度 · 是否认真</span><span class="weight">10%</span></div>
+              </div>
+            </div>
+
+            <div class="grade-stat-card" style="background:var(--highlighter-soft); border-color:var(--highlighter);">
+              <h5 style="color:#8A6500;"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12c1 1 2 2 2 4h4c0-2 1-3 2-4a7 7 0 0 0-4-12z"/></svg> 录入提示</h5>
+              <div style="font-size:11px; line-height:1.5; color:var(--inkwell-2);">
+                Tab 键快速切换输入框；<br/>
+                Enter 键自动保存当前行；<br/>
+                Ctrl+S 全部保存。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COURSE EDITOR ============ -->
+<section class="section">
+  <div class="section-title">02 · 课程编辑 / Course Editor</div>
+  <div class="device-label">
+    <span>Teacher · Desktop · 课程信息</span>
+    <span class="tag">新建/编辑 · 草稿自动保存</span>
+  </div>
+  <div class="desktop">
+    <div class="desktop-bar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="title">Lumina · 课程编辑 · 高等数学 A 班</div>
+      <div style="width:42px;"></div>
+    </div>
+    <div class="desktop-body">
+      <div class="d-side">
+        <div class="logo"><span class="dot"></span> Lumina</div>
+        <div class="who">王建国 · 副教授</div>
+        <div class="group">教学 · Teaching</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>工作台</div>
+        <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>我的课程</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h9"/></svg>作业测验</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>成绩册</div>
+        <div class="offline-indicator">
+          <div class="badge"><span class="dot"></span> 离线可用</div>
+          <div class="info">已同步 2.3 GB · 最后更新 2 分钟前</div>
+        </div>
+      </div>
+
+      <div class="d-main">
+        <div class="top-bar">
+          <div>
+            <h1>课程编辑 · <em>高等数学 A 班</em></h1>
+            <div class="sub">MOD-203 · 草稿自动保存 · 最后保存 08:42</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn">预览</button>
+            <button class="btn primary">发布课程</button>
+          </div>
+        </div>
+
+        <div class="editor-layout">
+          <div class="editor-preview">
+            <div class="course-cover">
+              <div style="text-align:center;">
+                <div style="font-family:var(--f-display); font-size:28px; font-weight:300; letter-spacing:-0.02em;">高等数学</div>
+                <div style="font-family:var(--f-mono); font-size:10px; opacity:0.7; margin-top:4px;">ADVANCED MATHEMATICS</div>
+              </div>
+              <div class="edit-btn">更换封面</div>
+            </div>
+            <div class="course-title">高等数学 A 班</div>
+            <div class="course-code">MOD-203 · 必修 · 4 学分</div>
+
+            <div class="course-meta">
+              <div class="meta-box"><div class="val">42</div><div class="lbl">学生</div></div>
+              <div class="meta-box"><div class="val">12</div><div class="lbl">周数</div></div>
+              <div class="meta-box"><div class="val">78%</div><div class="lbl">均分</div></div>
+            </div>
+
+            <div style="font-size:12px; line-height:1.7; color:var(--inkwell-2); padding-top:10px; border-top:1px solid var(--line);">
+              本课程系统讲授一元函数微积分的基本理论与方法，培养学生抽象思维与逻辑推理能力。
+            </div>
+          </div>
+
+          <div class="editor-form">
+            <div class="form-section">
+              <h4>基本信息</h4>
+              <div class="desc">课程名称、代码与学分</div>
+              <div class="form-grid">
+                <div class="form-row">
+                  <label>课程名称</label>
+                  <input type="text" value="高等数学 A 班">
+                </div>
+                <div class="form-row">
+                  <label>课程代码</label>
+                  <input type="text" value="MOD-203">
+                </div>
+                <div class="form-row">
+                  <label>课程类型</label>
+                  <select><option>必修课</option><option>选修课</option><option>公共课</option></select>
+                </div>
+                <div class="form-row">
+                  <label>学分</label>
+                  <input type="number" value="4">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>教学安排</h4>
+              <div class="desc">时间、地点与学期</div>
+              <div class="form-grid">
+                <div class="form-row">
+                  <label>学期</label>
+                  <select><option>2026 秋季</option><option>2026 春季</option></select>
+                </div>
+                <div class="form-row">
+                  <label>周数</label>
+                  <input type="number" value="12">
+                </div>
+                <div class="form-row">
+                  <label>上课时间</label>
+                  <input type="text" value="周一 10:00-11:40 · 周三 14:00-15:40">
+                </div>
+                <div class="form-row">
+                  <label>教室</label>
+                  <input type="text" value="理科楼 A203">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>课程简介</h4>
+              <div class="desc">学生看到的课程介绍</div>
+              <div class="form-row">
+                <label>简介</label>
+                <textarea>本课程系统讲授一元函数微积分的基本理论与方法，培养学生抽象思维与逻辑推理能力。</textarea>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h4>教学助理</h4>
+              <div class="desc">协助批阅与答疑</div>
+              <div class="form-row">
+                <label>助教</label>
+                <select><option>林清 (2024 级硕士)</option><option>陈浩然 (2024 级硕士)</option></select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Q&A MANAGEMENT ============ -->
+<section class="section">
+  <div class="section-title">03 · 答疑管理 / Q&A Management</div>
+  <div class="device-label">
+    <span>Teacher · Desktop · 答疑讨论</span>
+    <span class="tag">3 条未回答</span>
+  </div>
+  <div class="desktop">
+    <div class="desktop-bar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="title">Lumina · 答疑讨论 · 高等数学 A 班</div>
+      <div style="width:42px;"></div>
+    </div>
+    <div class="desktop-body">
+      <div class="d-side">
+        <div class="logo"><span class="dot"></span> Lumina</div>
+        <div class="who">王建国 · 副教授</div>
+        <div class="group">教学 · Teaching</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>工作台</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>我的课程</div>
+        <div class="nav-item active">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          答疑讨论
+          <span class="count">3</span>
+        </div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>成绩册</div>
+        <div class="offline-indicator">
+          <div class="badge"><span class="dot"></span> 离线可用</div>
+          <div class="info">已同步 2.3 GB · 最后更新 2 分钟前</div>
+        </div>
+      </div>
+
+      <div class="d-main">
+        <div class="top-bar">
+          <div>
+            <h1>答疑讨论 · <em>高等数学 A 班</em></h1>
+            <div class="sub">第四章 · 不定积分 · 共 14 个问题</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn">导出报告</button>
+            <button class="btn primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>新建回答</button>
+          </div>
+        </div>
+
+        <div class="qa-layout">
+          <div class="qa-filters">
+            <h5>问题状态</h5>
+            <div class="qa-filter-item active">
+              <span>全部问题</span>
+              <span class="count">14</span>
+            </div>
+            <div class="qa-filter-item">
+              <span style="color:var(--correction);">未回答</span>
+              <span class="count" style="color:var(--correction);">3</span>
+            </div>
+            <div class="qa-filter-item">
+              <span style="color:#8A6500;">回答中</span>
+              <span class="count">2</span>
+            </div>
+            <div class="qa-filter-item">
+              <span style="color:var(--growth);">已解决</span>
+              <span class="count">9</span>
+            </div>
+
+            <h5 style="margin-top:16px;">所属章节</h5>
+            <div class="qa-filter-item">
+              <span>4.1 不定积分概念</span>
+              <span class="count">5</span>
+            </div>
+            <div class="qa-filter-item active">
+              <span>4.2 基本积分公式</span>
+              <span class="count">4</span>
+            </div>
+            <div class="qa-filter-item">
+              <span>4.3 换元积分法</span>
+              <span class="count">3</span>
+            </div>
+            <div class="qa-filter-item">
+              <span>4.4 分部积分</span>
+              <span class="count">2</span>
+            </div>
+
+            <div style="margin-top:16px; padding:12px; background:var(--ricepaper); border-radius:8px; font-size:11px; line-height:1.5;">
+              <div style="font-weight:500; margin-bottom:4px;"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12c1 1 2 2 2 4h4c0-2 1-3 2-4a7 7 0 0 0-4-12z"/></svg> 响应时效</div>
+              <div style="color:var(--inkwell-2);">平均响应时间：<span style="color:var(--growth); font-weight:500;">2.3 小时</span></div>
+              <div style="color:var(--inkwell-2);">最慢响应：<span style="color:var(--correction); font-weight:500;">5.1 小时</span></div>
+            </div>
+          </div>
+
+          <div class="qa-list">
+            <div class="qa-card">
+              <div class="head">
+                <div class="title">为什么 sin²x 的积分不是 -cos²x / 2？</div>
+                <div class="status unanswered">未回答</div>
+              </div>
+              <div class="content">
+                我在做 ∫sin²x dx 时直接用了 d(cos x) = -sin x dx，把 sin x 凑到 dx 里，得到 -cos²x / 2。但答案用的是降幂公式，为什么我的方法不行？
+              </div>
+              <div class="foot">
+                <div class="author">
+                  <div class="av" style="background:var(--correction-soft); color:var(--correction);">周</div>
+                  <div>
+                    <div style="font-weight:500;">周子涵</div>
+                    <div class="time">1 小时前 · 4.2 节</div>
+                  </div>
+                </div>
+                <div class="stats">
+                  <span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> 8</span>
+                  <span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 3</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="qa-card">
+              <div class="head">
+                <div class="title">三角换元时如何确定 t 的范围？</div>
+                <div class="status unanswered">未回答</div>
+              </div>
+              <div class="content">
+                用 x = a·sin(t) 做换元时，t 的取值范围是 [-π/2, π/2] 还是 [0, π]？如果取错了范围会怎样？
+              </div>
+              <div class="foot">
+                <div class="author">
+                  <div class="av" style="background:var(--cobalt-soft); color:var(--cobalt);">林</div>
+                  <div>
+                    <div style="font-weight:500;">林思语</div>
+                    <div class="time">2 小时前 · 4.3 节</div>
+                  </div>
+                </div>
+                <div class="stats">
+                  <span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> 12</span>
+                  <span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 5</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="qa-card">
+              <div class="head">
+                <div class="title">不定积分的几何意义是什么？</div>
+                <div class="status unanswered">未回答</div>
+              </div>
+              <div class="content">
+                定积分表示面积，那不定积分 ∫f(x)dx = F(x) + C 在几何上对应什么图形？是曲线族吗？
+              </div>
+              <div class="foot">
+                <div class="author">
+                  <div class="av" style="background:var(--growth);">陈</div>
+                  <div>
+                    <div style="font-weight:500;">陈浩然</div>
+                    <div class="time">3 小时前 · 4.1 节</div>
+                  </div>
+                </div>
+                <div class="stats">
+                  <span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> 18</span>
+                  <span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 7</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="qa-card">
+              <div class="head">
+                <div class="title">如何判断应该用哪类换元法？</div>
+                <div class="status answering">回答中</div>
+              </div>
+              <div class="content">
+                换元法有好几种（三角、倒代、根式），面对一道题时怎么快速判断该用哪一种？有没有通用的判断规则？
+              </div>
+              <div class="foot">
+                <div class="author">
+                  <div class="av" style="background:var(--highlighter-soft); color:#8A6500;">王</div>
+                  <div>
+                    <div style="font-weight:500;">王建国</div>
+                    <div class="time">昨天 · 4.3 节</div>
+                  </div>
+                </div>
+                <div class="stats">
+                  <span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> 22</span>
+                  <span><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 9</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SYNC MANAGEMENT ============ -->
+<section class="section">
+  <div class="section-title">04 · 离线同步管理 / Sync Management</div>
+  <div class="device-label">
+    <span>Teacher · Desktop · 数据同步</span>
+    <span class="tag">本地 2.3 GB · 云端同步中</span>
+  </div>
+  <div class="desktop">
+    <div class="desktop-bar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="title">Lumina · 同步管理 · 离线数据状态</div>
+      <div style="width:42px;"></div>
+    </div>
+    <div class="desktop-body">
+      <div class="d-side">
+        <div class="logo"><span class="dot"></span> Lumina</div>
+        <div class="who">王建国 · 副教授</div>
+        <div class="group">教学 · Teaching</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>工作台</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>我的课程</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h9"/></svg>作业测验</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>成绩册</div>
+        <div class="group">工具 · Tools</div>
+        <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>同步管理</div>
+        <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg>设置</div>
+        <div class="offline-indicator">
+          <div class="badge"><span class="dot"></span> 同步中</div>
+          <div class="info">正在同步 · 剩余 4 分钟</div>
+        </div>
+      </div>
+
+      <div class="d-main">
+        <div class="top-bar">
+          <div>
+            <h1>同步管理 · <em>离线数据状态</em></h1>
+            <div class="sub">本地缓存 2.3 GB · 云端连接正常 · 最后同步 2026-08-25 08:30</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn">暂停同步</button>
+            <button class="btn primary">立即同步</button>
+          </div>
+        </div>
+
+        <div class="sync-layout">
+          <div class="sync-main">
+            <div class="sync-card dark">
+              <h5><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg> 当前同步状态</h5>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div>
+                  <div style="font-family:var(--f-display); font-size:28px; font-weight:380;">2.3 GB</div>
+                  <div style="font-size:11px; opacity:0.7;">已同步 / 总计 2.3 GB</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-family:var(--f-mono); font-size:11px; opacity:0.8;">进度 92%</div>
+                  <div style="font-family:var(--f-mono); font-size:10px; opacity:0.6;">剩余约 4 分钟</div>
+                </div>
+              </div>
+              <div class="sync-progress"><div class="bar" style="width:92%; background:var(--highlighter);"></div></div>
+              <div style="display:flex; justify-content:space-between; font-size:10px; margin-top:6px; opacity:0.7;">
+                <span>42 项已同步</span>
+                <span>4 项等待中</span>
+              </div>
+            </div>
+
+            <div class="sync-card">
+              <h5>按类别同步状态</h5>
+              <div class="sync-row">
+                <div class="left">
+                  <div class="ic grow" style="background:var(--growth-soft); color:var(--growth);">VID</div>
+                  <div>
+                    <div style="font-weight:500;">教学视频</div>
+                    <div style="font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono);">18 个 · 1.4 GB</div>
+                  </div>
+                </div>
+                <div class="status-pill ok">✓ 已同步</div>
+              </div>
+              <div class="sync-row">
+                <div class="left">
+                  <div class="ic">PDF</div>
+                  <div>
+                    <div style="font-weight:500;">讲义与作业</div>
+                    <div style="font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono);">36 个 · 320 MB</div>
+                  </div>
+                </div>
+                <div class="status-pill ok">✓ 已同步</div>
+              </div>
+              <div class="sync-row">
+                <div class="left">
+                  <div class="ic">NTS</div>
+                  <div>
+                    <div style="font-weight:500;">批阅记录</div>
+                    <div style="font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono);">128 条 · 8 MB</div>
+                  </div>
+                </div>
+                <div class="status-pill pending">↻ 同步中</div>
+              </div>
+              <div class="sync-row">
+                <div class="left">
+                  <div class="ic warn">MSG</div>
+                  <div>
+                    <div style="font-weight:500;">消息与通知</div>
+                    <div style="font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono);">64 条 · 2 MB</div>
+                  </div>
+                </div>
+                <div class="status-pill pending">↻ 同步中</div>
+              </div>
+              <div class="sync-row">
+                <div class="left">
+                  <div class="ic" style="background:var(--cobalt-soft); color:var(--cobalt);">ANS</div>
+                  <div>
+                    <div style="font-weight:500;">答疑回复</div>
+                    <div style="font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono);">9 条 · 0.4 MB</div>
+                  </div>
+                </div>
+                <div class="status-pill err">✕ 冲突</div>
+              </div>
+            </div>
+
+            <div class="conflict-card">
+              <div class="head">
+                <div class="ic"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+                <div>
+                  <div class="title">发现 1 个同步冲突</div>
+                  <div style="font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono);">答疑回复 · 周子涵 · 2 小时前</div>
+                </div>
+              </div>
+              <div class="desc">
+                离线时修改过的答疑记录与云端最新版本不一致。请选择保留哪个版本：
+              </div>
+              <div class="actions">
+                <button class="btn" style="padding:5px 10px; font-size:11px;">查看本地版本</button>
+                <button class="btn" style="padding:5px 10px; font-size:11px;">查看云端版本</button>
+                <button class="btn primary" style="padding:5px 10px; font-size:11px;">使用云端版本</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div class="sync-card">
+              <h5>同步历史</h5>
+              <div class="log-list">
+                <div class="log-item">
+                  <div class="time">08:30</div>
+                  <div class="msg">开始同步 · 46 项待处理</div>
+                  <div class="status ok">进行中</div>
+                </div>
+                <div class="log-item">
+                  <div class="time">08:28</div>
+                  <div class="msg">批阅记录 已同步 (128 条)</div>
+                  <div class="status ok">完成</div>
+                </div>
+                <div class="log-item">
+                  <div class="time">08:25</div>
+                  <div class="msg">讲义 已同步 (36 个)</div>
+                  <div class="status ok">完成</div>
+                </div>
+                <div class="log-item">
+                  <div class="time">08:20</div>
+                  <div class="msg">视频 已同步 (18 个)</div>
+                  <div class="status ok">完成</div>
+                </div>
+                <div class="log-item">
+                  <div class="time">08:15</div>
+                  <div class="msg">答疑回复 · 冲突</div>
+                  <div class="status warn">待处理</div>
+                </div>
+                <div class="log-item">
+                  <div class="time">昨天</div>
+                  <div class="msg">全量同步完成 · 2.3 GB</div>
+                  <div class="status ok">完成</div>
+                </div>
+                <div class="log-item">
+                  <div class="time">2 天前</div>
+                  <div class="msg">增量同步 · 120 MB</div>
+                  <div class="status ok">完成</div>
+                </div>
+                <div class="log-item">
+                  <div class="time">3 天前</div>
+                  <div class="msg">网络异常 · 同步中断</div>
+                  <div class="status warn">已重试</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sync-card" style="background:var(--growth-soft); border-color:var(--growth);">
+              <h5 style="color:var(--growth);">✓ 离线模式说明</h5>
+              <div style="font-size:11px; line-height:1.6; color:var(--inkwell-2);">
+                • 断网时仍可正常批阅作业<br/>
+                • 修改会在恢复网络后自动同步<br/>
+                • 冲突时系统会提示手动解决
+              </div>
+            </div>
+
+            <div class="sync-card">
+              <h5>存储详情</h5>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span style="font-size:12px;">本地占用</span>
+                <span style="font-family:var(--f-display); font-size:18px;">2.3 GB</span>
+              </div>
+              <div class="sync-progress"><div class="bar synced" style="width:46%;"></div></div>
+              <div style="display:flex; justify-content:space-between; font-size:10px; margin-top:6px; color:var(--inkwell-2);">
+                <span>2.3 GB / 5 GB</span>
+                <span style="color:var(--growth);">✓ 空间充足</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina · 04 · 学生 PC 端</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC;
+    --ricepaper-2:#F2EBD8;
+    --inkwell:#0F1020;
+    --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9;
+    --cobalt-soft:#E8EAFB;
+    --highlighter:#F5B800;
+    --highlighter-soft:#FDE68A;
+    --correction:#E85D3A;
+    --correction-soft:#FDE0D4;
+    --growth:#2A7F4F;
+    --growth-soft:#D4EDDC;
+    --line:rgba(15,16,32,0.12);
+    --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.5;}
+  body{padding:48px 56px;}
+
+  .page-header{
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding-bottom:32px; border-bottom:1px solid var(--line); margin-bottom:48px;
+  }
+  .page-header h1{font-family:var(--f-display); font-weight:380; font-size:48px; letter-spacing:-0.02em;}
+  .page-header h1 em{font-style:italic; color:var(--cobalt);}
+  .page-header .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.14em;}
+
+  .device-label{
+    font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em;
+    color:var(--inkwell-2); margin-bottom:14px; display:flex; justify-content:space-between;
+  }
+  .device-label .tag{color:var(--cobalt);}
+
+  .browser{
+    background:#fff; border:1px solid var(--line-strong); border-radius:8px; overflow:hidden;
+    box-shadow: var(--shadow);
+  }
+  .browser-bar{
+    background:#F7F4EA; border-bottom:1px solid var(--line); padding:10px 14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .browser-bar .dots{display:flex; gap:6px;}
+  .browser-bar .dots span{width:10px; height:10px; border-radius:50%; background:var(--line-strong);}
+  .browser-bar .url{
+    flex:1; background:#fff; border:1px solid var(--line); border-radius:4px;
+    padding:4px 10px; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);
+  }
+  .browser-body{background:var(--ricepaper); display:flex; min-height:700px;}
+
+  .w-side{
+    width:220px; background:#FDFBF3; border-right:1px solid var(--line); padding:20px 16px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .w-side .logo{font-family:var(--f-display); font-size:20px; font-weight:500; display:flex; align-items:center; gap:8px; margin-bottom:18px;}
+  .w-side .logo .dot{width:10px; height:10px; border-radius:50%; background:var(--highlighter);}
+  .w-side .nav-item{
+    display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:6px;
+    font-size:13px; color:var(--inkwell-2); cursor:pointer;
+  }
+  .w-side .nav-item:hover{background:var(--ricepaper-2);}
+  .w-side .nav-item.active{background:var(--cobalt-soft); color:var(--cobalt); font-weight:500;}
+  .w-side .nav-item svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.7;}
+  .w-side .divider{height:1px; background:var(--line); margin:10px 0;}
+  .w-side .user-card{
+    margin-top:auto; padding:10px; background:#fff; border:1px solid var(--line); border-radius:8px;
+    display:flex; align-items:center; gap:8px; font-size:12px;
+  }
+  .w-side .user-card .av{width:28px; height:28px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-family:var(--f-display);}
+
+  .w-main{flex:1; padding:24px 28px;}
+  .w-top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px;}
+  .w-top h1{font-family:var(--f-display); font-weight:380; font-size:32px; letter-spacing:-0.02em; line-height:1.1;}
+  .w-top h1 em{font-style:italic; background: linear-gradient(180deg, transparent 64%, var(--highlighter) 64%, var(--highlighter) 90%, transparent 90%); padding:0 3px;}
+  .w-top .sub{font-size:13px; color:var(--inkwell-2); margin-top:4px;}
+  .w-top .actions{display:flex; gap:8px;}
+  .btn{
+    font-family:var(--f-body); font-size:12px; font-weight:500; padding:7px 12px; border-radius:6px; border:1px solid var(--line);
+    background:#fff; color:var(--inkwell); cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn.primary{background:var(--cobalt); color:#fff; border-color:var(--cobalt);}
+  .btn svg{width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:2;}
+
+  .w-stats{display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:24px;}
+  .w-stat{background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px 14px;}
+  .w-stat .lbl{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2);}
+  .w-stat .val{font-family:var(--f-display); font-size:30px; font-weight:380; letter-spacing:-0.02em; margin-top:4px; line-height:1;}
+  .w-stat .val .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 3px;}
+  .w-stat .delta{font-family:var(--f-mono); font-size:10px; color:var(--growth); margin-top:4px;}
+  .w-stat .delta.bad{color:var(--correction);}
+
+  .w-grid{display:grid; grid-template-columns: 1.6fr 1fr; gap:16px;}
+
+  .w-courses{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .w-course{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px;
+  }
+  .w-course .tag{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em;}
+  .w-course .title{font-family:var(--f-display); font-size:18px; font-weight:420; letter-spacing:-0.01em; line-height:1.2; margin:4px 0 8px;}
+  .w-course .progress{height:4px; background:var(--ricepaper-2); border-radius:2px; overflow:hidden; margin-top:10px;}
+  .w-course .progress .bar{height:100%; background:var(--cobalt); border-radius:2px;}
+  .w-course .meta{display:flex; justify-content:space-between; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:6px;}
+  .w-course.cobalt{background:var(--cobalt); color:#fff; border-color:var(--cobalt);}
+  .w-course.cobalt .tag, .w-course.cobalt .meta{color:rgba(255,255,255,0.7);}
+  .w-course.cobalt .progress{background:rgba(255,255,255,0.2);}
+  .w-course.cobalt .progress .bar{background:var(--highlighter);}
+  .w-course.hl-y{background:var(--highlighter); border-color:var(--highlighter);}
+  .w-course.hl-y .progress{background:rgba(15,16,32,0.12);}
+  .w-course.hl-y .progress .bar{background:var(--inkwell);}
+
+  .w-side-panel{display:flex; flex-direction:column; gap:12px;}
+  .w-panel{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px;}
+  .w-panel h5{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:10px; font-weight:500; display:flex; justify-content:space-between;}
+  .w-panel h5 a{font-family:var(--f-body); font-size:11px; color:var(--cobalt); text-decoration:none; text-transform:none; letter-spacing:0;}
+
+  .deadline{display:flex; gap:10px; padding:7px 0; border-bottom:1px dashed var(--line); font-size:12px;}
+  .deadline:last-child{border-bottom:none;}
+  .deadline .d{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); min-width:44px; padding-top:2px;}
+  .deadline .t{flex:1; font-weight:500; font-size:12.5px;}
+  .deadline .t small{display:block; font-weight:400; color:var(--inkwell-2); font-size:11px; margin-top:1px;}
+  .deadline.urgent .d{color:var(--correction); font-weight:500;}
+
+  .announce{padding:8px 0; border-bottom:1px dashed var(--line); font-size:12px;}
+  .announce:last-child{border-bottom:none;}
+  .announce .t{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);}
+  .announce .m{margin-top:3px; line-height:1.45;}
+</style>
+<!-- Icons: Feather Icons (https://feathericons.com) — MIT License, © Cole Bemis -->
+</head>
+<body>
+
+<header class="page-header">
+  <h1>学生 PC 端 <em>Student Web</em></h1>
+  <div class="meta">Lumina · 04 / 08 · Browser · Dashboard</div>
+</header>
+
+<div class="device-label">
+  <span>Student · PC Website · 仪表板</span>
+  <span class="tag">课程概览 · 统计数据 · 截止日期</span>
+</div>
+
+<div class="browser">
+  <div class="browser-bar">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div class="url"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>  lumina.edu.cn/dashboard</div>
+  </div>
+  <div class="browser-body">
+    <div class="w-side">
+      <div class="logo"><span class="dot"></span> Lumina</div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+        学习首页
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+        我的课程
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h9"/></svg>
+        作业与测验
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        讨论区
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>
+        成绩册
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="1"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        日历
+      </div>
+      <div class="divider"></div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" fill="none"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+        资源库
+      </div>
+      <div class="user-card">
+        <div class="av">林</div>
+        <div>
+          <div style="font-weight:500;">林清</div>
+          <div style="color:var(--inkwell-2); font-size:10px; font-family:var(--f-mono);">CS · 2023 级</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="w-main">
+      <div class="w-top">
+        <div>
+          <h1>欢迎回来，<em>林清</em></h1>
+          <div class="sub">今天是 2026 年 8 月 24 日 · 本周有 4 份待完成 · 2 条新讨论</div>
+        </div>
+        <div class="actions">
+          <button class="btn">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
+            导出成绩
+          </button>
+          <button class="btn primary">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            加入新课程
+          </button>
+        </div>
+      </div>
+
+      <div class="w-stats">
+        <div class="w-stat">
+          <div class="lbl">本学期课程</div>
+          <div class="val"><span class="hl">6</span></div>
+          <div class="delta">↑ 全部正常进度</div>
+        </div>
+        <div class="w-stat">
+          <div class="lbl">累计学时</div>
+          <div class="val">128<span style="font-size:16px; color:var(--inkwell-2); font-family:var(--f-body);"> h</span></div>
+          <div class="delta">↑ 12 h 本周</div>
+        </div>
+        <div class="w-stat">
+          <div class="lbl">GPA · 学期</div>
+          <div class="val"><span class="hl">3.72</span></div>
+          <div class="delta">↑ 0.08 vs 上学期</div>
+        </div>
+        <div class="w-stat">
+          <div class="lbl">待办任务</div>
+          <div class="val" style="color:var(--correction);">4</div>
+          <div class="delta bad">2 项明日截止</div>
+        </div>
+      </div>
+
+      <div class="w-grid">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px;">
+            <h5 style="font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); font-weight:500;">进行中的课程</h5>
+            <a href="#" style="font-size:12px; color:var(--cobalt); text-decoration:none;">全部课程 →</a>
+          </div>
+          <div class="w-courses">
+            <div class="w-course cobalt">
+              <div class="tag">必修 · 高等数学</div>
+              <div class="title">第四章 · 不定积分</div>
+              <div class="progress"><div class="bar" style="width:62%;"></div></div>
+              <div class="meta"><span>进度 62%</span><span>王建国</span></div>
+            </div>
+            <div class="w-course hl-y">
+              <div class="tag">选修 · 西方哲学</div>
+              <div class="title">§4 康德：先验分析论</div>
+              <div class="progress"><div class="bar" style="width:45%;"></div></div>
+              <div class="meta"><span>进度 45%</span><span>陈思远</span></div>
+            </div>
+            <div class="w-course">
+              <div class="tag">必修 · 线性代数</div>
+              <div class="title">特征值与特征向量</div>
+              <div class="progress"><div class="bar" style="width:78%;"></div></div>
+              <div class="meta"><span>进度 78%</span><span>刘芳</span></div>
+            </div>
+            <div class="w-course">
+              <div class="tag">实验 · 数据结构</div>
+              <div class="title">Lab 05 · 二叉搜索树</div>
+              <div class="progress"><div class="bar" style="width:30%;"></div></div>
+              <div class="meta"><span>进度 30%</span><span>赵宇航</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-side-panel">
+          <div class="w-panel">
+            <h5>即将到来 <a href="#">日历</a></h5>
+            <div class="deadline urgent">
+              <div class="d">08-25</div>
+              <div class="t">高数 · 第四章习题<small>明天 23:59 截止 · 占总评 8%</small></div>
+            </div>
+            <div class="deadline urgent">
+              <div class="d">08-25</div>
+              <div class="t">数据结构 · Lab 05 提交<small>明天 18:00 · BST 算法实现</small></div>
+            </div>
+            <div class="deadline">
+              <div class="d">08-28</div>
+              <div class="t">哲学 · 读书报告 §5-6<small>下周五 · 2500 字</small></div>
+            </div>
+            <div class="deadline">
+              <div class="d">09-02</div>
+              <div class="t">线代 · 期中测验<small>在线 · 60 分钟</small></div>
+            </div>
+          </div>
+
+          <div class="w-panel">
+            <h5>公告 <a href="#">全部</a></h5>
+            <div class="announce">
+              <div class="t">王建国 · 2 小时前</div>
+              <div class="m">高数课周三调至教三 305，请相互转告。</div>
+            </div>
+            <div class="announce">
+              <div class="t">赵宇航 · 昨天</div>
+              <div class="m">Lab 05 补充了测试用例说明，请重新下载。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

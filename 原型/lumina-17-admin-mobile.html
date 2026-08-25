@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina · 17 · 管理端 · Mobile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.5;}
+  body{padding:48px 56px;}
+
+  .page-header{display:flex; justify-content:space-between; align-items:baseline; padding-bottom:32px; border-bottom:1px solid var(--line); margin-bottom:48px;}
+  .page-header h1{font-family:var(--f-display); font-weight:380; font-size:48px; letter-spacing:-0.02em;}
+  .page-header h1 em{font-style:italic; color:var(--cobalt);}
+  .page-header .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.14em;}
+
+  .section{margin-bottom:60px;}
+  .section-title{font-family:var(--f-mono); font-size:12px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin-bottom:24px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .section-desc{font-size:14px; color:var(--inkwell-2); margin:-12px 0 20px; max-width:720px;}
+
+  .phones-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:32px;}
+  .phone-col{display:flex; flex-direction:column; gap:12px;}
+  .phone-col .label{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+  .phone-col .label .tag{color:var(--correction); margin-left:8px; font-weight:500;}
+
+  .phone{background:var(--inkwell); border-radius:36px; padding:12px; box-shadow:var(--shadow); width:100%; max-width:320px; margin:0 auto;}
+  .phone-screen{background:var(--ricepaper); border-radius:26px; overflow:hidden; aspect-ratio:9/19.5; display:flex; flex-direction:column; position:relative;}
+  .phone-notch{position:absolute; top:8px; left:50%; transform:translateX(-50%); width:90px; height:24px; background:var(--inkwell); border-radius:16px; z-index:5;}
+  .phone-status{display:flex; justify-content:space-between; padding:14px 22px 0; font-family:var(--f-mono); font-size:10px; font-weight:500; position:relative; z-index:2;}
+  .phone-status .icons{display:flex; gap:3px;}
+  .phone-status .icons svg{width:14px; height:14px;}
+
+  /* Admin mobile top bar */
+  .adm-topbar{background:var(--inkwell); color:var(--ricepaper); padding:8px 16px 14px; display:flex; align-items:center; gap:10px;}
+  .adm-topbar .brand{display:flex; align-items:center; gap:8px; flex:1;}
+  .adm-topbar .brand .logo{width:24px; height:24px; border-radius:5px; background:var(--highlighter); color:var(--inkwell); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-weight:500; font-style:italic; font-size:13px;}
+  .adm-topbar .brand .name{font-family:var(--f-display); font-size:13px; font-weight:400;}
+  .adm-topbar .brand .tag{font-family:var(--f-mono); font-size:8px; text-transform:uppercase; letter-spacing:0.12em; background:var(--correction); color:#fff; padding:1px 5px; border-radius:3px; margin-left:4px;}
+  .adm-topbar .icon-btn{width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; position:relative;}
+  .adm-topbar .icon-btn svg{width:13px; height:13px; fill:none; stroke:var(--ricepaper); stroke-width:1.8;}
+  .adm-topbar .icon-btn .badge{position:absolute; top:-3px; right:-3px; width:12px; height:12px; border-radius:50%; background:var(--correction); color:#fff; font-size:7px; font-family:var(--f-mono); font-weight:600; display:flex; align-items:center; justify-content:center; border:1.5px solid var(--inkwell);}
+
+  .m-body{flex:1; overflow:hidden; display:flex; flex-direction:column;}
+  .m-body .scroll{flex:1; overflow-y:auto; padding:12px 14px;}
+  .m-body .scroll::-webkit-scrollbar{display:none;}
+
+  .m-nav{display:grid; grid-template-columns:repeat(5, 1fr); background:#fff; border-top:1px solid var(--line); padding:8px 0 6px;}
+  .m-nav .item{display:flex; flex-direction:column; align-items:center; gap:2px;}
+  .m-nav .item svg{width:17px; height:17px; fill:none; stroke:var(--inkwell-2); stroke-width:1.6;}
+  .m-nav .item span{font-size:9px; color:var(--inkwell-2);}
+  .m-nav .item.active svg{stroke:var(--inkwell);}
+  .m-nav .item.active span{color:var(--inkwell); font-weight:500;}
+  .m-nav .item .badge{position:relative; top:-2px; right:-2px; width:12px; height:12px; border-radius:50%; background:var(--correction); color:#fff; font-size:7px; font-family:var(--f-mono); display:flex; align-items:center; justify-content:center;}
+
+  .m-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:8px;}
+  .m-card h5{font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:6px; font-weight:500;}
+  .m-card.dark{background:var(--inkwell); color:#fff; border-color:var(--inkwell);}
+  .m-card.dark h5{color:rgba(255,255,255,0.6);}
+  .m-card.hl{background:var(--highlighter-soft); border-color:var(--highlighter);}
+  .m-card.growth{background:var(--growth-soft); border-color:var(--growth);}
+  .m-card.warn{background:var(--correction-soft); border-color:var(--correction);}
+
+  .m-head{padding:8px 16px 10px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--line); background:#fff;}
+  .m-head .title{font-family:var(--f-display); font-size:16px; font-weight:400; letter-spacing:-0.01em; flex:1;}
+  .m-head .back{width:26px; height:26px; border-radius:50%; background:var(--ricepaper); border:1px solid var(--line); display:flex; align-items:center; justify-content:center;}
+  .m-head .back svg{width:12px; height:12px; fill:none; stroke:var(--inkwell); stroke-width:2;}
+
+  .scr-head{padding:8px 16px 12px; display:flex; align-items:center; gap:10px;}
+  .scr-head .back{width:28px; height:28px; border-radius:50%; background:#fff; border:1px solid var(--line); display:flex; align-items:center; justify-content:center;}
+  .scr-head .back svg{width:14px; height:14px; fill:none; stroke:var(--inkwell); stroke-width:2;}
+  .scr-head .title{font-family:var(--f-display); font-size:18px; font-weight:400; letter-spacing:-0.01em; flex:1;}
+
+  /* Mobile stats */
+  .m-stats{display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; margin-bottom:10px;}
+  .m-stat{background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px;}
+  .m-stat .lbl{font-family:var(--f-mono); font-size:8px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2);}
+  .m-stat .val{font-family:var(--f-display); font-size:22px; font-weight:400; letter-spacing:-0.01em; line-height:1.1; margin-top:2px;}
+  .m-stat .delta{font-family:var(--f-mono); font-size:9px; color:var(--growth); margin-top:2px;}
+  .m-stat.warn .val{color:var(--correction);}
+  .m-stat.hl{background:var(--highlighter-soft); border-color:var(--highlighter);}
+  .m-stat.grow{background:var(--growth-soft); border-color:var(--growth);}
+  .m-stat.warn{background:var(--correction-soft); border-color:var(--correction);}
+
+  /* Quick action grid */
+  .m-quick{display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:10px;}
+  .m-quick .qa{background:#fff; border:1px solid var(--line); border-radius:8px; padding:8px 4px; text-align:center; cursor:pointer;}
+  .m-quick .qa svg{width:18px; height:18px; fill:none; stroke:var(--inkwell); stroke-width:1.7; margin:0 auto 4px; display:block;}
+  .m-quick .qa span{font-size:9px; display:block;}
+  .m-quick .qa .count{display:block; font-family:var(--f-mono); font-size:9px; color:var(--correction); font-weight:600; margin-top:2px;}
+  .m-quick .qa.alert{background:var(--correction-soft); border-color:var(--correction);}
+  .m-quick .qa.alert svg{stroke:var(--correction);}
+
+  /* Live alert */
+  .alert-strip{
+    background:var(--correction); color:#fff; padding:10px 14px; display:flex; gap:10px; align-items:flex-start; margin-bottom:10px; border-radius:10px;
+  }
+  .alert-strip svg{width:18px; height:18px; fill:none; stroke:#fff; stroke-width:2; flex-shrink:0; margin-top:1px;}
+  .alert-strip .content{flex:1; font-size:11px; line-height:1.4;}
+  .alert-strip .title{font-weight:600; margin-bottom:2px;}
+  .alert-strip .time{font-size:9px; opacity:0.85; font-family:var(--f-mono); margin-top:4px;}
+
+  /* Approval card mobile */
+  .adm-approval{background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:8px;}
+  .adm-approval .head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;}
+  .adm-approval .title{font-family:var(--f-display); font-size:14px; font-weight:400; line-height:1.3; flex:1;}
+  .adm-approval .pill{padding:2px 7px; border-radius:6px; font-size:9px; font-weight:500; background:var(--highlighter-soft); color:#8A6500;}
+  .adm-approval .pill.approved{background:var(--growth-soft); color:var(--growth);}
+  .adm-approval .pill.rejected{background:var(--correction-soft); color:var(--correction);}
+  .adm-approval .meta{font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono); margin-bottom:8px; display:flex; gap:8px; flex-wrap:wrap;}
+  .adm-approval .desc{font-size:11px; line-height:1.5; padding:8px; background:var(--ricepaper); border-radius:6px; margin-bottom:10px; color:var(--inkwell-2);}
+  .adm-approval .submitter{display:flex; align-items:center; gap:8px; font-size:10px; margin-bottom:10px;}
+  .adm-approval .submitter .av{width:22px; height:22px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:9px;}
+  .adm-approval .actions{display:flex; gap:6px;}
+  .adm-approval .actions button{flex:1; padding:7px; border-radius:6px; font-size:11px; font-weight:500; cursor:pointer; border:1px solid var(--line); background:#fff;}
+  .adm-approval .actions button.approve{background:var(--growth); color:#fff; border-color:var(--growth);}
+  .adm-approval .actions button.reject{background:#fff; color:var(--correction); border-color:var(--correction);}
+
+  /* Notification list */
+  .notif-item{display:flex; gap:10px; padding:10px; background:#fff; border:1px solid var(--line); border-radius:10px; margin-bottom:6px; align-items:flex-start;}
+  .notif-item.unread{background:var(--cobalt-soft); border-color:var(--cobalt);}
+  .notif-item.urgent{background:var(--correction-soft); border-color:var(--correction);}
+  .notif-item .icon{
+    width:32px; height:32px; border-radius:8px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .notif-item .icon svg{width:16px; height:16px; fill:none; stroke-width:2;}
+  .notif-item .icon.warn{background:var(--correction); }
+  .notif-item .icon.warn svg{stroke:#fff;}
+  .notif-item .icon.ok{background:var(--growth);}
+  .notif-item .icon.ok svg{stroke:#fff;}
+  .notif-item .icon.info{background:var(--cobalt);}
+  .notif-item .icon.info svg{stroke:#fff;}
+  .notif-item .icon.sys{background:var(--inkwell);}
+  .notif-item .icon.sys svg{stroke:var(--highlighter);}
+  .notif-item .content{flex:1; min-width:0;}
+  .notif-item .title{font-size:12px; font-weight:500; line-height:1.3; margin-bottom:2px;}
+  .notif-item .desc{font-size:10px; color:var(--inkwell-2); line-height:1.4;}
+  .notif-item .time{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); margin-top:4px;}
+
+  /* User card mobile */
+  .user-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:8px; display:flex; gap:10px; align-items:center;}
+  .user-card .av{width:36px; height:36px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:14px; flex-shrink:0;}
+  .user-card .av.warn{background:var(--correction);}
+  .user-card .info{flex:1; min-width:0;}
+  .user-card .name{font-size:13px; font-weight:500; display:flex; gap:6px; align-items:center;}
+  .user-card .name .pill{font-size:8px; padding:1px 5px; border-radius:4px; font-weight:600;}
+  .user-card .name .pill.warn{background:var(--correction-soft); color:var(--correction);}
+  .user-card .meta{font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono); margin-top:2px;}
+  .user-card .act{width:28px; height:28px; border-radius:50%; background:var(--ricepaper); border:1px solid var(--line); display:flex; align-items:center; justify-content:center;}
+  .user-card .act svg{width:12px; height:12px; fill:none; stroke:var(--inkwell-2); stroke-width:2;}
+
+  .m-search{
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px 12px; display:flex; align-items:center; gap:8px; margin-bottom:10px;
+  }
+  .m-search svg{width:14px; height:14px; fill:none; stroke:var(--inkwell-2); stroke-width:1.8;}
+  .m-search input{flex:1; border:none; outline:none; font-size:12px; background:transparent; font-family:var(--f-body);}
+</style>
+<!-- Icons: Feather Icons (https://feathericons.com) — MIT License, © Cole Bemis -->
+</head>
+<body>
+
+<header class="page-header">
+  <h1>管理端 · <em>Admin Mobile</em></h1>
+  <div class="meta">Lumina · 17 · Mobile · Dashboard / Approvals / Alerts / User Lookup</div>
+</header>
+
+<!-- ============ DASHBOARD ============ -->
+<section class="section">
+  <div class="section-title">01 · 移动总览 / Admin Dashboard (Mobile)</div>
+  <div class="section-desc">管理员移动端首屏：实时指标、紧急警报、快捷操作、待处理事项。</div>
+  <div class="phones-grid">
+
+    <div class="phone-col">
+      <div class="label">管理员首屏 <span class="tag">⚠ 紧急警报</span></div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="phone-status">
+            <span>14:23</span>
+            <div class="icons">
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="14" width="3" height="6"/><rect x="8" y="10" width="3" height="10"/><rect x="13" y="6" width="3" height="14"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="16" height="8" rx="1.5"/><rect x="5" y="10" width="10" height="4" fill="currentColor"/><rect x="19" y="10" width="2" height="4" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="adm-topbar">
+            <div class="brand">
+              <div class="logo">墨</div>
+              <div class="name">Lumina 墨光<span class="tag">Admin</span></div>
+            </div>
+            <div class="icon-btn">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="badge">12</span>
+            </div>
+            <div class="icon-btn">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+          </div>
+
+          <div class="m-body">
+            <div class="scroll">
+              <div class="alert-strip">
+                <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <div class="content">
+                  <div class="title">CDN 华南节点降级至 94.2%</div>
+                  <div>影响视频流 · 已自动切换备用节点</div>
+                  <div class="time">2 分钟前 · 自动通知</div>
+                </div>
+              </div>
+
+              <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin-bottom:8px;">实时指标</div>
+              <div class="m-stats">
+                <div class="m-stat grow">
+                  <div class="lbl">在线用户</div>
+                  <div class="val">847</div>
+                  <div class="delta">↑ 12%</div>
+                </div>
+                <div class="m-stat hl">
+                  <div class="lbl">当前直播</div>
+                  <div class="val">24</div>
+                  <div class="delta">18 门课程</div>
+                </div>
+                <div class="m-stat">
+                  <div class="lbl">API 延迟</div>
+                  <div class="val">32<span style="font-size:11px; opacity:0.6;">ms</span></div>
+                  <div class="delta">正常</div>
+                </div>
+                <div class="m-stat warn">
+                  <div class="lbl">待处理</div>
+                  <div class="val">22</div>
+                  <div class="delta" style="color:var(--correction);">紧急</div>
+                </div>
+              </div>
+
+              <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin-bottom:8px;">快捷操作</div>
+              <div class="m-quick">
+                <div class="qa alert">
+                  <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+                  <span>审批</span>
+                  <span class="count">7</span>
+                </div>
+                <div class="qa alert">
+                  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <span>举报</span>
+                  <span class="count">3</span>
+                </div>
+                <div class="qa">
+                  <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  <span>学生</span>
+                </div>
+                <div class="qa">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg>
+                  <span>权限</span>
+                </div>
+              </div>
+
+              <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin-bottom:8px;">待我处理</div>
+
+              <div class="m-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:var(--ricepaper); border-radius:6px; margin-bottom:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="width:6px; height:6px; border-radius:50%; background:var(--highlighter);"></span>
+                    <span style="font-size:12px;">课程审批</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-family:var(--f-mono); font-size:11px; font-weight:500;">7 件</span>
+                    <button style="padding:3px 8px; font-size:10px; background:var(--inkwell); color:#fff; border:none; border-radius:4px; cursor:pointer;">→</button>
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:var(--ricepaper); border-radius:6px; margin-bottom:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="width:6px; height:6px; border-radius:50%; background:var(--correction);"></span>
+                    <span style="font-size:12px;">内容举报</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-family:var(--f-mono); font-size:11px; font-weight:500;">3 件</span>
+                    <button style="padding:3px 8px; font-size:10px; background:var(--inkwell); color:#fff; border:none; border-radius:4px; cursor:pointer;">→</button>
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:var(--ricepaper); border-radius:6px; margin-bottom:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="width:6px; height:6px; border-radius:50%; background:var(--cobalt);"></span>
+                    <span style="font-size:12px;">教师认证</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-family:var(--f-mono); font-size:11px; font-weight:500;">4 件</span>
+                    <button style="padding:3px 8px; font-size:10px; background:var(--inkwell); color:#fff; border:none; border-radius:4px; cursor:pointer;">→</button>
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:var(--ricepaper); border-radius:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="width:6px; height:6px; border-radius:50%; background:var(--growth);"></span>
+                    <span style="font-size:12px;">退款申请</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-family:var(--f-mono); font-size:11px; font-weight:500;">8 件</span>
+                    <button style="padding:3px 8px; font-size:10px; background:var(--inkwell); color:#fff; border:none; border-radius:4px; cursor:pointer;">→</button>
+                  </div>
+                </div>
+              </div>
+
+              <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin-bottom:8px;">最近活动</div>
+
+              <div class="m-card">
+                <div style="font-size:11px; padding:6px 0; border-bottom:1px dashed var(--line);">
+                  <span style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);">10:23</span>
+                  <span style="margin-left:6px;">刘思源 审批通过</span>
+                  <b>高等数学 A</b>
+                </div>
+                <div style="font-size:11px; padding:6px 0; border-bottom:1px dashed var(--line);">
+                  <span style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);">10:18</span>
+                  <span style="margin-left:6px;">系统封禁</span>
+                  <b style="color:var(--correction);">u_2841</b>
+                </div>
+                <div style="font-size:11px; padding:6px 0;">
+                  <span style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);">09:54</span>
+                  <span style="margin-left:6px;">陈助理处理举报 #4928</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-nav">
+            <div class="item active">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span>总览</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <span>用户</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+              <span>审批</span>
+              <span class="badge">7</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span>警报</span>
+              <span class="badge">12</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg>
+              <span>我的</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-col">
+      <div class="label">平台健康度</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="phone-status">
+            <span>14:25</span>
+            <div class="icons">
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="14" width="3" height="6"/><rect x="8" y="10" width="3" height="10"/><rect x="13" y="6" width="3" height="14"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="16" height="8" rx="1.5"/><rect x="5" y="10" width="10" height="4" fill="currentColor"/><rect x="19" y="10" width="2" height="4" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="adm-topbar">
+            <div class="brand">
+              <div class="logo">墨</div>
+              <div class="name">Lumina 墨光<span class="tag">Admin</span></div>
+            </div>
+            <div class="icon-btn">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="badge">12</span>
+            </div>
+          </div>
+
+          <div class="scr-head">
+            <div class="back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div>
+            <div class="title">平台健康度</div>
+          </div>
+
+          <div class="m-body">
+            <div class="scroll">
+              <div class="m-card dark">
+                <h5>SLA · 本月</h5>
+                <div style="font-family:var(--f-display); font-size:32px; font-weight:380; color:var(--growth);">99.95%</div>
+                <div style="font-size:11px; opacity:0.8; margin-top:4px;">目标 99.9% · 已达标</div>
+              </div>
+
+              <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin:8px 0;">各服务状态</div>
+
+              <div class="m-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:var(--growth-soft); border-radius:6px; margin-bottom:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span style="font-size:11px; font-weight:500;">API 服务</span>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-family:var(--f-mono); font-size:10px; color:var(--growth); font-weight:500;">99.98%</div>
+                    <div style="font-size:8px; color:var(--inkwell-2); font-family:var(--f-mono);">32ms</div>
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:var(--growth-soft); border-radius:6px; margin-bottom:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span style="font-size:11px; font-weight:500;">视频流</span>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-family:var(--f-mono); font-size:10px; color:var(--growth); font-weight:500;">99.95%</div>
+                    <div style="font-size:8px; color:var(--inkwell-2); font-family:var(--f-mono);">180ms</div>
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:var(--growth-soft); border-radius:6px; margin-bottom:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span style="font-size:11px; font-weight:500;">存储 OSS</span>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-family:var(--f-mono); font-size:10px; color:var(--growth); font-weight:500;">100%</div>
+                    <div style="font-size:8px; color:var(--inkwell-2); font-family:var(--f-mono);">2.1TB</div>
+                  </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:var(--highlighter-soft); border-radius:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A6500" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                    <span style="font-size:11px; font-weight:500;">CDN 华南</span>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-family:var(--f-mono); font-size:10px; color:#8A6500; font-weight:500;">94.2%</div>
+                    <div style="font-size:8px; color:var(--inkwell-2); font-family:var(--f-mono);">降级中</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin:10px 0 8px;">近 24 小时请求量</div>
+              <div class="m-card">
+                <svg viewBox="0 0 280 100" style="width:100%; height:auto;">
+                  <defs>
+                    <linearGradient id="mg1" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stop-color="#3D46C9" stop-opacity="0.3"/>
+                      <stop offset="100%" stop-color="#3D46C9" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <g stroke="#F2EBD8" stroke-width="1">
+                    <line x1="20" y1="20" x2="270" y2="20"/>
+                    <line x1="20" y1="50" x2="270" y2="50"/>
+                    <line x1="20" y1="80" x2="270" y2="80"/>
+                  </g>
+                  <path d="M20,60 L45,55 L70,50 L95,48 L120,45 L145,42 L170,38 L195,40 L220,45 L245,50 L270,48" fill="none" stroke="#3D46C9" stroke-width="2"/>
+                  <path d="M20,60 L45,55 L70,50 L95,48 L120,45 L145,42 L170,38 L195,40 L220,45 L245,50 L270,48 L270,85 L20,85 Z" fill="url(#mg1)"/>
+                  <g font-family="JetBrains Mono" font-size="7" fill="#2A2B3D">
+                    <text x="15" y="85">0</text><text x="5" y="55">2k</text><text x="5" y="25">4k</text>
+                  </g>
+                  <g font-family="JetBrains Mono" font-size="7" fill="#2A2B3D">
+                    <text x="15" y="95">00:00</text><text x="85" y="95">08:00</text><text x="155" y="95">16:00</text><text x="245" y="95">现在</text>
+                  </g>
+                </svg>
+              </div>
+
+              <div class="m-card hl">
+                <h5>⚠ 待关注</h5>
+                <div style="font-size:11px; line-height:1.5;">
+                  CDN 华南节点降级，已触发备用节点。<br/>
+                  <b>预计 15 分钟内</b>恢复正常。
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-nav">
+            <div class="item active">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span>总览</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <span>用户</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+              <span>审批</span>
+              <span class="badge">7</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span>警报</span>
+              <span class="badge">12</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg>
+              <span>我的</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ APPROVALS ============ -->
+<section class="section">
+  <div class="section-title">02 · 审批队列 / Approvals (Mobile)</div>
+  <div class="section-desc">移动端审批：快速预览、一键通过/驳回、详情跳转。</div>
+  <div class="phones-grid">
+
+    <div class="phone-col">
+      <div class="label">待审批列表 <span class="tag">7 待处理</span></div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="phone-status">
+            <span>14:30</span>
+            <div class="icons">
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="14" width="3" height="6"/><rect x="8" y="10" width="3" height="10"/><rect x="13" y="6" width="3" height="14"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="16" height="8" rx="1.5"/><rect x="5" y="10" width="10" height="4" fill="currentColor"/><rect x="19" y="10" width="2" height="4" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="adm-topbar">
+            <div class="brand">
+              <div class="logo">墨</div>
+              <div class="name">Lumina 墨光<span class="tag">Admin</span></div>
+            </div>
+            <div class="icon-btn">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="badge">12</span>
+            </div>
+          </div>
+
+          <div class="scr-head">
+            <div class="back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div>
+            <div class="title">课程审批 · 7</div>
+          </div>
+
+          <div class="m-body">
+            <div class="scroll">
+              <div class="m-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input placeholder="搜索课程、讲师..." />
+              </div>
+
+              <div style="display:flex; gap:6px; margin-bottom:10px; overflow-x:auto;">
+                <div style="padding:4px 10px; background:var(--inkwell); color:var(--ricepaper); border-radius:10px; font-size:10px; white-space:nowrap;">全部 · 7</div>
+                <div style="padding:4px 10px; background:#fff; border:1px solid var(--line); border-radius:10px; font-size:10px; color:var(--inkwell-2); white-space:nowrap;">待审批</div>
+                <div style="padding:4px 10px; background:#fff; border:1px solid var(--line); border-radius:10px; font-size:10px; color:var(--inkwell-2); white-space:nowrap;">已批准</div>
+                <div style="padding:4px 10px; background:#fff; border:1px solid var(--line); border-radius:10px; font-size:10px; color:var(--inkwell-2); white-space:nowrap;">已驳回</div>
+              </div>
+
+              <div class="adm-approval">
+                <div class="head">
+                  <div class="title">西方哲学史 · 导论篇</div>
+                  <span class="pill">待审批</span>
+                </div>
+                <div class="meta">
+                  <span>通识 · 2 学分</span>
+                  <span>·</span>
+                  <span>120 人</span>
+                  <span>·</span>
+                  <span>09-01 开课</span>
+                </div>
+                <div class="submitter">
+                  <div class="av" style="background:var(--cobalt);">孙</div>
+                  <div>
+                    <div style="font-weight:500;">孙文心 · 副教授</div>
+                    <div style="color:var(--inkwell-2);">哲学系 · 已认证</div>
+                  </div>
+                </div>
+                <div class="actions">
+                  <button class="reject">驳回</button>
+                  <button>详情</button>
+                  <button class="approve">✓ 批准</button>
+                </div>
+              </div>
+
+              <div class="adm-approval">
+                <div class="head">
+                  <div class="title">数据结构 · 进阶</div>
+                  <span class="pill">待审批</span>
+                </div>
+                <div class="meta">
+                  <span>必修 · 4 学分</span>
+                  <span>·</span>
+                  <span>80 人</span>
+                  <span>·</span>
+                  <span>混合式</span>
+                </div>
+                <div class="submitter">
+                  <div class="av" style="background:var(--cobalt);">王</div>
+                  <div>
+                    <div style="font-weight:500;">王建国 · 教授</div>
+                    <div style="color:var(--inkwell-2);">计算机系</div>
+                  </div>
+                </div>
+                <div class="actions">
+                  <button class="reject">驳回</button>
+                  <button>详情</button>
+                  <button class="approve">✓ 批准</button>
+                </div>
+              </div>
+
+              <div class="adm-approval">
+                <div class="head">
+                  <div class="title">线性代数 · 应用导向</div>
+                  <span class="pill">待审批</span>
+                </div>
+                <div class="meta">
+                  <span>必修 · 3 学分</span>
+                  <span>·</span>
+                  <span>150 人</span>
+                  <span>·</span>
+                  <span>线下</span>
+                </div>
+                <div class="submitter">
+                  <div class="av" style="background:var(--growth);">张</div>
+                  <div>
+                    <div style="font-weight:500;">张明德 · 副教授</div>
+                    <div style="color:var(--inkwell-2);">数学系</div>
+                  </div>
+                </div>
+                <div class="actions">
+                  <button class="reject">驳回</button>
+                  <button>详情</button>
+                  <button class="approve">✓ 批准</button>
+                </div>
+              </div>
+
+              <div class="adm-approval" style="opacity:0.7;">
+                <div class="head">
+                  <div class="title">Python 科学计算</div>
+                  <span class="pill approved">已批准</span>
+                </div>
+                <div class="meta">
+                  <span>选修 · 2 学分</span>
+                  <span>·</span>
+                  <span>审批：刘思源</span>
+                </div>
+                <div class="submitter">
+                  <div class="av" style="background:var(--cobalt);">李</div>
+                  <div>
+                    <div style="font-weight:500;">李晓峰 · 讲师</div>
+                    <div style="color:var(--growth);">✓ 08-18 11:20</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="m-card hl">
+                <h5>💡 审批提示</h5>
+                <div style="font-size:11px; line-height:1.5;">
+                  本周有 <b>7 门</b> 待审课程，<b>3 位</b> 讲师首次开课。<br/>建议重点查看教学大纲。
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-nav">
+            <div class="item">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span>总览</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <span>用户</span>
+            </div>
+            <div class="item active">
+              <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+              <span>审批</span>
+              <span class="badge">7</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span>警报</span>
+              <span class="badge">12</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg>
+              <span>我的</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-col">
+      <div class="label">审批详情 <span class="tag">西方哲学史</span></div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="phone-status">
+            <span>14:32</span>
+            <div class="icons">
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="14" width="3" height="6"/><rect x="8" y="10" width="3" height="10"/><rect x="13" y="6" width="3" height="14"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="16" height="8" rx="1.5"/><rect x="5" y="10" width="10" height="4" fill="currentColor"/><rect x="19" y="10" width="2" height="4" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="adm-topbar">
+            <div class="brand">
+              <div class="logo">墨</div>
+              <div class="name">Lumina 墨光<span class="tag">Admin</span></div>
+            </div>
+            <div class="icon-btn">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="badge">12</span>
+            </div>
+          </div>
+
+          <div class="scr-head">
+            <div class="back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div>
+            <div class="title">审批详情</div>
+          </div>
+
+          <div class="m-body">
+            <div class="scroll">
+              <div class="m-card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                  <div style="flex:1;">
+                    <div style="font-family:var(--f-display); font-size:18px; font-weight:400; line-height:1.2;">西方哲学史</div>
+                    <div style="font-size:11px; color:var(--inkwell-2); margin-top:4px;">导论篇 · 通识选修</div>
+                  </div>
+                  <span class="pill">待审批</span>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; font-size:10px; font-family:var(--f-mono); color:var(--inkwell-2);">
+                  <span>2 学分</span>
+                  <span>·</span>
+                  <span>120 人</span>
+                  <span>·</span>
+                  <span>线上</span>
+                  <span>·</span>
+                  <span>09-01 开课</span>
+                </div>
+              </div>
+
+              <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin:10px 0 8px;">讲师信息</div>
+              <div class="m-card">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                  <div style="width:40px; height:40px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:16px;">孙</div>
+                  <div style="flex:1;">
+                    <div style="font-size:13px; font-weight:500;">孙文心 · 副教授</div>
+                    <div style="font-size:10px; color:var(--inkwell-2); font-family:var(--f-mono);">哲学系 · 已认证讲师</div>
+                  </div>
+                  <span style="font-size:9px; padding:2px 6px; background:var(--growth-soft); color:var(--growth); border-radius:6px; font-weight:500;">✓</span>
+                </div>
+                <div style="font-size:11px; color:var(--inkwell-2); line-height:1.5;">
+                  10 年教学经验 · 上学期评分 4.8 · 开设课程 3 门
+                </div>
+              </div>
+
+              <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin:10px 0 8px;">课程简介</div>
+              <div class="m-card">
+                <div style="font-size:11px; line-height:1.5;">
+                  从苏格拉底到后现代，系统梳理西方哲学 2500 年发展脉络。重点讨论认识论、伦理学与存在主义三大主题，配套原著选读与课堂辩论。
+                </div>
+              </div>
+
+              <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin:10px 0 8px;">审批清单</div>
+              <div class="m-card growth">
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <div style="display:flex; align-items:center; gap:8px; font-size:11px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    讲师资质 ✓
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px; font-size:11px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    教学大纲 ✓
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px; font-size:11px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    教材列表 ✓
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px; font-size:11px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--growth)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    考核方式 ✓
+                  </div>
+                </div>
+              </div>
+
+              <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin:10px 0 8px;">审批批注</div>
+              <div class="m-card">
+                <textarea placeholder="可添加审批意见..." style="width:100%; min-height:60px; background:var(--ricepaper); border:1px solid var(--line); border-radius:6px; padding:8px; font-size:11px; font-family:var(--f-body); outline:none; resize:vertical;"></textarea>
+              </div>
+
+              <div style="display:flex; gap:6px; margin-top:10px;">
+                <button style="flex:1; padding:10px; background:var(--correction); color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:500; cursor:pointer;">驳回</button>
+                <button style="flex:2; padding:10px; background:var(--growth); color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:500; cursor:pointer;">✓ 批准开课</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-nav">
+            <div class="item">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span>总览</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <span>用户</span>
+            </div>
+            <div class="item active">
+              <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+              <span>审批</span>
+              <span class="badge">7</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span>警报</span>
+              <span class="badge">12</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg>
+              <span>我的</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ ALERTS ============ -->
+<section class="section">
+  <div class="section-title">03 · 通知与警报 / Alerts (Mobile)</div>
+  <div class="section-desc">管理员移动端警报中心：系统异常、用户风险、举报、审计事件。</div>
+  <div class="phones-grid">
+
+    <div class="phone-col">
+      <div class="label">通知中心 <span class="tag">12 未读</span></div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="phone-status">
+            <span>14:40</span>
+            <div class="icons">
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="14" width="3" height="6"/><rect x="8" y="10" width="3" height="10"/><rect x="13" y="6" width="3" height="14"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="16" height="8" rx="1.5"/><rect x="5" y="10" width="10" height="4" fill="currentColor"/><rect x="19" y="10" width="2" height="4" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="adm-topbar">
+            <div class="brand">
+              <div class="logo">墨</div>
+              <div class="name">Lumina 墨光<span class="tag">Admin</span></div>
+            </div>
+            <div class="icon-btn">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="badge">12</span>
+            </div>
+          </div>
+
+          <div class="scr-head">
+            <div class="back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div>
+            <div class="title">通知 · 12 未读</div>
+          </div>
+
+          <div class="m-body">
+            <div class="scroll">
+              <div style="display:flex; gap:6px; margin-bottom:10px; overflow-x:auto;">
+                <div style="padding:4px 10px; background:var(--inkwell); color:var(--ricepaper); border-radius:10px; font-size:10px; white-space:nowrap;">全部</div>
+                <div style="padding:4px 10px; background:#fff; border:1px solid var(--line); border-radius:10px; font-size:10px; color:var(--inkwell-2); white-space:nowrap;">紧急 3</div>
+                <div style="padding:4px 10px; background:#fff; border:1px solid var(--line); border-radius:10px; font-size:10px; color:var(--inkwell-2); white-space:nowrap;">系统</div>
+                <div style="padding:4px 10px; background:#fff; border:1px solid var(--line); border-radius:10px; font-size:10px; color:var(--inkwell-2); white-space:nowrap;">举报</div>
+                <div style="padding:4px 10px; background:#fff; border:1px solid var(--line); border-radius:10px; font-size:10px; color:var(--inkwell-2); white-space:nowrap;">审批</div>
+              </div>
+
+              <div class="notif-item urgent unread">
+                <div class="icon warn">
+                  <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="content">
+                  <div class="title">CDN 华南节点降级至 94.2%</div>
+                  <div class="desc">视频流服务受影响，已自动切换备用节点</div>
+                  <div class="time">2 分钟前</div>
+                </div>
+              </div>
+
+              <div class="notif-item urgent unread">
+                <div class="icon warn">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                </div>
+                <div class="content">
+                  <div class="title">异常账户自动封禁</div>
+                  <div class="desc">u_2841 检测到 5 次异地登录尝试</div>
+                  <div class="time">5 分钟前</div>
+                </div>
+              </div>
+
+              <div class="notif-item unread">
+                <div class="icon info">
+                  <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+                </div>
+                <div class="content">
+                  <div class="title">新课程待审批</div>
+                  <div class="desc">西方哲学史 · 孙文心 提交</div>
+                  <div class="time">30 分钟前</div>
+                </div>
+              </div>
+
+              <div class="notif-item unread">
+                <div class="icon sys">
+                  <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div class="content">
+                  <div class="title">高风险学生 · 周子涵</div>
+                  <div class="desc">14 天未登录，建议联系辅导员</div>
+                  <div class="time">1 小时前</div>
+                </div>
+              </div>
+
+              <div class="notif-item unread">
+                <div class="icon info">
+                  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="content">
+                  <div class="title">内容举报待处理</div>
+                  <div class="desc">讨论区 #4928 涉嫌不当言论</div>
+                  <div class="time">2 小时前</div>
+                </div>
+              </div>
+
+              <div class="notif-item">
+                <div class="icon ok">
+                  <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div class="content">
+                  <div class="title">自动备份完成</div>
+                  <div class="desc">2.1 TB 数据备份至异地</div>
+                  <div class="time">5 小时前</div>
+                </div>
+              </div>
+
+              <div class="notif-item">
+                <div class="icon info">
+                  <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div class="content">
+                  <div class="title">退款申请 · 8 件</div>
+                  <div class="desc">总计 ¥4,800，需审批</div>
+                  <div class="time">6 小时前</div>
+                </div>
+              </div>
+
+              <div class="notif-item">
+                <div class="icon sys">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg>
+                </div>
+                <div class="content">
+                  <div class="title">权限变更</div>
+                  <div class="desc">张讲师权限被刘思源调整</div>
+                  <div class="time">昨天 09:42</div>
+                </div>
+              </div>
+
+              <button style="width:100%; padding:10px; background:#fff; color:var(--inkwell); border:1px solid var(--line); border-radius:8px; font-size:12px; cursor:pointer; margin-top:10px;">全部标记为已读</button>
+            </div>
+          </div>
+
+          <div class="m-nav">
+            <div class="item">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span>总览</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <span>用户</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+              <span>审批</span>
+              <span class="badge">7</span>
+            </div>
+            <div class="item active">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span>警报</span>
+              <span class="badge">12</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg>
+              <span>我的</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-col">
+      <div class="label">用户快速查询</div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="phone-status">
+            <span>14:45</span>
+            <div class="icons">
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="14" width="3" height="6"/><rect x="8" y="10" width="3" height="10"/><rect x="13" y="6" width="3" height="14"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="16" height="8" rx="1.5"/><rect x="5" y="10" width="10" height="4" fill="currentColor"/><rect x="19" y="10" width="2" height="4" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="adm-topbar">
+            <div class="brand">
+              <div class="logo">墨</div>
+              <div class="name">Lumina 墨光<span class="tag">Admin</span></div>
+            </div>
+            <div class="icon-btn">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span class="badge">12</span>
+            </div>
+          </div>
+
+          <div class="scr-head">
+            <div class="back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div>
+            <div class="title">用户查询</div>
+          </div>
+
+          <div class="m-body">
+            <div class="scroll">
+              <div class="m-search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input placeholder="学号、姓名、邮箱..." value="周" />
+              </div>
+
+              <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin-bottom:8px;">搜索结果 · 3 人</div>
+
+              <div class="user-card">
+                <div class="av warn">周</div>
+                <div class="info">
+                  <div class="name">周子涵 <span class="pill warn">高风险</span></div>
+                  <div class="meta">2023110284 · 计算机大三</div>
+                </div>
+                <div class="act">
+                  <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+
+              <div class="user-card">
+                <div class="av">周</div>
+                <div class="info">
+                  <div class="name">周梦琪</div>
+                  <div class="meta">2024110205 · 心理学大二</div>
+                </div>
+                <div class="act">
+                  <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+
+              <div class="user-card">
+                <div class="av">周</div>
+                <div class="info">
+                  <div class="name">周天宇</div>
+                  <div class="meta">2022110187 · 自动化大四</div>
+                </div>
+                <div class="act">
+                  <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+              </div>
+
+              <div style="font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin:14px 0 8px;">周子涵 · 快速档案</div>
+
+              <div class="m-card">
+                <div style="display:flex; gap:10px; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid var(--line);">
+                  <div style="width:48px; height:48px; border-radius:50%; background:var(--correction); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:20px;">周</div>
+                  <div style="flex:1;">
+                    <div style="font-family:var(--f-display); font-size:16px; font-weight:400;">周子涵</div>
+                    <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:2px;">2023110284</div>
+                    <div style="font-size:10px; color:var(--inkwell-2); margin-top:2px;">计算机科学 · 大三</div>
+                  </div>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
+                  <div style="text-align:center; padding:8px; background:var(--ricepaper); border-radius:6px;">
+                    <div style="font-family:var(--f-display); font-size:16px; font-weight:400; color:var(--correction);">2.34</div>
+                    <div style="font-family:var(--f-mono); font-size:8px; color:var(--inkwell-2); text-transform:uppercase;">GPA</div>
+                  </div>
+                  <div style="text-align:center; padding:8px; background:var(--ricepaper); border-radius:6px;">
+                    <div style="font-family:var(--f-display); font-size:16px; font-weight:400; color:var(--correction);">67%</div>
+                    <div style="font-family:var(--f-mono); font-size:8px; color:var(--inkwell-2); text-transform:uppercase;">出勤</div>
+                  </div>
+                  <div style="text-align:center; padding:8px; background:var(--ricepaper); border-radius:6px;">
+                    <div style="font-family:var(--f-display); font-size:16px; font-weight:400; color:var(--correction);">38%</div>
+                    <div style="font-family:var(--f-mono); font-size:8px; color:var(--inkwell-2); text-transform:uppercase;">作业</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="m-card warn">
+                <h5 style="color:var(--correction);">⚠ 风险信号</h5>
+                <div style="font-size:11px; line-height:1.5;">
+                  · 连续 3 次缺席<br/>
+                  · 作业 38% · GPA 下滑<br/>
+                  · 14 天未登录
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                <button style="padding:8px; background:var(--cobalt); color:#fff; border:none; border-radius:8px; font-size:11px; font-weight:500; cursor:pointer;">发送通知</button>
+                <button style="padding:8px; background:#fff; color:var(--inkwell); border:1px solid var(--line); border-radius:8px; font-size:11px; cursor:pointer;">完整档案</button>
+                <button style="padding:8px; background:#fff; color:var(--inkwell); border:1px solid var(--line); border-radius:8px; font-size:11px; cursor:pointer;">约谈记录</button>
+                <button style="padding:8px; background:var(--correction-soft); color:var(--correction); border:1px solid var(--correction); border-radius:8px; font-size:11px; cursor:pointer;">暂时封禁</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-nav">
+            <div class="item">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span>总览</span>
+            </div>
+            <div class="item active">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <span>用户</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+              <span>审批</span>
+              <span class="badge">7</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span>警报</span>
+              <span class="badge">12</span>
+            </div>
+            <div class="item">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/></svg>
+              <span>我的</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ 平板模式适配 ============ -->
+<section style="margin-top:56px; padding-top:32px; border-top:2px solid var(--line);">
+  <div style="font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin-bottom:14px; display:flex; justify-content:space-between;">
+    <span>Admin Console · Tablet APP · 自适应布局</span>
+    <span style="color:var(--cobalt);">iPad · 768×1024 · 双模式</span>
+  </div>
+
+  <div style="padding:20px; background:linear-gradient(135deg, var(--cobalt-soft), #fff); border:1px solid var(--cobalt); border-radius:12px; margin-bottom:20px;">
+    <h3 style="font-family:var(--f-display); font-size:20px; font-weight:500; margin-bottom:12px;">📱 ↔ 📲 管理后台平板适配</h3>
+    <div style="font-size:13px; line-height:1.7; color:var(--inkwell);">
+      管理后台在平板上获得接近桌面级的操控体验，适合移动办公场景。
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin-bottom:20px;">
+    <div style="padding:14px; background:#fff; border:1px solid var(--line); border-radius:10px;">
+      <div style="font-size:22px; margin-bottom:6px;">📊</div>
+      <h4 style="font-family:var(--f-display); font-size:13px; font-weight:500; margin-bottom:6px;">数据仪表盘</h4>
+      <div style="font-size:10px; color:var(--inkwell-2); line-height:1.5;">
+        <b style="color:var(--correction);">手机</b>：统计卡片堆叠<br/>
+        <b style="color:var(--cobalt);">平板</b>：多列统计网格 + 侧边筛选器 + 实时图表
+      </div>
+    </div>
+    <div style="padding:14px; background:#fff; border:1px solid var(--line); border-radius:10px;">
+      <div style="font-size:22px; margin-bottom:6px;">👥</div>
+      <h4 style="font-family:var(--f-display); font-size:13px; font-weight:500; margin-bottom:6px;">用户管理</h4>
+      <div style="font-size:10px; color:var(--inkwell-2); line-height:1.5;">
+        <b style="color:var(--correction);">手机</b>：用户列表<br/>
+        <b style="color:var(--cobalt);">平板</b>：左侧用户列表 + 右侧详情面板 + 批量操作栏
+      </div>
+    </div>
+    <div style="padding:14px; background:#fff; border:1px solid var(--line); border-radius:10px;">
+      <div style="font-size:22px; margin-bottom:6px;">📋</div>
+      <h4 style="font-family:var(--f-display); font-size:13px; font-weight:500; margin-bottom:6px;">审批流程</h4>
+      <div style="font-size:10px; color:var(--inkwell-2); line-height:1.5;">
+        <b style="color:var(--correction);">手机</b>：审批列表<br/>
+        <b style="color:var(--cobalt);">平板</b>：左侧审批队列 + 右侧详情 + 审批操作面板
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:16px; background:var(--highlighter-soft); border:1px solid var(--highlighter); border-radius:10px;">
+    <div style="font-family:var(--f-mono); font-size:10px; color:#8A6500; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px;">💡 管理后台适配要点</div>
+    <div style="font-size:12px; line-height:1.7;">
+      <b>数据监控</b>：多图表并排展示，支持时间范围选择器常驻显示<br/>
+      <b>用户管理</b>：双栏布局（列表+详情），支持批量选择和导出操作<br/>
+      <b>审批流程</b>：左侧队列快速切换，右侧完整展示审批详情和操作按钮<br/>
+      <b>通知中心</b>：分类标签常驻顶部，通知列表支持滑动操作和批量处理
+    </div>
+  </div>
+</section>
+
+<footer style="margin-top:60px; padding-top:32px; border-top:1px solid var(--line); display:flex; justify-content:space-between; font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);">
+  <div>Lumina · 17 · Mobile · Admin Console · 3 scenarios · 6 phones</div>
+  <div>Feather MIT · Fraunces + Inter + JetBrains Mono · OFL 1.1</div>
+</footer>
+
+</body>
+</html>

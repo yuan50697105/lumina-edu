@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · 产品需求文档 PRD v1.2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding:56px 64px; max-width:1280px; margin:0 auto;}
+
+  /* Cover */
+  .cover{
+    padding:80px 0 64px; border-bottom:1px solid var(--line); margin-bottom:56px;
+    display:grid; grid-template-columns:2fr 1fr; gap:48px; align-items:end;
+  }
+  .cover .brand{display:flex; align-items:center; gap:14px; margin-bottom:32px;}
+  .cover .brand .logo{
+    width:56px; height:56px; border-radius:14px;
+    background:var(--inkwell); color:var(--highlighter);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--f-display); font-size:28px; font-weight:500; font-style:italic;
+  }
+  .cover .brand .name{font-family:var(--f-display); font-size:20px; font-weight:500;}
+  .cover .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:4px;}
+  .cover .doc-type{
+    font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em;
+    color:var(--cobalt); background:var(--cobalt-soft); padding:6px 12px; border-radius:8px;
+    display:inline-block; margin-bottom:20px;
+  }
+  .cover h1{
+    font-family:var(--f-display); font-weight:300; font-size:72px; letter-spacing:-0.04em; line-height:1;
+  }
+  .cover h1 em{font-style:italic; color:var(--cobalt);}
+  .cover h1 .hl{
+    background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%);
+    padding:0 6px; display:inline-block;
+  }
+  .cover .subtitle{font-size:18px; color:var(--inkwell-2); margin-top:20px; font-weight:300; letter-spacing:-0.01em;}
+  .cover .meta{
+    font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);
+    text-transform:uppercase; letter-spacing:0.12em; line-height:2.2;
+  }
+  .cover .meta .label{color:var(--inkwell-2); font-size:10px; display:block; margin-bottom:2px; letter-spacing:0.14em;}
+  .cover .meta .value{color:var(--inkwell); font-size:13px; text-transform:none; letter-spacing:0; font-family:var(--f-body); font-weight:500;}
+  .cover .meta .row{padding:8px 0; border-top:1px solid var(--line);}
+  .cover .meta .row:first-child{border-top:none;}
+
+  /* Stats */
+  .stats{
+    display:grid; grid-template-columns:repeat(6, 1fr); gap:12px; margin-bottom:56px;
+    padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px;
+  }
+  .stat{text-align:center; padding:6px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .val{font-family:var(--f-display); font-size:26px; font-weight:300; letter-spacing:-0.02em;}
+  .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  /* TOC */
+  .toc{
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px 28px;
+    margin-bottom:56px;
+  }
+  .toc h3{
+    font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em;
+    color:var(--inkwell-2); margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line);
+  }
+  .toc ol{list-style:none; counter-reset:toc; columns:2; column-gap:40px;}
+  .toc ol li{
+    counter-increment:toc; padding:6px 0; font-size:13px;
+    display:flex; gap:12px; align-items:baseline;
+    break-inside:avoid;
+  }
+  .toc ol li::before{
+    content:counter(toc, decimal-leading-zero);
+    font-family:var(--f-mono); font-size:10px; color:var(--cobalt); font-weight:500;
+    min-width:24px;
+  }
+  .toc ol li a{color:var(--inkwell); text-decoration:none; flex:1;}
+  .toc ol li a:hover{color:var(--cobalt);}
+  .toc ol li .pg{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);}
+
+  /* Sections */
+  .section{margin-bottom:64px; page-break-inside:avoid;}
+  .section-header{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid var(--line);
+  }
+  .section-header h2{
+    font-family:var(--f-display); font-weight:380; font-size:32px; letter-spacing:-0.02em;
+  }
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{
+    font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em;
+    color:var(--inkwell-2);
+  }
+  .section-desc{font-size:14px; color:var(--inkwell-2); margin-bottom:24px; line-height:1.6; max-width:900px;}
+
+  h3.sub{
+    font-family:var(--f-display); font-size:20px; font-weight:400; letter-spacing:-0.01em;
+    margin:28px 0 14px; padding-left:14px; border-left:3px solid var(--highlighter);
+  }
+  h4.sub{
+    font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.12em;
+    color:var(--inkwell-2); margin:20px 0 10px; font-weight:500;
+  }
+
+  p{margin-bottom:12px; font-size:14px; line-height:1.7;}
+  p.lead{font-size:16px; line-height:1.6; color:var(--inkwell);}
+
+  ul,ol{margin:0 0 14px 20px; font-size:14px; line-height:1.7;}
+  li{margin-bottom:4px;}
+  li b{color:var(--cobalt);}
+
+  /* Tables */
+  table{width:100%; border-collapse:collapse; margin-bottom:20px; font-size:13px;}
+  table thead th{
+    font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em;
+    color:var(--inkwell-2); text-align:left; padding:10px 12px;
+    background:var(--ricepaper); border-bottom:1px solid var(--line); font-weight:500;
+  }
+  table td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  table tr:hover{background:var(--ricepaper);}
+  table .tag{display:inline-block; padding:2px 7px; border-radius:5px; font-size:10px; font-weight:500; font-family:var(--f-mono);}
+  table .tag.p0{background:var(--correction-soft); color:var(--correction);}
+  table .tag.p1{background:var(--highlighter-soft); color:#8A6500;}
+  table .tag.p2{background:var(--cobalt-soft); color:var(--cobalt);}
+  table .tag.p3{background:var(--ricepaper-2); color:var(--inkwell-2);}
+
+  /* Feature cards */
+  .feat-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin-bottom:20px;}
+  .feat-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px;}
+  .feat-card .feat-num{font-family:var(--f-mono); font-size:10px; color:var(--cobalt); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px;}
+  .feat-card h4{font-family:var(--f-display); font-size:16px; font-weight:400; margin-bottom:6px;}
+  .feat-card p{font-size:12px; color:var(--inkwell-2); margin:0; line-height:1.5;}
+  .feat-card .surfaces{display:flex; flex-wrap:wrap; gap:4px; margin-top:10px;}
+  .feat-card .surface{font-size:10px; padding:2px 7px; background:var(--ricepaper); border:1px solid var(--line); border-radius:8px; color:var(--inkwell-2);}
+  .feat-card.hl{background:var(--highlighter-soft); border-color:var(--highlighter);}
+
+  /* Persona cards */
+  .persona-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin-bottom:20px;}
+  .persona{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px;}
+  .persona .av{
+    width:56px; height:56px; border-radius:50%; margin-bottom:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--f-display); font-size:24px; font-weight:400; color:#fff;
+  }
+  .persona h4{font-family:var(--f-display); font-size:18px; font-weight:400; margin-bottom:4px;}
+  .persona .role{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:12px;}
+  .persona .stat-row{display:flex; justify-content:space-between; padding:6px 0; border-top:1px dashed var(--line); font-size:11px;}
+  .persona .stat-row .lbl{color:var(--inkwell-2); font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em;}
+  .persona .stat-row .val{font-family:var(--f-mono); font-size:11px; font-weight:500;}
+  .persona .quote{font-style:italic; font-size:12px; color:var(--inkwell-2); padding:10px; background:var(--ricepaper); border-radius:6px; margin-top:10px; line-height:1.5;}
+
+  /* Info boxes */
+  .info{padding:14px 16px; border-radius:8px; margin-bottom:16px; font-size:13px; line-height:1.6;}
+  .info.note{background:var(--cobalt-soft); border-left:3px solid var(--cobalt);}
+  .info.warn{background:var(--highlighter-soft); border-left:3px solid var(--highlighter);}
+  .info.danger{background:var(--correction-soft); border-left:3px solid var(--correction);}
+  .info.success{background:var(--growth-soft); border-left:3px solid var(--growth);}
+  .info b{color:var(--inkwell);}
+  .info .label{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:4px;}
+
+  /* Timeline */
+  .timeline{position:relative; padding-left:24px; margin:20px 0;}
+  .timeline::before{content:""; position:absolute; left:7px; top:8px; bottom:8px; width:2px; background:var(--line);}
+  .timeline .phase{position:relative; margin-bottom:20px; padding:12px 14px; background:#fff; border:1px solid var(--line); border-radius:8px;}
+  .timeline .phase::before{
+    content:""; position:absolute; left:-21px; top:18px; width:12px; height:12px; border-radius:50%;
+    background:var(--cobalt); border:2px solid var(--ricepaper);
+  }
+  .timeline .phase.done::before{background:var(--growth);}
+  .timeline .phase.current::before{background:var(--highlighter); box-shadow:0 0 0 4px var(--highlighter-soft);}
+  .timeline .phase .head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+  .timeline .phase .title{font-family:var(--f-display); font-size:16px; font-weight:400;}
+  .timeline .phase .time{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em;}
+  .timeline .phase .desc{font-size:12px; color:var(--inkwell-2); line-height:1.5;}
+  .timeline .phase .deliverables{display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;}
+  .timeline .phase .deliv{font-size:10px; padding:2px 7px; background:var(--ricepaper); border:1px solid var(--line); border-radius:8px; color:var(--inkwell-2);}
+
+  /* Revision history */
+  .revision{background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:20px;}
+
+  /* Surface badge */
+  .surface-badge{display:inline-flex; align-items:center; gap:6px; padding:4px 10px; background:#fff; border:1px solid var(--line); border-radius:14px; font-size:11px; margin-right:6px; margin-bottom:6px;}
+  .surface-badge svg{width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:1.8;}
+  .surface-badge.mobile{color:var(--cobalt); border-color:var(--cobalt);}
+  .surface-badge.web{color:var(--growth); border-color:var(--growth);}
+  .surface-badge.desktop{color:var(--correction); border-color:var(--correction);}
+
+  /* Footer */
+  footer{
+    margin-top:64px; padding-top:24px; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);
+    text-transform:uppercase; letter-spacing:0.12em;
+  }
+  footer .sig{
+    font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell);
+    text-transform:none; letter-spacing:0;
+  }
+  footer .sig .hl{
+    background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%);
+    padding:0 4px;
+  }
+
+  /* Print */
+  @media print {
+    body{padding:20px;}
+    .section{page-break-after:auto;}
+    .toc ol{columns:1;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div>
+    <div class="brand">
+      <div class="logo">墨</div>
+      <div class="name">Lumina · 墨光<small>教育应用产品需求文档 · PRD</small></div>
+    </div>
+    <div class="doc-type">Product Requirements Document · v1.2</div>
+    <h1>
+      <span class="hl">Lumina</span> <em>墨光</em><br/>
+      六端教学平台
+    </h1>
+    <div class="subtitle">面向高校师生的跨端教学协作平台 · 覆盖学生、教师、管理员三类用户的全场景需求 · 📱↔📲 双模式适配 · 🤖 国产模型</div>
+  </div>
+  <div class="meta">
+    <div class="row">
+      <span class="label">文档编号</span>
+      <span class="value">PRD-LUMINA-2026-001</span>
+    </div>
+    <div class="row">
+      <span class="label">版本号</span>
+      <span class="value">v1.2 · 移动端双模式适配</span>
+    </div>
+    <div class="row">
+      <span class="label">作者</span>
+      <span class="value">产品与设计团队</span>
+    </div>
+    <div class="row">
+      <span class="label">发布日期</span>
+      <span class="value">2026-08-25</span>
+    </div>
+    <div class="row">
+      <span class="label">密级</span>
+      <span class="value">内部公开 · 项目组</span>
+    </div>
+    <div class="row">
+      <span class="label">状态</span>
+      <span class="value" style="color:var(--growth); font-weight:600;">● 已评审通过</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ STATS ============ -->
+<div class="stats">
+  <div class="stat"><div class="val hl">3</div><div class="lbl">目标用户</div></div>
+  <div class="stat"><div class="val hl">6</div><div class="lbl">设计表面</div></div>
+  <div class="stat"><div class="val">24</div><div class="lbl">原型文件</div></div>
+  <div class="stat"><div class="val">140+</div><div class="lbl">界面页面</div></div>
+  <div class="stat"><div class="val">20</div><div class="lbl">功能模块</div></div>
+  <div class="stat"><div class="val">6</div><div class="lbl">项目阶段</div></div>
+</div>
+
+<!-- ============ TOC ============ -->
+<nav class="toc">
+  <h3>目录 · Table of Contents</h3>
+  <ol>
+    <li><a href="#s1">修订历史</a></li>
+    <li><a href="#s2">产品愿景与目标</a></li>
+    <li><a href="#s3">目标用户与画像</a></li>
+    <li><a href="#s4">产品范围与边界</a></li>
+    <li><a href="#s5">信息架构</a></li>
+    <li><a href="#s6">核心功能模块</a></li>
+    <li><a href="#s7">学生端功能详述</a></li>
+    <li><a href="#s8">教师端功能详述</a></li>
+    <li><a href="#s9">管理端功能详述</a></li>
+    <li><a href="#s9a">🤖 AI 智能模块（2026 新增）</a></li>
+    <li><a href="#s10">跨端协同场景</a></li>
+    <li><a href="#s11">非功能需求</a></li>
+    <li><a href="#s12">设计规范摘要</a></li>
+    <li><a href="#s13">技术架构建议</a></li>
+    <li><a href="#s14">依赖与许可</a></li>
+    <li><a href="#s15">项目里程碑</a></li>
+    <li><a href="#s16">原型文件索引</a></li>
+    <li><a href="#s17">验收标准</a></li>
+    <li><a href="#s18">附录 · 术语表</a></li>
+  </ol>
+</nav>
+
+<!-- ============ 01 · 修订历史 ============ -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <h2>01 · 修订历史 <em>Revision</em></h2>
+    <div class="num-tag">Document Control</div>
+  </div>
+
+  <div class="revision">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:100px;">版本</th>
+          <th style="width:110px;">日期</th>
+          <th style="width:100px;">作者</th>
+          <th>修订内容</th>
+          <th style="width:100px;">状态</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag p0">v0.1</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px;">2026-08-20</td>
+          <td>产品团队</td>
+          <td>初稿 · 核心场景梳理 · 用户画像草稿</td>
+          <td><span style="color:var(--inkwell-2); font-family:var(--f-mono); font-size:10px;">草稿</span></td>
+        </tr>
+        <tr>
+          <td><span class="tag p1">v0.5</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px;">2026-08-22</td>
+          <td>产品+设计</td>
+          <td>完成设计系统 · 学生/教师端原型 · 共享页面</td>
+          <td><span style="color:var(--cobalt); font-family:var(--f-mono); font-size:10px;">评审</span></td>
+        </tr>
+        <tr>
+          <td><span class="tag p2">v0.8</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px;">2026-08-24</td>
+          <td>产品+设计</td>
+          <td>协作场景 · 教师深度功能 · 管理端原型</td>
+          <td><span style="color:var(--cobalt); font-family:var(--f-mono); font-size:10px;">评审</span></td>
+        </tr>
+        <tr style="background:var(--growth-soft);">
+          <td><span class="tag" style="background:var(--growth); color:#fff;">v1.0</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px; font-weight:500;">2026-08-25</td>
+          <td><b>产品团队</b></td>
+          <td><b>PRD 完整发布 · 24 个原型文件交付 · 通过评审</b></td>
+          <td><span style="color:var(--growth); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</span></td>
+        </tr>
+        <tr style="background:var(--ai-soft);">
+          <td><span class="tag" style="background:var(--ai); color:#fff;">v1.1</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px; font-weight:500;">2026-08-25</td>
+          <td><b>AI 产品组</b></td>
+          <td><b>🤖 AI 模块新增 · 3 个 AI 原型文件 · LLM · Multi-Agent · 内容安全</b></td>
+          <td><span style="color:var(--ai); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</span></td>
+        </tr>
+        <tr style="background:var(--cobalt-soft);">
+          <td><span class="tag" style="background:var(--cobalt); color:#fff;">v1.2</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px; font-weight:500;">2026-08-25</td>
+          <td><b>产品+设计</b></td>
+          <td><b>📱↔📲 移动端平板双模式适配 · 全部 5 个移动端原型支持手机+平板自适应</b></td>
+          <td><span style="color:var(--cobalt); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 02 · 产品愿景 ============ -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <h2>02 · 产品愿景与目标 <em>Vision</em></h2>
+    <div class="num-tag">Product Vision</div>
+  </div>
+
+  <h3 class="sub">2.1 产品愿景</h3>
+  <p class="lead">Lumina（墨光）致力于成为<b>高校教学场景的跨端数字中枢</b>，让教师专注于教学、学生专注于学习、管理员专注于运营，在三端（移动端 / Web / 桌面端）之间无缝衔接。</p>
+  <p>「墨」代表知识的沉淀，「光」代表启发的瞬间。Lumina 希望成为连接师生之间知识传递的光亮，让教学回归本质。</p>
+
+  <h3 class="sub">2.2 产品定位</h3>
+  <table>
+    <thead><tr><th>维度</th><th>定位</th></tr></thead>
+    <tbody>
+      <tr><td><b>目标市场</b></td><td>高等院校 · 本科生/研究生教学场景</td></tr>
+      <tr><td><b>核心用户</b></td><td>学生（C 端）· 教师（B 端）· 管理员（运营端）</td></tr>
+      <tr><td><b>覆盖终端</b></td><td>移动端（iOS/Android）· Web 端（主流浏览器）· 桌面端（macOS/Windows/Linux）</td></tr>
+      <tr><td><b>差异化</b></td><td>跨端一致性 · 荧光笔视觉签名 · 学情智能预警 · 直播教学一体化</td></tr>
+      <tr><td><b>价值主张</b></td><td>「一个账号，六端一致；专注学习，回归教学」</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">2.3 业务目标 · 2026 学年</h3>
+  <table>
+    <thead><tr><th>目标</th><th>关键结果</th><th>衡量指标</th></tr></thead>
+    <tbody>
+      <tr><td><b>用户覆盖</b></td><td>完成华清大学全校试点</td><td>覆盖 1,284 学生 + 86 教师</td></tr>
+      <tr><td><b>活跃度</b></td><td>日均活跃用户 (DAU) 占比</td><td>≥ 60%（847 DAU）</td></tr>
+      <tr><td><b>教学质量</b></td><td>课程评估平均分</td><td>≥ 4.5 / 5.0</td></tr>
+      <tr><td><b>运营效率</b></td><td>管理员审批时效</td><td>≤ 24 小时</td></tr>
+      <tr><td><b>系统稳定</b></td><td>SLA 服务可用性</td><td>≥ 99.9%</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 03 · 目标用户 ============ -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <h2>03 · 目标用户与画像 <em>Personas</em></h2>
+    <div class="num-tag">Target Users</div>
+  </div>
+
+  <div class="persona-grid">
+    <div class="persona">
+      <div class="av" style="background:var(--cobalt);">林</div>
+      <h4>林清 · 主力学生</h4>
+      <div class="role">Computer Science · Junior · 2023 级</div>
+      <div class="stat-row"><span class="lbl">主用设备</span><span class="val">iPhone + MacBook</span></div>
+      <div class="stat-row"><span class="lbl">每周学习时长</span><span class="val">32 小时</span></div>
+      <div class="stat-row"><span class="lbl">当前 GPA</span><span class="val">3.72</span></div>
+      <div class="stat-row"><span class="lbl">选课数</span><span class="val">6 门 · 128h</span></div>
+      <div class="quote">"希望能在地铁上也能看到老师的课件更新，周末在图书馆用桌面端专注学习。"</div>
+    </div>
+
+    <div class="persona">
+      <div class="av" style="background:var(--growth);">王</div>
+      <h4>王建国 · 资深教授</h4>
+      <div class="role">Professor · Computer Science · 15 年教龄</div>
+      <div class="stat-row"><span class="lbl">主用设备</span><span class="val">iPad + iMac</span></div>
+      <div class="stat-row"><span class="lbl">每学期开课</span><span class="val">2-3 门</span></div>
+      <div class="stat-row"><span class="lbl">学生数</span><span class="val">280 人/学期</span></div>
+      <div class="stat-row"><span class="lbl">教学评分</span><span class="val">4.8 / 5.0</span></div>
+      <div class="quote">"我最需要的是快速批阅 280 份作业，并能快速看到哪些学生掉队了。"</div>
+    </div>
+
+    <div class="persona">
+      <div class="av" style="background:var(--inkwell); color:var(--highlighter);">刘</div>
+      <h4>刘思源 · 超级管理员</h4>
+      <div class="role">System Admin · IT 部门 · 5 年经验</div>
+      <div class="stat-row"><span class="lbl">主用设备</span><span class="val">MacBook Pro</span></div>
+      <div class="stat-row"><span class="lbl">管辖用户</span><span class="val">1,370 人</span></div>
+      <div class="stat-row"><span class="lbl">审批任务</span><span class="val">日均 22 件</span></div>
+      <div class="stat-row"><span class="lbl">关注点</span><span class="val">SLA 99.9%</span></div>
+      <div class="quote">"我需要一个能让我 5 分钟内判断全平台健康度的仪表盘。"</div>
+    </div>
+  </div>
+
+  <h3 class="sub">3.1 用户场景矩阵</h3>
+  <table>
+    <thead><tr><th>用户角色</th><th>核心场景</th><th>常用端</th><th>频率</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="4"><b>学生</b></td><td>课前预习 / 查看课件</td><td>移动 · Web</td><td>每日</td></tr>
+      <tr><td>直播上课 / 互动答题</td><td>三端</td><td>每周 3-5 次</td></tr>
+      <tr><td>完成作业 / 小组协作</td><td>Web · 桌面</td><td>每周</td></tr>
+      <tr><td>查看成绩 / 选课</td><td>移动端</td><td>每学期初/末</td></tr>
+      <tr><td rowspan="4"><b>教师</b></td><td>直播授课 / 课堂控制</td><td>三端（桌面优先）</td><td>每周 3-5 次</td></tr>
+      <tr><td>批阅作业 / 录入成绩</td><td>桌面 · Web</td><td>每周</td></tr>
+      <tr><td>题库管理 / 组卷</td><td>Web · 桌面</td><td>每月</td></tr>
+      <tr><td>学情分析 / 学生辅导</td><td>Web · 移动</td><td>每周</td></tr>
+      <tr><td rowspan="3"><b>管理员</b></td><td>数据监控 / 健康度</td><td>桌面 · Web</td><td>每日</td></tr>
+      <tr><td>课程审批 / 用户管理</td><td>Web · 桌面</td><td>每日</td></tr>
+      <tr><td>紧急警报处理</td><td>移动端</td><td>按需</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 04 · 产品范围 ============ -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <h2>04 · 产品范围与边界 <em>Scope</em></h2>
+    <div class="num-tag">Product Scope</div>
+  </div>
+
+  <h3 class="sub">4.1 六端覆盖</h3>
+  <p>Lumina 采用<b>三用户 × 两角色层</b>的产品结构：学生端、教师端、管理端三类用户，每类用户覆盖移动端、Web 端、桌面端三种终端形态，共形成 6 个独立设计表面（surface），通过统一的账号系统打通。</p>
+
+  <table>
+    <thead><tr><th>角色</th><th>移动端</th><th>Web 端</th><th>桌面端</th><th>核心定位</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>学生</b></td>
+        <td><span class="tag p0">P0</span> 03</td>
+        <td><span class="tag p0">P0</span> 04</td>
+        <td><span class="tag p1">P1</span> 05</td>
+        <td>随时随地的学习伴侣</td>
+      </tr>
+      <tr>
+        <td><b>教师</b></td>
+        <td><span class="tag p0">P0</span> 06</td>
+        <td><span class="tag p0">P0</span> 07</td>
+        <td><span class="tag p1">P1</span> 08</td>
+        <td>高效教学的工作台</td>
+      </tr>
+      <tr>
+        <td><b>管理员</b></td>
+        <td><span class="tag p2">P2</span> 17</td>
+        <td><span class="tag p0">P0</span> 15</td>
+        <td><span class="tag p1">P1</span> 16</td>
+        <td>平台运营的控制塔</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">4.2 版本边界</h3>
+  <div class="info note">
+    <div class="label">V1.0 范围</div>
+    <b>纳入</b>：学生 15 个核心页面 · 教师 15 个核心页面 · 管理员 12 个核心页面 · 设计系统基础<br/>
+    <b>延后</b>：家长端 · AI 智能助教 · 多语言版本 · PWA 离线模式（列入 V1.5 路线图）
+  </div>
+</section>
+
+<!-- ============ 05 · 信息架构 ============ -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <h2>05 · 信息架构 <em>Information Architecture</em></h2>
+    <div class="num-tag">IA Structure</div>
+  </div>
+
+  <h3 class="sub">5.1 学生端 IA</h3>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-num">L1 · 主页</div>
+      <h4>今日 / 即将到来</h4>
+      <p>课程入口、日程聚合、快捷操作</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L2 · 课程</div>
+      <h4>课程详情 · 资料</h4>
+      <p>章节结构、课件下载、讨论区</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L3 · 学习</div>
+      <h4>作业 · 考试 · 成绩</h4>
+      <p>提交作业、在线考试、GPA 查看</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L4 · 协作</div>
+      <h4>小组 · 直播 · 答疑</h4>
+      <p>项目组看板、实时课堂、师生互动</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L5 · 数据</div>
+      <h4>成绩册 · 学习报告</h4>
+      <p>多维成绩、能力雷达、成就徽章</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L6 · 服务</div>
+      <h4>选课 · 日历 · 资源</h4>
+      <p>课程浏览、日程管理、资料下载</p>
+    </div>
+  </div>
+
+  <h3 class="sub">5.2 教师端 IA</h3>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-num">L1 · 工作台</div>
+      <h4>待办 · 快捷操作</h4>
+      <p>批作业、发通知、考勤、答疑队列</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L2 · 教学</div>
+      <h4>直播授课 · 课件</h4>
+      <p>直播控制台、举手点名、屏幕共享</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L3 · 评估</div>
+      <h4>题库 · 试卷 · 评分</h4>
+      <p>题目管理、智能组卷、多维评分</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L4 · 学生</div>
+      <h4>档案 · 预警 · 辅导</h4>
+      <p>学生详情、风险预警、辅导记录</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L5 · 数据</div>
+      <h4>学情分析 · 评估</h4>
+      <p>成绩分布、学情趋势、教学反馈</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L6 · 管理</div>
+      <h4>课程编辑 · 设置</h4>
+      <p>课程大纲、章节管理、学生分组</p>
+    </div>
+  </div>
+
+  <h3 class="sub">5.3 管理端 IA</h3>
+  <div class="feat-grid">
+    <div class="feat-card hl">
+      <div class="feat-num">L1 · 概览</div>
+      <h4>数据总览 · 监控</h4>
+      <p>用户指标、SLA 健康度、实时告警</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L2 · 用户</div>
+      <h4>学生 · 教师 · 角色</h4>
+      <p>账户管理、批量操作、权限分配</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L3 · 内容</div>
+      <h4>审批 · 审核 · 举报</h4>
+      <p>课程审批、内容合规、举报处理</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L4 · 财务</div>
+      <h4>订单 · 退款</h4>
+      <p>支付流水、账单对账、退款审批</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L5 · 系统</div>
+      <h4>设置 · 审计</h4>
+      <p>平台配置、安全策略、操作日志</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">L6 · 工具</div>
+      <h4>导入导出 · 批处理</h4>
+      <p>CSV 批量、数据导出、定时任务</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 06 · 核心功能 ============ -->
+<section class="section" id="s6">
+  <div class="section-header">
+    <h2>06 · 核心功能模块 <em>Feature Modules</em></h2>
+    <div class="num-tag">20 Modules · 160+ Pages</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:40px;">#</th>
+        <th style="width:200px;">模块名称</th>
+        <th>描述</th>
+        <th style="width:100px;">优先级</th>
+        <th style="width:100px;">原型</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>01</td><td><b>设计系统</b> Design System</td><td>调色板 · 字体规范 · 组件库 · 荧光笔签名</td><td><span class="tag p0">P0 · 基础</span></td><td>01</td></tr>
+      <tr><td>02</td><td><b>账户与认证</b> Auth</td><td>登录/注册 · 个人中心 · 消息 · 状态页</td><td><span class="tag p0">P0</span></td><td>02</td></tr>
+      <tr><td>03</td><td><b>学生学习</b> Learning</td><td>课程详情 · 资料浏览 · 作业提交 · 讨论</td><td><span class="tag p0">P0</span></td><td>03-05</td></tr>
+      <tr><td>04</td><td><b>直播课堂</b> Live Class</td><td>学生观看 · 教师控制 · 举手 · 答题 · 聊天</td><td><span class="tag p0">P0</span></td><td>09 · 12</td></tr>
+      <tr><td>05</td><td><b>协作工具</b> Collaboration</td><td>小组项目 · 看板 · 文件共享 · 讨论</td><td><span class="tag p1">P1</span></td><td>09-11</td></tr>
+      <tr><td>06</td><td><b>教学管理</b> Teaching</td><td>课程编辑 · 章节管理 · 学生分组</td><td><span class="tag p0">P0</span></td><td>06-08</td></tr>
+      <tr><td>07</td><td><b>题库与考试</b> Exam</td><td>题目管理 · 智能组卷 · 在线考试 · 评分</td><td><span class="tag p1">P1</span></td><td>04+ · 12-14</td></tr>
+      <tr><td>08</td><td><b>学情分析</b> Analytics</td><td>成绩分布 · 趋势图 · 风险预警 · 洞察</td><td><span class="tag p1">P1</span></td><td>07 · 12-14</td></tr>
+      <tr><td>09</td><td><b>课程评估</b> Evaluation</td><td>教学反馈问卷 · 多维评分 · 学期对比</td><td><span class="tag p2">P2</span></td><td>12-14</td></tr>
+      <tr><td>10</td><td><b>学生档案</b> Student Profile</td><td>学生详情 · 成绩趋势 · 预警 · 辅导记录</td><td><span class="tag p1">P1</span></td><td>06 · 12-14</td></tr>
+      <tr><td>11</td><td><b>学习报告</b> Report</td><td>GPA 概览 · 能力雷达 · 成就徽章</td><td><span class="tag p2">P2</span></td><td>09-11</td></tr>
+      <tr><td>12</td><td><b>选课中心</b> Enrollment</td><td>课程浏览 · 筛选 · 课程详情 · 选课</td><td><span class="tag p2">P2</span></td><td>09-11</td></tr>
+      <tr><td>13</td><td><b>用户管理</b> User Admin</td><td>学生/教师账户 · 角色 · 批量操作</td><td><span class="tag p0">P0</span></td><td>15-17</td></tr>
+      <tr><td>14</td><td><b>课程审批</b> Approval</td><td>开课申请 · 审批队列 · 工作流</td><td><span class="tag p1">P1</span></td><td>15-17</td></tr>
+      <tr><td>15</td><td><b>平台监控</b> Monitor</td><td>SLA 健康度 · API 延迟 · 系统状态</td><td><span class="tag p0">P0</span></td><td>15-17</td></tr>
+      <tr><td>16</td><td><b>系统设置</b> Settings</td><td>平台配置 · 安全策略 · 通知模板</td><td><span class="tag p1">P1</span></td><td>15-17</td></tr>
+      <tr><td>17</td><td><b>审计日志</b> Audit</td><td>操作追踪 · 筛选 · 导出 · 归档策略</td><td><span class="tag p1">P1</span></td><td>15-17</td></tr>
+      <tr style="background:var(--ai-soft);"><td>18</td><td><b style="color:var(--ai);">🤖 学生 AI</b> Student AI</td><td>苏格拉底导师 · 学习路径 · 知识图谱 · 多模态 · RAG · <b style="color:var(--ai);">手机/平板双模式</b></td><td><span class="tag p0">P0</span></td><td>18</td></tr>
+      <tr style="background:var(--ai-soft);"><td>19</td><td><b style="color:var(--ai);">🤖 教师 AI</b> Teacher AI</td><td>AI 批阅 · 课件生成 · 课堂 Copilot · 学情预测</td><td><span class="tag p0">P0</span></td><td>19</td></tr>
+      <tr style="background:var(--ai-soft);"><td>20</td><td><b style="color:var(--ai);">🤖 平台 AI</b> Platform AI</td><td>Multi-Agent 编排 · 内容安全 · 成本优化 · 合规审计 · <b>模型池管理</b></td><td><span class="tag p0">P0</span></td><td>20</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 07 · 学生端 ============ -->
+<section class="section" id="s7">
+  <div class="section-header">
+    <h2>07 · 学生端功能详述 <em>Student Features</em></h2>
+    <div class="num-tag">15 Main · 15 Extended · 3 Surfaces</div>
+  </div>
+
+  <div class="info note">
+    <div class="label">设计文件</div>
+    原型 03-05（主 + 扩展）· 09-11（协作场景）· 共 9 个 HTML 文件 · 60+ 个界面页面
+  </div>
+
+  <h3 class="sub">7.1 学生移动端（03 · 09-移动）</h3>
+  <table>
+    <thead><tr><th>功能</th><th>描述</th><th>优先级</th></tr></thead>
+    <tbody>
+      <tr><td>今日课程</td><td>当日课程日程、即将到来列表</td><td><span class="tag p0">P0</span></td></tr>
+      <tr><td>课程详情</td><td>章节、课件、作业、讨论入口</td><td><span class="tag p0">P0</span></td></tr>
+      <tr><td>作业提交</td><td>富文本提交、文件上传、截止提醒</td><td><span class="tag p0">P0</span></td></tr>
+      <tr><td>讨论区</td><td>课程讨论、点赞、回复、@提及</td><td><span class="tag p1">P1</span></td></tr>
+      <tr><td>成绩册</td><td>课程成绩、GPA、趋势图</td><td><span class="tag p1">P1</span></td></tr>
+      <tr><td>日历</td><td>课程/作业/考试时间线</td><td><span class="tag p1">P1</span></td></tr>
+      <tr><td>直播入口</td><td>加入课堂、举手、实时聊天</td><td><span class="tag p0">P0</span></td></tr>
+      <tr><td>学习报告</td><td>GPA、能力雷达图、成就徽章</td><td><span class="tag p2">P2</span></td></tr>
+      <tr><td>选课中心</td><td>浏览课程、筛选、查看详情、选课</td><td><span class="tag p2">P2</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">7.2 学生 Web 端（04 · 10-Web）</h3>
+  <p>在移动端基础上扩展：侧边栏导航、看板协作、在线考试、资源库、课程详情深度信息。</p>
+
+  <h3 class="sub">7.3 学生桌面端（05 · 11-桌面）</h3>
+  <p>专注模式 · 番茄钟 · 离线下载 · Markdown 笔记 · 快捷键支持（⌘+F 专注、⌘+D 下载）。</p>
+</section>
+
+<!-- ============ 08 · 教师端 ============ -->
+<section class="section" id="s8">
+  <div class="section-header">
+    <h2>08 · 教师端功能详述 <em>Teacher Features</em></h2>
+    <div class="num-tag">15 Main · 21 Deep · 3 Surfaces</div>
+  </div>
+
+  <div class="info note">
+    <div class="label">设计文件</div>
+    原型 06-08（主 + 扩展）· 12-14（深度功能）· 共 9 个 HTML 文件 · 60+ 个界面页面
+  </div>
+
+  <h3 class="sub">8.1 教师三端通用功能</h3>
+  <table>
+    <thead><tr><th>功能</th><th>描述</th><th>优先级</th><th>最佳端</th></tr></thead>
+    <tbody>
+      <tr><td><b>直播授课</b></td><td>课堂控制、屏幕共享、举手队列、随机点名、课件翻页</td><td><span class="tag p0">P0</span></td><td>桌面 · Web</td></tr>
+      <tr><td><b>批量批阅</b></td><td>多份作业并排、快捷键批阅、离线模式</td><td><span class="tag p0">P0</span></td><td>桌面</td></tr>
+      <tr><td><b>题库管理</b></td><td>题目标签、难度分级、智能组卷、自动评分</td><td><span class="tag p1">P1</span></td><td>Web · 桌面</td></tr>
+      <tr><td><b>学情分析</b></td><td>成绩分布、学情趋势、风险预警、关键洞察</td><td><span class="tag p1">P1</span></td><td>Web · 桌面</td></tr>
+      <tr><td><b>学生预警</b></td><td>高/中/低风险分级、一键约谈、辅导记录</td><td><span class="tag p1">P1</span></td><td>Web · 移动</td></tr>
+      <tr><td><b>课程评估</b></td><td>匿名问卷、多维评分、学期对比、行动建议</td><td><span class="tag p2">P2</span></td><td>Web · 桌面</td></tr>
+      <tr><td><b>考勤管理</b></td><td>一键发起、扫码签到、到勤率统计</td><td><span class="tag p0">P0</span></td><td>移动 · Web</td></tr>
+      <tr><td><b>答疑管理</b></td><td>问题队列、分配助教、回复模板</td><td><span class="tag p1">P1</span></td><td>Web · 桌面</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">8.2 桌面端特色</h3>
+  <ul>
+    <li><b>画中画</b> 直播：多学生摄像头画中画显示</li>
+    <li><b>快捷键</b>：⌘+M 麦克风 · ⌘+V 摄像头 · ⌘+S 共享 · ⌘+R 点名 · ⌘+E 结束</li>
+    <li><b>多列布局</b>：题库宽屏列表、风险学生表格、评估三列视图</li>
+    <li><b>离线模式</b>：批阅不依赖网络，联网后自动同步</li>
+  </ul>
+</section>
+
+<!-- ============ 09 · 管理端 ============ -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <h2>09 · 管理端功能详述 <em>Admin Features</em></h2>
+    <div class="num-tag">12 Pages · 3 Surfaces</div>
+  </div>
+
+  <div class="info note">
+    <div class="label">设计文件</div>
+    原型 15-17（Web · 桌面 · 移动）· 共 3 个 HTML 文件 · 12+ 个界面页面
+  </div>
+
+  <table>
+    <thead><tr><th>功能</th><th>描述</th><th>优先级</th><th>最佳端</th></tr></thead>
+    <tbody>
+      <tr><td><b>数据总览</b></td><td>用户数、课程数、DAU、营收、待处理事项</td><td><span class="tag p0">P0</span></td><td>Web · 桌面</td></tr>
+      <tr><td><b>平台监控</b></td><td>API 延迟、SLA、CDN、存储、视频流健康度</td><td><span class="tag p0">P0</span></td><td>三端</td></tr>
+      <tr><td><b>用户管理</b></td><td>学生/教师账户 CRUD、批量导入导出、状态调整</td><td><span class="tag p0">P0</span></td><td>Web · 桌面</td></tr>
+      <tr><td><b>角色权限</b></td><td>RBAC 模型、超级管理员/讲师/助教分级</td><td><span class="tag p1">P1</span></td><td>Web · 桌面</td></tr>
+      <tr><td><b>课程审批</b></td><td>开课申请、讲师资质审核、批量审批</td><td><span class="tag p1">P1</span></td><td>三端</td></tr>
+      <tr><td><b>内容审核</b></td><td>讨论区内容、举报处理</td><td><span class="tag p1">P1</span></td><td>Web · 桌面</td></tr>
+      <tr><td><b>订单与账单</b></td><td>支付流水、退款审批</td><td><span class="tag p2">P2</span></td><td>Web · 桌面</td></tr>
+      <tr><td><b>系统设置</b></td><td>平台配置、安全策略、通知模板</td><td><span class="tag p1">P1</span></td><td>Web · 桌面</td></tr>
+      <tr><td><b>审计日志</b></td><td>全量操作追踪、筛选导出、7 年合规保留</td><td><span class="tag p1">P1</span></td><td>桌面</td></tr>
+      <tr><td><b>警报中心</b></td><td>紧急推送、异常登录、SLA 降级</td><td><span class="tag p0">P0</span></td><td>移动</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 9A · AI 智能模块 ============ -->
+<section class="section" id="s9a">
+  <div class="section-header">
+    <h2>9A · 🤖 AI 智能模块 <em>AI-Powered · 2026 新增</em></h2>
+    <div class="num-tag">18 — 20 · 3 Files · 270 KB</div>
+  </div>
+
+  <div class="info success">
+    <div class="label">✨ 2026 年 8 月 新增</div>
+    面对教育 AI 浪潮，Lumina 新增完整的 AI 能力模块。覆盖大语言模型（LLM）、多模态 AI、Multi-Agent 编排、RAG（检索增强生成）、内容安全审核、智能运维等前沿场景，让教学平台成为 AI 原生的智能中枢。
+  </div>
+
+  <h3 class="sub">9A.1 核心 AI 能力矩阵</h3>
+  <table>
+    <thead><tr><th>能力层</th><th>具体场景</th><th>技术栈</th><th>优先级</th></tr></thead>
+    <tbody>
+      <tr>
+        <td rowspan="4"><b>👨‍🎓 学生 AI</b></td>
+        <td>苏格拉底式 AI 导师（24/7 引导式答疑）</td>
+        <td>通义千问 Qwen-Max · MCP</td>
+        <td><span class="tag p0">P0</span></td>
+      </tr>
+      <tr>
+        <td>个性化自适应学习路径</td>
+        <td>知识图谱 · 强化学习</td>
+        <td><span class="tag p0">P0</span></td>
+      </tr>
+      <tr>
+        <td>多模态提问（拍照解题、语音对话）</td>
+        <td>通义千问-VL · 讯飞语音</td>
+        <td><span class="tag p1">P1</span></td>
+      </tr>
+      <tr>
+        <td>AI 闪卡（间隔重复）· AI 笔记 · RAG 教材问答</td>
+        <td>RAG · Embedding</td>
+        <td><span class="tag p1">P1</span></td>
+      </tr>
+      <tr>
+        <td rowspan="4"><b>👨‍🏫 教师 AI</b></td>
+        <td>AI 批阅助手（280 份作业 5 分钟完成）</td>
+        <td>通义千问 Qwen-Max</td>
+        <td><span class="tag p0">P0</span></td>
+      </tr>
+      <tr>
+        <td>AI 课件工坊（一键生成 PPT/题库/讲义）</td>
+        <td>通义千问-VL · 多模态</td>
+        <td><span class="tag p0">P0</span></td>
+      </tr>
+      <tr>
+        <td>AI 课堂 Copilot（实时转写、学情感知、教学建议）</td>
+        <td>讯飞语音 · Emotion AI</td>
+        <td><span class="tag p1">P1</span></td>
+      </tr>
+      <tr>
+        <td>AI 学情预测（风险预警、个性化干预）</td>
+        <td>XGBoost · LLM</td>
+        <td><span class="tag p1">P1</span></td>
+      </tr>
+      <tr>
+        <td rowspan="4"><b>🔧 平台 AI</b></td>
+        <td>Multi-Agent 编排（18 个 Agent 统一管理）</td>
+        <td>Agent Framework</td>
+        <td><span class="tag p0">P0</span></td>
+      </tr>
+      <tr>
+        <td>AI 内容安全审核（学术不端、敏感内容、版权）</td>
+        <td>多模态检测 · 99.2% 自动</td>
+        <td><span class="tag p0">P0</span></td>
+      </tr>
+      <tr>
+        <td>AI 成本优化（模型路由、语义缓存、预算控制）</td>
+        <td>Smart Router · Cache</td>
+        <td><span class="tag p1">P1</span></td>
+      </tr>
+      <tr>
+        <td>AI 合规审计（决策追溯、PII 保护、伦理监测）</td>
+        <td>Audit Trail · 7 年保留</td>
+        <td><span class="tag p0">P0</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">9A.2 关键 AI 技术选型</h3>
+  <div class="info success">
+    <div class="label">🎛 双层模型选择系统</div>
+    <b>层面一 · 管理端可配置</b>：管理员配置可用模型池（启用/禁用/配额/成本预算/优先级）<br/>
+    <b>层面二 · 用户端可自主选择</b>：师生在使用 AI 时根据场景自主选择合适的模型<br/>
+    <b>智能路由</b>：系统根据任务类型、成本、延迟自动推荐最优模型，用户可覆盖
+  </div>
+
+  <h4 class="sub">国产模型池配置</h4>
+  <table>
+    <thead><tr><th>技术</th><th>用途</th><th>选型</th><th>厂商</th></tr></thead>
+    <tbody>
+      <tr><td><b>LLM 主力</b></td><td>对话、推理、内容生成</td><td>通义千问 Qwen-Max</td><td>阿里云</td></tr>
+      <tr><td><b>LLM 备选</b></td><td>复杂推理、中文优化</td><td>智谱 GLM-4</td><td>智谱 AI</td></tr>
+      <tr><td><b>教育专用</b></td><td>作文批改、教学场景</td><td>讯飞星火 V4</td><td>科大讯飞</td></tr>
+      <tr><td><b>轻量快速</b></td><td>简单问答、快速响应</td><td>豆包 Lite</td><td>字节跳动</td></tr>
+      <tr><td><b>多模态视觉</b></td><td>拍照解题、PPT 理解</td><td>通义千问-VL</td><td>阿里云</td></tr>
+      <tr><td><b>语音识别</b></td><td>课堂实时转写</td><td>讯飞语音 V3</td><td>科大讯飞</td></tr>
+      <tr><td><b>向量模型</b></td><td>RAG 检索、知识图谱</td><td>百川 Embedding</td><td>百川 AI</td></tr>
+      <tr><td><b>长文本</b></td><td>超长文档处理（可选）</td><td>月之暗面 Kimi</td><td>Moonshot</td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="sub">其他基础设施</h4>
+  <table>
+    <thead><tr><th>技术</th><th>用途</th><th>选型</th></tr></thead>
+    <tbody>
+      <tr><td><b>向量数据库</b></td><td>RAG 教材检索</td><td>Milvus 向量库（国产）</td></tr>
+      <tr><td><b>Agent 框架</b></td><td>Multi-Agent 编排</td><td>魔搭 AgentScope（阿里达摩院）</td></tr>
+      <tr><td><b>协议</b></td><td>AI 工具调用</td><td>MCP（Model Context Protocol）</td></tr>
+      <tr><td><b>内容审核</b></td><td>学术不端检测</td><td>知网 AIGC 检测 / 知网 AMLC</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">9A.3 AI 治理与合规</h3>
+  <div class="info warn">
+    <div class="label">⚠ AI 伦理准则</div>
+    <ul style="margin:6px 0 0 16px; font-size:12px; line-height:1.7;">
+      <li><b>透明性</b>：所有 AI 输出均明确标识「🤖 AI 生成」</li>
+      <li><b>公平性</b>：评分算法定期审计，消除性别/地域偏见</li>
+      <li><b>可控性</b>：教师始终拥有 AI 评分的最终决定权</li>
+      <li><b>隐私保护</b>：学生数据绝不用于训练公共模型</li>
+      <li><b>可追溯</b>：所有 AI 决策保留 7 年完整日志</li>
+      <li><b>幻觉控制</b>：目标事实错误率 &lt; 2%（当前 0.42%）</li>
+    </ul>
+  </div>
+
+  <h3 class="sub">9A.4 AI 模块原型文件</h3>
+  <table>
+    <thead><tr><th>文件</th><th>覆盖场景</th><th>规模</th></tr></thead>
+    <tbody>
+      <tr><td><b>lumina-18-ai-student.html</b></td><td>AI 导师 · 学习路径 · 知识图谱 · AI 闪卡 · 多模态 · 语音 · RAG</td><td>93 KB</td></tr>
+      <tr><td><b>lumina-19-ai-teacher.html</b></td><td>AI 批阅 · 课件生成 · 课堂 Copilot · 学情预测 · 个性化干预</td><td>95 KB</td></tr>
+      <tr><td><b>lumina-20-ai-admin.html</b></td><td>Agent 编排 · 内容安全 · 成本优化 · 合规审计 · 伦理监测</td><td>82 KB</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">9A.5 商业价值预估</h3>
+  <div class="feat-grid">
+    <div class="feat-card" style="background:var(--ai-soft); border-color:var(--ai);">
+      <div class="feat-num" style="color:var(--ai);">👨‍🎓 学生价值</div>
+      <h4>24/7 专属导师</h4>
+      <p>每个学生都能获得苏格拉底式引导学习，预计学习效率提升 <b>40%</b>，弱势学生辍学率下降 <b>25%</b></p>
+    </div>
+    <div class="feat-card" style="background:var(--ai-soft); border-color:var(--ai);">
+      <div class="feat-num" style="color:var(--ai);">👨‍🏫 教师价值</div>
+      <h4>99% 时间节省</h4>
+      <p>280 份作业从 8 小时降至 5 分钟。每月为每位教师节省 <b>180 小时</b>，ROI <b>+340%</b></p>
+    </div>
+    <div class="feat-card" style="background:var(--ai-soft); border-color:var(--ai);">
+      <div class="feat-num" style="color:var(--ai);">🏫 平台价值</div>
+      <h4>智能运维中枢</h4>
+      <p>99.2% 内容自动审核，成本优化 <b>23%</b>（月省 ¥24,000），AI 决策 100% 可追溯</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10 · 跨端协同 ============ -->
+<section class="section" id="s10">
+  <div class="section-header">
+    <h2>10 · 跨端协同场景 <em>Cross-Device</em></h2>
+    <div class="num-tag">Seamless Experience</div>
+  </div>
+
+  <h3 class="sub">10.1 实时同步</h3>
+  <ul>
+    <li><b>学习进度</b>：学生在移动端看到的课件阅读进度，在桌面端无缝继续</li>
+    <li><b>作业草稿</b>：Web 端未完成的作业，移动端可继续编辑</li>
+    <li><b>消息通知</b>：三端消息已读状态同步，避免重复提醒</li>
+    <li><b>直播状态</b>：学生在移动端加入的直播，切换到桌面端继续观看</li>
+  </ul>
+
+  <h3 class="sub">10.2 离线优先</h3>
+  <ul>
+    <li><b>桌面端</b>：课件、笔记、作业支持离线访问，联网后自动同步</li>
+    <li><b>移动端</b>：课程资料可下载缓存，地铁等弱网环境可读</li>
+    <li><b>教师端</b>：作业批阅离线进行，回到网络后批量上传</li>
+  </ul>
+
+  <h3 class="sub">10.3 视觉一致性</h3>
+  <p>三端采用<b>统一设计系统</b>：相同调色板、相同字体、相同图标（Feather Icons），保证 Lumina 视觉 DNA 跨端一致。荧光笔签名效果（linear-gradient 62%→88%）在所有端均可见。</p>
+
+  <h3 class="sub">10.4 📱↔📲 移动端双模式适配（v1.2 新增）</h3>
+  <div class="info success">
+    <div class="label">✨ 手机+平板自适应设计</div>
+    所有 5 个移动端原型（学生端、教师端、协作端、教师深度端、管理端）均支持<b>手机+平板双模式自适应</b>，根据屏幕尺寸自动切换布局。
+  </div>
+
+  <table>
+    <thead><tr><th>维度</th><th>📱 手机模式</th><th>📲 平板模式</th></tr></thead>
+    <tbody>
+      <tr><td><b>屏幕尺寸</b></td><td>≤ 480px</td><td>768px - 1024px</td></tr>
+      <tr><td><b>导航结构</b></td><td>底部 5 Tab 导航</td><td>左侧侧边栏导航</td></tr>
+      <tr><td><b>布局方式</b></td><td>单列卡片堆叠</td><td>多列网格（2-3 栏）</td></tr>
+      <tr><td><b>信息密度</b></td><td>紧凑卡片，核心功能优先</td><td>丰富面板，展示更多信息</td></tr>
+      <tr><td><b>AI 助手</b></td><td>底部抽屉或全屏</td><td>常驻侧边面板</td></tr>
+      <tr><td><b>适用设备</b></td><td>iPhone / Android 手机</td><td>iPad / Android 平板</td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="sub">各模块适配要点</h4>
+  <ul>
+    <li><b>学生端</b>：课程卡片单列→双列 · 底部 Tab→侧边导航 · AI 导师常驻侧边</li>
+    <li><b>教师端</b>：2×2 快捷操作→4 列统计面板 · 单列课程→双列课程+预警</li>
+    <li><b>协作端</b>：单列任务→三栏看板（拖拽支持）· 全屏直播→多窗口布局</li>
+    <li><b>教师深度端</b>：直播简化控制→多窗口矩阵 · 单图表→多图表并排+学生列表</li>
+    <li><b>管理端</b>：统计卡片堆叠→多列网格+筛选器 · 用户列表→双栏（列表+详情）</li>
+  </ul>
+
+  <h4 class="sub">技术实现</h4>
+  <ul>
+    <li><b>响应式断点</b>：Mobile (<480px) · Tablet (768-1024px) · Desktop (>1024px)</li>
+    <li><b>核心技术</b>：CSS Grid + Flexbox · Media Queries · 动态组件显隐</li>
+    <li><b>设计原则</b>：内容优先 · 触摸优先 · 交互一致 · 性能优先</li>
+  </ul>
+</section>
+
+<!-- ============ 11 · 非功能需求 ============ -->
+<section class="section" id="s11">
+  <div class="section-header">
+    <h2>11 · 非功能需求 <em>Non-Functional</em></h2>
+    <div class="num-tag">Quality Attributes</div>
+  </div>
+
+  <table>
+    <thead><tr><th>维度</th><th>要求</th><th>指标</th></tr></thead>
+    <tbody>
+      <tr><td><b>性能</b></td><td>页面加载时间</td><td>首屏 ≤ 1.5 秒（4G 网络）</td></tr>
+      <tr><td><b>性能</b></td><td>API 响应时间</td><td>P95 ≤ 200ms · P99 ≤ 500ms</td></tr>
+      <tr><td><b>可用性</b></td><td>服务 SLA</td><td>≥ 99.9%（月度）</td></tr>
+      <tr><td><b>可用性</b></td><td>直播流可用性</td><td>≥ 99.95%</td></tr>
+      <tr><td><b>安全性</b></td><td>数据传输</td><td>全链路 HTTPS · TLS 1.3</td></tr>
+      <tr><td><b>安全性</b></td><td>认证</td><td>管理员强制 2FA</td></tr>
+      <tr><td><b>安全性</b></td><td>审计</td><td>所有写操作记录审计日志 · 保留 7 年</td></tr>
+      <tr><td><b>合规</b></td><td>数据保护</td><td>符合《个人信息保护法》· 学生数据脱敏</td></tr>
+      <tr><td><b>兼容性</b></td><td>移动端 · 手机</td><td>iOS 15+ (iPhone) · Android 10+ · 屏幕 ≤ 480px</td></tr>
+      <tr><td><b>兼容性</b></td><td>移动端 · 平板</td><td>iPadOS 15+ · Android Tablet · 屏幕 768-1024px · <b style="color:var(--ai);">自适应双模式</b></td></tr>
+      <tr><td><b>兼容性</b></td><td>Web 端</td><td>Chrome 90+ · Firefox 88+ · Safari 14+ · Edge 90+</td></tr>
+      <tr><td><b>兼容性</b></td><td>桌面端</td><td>macOS 11+ · Windows 10+ · Ubuntu 20.04+</td></tr>
+      <tr><td><b>可访问性</b></td><td>WCAG</td><td>符合 WCAG 2.1 AA 标准</td></tr>
+      <tr><td><b>可扩展</b></td><td>用户规模</td><td>支持 10,000+ 并发用户</td></tr>
+      <tr><td><b>可扩展</b></td><td>存储</td><td>当前 2.1 TB / 总配额 5 TB · 支持横向扩展</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 12 · 设计规范 ============ -->
+<section class="section" id="s12">
+  <div class="section-header">
+    <h2>12 · 设计规范摘要 <em>Design System</em></h2>
+    <div class="num-tag">Visual Language</div>
+  </div>
+
+  <h3 class="sub">12.1 调色板</h3>
+  <table>
+    <thead><tr><th>Token</th><th>色值</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td><code>--ricepaper</code></td><td style="background:#FAF6EC; padding:4px 10px; border-radius:4px; border:1px solid var(--line);">#FAF6EC</td><td>主背景 · 宣纸质感</td></tr>
+      <tr><td><code>--inkwell</code></td><td style="background:#0F1020; color:#fff; padding:4px 10px; border-radius:4px;">#0F1020</td><td>主文字 · 墨色</td></tr>
+      <tr><td><code>--cobalt</code></td><td style="background:#3D46C9; color:#fff; padding:4px 10px; border-radius:4px;">#3D46C9</td><td>主强调色 · 品牌色</td></tr>
+      <tr><td><code>--highlighter</code></td><td style="background:#F5B800; padding:4px 10px; border-radius:4px;">#F5B800</td><td>荧光笔 · 视觉签名</td></tr>
+      <tr><td><code>--correction</code></td><td style="background:#E85D3A; color:#fff; padding:4px 10px; border-radius:4px;">#E85D3A</td><td>警示 · 错误 · 批注</td></tr>
+      <tr><td><code>--growth</code></td><td style="background:#2A7F4F; color:#fff; padding:4px 10px; border-radius:4px;">#2A7F4F</td><td>成长 · 成功 · 正向</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">12.2 字体</h3>
+  <table>
+    <thead><tr><th>用途</th><th>字体</th><th>许可</th></tr></thead>
+    <tbody>
+      <tr><td>Display 标题</td><td><b>Fraunces</b> · variable · 300-900</td><td>SIL OFL 1.1</td></tr>
+      <tr><td>Body 正文</td><td><b>Inter</b> · variable · 300-700</td><td>SIL OFL 1.1</td></tr>
+      <tr><td>Mono 数字/代码</td><td><b>JetBrains Mono</b> · 400-500</td><td>SIL OFL 1.1</td></tr>
+      <tr><td>中文 fallback</td><td>PingFang SC · Songti SC</td><td>系统字体</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">12.3 签名效果 · 荧光笔</h3>
+  <div class="info warn">
+    <div class="label">CSS 实现</div>
+    <code style="font-family:var(--f-mono); font-size:11px; display:block; line-height:1.6; margin-top:6px;">
+      background: linear-gradient(180deg,<br/>
+      &nbsp;&nbsp;transparent 62%,<br/>
+      &nbsp;&nbsp;var(--highlighter) 62%,<br/>
+      &nbsp;&nbsp;var(--highlighter) 88%,<br/>
+      &nbsp;&nbsp;transparent 88%);
+    </code>
+  </div>
+
+  <h3 class="sub">12.4 图标</h3>
+  <p><b>Feather Icons</b> · 260+ 线性图标 · MIT License · © Cole Bemis<br/>
+  所有图标采用 inline SVG 形式嵌入，保证跨端一致性与可定制性。</p>
+</section>
+
+<!-- ============ 13 · 技术架构 ============ -->
+<section class="section" id="s13">
+  <div class="section-header">
+    <h2>13 · 技术架构建议 <em>Architecture</em></h2>
+    <div class="num-tag">Technical Recommendation</div>
+  </div>
+
+  <h3 class="sub">13.1 总体架构</h3>
+  <table>
+    <thead><tr><th>层</th><th>技术选型</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><b>前端</b></td><td>React 18 + TypeScript · Vite</td><td>学生/教师 Web 端 · SPA 架构</td></tr>
+      <tr><td><b>桌面端</b></td><td>Electron + React</td><td>复用 Web 代码 · 原生体验</td></tr>
+      <tr><td><b>移动端</b></td><td>React Native · 或 Flutter</td><td>iOS + Android 双端 · 共享代码</td></tr>
+      <tr><td><b>自适应设计</b></td><td>响应式 + 自适应混合</td><td>手机 (≤480px) · 平板 (768-1024px) · 双模式布局切换</td></tr>
+      <tr><td><b>后端</b></td><td>Node.js (NestJS) · Go (性能敏感)</td><td>微服务架构</td></tr>
+      <tr><td><b>数据库</b></td><td>PostgreSQL · Redis</td><td>关系型 + 缓存</td></tr>
+      <tr><td><b>直播</b></td><td>WebRTC + CDN</td><td>低延迟直播</td></tr>
+      <tr><td><b>存储</b></td><td>阿里云 OSS</td><td>课件/作业/视频存储</td></tr>
+      <tr><td><b>消息</b></td><td>RabbitMQ</td><td>异步任务 · 通知分发</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">13.2 关键服务</h3>
+  <ul>
+    <li><b>Auth Service</b>：OAuth 2.0 + JWT · 支持学校 CAS 单点登录</li>
+    <li><b>Course Service</b>：课程 CRUD · 章节管理 · 课件版本</li>
+    <li><b>Live Service</b>：WebSocket 信令 · 举手队列 · 答题统计</li>
+    <li><b>Analytics Service</b>：学情聚合 · 风险预警算法</li>
+    <li><b>Notification Service</b>：APNs / FCM / WebSocket / Email 多通道</li>
+    <li><b>Admin Service</b>：RBAC · 审批工作流 · 审计日志</li>
+  </ul>
+</section>
+
+<!-- ============ 14 · 依赖许可 ============ -->
+<section class="section" id="s14">
+  <div class="section-header">
+    <h2>14 · 依赖与许可 <em>Dependencies</em></h2>
+    <div class="num-tag">License Audit</div>
+  </div>
+
+  <div class="info success">
+    <div class="label">✅ 商用许可审计通过</div>
+    所有使用的依赖均为 <b>商用友好许可</b>：SIL OFL 1.1（字体）、MIT（图标），无 GPL/AGPL 传染风险，可安全用于商业产品。
+  </div>
+
+  <table>
+    <thead><tr><th>类型</th><th>名称</th><th>许可</th><th>商用</th></tr></thead>
+    <tbody>
+      <tr><td>字体 · Display</td><td>Fraunces (Google Fonts)</td><td>SIL OFL 1.1</td><td style="color:var(--growth);">✓ 可商用</td></tr>
+      <tr><td>字体 · Body</td><td>Inter (Google Fonts)</td><td>SIL OFL 1.1</td><td style="color:var(--growth);">✓ 可商用</td></tr>
+      <tr><td>字体 · Mono</td><td>JetBrains Mono</td><td>SIL OFL 1.1</td><td style="color:var(--growth);">✓ 可商用</td></tr>
+      <tr><td>图标库</td><td>Feather Icons · © Cole Bemis</td><td>MIT</td><td style="color:var(--growth);">✓ 可商用</td></tr>
+      <tr><td>中文 fallback</td><td>PingFang SC · Songti SC</td><td>系统内置</td><td style="color:var(--growth);">✓ 系统字体</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info warn">
+    <div class="label">⚠ 避免使用的资源</div>
+    <ul style="margin:6px 0 0 16px; font-size:12px;">
+      <li><b>Emoji</b>：跨平台显示不一致，已全量替换为 Feather Icons SVG</li>
+      <li><b>iOS 风格图标</b>：避免 Apple 商标风险，使用通用 SVG 状态栏图标</li>
+      <li><b>GPL 字体</b>：如 GNU FreeFont 等可能传染项目</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 15 · 里程碑 ============ -->
+<section class="section" id="s15">
+  <div class="section-header">
+    <h2>15 · 项目里程碑 <em>Milestones</em></h2>
+    <div class="num-tag">6 Phases · 12 Months</div>
+  </div>
+
+  <div class="timeline">
+    <div class="phase done">
+      <div class="head">
+        <div class="title">Phase 0 · 原型设计</div>
+        <div class="time">2026-08 · ✓ 已完成</div>
+      </div>
+      <div class="desc">完成 28 个原型文件 · 160+ 界面页面 · 6 个设计表面覆盖 · 🤖 AI 模块交付</div>
+      <div class="deliverables">
+        <span class="deliv">设计系统 01</span>
+        <span class="deliv">学生端 03-05</span>
+        <span class="deliv">教师端 06-08</span>
+        <span class="deliv">协作 09-11</span>
+        <span class="deliv">教师深度 12-14</span>
+        <span class="deliv">管理端 15-17</span>
+      </div>
+    </div>
+
+    <div class="phase current">
+      <div class="head">
+        <div class="title">Phase 1 · 设计评审与开发启动</div>
+        <div class="time">2026-09 · 当前</div>
+      </div>
+      <div class="desc">PRD 评审通过 · 技术方案评审 · 前端工程搭建 · 设计资产交接</div>
+      <div class="deliverables">
+        <span class="deliv">PRD v1.0</span>
+        <span class="deliv">技术设计文档</span>
+        <span class="deliv">Figma 设计资产</span>
+        <span class="deliv">前端脚手架</span>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="head">
+        <div class="title">Phase 2 · 核心模块开发</div>
+        <div class="time">2026-10 — 2026-12</div>
+      </div>
+      <div class="desc">账户系统 · 课程基础 · 学生学习三端 · 教师工作台 · 直播基础</div>
+      <div class="deliverables">
+        <span class="deliv">Auth Service</span>
+        <span class="deliv">Course Service</span>
+        <span class="deliv">学生 Web 端</span>
+        <span class="deliv">学生移动 端</span>
+        <span class="deliv">教师 Web 端</span>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="head">
+        <div class="title">Phase 3 · 高级功能开发</div>
+        <div class="time">2027-01 — 2027-03</div>
+      </div>
+      <div class="desc">直播增强 · 题库考试 · 学情分析 · 桌面端 · 管理端</div>
+      <div class="deliverables">
+        <span class="deliv">Live Service</span>
+        <span class="deliv">Exam Service</span>
+        <span class="deliv">桌面端</span>
+        <span class="deliv">管理端</span>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="head">
+        <div class="title">Phase 4 · 内测与打磨</div>
+        <div class="time">2027-04 — 2027-05</div>
+      </div>
+      <div class="desc">小范围内测（100 师生）· 性能优化 · Bug 修复 · 用户反馈迭代</div>
+      <div class="deliverables">
+        <span class="deliv">内测报告</span>
+        <span class="deliv">性能基线</span>
+        <span class="deliv">用户手册</span>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="head">
+        <div class="title">Phase 5 · 公测与上线</div>
+        <div class="time">2027-06 — 2027-08</div>
+      </div>
+      <div class="desc">全校公测 · 秋季学期正式上线 · 运营支持 · 持续迭代</div>
+      <div class="deliverables">
+        <span class="deliv">正式上线</span>
+        <span class="deliv">运营手册</span>
+        <span class="deliv">应急预案</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 16 · 原型索引 ============ -->
+<section class="section" id="s16">
+  <div class="section-header">
+    <h2>16 · 原型文件索引 <em>Prototype Index</em></h2>
+    <div class="num-tag">28 Files · 1.6 MB</div>
+  </div>
+
+  <div class="info note">
+    <div class="label">📁 文件位置</div>
+    所有原型统一存放于 <code style="font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px;">edu/原型/</code> 目录下。<br/>
+    入口文件：<b>lumina-00-index.html</b> · 浏览器打开即可导航所有设计稿。
+  </div>
+
+  <table>
+    <thead><tr><th>编号</th><th>文件</th><th>模块</th><th>端</th><th>规模</th></tr></thead>
+    <tbody>
+      <tr><td>00</td><td>lumina-00-index.html</td><td>索引入口</td><td>—</td><td>47 KB</td></tr>
+      <tr><td>01</td><td>lumina-01-design-system.html</td><td>设计系统</td><td>共享</td><td>9 KB</td></tr>
+      <tr><td>02</td><td>lumina-02-shared.html</td><td>共享页面</td><td>共享</td><td>23 KB</td></tr>
+      <tr><td>03</td><td>lumina-03-student-mobile.html + extended</td><td>学生主页面</td><td>移动</td><td>43 KB</td></tr>
+      <tr><td>04</td><td>lumina-04-student-web.html + extended</td><td>学生学习</td><td>Web</td><td>70 KB</td></tr>
+      <tr><td>05</td><td>lumina-05-student-desktop.html + extended</td><td>学生专注</td><td>桌面</td><td>45 KB</td></tr>
+      <tr><td>06</td><td>lumina-06-teacher-mobile.html + extended</td><td>教师主页面</td><td>移动</td><td>49 KB</td></tr>
+      <tr><td>07</td><td>lumina-07-teacher-web.html + extended</td><td>教师教学</td><td>Web</td><td>58 KB</td></tr>
+      <tr><td>08</td><td>lumina-08-teacher-desktop.html + extended</td><td>教师批阅</td><td>桌面</td><td>77 KB</td></tr>
+      <tr><td>09</td><td>lumina-09-student-collaboration-mobile.html</td><td>学生协作</td><td>移动</td><td>75 KB</td></tr>
+      <tr><td>10</td><td>lumina-10-student-collaboration-web.html</td><td>学生协作</td><td>Web</td><td>63 KB</td></tr>
+      <tr><td>11</td><td>lumina-11-student-collaboration-desktop.html</td><td>学生协作</td><td>桌面</td><td>63 KB</td></tr>
+      <tr><td>12</td><td>lumina-12-teacher-deep-mobile.html</td><td>教师深度</td><td>移动</td><td>73 KB</td></tr>
+      <tr><td>13</td><td>lumina-13-teacher-deep-web.html</td><td>教师深度</td><td>Web</td><td>71 KB</td></tr>
+      <tr><td>14</td><td>lumina-14-teacher-deep-desktop.html</td><td>教师深度</td><td>桌面</td><td>77 KB</td></tr>
+      <tr><td>15</td><td>lumina-15-admin-web.html</td><td>管理端</td><td>Web</td><td>74 KB</td></tr>
+      <tr><td>16</td><td>lumina-16-admin-desktop.html</td><td>管理端</td><td>桌面</td><td>81 KB</td></tr>
+      <tr><td>17</td><td>lumina-17-admin-mobile.html</td><td>管理端</td><td>移动</td><td>67 KB</td></tr>
+      <tr style="background:var(--ai-soft);"><td>18</td><td><b style="color:var(--ai);">lumina-18-ai-student.html</b></td><td>🤖 AI 学生</td><td>三端</td><td>93 KB</td></tr>
+      <tr style="background:var(--ai-soft);"><td>19</td><td><b style="color:var(--ai);">lumina-19-ai-teacher.html</b></td><td>🤖 AI 教师</td><td>三端</td><td>95 KB</td></tr>
+      <tr style="background:var(--ai-soft);"><td>20</td><td><b style="color:var(--ai);">lumina-20-ai-admin.html</b></td><td>🤖 AI 平台</td><td>三端</td><td>82 KB</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 17 · 验收标准 ============ -->
+<section class="section" id="s17">
+  <div class="section-header">
+    <h2>17 · 验收标准 <em>Acceptance Criteria</em></h2>
+    <div class="num-tag">Definition of Done</div>
+  </div>
+
+  <h3 class="sub">17.1 原型验收</h3>
+  <ul>
+    <li>所有 24 个 HTML 文件可独立打开并在现代浏览器中正常渲染</li>
+    <li>所有内部链接可跳转（相对路径）</li>
+    <li>所有文字内容为中文（符合目标用户习惯）</li>
+    <li>所有图标统一为 Feather Icons SVG（无 emoji）</li>
+    <li>设计系统 6 色调色板、3 套字体在所有文件中一致应用</li>
+  </ul>
+
+  <h3 class="sub">17.2 功能验收</h3>
+  <ul>
+    <li><b>P0 功能</b>：100% 实现并通过 QA 测试</li>
+    <li><b>P1 功能</b>：≥ 95% 实现，剩余列入 V1.1</li>
+    <li><b>P2 功能</b>：≥ 80% 实现，剩余列入 V1.5</li>
+  </ul>
+
+  <h3 class="sub">17.3 性能验收</h3>
+  <ul>
+    <li>Web 端 Lighthouse Performance 分数 ≥ 90</li>
+    <li>首屏加载时间 ≤ 1.5s（4G 网络）</li>
+    <li>API P95 ≤ 200ms · 直播延迟 ≤ 2s</li>
+  </ul>
+
+  <h3 class="sub">17.4 安全验收</h3>
+  <ul>
+    <li>通过第三方渗透测试</li>
+    <li>学生数据脱敏 · 符合《个人信息保护法》</li>
+    <li>所有审计日志可追溯 7 年</li>
+    <li>管理员账户 100% 启用 2FA</li>
+  </ul>
+</section>
+
+<!-- ============ 18 · 附录 ============ -->
+<section class="section" id="s18">
+  <div class="section-header">
+    <h2>18 · 附录 · 术语表 <em>Glossary</em></h2>
+    <div class="num-tag">Appendix</div>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:180px;">术语</th><th>定义</th></tr></thead>
+    <tbody>
+      <tr><td><b>Lumina / 墨光</b></td><td>本产品的正式名称。「墨」代表知识沉淀，「光」代表启发瞬间。</td></tr>
+      <tr><td><b>Design Surface</b></td><td>设计表面，指一类独立的 UI 平台（如学生移动端）。本产品共 6 个设计表面。</td></tr>
+      <tr><td><b>Ricepaper</b></td><td>设计系统主背景色，宣纸质感米白（#FAF6EC）。</td></tr>
+      <tr><td><b>Inkwell</b></td><td>设计系统主文字色，墨色（#0F1020）。</td></tr>
+      <tr><td><b>Cobalt</b></td><td>品牌强调色，钴蓝（#3D46C9）。</td></tr>
+      <tr><td><b>Highlighter</b></td><td>荧光笔色，Lumina 视觉签名（#F5B800）。</td></tr>
+      <tr><td><b>Correction / Growth</b></td><td>警示色（#E85D3A）与 成长色（#2A7F4F）。</td></tr>
+      <tr><td><b>Highlighter Signature</b></td><td>荧光笔签名效果，linear-gradient 62%→88% 实现。</td></tr>
+      <tr><td><b>P0 / P1 / P2</b></td><td>优先级：P0 必做 · P1 重要 · P2 锦上添花。</td></tr>
+      <tr><td><b>SLA</b></td><td>Service Level Agreement · 服务等级协议。</td></tr>
+      <tr><td><b>DAU</b></td><td>Daily Active Users · 日活跃用户数。</td></tr>
+      <tr><td><b>RBAC</b></td><td>Role-Based Access Control · 基于角色的访问控制。</td></tr>
+      <tr><td><b>2FA</b></td><td>Two-Factor Authentication · 双因素认证。</td></tr>
+      <tr><td><b>CAS</b></td><td>Central Authentication Service · 高校单点登录标准。</td></tr>
+      <tr><td><b>WCAG</b></td><td>Web Content Accessibility Guidelines · Web 内容无障碍指南。</td></tr>
+      <tr><td><b>SPA</b></td><td>Single Page Application · 单页应用。</td></tr>
+      <tr><td><b>WebRTC</b></td><td>网页实时通信技术，用于低延迟直播。</td></tr>
+      <tr style="background:var(--ai-soft);"><td><b>LLM</b></td><td>Large Language Model · 大语言模型，如通义千问、智谱 GLM、讯飞星火、豆包、Kimi。</td></tr>
+      <tr style="background:var(--ai-soft);"><td><b>RAG</b></td><td>Retrieval-Augmented Generation · 检索增强生成，结合向量数据库实现基于教材的精确问答。</td></tr>
+      <tr style="background:var(--ai-soft);"><td><b>Multi-Agent</b></td><td>多智能体系统，多个 AI Agent 协作完成复杂任务。</td></tr>
+      <tr style="background:var(--ai-soft);"><td><b>MCP</b></td><td>Model Context Protocol · 模型上下文协议，AI 工具调用标准。</td></tr>
+      <tr style="background:var(--ai-soft);"><td><b>Adaptive Learning</b></td><td>自适应学习，根据学生水平动态调整内容与难度。</td></tr>
+      <tr style="background:var(--ai-soft);"><td><b>苏格拉底式 AI</b></td><td>不直接给答案，通过反问引导学生思考的 AI 教学方式。</td></tr>
+      <tr style="background:var(--ai-soft);"><td><b>AI Copilot</b></td><td>AI 副驾驶，在直播课堂中为教师提供实时建议。</td></tr>
+      <tr style="background:var(--ai-soft);"><td><b>模型路由</b></td><td>根据任务复杂度智能选择最合适的 AI 模型，优化成本。</td></tr>
+      <tr style="background:var(--ai-soft);"><td><b>AI 幻觉</b></td><td>AI 生成内容的事实性错误，需要持续监测与控制。</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info success" style="margin-top:20px;">
+    <div class="label">✓ 文档签署</div>
+    本文档由产品团队编制，经设计、研发、运营三方评审通过。<br/>
+    <b>版本：v1.0 · 发布日期：2026-08-25 · 状态：已发布</b>
+  </div>
+</section>
+
+<footer>
+  <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · 产品需求文档 PRD v1.0</div>
+  <div>edu/原型/ · 2026-08-25</div>
+  <div>PRD-LUMINA-2026-001</div>
+</footer>
+
+</body>
+</html>

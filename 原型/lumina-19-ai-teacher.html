@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · AI 教师端</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE; --ai-2:#A78BFA; --ai-grad:linear-gradient(135deg, #7C3AED, #3D46C9);
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.5;}
+  body{padding:56px 64px; max-width:1440px; margin:0 auto;}
+
+  .topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:40px; padding-bottom:24px; border-bottom:1px solid var(--line);}
+  .topbar .brand{display:flex; align-items:center; gap:14px;}
+  .topbar .brand .logo{width:44px; height:44px; border-radius:10px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:24px; font-style:italic;}
+  .topbar .brand .name{font-family:var(--f-display); font-size:18px; font-weight:500;}
+  .topbar .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:2px;}
+  .topbar .nav{display:flex; gap:8px; align-items:center;}
+  .topbar .nav a{padding:8px 14px; font-size:12px; color:var(--inkwell-2); text-decoration:none; border-radius:6px; font-family:var(--f-mono); letter-spacing:0.05em;}
+  .topbar .nav a:hover{background:#fff; color:var(--inkwell);}
+  .topbar .nav a.back{color:var(--cobalt);}
+
+  .hero{padding:32px 0 40px; border-bottom:1px solid var(--line); margin-bottom:40px; display:grid; grid-template-columns:1.5fr 1fr; gap:48px; align-items:end;}
+  .hero .tag{display:inline-block; padding:5px 11px; background:var(--ai-soft); color:var(--ai); border-radius:12px; font-family:var(--f-mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; font-weight:500; margin-bottom:16px;}
+  .hero h1{font-family:var(--f-display); font-weight:300; font-size:76px; letter-spacing:-0.04em; line-height:1;}
+  .hero h1 em{font-style:italic; color:var(--ai);}
+  .hero h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .hero .sub{font-size:15px; color:var(--inkwell-2); margin-top:20px; line-height:1.6; max-width:560px;}
+  .hero .stats{display:flex; flex-direction:column; gap:10px;}
+  .hero .stats .s{display:flex; justify-content:space-between; padding:10px 14px; background:#fff; border:1px solid var(--line); border-radius:8px;}
+  .hero .stats .s .lbl{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2);}
+  .hero .stats .s .val{font-family:var(--f-mono); font-size:12px; font-weight:500;}
+
+  .section{margin-bottom:56px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:32px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--ai);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  .phones, .browsers, .desktops{display:grid; gap:24px; margin-bottom:32px;}
+  .phones{grid-template-columns:repeat(3, 1fr); max-width:1200px; margin-left:auto; margin-right:auto;}
+  .browsers, .desktops{grid-template-columns:1fr;}
+
+  .phone{background:#1a1a1a; border-radius:44px; padding:14px; box-shadow:var(--shadow); position:relative;}
+  .phone::before{content:""; position:absolute; top:18px; left:50%; transform:translateX(-50%); width:110px; height:28px; background:#000; border-radius:20px; z-index:2;}
+  .phone-screen{background:var(--ricepaper); border-radius:32px; overflow:hidden; min-height:620px; position:relative;}
+  .phone-status{height:44px; padding:0 28px; display:flex; align-items:center; justify-content:space-between; font-family:var(--f-mono); font-size:11px; font-weight:600; color:var(--inkwell); position:relative; z-index:1;}
+
+  .browser, .desktop{background:#fff; border:1px solid var(--line-strong); border-radius:10px; overflow:hidden; box-shadow:var(--shadow);}
+  .browser-bar, .desktop-bar{background:#f1f1f1; border-bottom:1px solid var(--line); padding:10px 14px; display:flex; align-items:center; gap:10px;}
+  .lights{display:flex; gap:6px;}
+  .lights i{width:10px; height:10px; border-radius:50%; background:#ddd;}
+  .lights i:nth-child(1){background:#ff5f57;} .lights i:nth-child(2){background:#febc2e;} .lights i:nth-child(3){background:#28c840;}
+  .addr{flex:1; background:#fff; border-radius:4px; padding:4px 10px; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);}
+  .browser-content, .desktop-content{min-height:560px;}
+  .desktop-bar{background:linear-gradient(180deg, #fafafa, #eaeaea);}
+  .desktop-bar .title{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.05em;}
+
+  .web-layout{display:grid; grid-template-columns:240px 1fr; min-height:560px;}
+  .web-sidebar{background:#fff; border-right:1px solid var(--line); padding:18px 14px;}
+  .web-main{padding:24px; background:var(--ricepaper);}
+  .d-layout{display:grid; grid-template-columns:260px 1fr 280px; min-height:560px;}
+  .d-left{background:#fff; border-right:1px solid var(--line); padding:16px;}
+  .d-center{padding:20px; background:var(--ricepaper);}
+  .d-right{background:#fff; border-left:1px solid var(--line); padding:16px;}
+
+  .sb-title{font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); padding:12px 10px 6px;}
+  .nav-item{display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:7px; font-size:12px; color:var(--inkwell); cursor:pointer; margin-bottom:2px;}
+  .nav-item:hover{background:var(--ricepaper);}
+  .nav-item svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2;}
+  .nav-item.active{background:var(--ai-soft); color:var(--ai); font-weight:500;}
+  .nav-item .badge{margin-left:auto; font-family:var(--f-mono); font-size:9px; padding:2px 6px; border-radius:6px; background:var(--ai); color:#fff;}
+  .nav-item .ai-tag{font-family:var(--f-mono); font-size:8px; padding:2px 5px; background:var(--ai-grad); color:#fff; border-radius:4px; letter-spacing:0.08em; margin-left:auto;}
+
+  .app-header{padding:14px 18px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); background:#fff;}
+  .app-title{font-family:var(--f-display); font-size:18px; font-weight:500; letter-spacing:-0.01em;}
+  .app-title small{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); letter-spacing:0.1em; text-transform:uppercase; margin-left:8px;}
+
+  .widget{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:12px;}
+  .widget h4{font-family:var(--f-display); font-size:13px; font-weight:500; margin-bottom:10px; display:flex; justify-content:space-between; align-items:baseline;}
+  .widget h4 .ai-badge{font-family:var(--f-mono); font-size:9px; padding:2px 7px; background:var(--ai-grad); color:#fff; border-radius:6px; letter-spacing:0.08em; font-weight:500;}
+  .stat-big{font-family:var(--f-display); font-size:28px; font-weight:300; letter-spacing:-0.02em; line-height:1;}
+  .stat-big .u{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em; margin-left:4px;}
+  .stat-delta{font-family:var(--f-mono); font-size:10px; color:var(--growth); margin-top:4px;}
+
+  .btn{padding:6px 12px; border-radius:6px; font-size:11px; border:1px solid var(--line); background:#fff; cursor:pointer; font-family:var(--f-body); color:var(--inkwell);}
+  .btn.primary{background:var(--ai-grad); color:#fff; border-color:var(--ai);}
+  .btn.sm{padding:3px 8px; font-size:10px;}
+  .kbd{font-family:var(--f-mono); font-size:9px; padding:2px 6px; background:var(--ricepaper-2); border:1px solid var(--line); border-radius:3px; color:var(--inkwell-2);}
+  .ai-pill{display:inline-flex; align-items:center; gap:4px; padding:3px 8px; background:var(--ai-soft); color:var(--ai); border-radius:10px; font-family:var(--f-mono); font-size:9px; letter-spacing:0.08em; text-transform:uppercase;}
+  .ai-pill svg{width:10px; height:10px; fill:none; stroke:currentColor; stroke-width:2;}
+  .tag-sm{font-family:var(--f-mono); font-size:9px; padding:2px 6px; background:var(--ricepaper); border:1px solid var(--line); border-radius:4px; color:var(--inkwell-2);}
+  .tag-sm.ai{background:var(--ai-soft); border-color:var(--ai); color:var(--ai);}
+  .tag-row{display:flex; gap:4px; flex-wrap:wrap;}
+
+  .row{display:flex; gap:10px; margin-bottom:12px;}
+  .row > *{flex:1;}
+
+  /* Grading specific */
+  .essay-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:10px;}
+  .essay-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .essay-student{display:flex; align-items:center; gap:8px;}
+  .essay-student .av{width:28px; height:28px; border-radius:50%; background:var(--cobalt-soft); color:var(--cobalt); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:12px; font-weight:500;}
+  .essay-student .name{font-size:12px; font-weight:500;}
+  .essay-student .meta{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);}
+  .essay-score{text-align:right;}
+  .essay-score .sc{font-family:var(--f-display); font-size:22px; font-weight:300; color:var(--ai);}
+  .essay-score .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em;}
+  .essay-text{font-size:11px; line-height:1.7; color:var(--inkwell); padding:10px; background:var(--ricepaper); border-radius:6px; margin-bottom:8px; max-height:90px; overflow:hidden; position:relative;}
+  .essay-annotations{display:flex; flex-direction:column; gap:4px; font-size:10px; line-height:1.5;}
+  .essay-annotations .a{padding:6px 8px; border-radius:5px; display:flex; gap:6px;}
+  .essay-annotations .a.pos{background:var(--growth-soft); color:var(--growth); border-left:2px solid var(--growth);}
+  .essay-annotations .a.neu{background:var(--highlighter-soft); color:#8A6500; border-left:2px solid var(--highlighter);}
+  .essay-annotations .a.neg{background:var(--correction-soft); color:var(--correction); border-left:2px solid var(--correction);}
+  .essay-annotations .a .n{font-family:var(--f-mono); font-size:8px; text-transform:uppercase; letter-spacing:0.1em; font-weight:500;}
+
+  /* Content generator */
+  .gen-form{background:#fff; border:1px solid var(--ai); border-radius:10px; padding:14px; margin-bottom:12px;}
+  .gen-form .prompt-label{font-family:var(--f-mono); font-size:9px; color:var(--ai); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:6px; display:flex; align-items:center; gap:6px;}
+  .gen-form textarea{width:100%; padding:10px; background:var(--ricepaper); border:1px solid var(--line); border-radius:6px; font-family:var(--f-body); font-size:12px; line-height:1.5; min-height:60px; resize:none;}
+  .gen-options{display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;}
+  .gen-chip{font-family:var(--f-mono); font-size:10px; padding:5px 10px; background:var(--ricepaper); border:1px solid var(--line); border-radius:12px; cursor:pointer;}
+  .gen-chip.active{background:var(--ai-soft); border-color:var(--ai); color:var(--ai);}
+
+  .question-card{background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:8px;}
+  .question-card .q-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .question-card .q-type{font-family:var(--f-mono); font-size:9px; padding:2px 7px; background:var(--ai-soft); color:var(--ai); border-radius:4px; letter-spacing:0.08em;}
+  .question-card .q-diff{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);}
+  .question-card .q-text{font-size:11px; line-height:1.6; margin-bottom:6px;}
+  .question-card .q-meta{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); display:flex; gap:8px;}
+
+  /* Copilot */
+  .copilot-live{background:linear-gradient(180deg, var(--ai-soft), #fff); padding:14px; min-height:560px;}
+  .live-bar{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;}
+  .live-indicator{display:flex; align-items:center; gap:8px; font-family:var(--f-mono); font-size:10px; color:var(--correction); letter-spacing:0.1em; text-transform:uppercase;}
+  .live-indicator .dot{width:8px; height:8px; border-radius:50%; background:var(--correction); animation:blink 1.5s infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+  .realtime-panel{background:#fff; border:1px solid var(--ai); border-radius:10px; padding:12px; margin-bottom:10px;}
+  .realtime-panel .title{font-family:var(--f-mono); font-size:10px; color:var(--ai); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px; display:flex; align-items:center; gap:6px;}
+
+  .confusion-meter{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+  .confusion-meter .bar{flex:1; height:8px; background:var(--ricepaper-2); border-radius:4px; overflow:hidden; position:relative;}
+  .confusion-meter .bar .fill{height:100%; background:linear-gradient(90deg, var(--growth), var(--highlighter), var(--correction)); border-radius:4px;}
+  .confusion-meter .val{font-family:var(--f-mono); font-size:11px; font-weight:500;}
+
+  .student-grid{display:grid; grid-template-columns:repeat(6, 1fr); gap:4px; margin-bottom:8px;}
+  .student-cell{aspect-ratio:1; background:var(--ricepaper); border-radius:4px; font-size:9px; display:flex; align-items:center; justify-content:center; font-family:var(--f-mono); color:var(--inkwell-2);}
+  .student-cell.engaged{background:var(--growth-soft); color:var(--growth);}
+  .student-cell.confused{background:var(--correction-soft); color:var(--correction); font-weight:500;}
+  .student-cell.neutral{background:var(--highlighter-soft); color:#8A6500;}
+
+  .suggestion-card{background:var(--ai-soft); border-left:3px solid var(--ai); padding:10px 12px; border-radius:6px; margin-bottom:6px;}
+  .suggestion-card .type{font-family:var(--f-mono); font-size:9px; color:var(--ai); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:4px;}
+  .suggestion-card .text{font-size:11px; line-height:1.6;}
+  .suggestion-card .action{margin-top:6px; display:flex; gap:6px;}
+
+  /* Insights */
+  .insight-card{background:linear-gradient(135deg, var(--ai-soft), #fff); border:1px solid var(--ai); border-radius:10px; padding:12px; margin-bottom:10px;}
+  .insight-card .title{font-family:var(--f-mono); font-size:9px; color:var(--ai); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:6px;}
+  .insight-card .content{font-size:12px; line-height:1.6; margin-bottom:8px;}
+  .insight-card .students{display:flex; flex-wrap:wrap; gap:4px;}
+  .insight-card .student{padding:3px 8px; background:#fff; border:1px solid var(--line); border-radius:10px; font-size:10px;}
+  .insight-card .student.at-risk{background:var(--correction-soft); border-color:var(--correction); color:var(--correction); font-weight:500;}
+
+  footer{margin-top:56px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none; letter-spacing:0;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="logo">墨</div>
+    <div class="name">Lumina · 墨光<small>AI · Teacher Module</small></div>
+  </div>
+  <div class="nav">
+    <a class="back" href="lumina-00-index.html">← 索引</a>
+    <a href="lumina-18-ai-student.html">学生 AI</a>
+    <a href="lumina-19-ai-teacher.html" style="background:var(--ai-soft); color:var(--ai);">教师 AI</a>
+    <a href="lumina-20-ai-admin.html">平台 AI</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div>
+    <div class="tag">🤖 AI-Powered · 2026 Edition</div>
+    <h1>AI <em>教师</em><br/><span class="hl">智能助手</span></h1>
+    <div class="sub">让教师从繁重的批改、备课中解放，专注于启发与陪伴。AI 批阅助手、AI 课件生成、AI 课堂 Copilot、AI 学情预测 —— 每个教师都有专属的 AI 教研团队。</div>
+  </div>
+  <div class="stats">
+    <div class="s"><span class="lbl">效率提升</span><span class="val">85% 批阅时间节省</span></div>
+    <div class="s"><span class="lbl">AI 模型</span><span class="val">通义千问 Qwen-Max</span></div>
+    <div class="s"><span class="lbl">多模态</span><span class="val">代码 · 作文 · 数学</span></div>
+    <div class="s"><span class="lbl">实时分析</span><span class="val">课堂 30× 学生状态</span></div>
+  </div>
+</header>
+
+<!-- ============ SECTION 1 · AI 批阅助手 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>场景一 · <em>AI 批阅助手</em></h2>
+    <div class="num-tag">AI Grading · 280 份作业 · 5 分钟完成</div>
+  </div>
+
+  <div class="browsers">
+    <div class="browser">
+      <div class="browser-bar">
+        <div class="lights"><i></i><i></i><i></i></div>
+        <div class="addr">🔒 lumina.edu/teacher/grading/essay-2026-87</div>
+      </div>
+      <div class="browser-content">
+        <div class="web-layout">
+          <div class="web-sidebar">
+            <div class="sb-title">AI 批阅队列</div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>待批阅 <span class="badge">247</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>已批阅 · 33</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>需复核 · 18</div>
+
+            <div class="sb-title">批阅配置</div>
+            <div style="font-size:10px; line-height:1.8; padding:0 10px; color:var(--inkwell);">
+              <div>✓ 评分量规：6 维度</div>
+              <div>✓ AI 置信度阈值：85%</div>
+              <div>✓ 自动提交 &lt; 90 分</div>
+              <div style="color:var(--correction);">⚠ 低于 60 需人工复核</div>
+            </div>
+
+            <div class="widget" style="margin-top:12px; background:linear-gradient(135deg, var(--ai-soft), #fff); border-color:var(--ai);">
+              <h4 style="font-size:11px;">🤖 本次批阅统计</h4>
+              <div class="stat-big">247<span class="u">份</span></div>
+              <div class="stat-delta">⏱ 预计 5 分钟</div>
+              <div style="font-size:10px; color:var(--inkwell-2); margin-top:6px; line-height:1.5;">
+                对比手动批阅 (8h)，节省 <b style="color:var(--ai);">99%</b> 时间
+              </div>
+            </div>
+          </div>
+
+          <div class="web-main">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <div>
+                <div style="font-family:var(--f-mono); font-size:10px; color:var(--ai); letter-spacing:0.1em; margin-bottom:4px;">🤖 通义千问 Qwen-Max · 评分中</div>
+                <h2 style="font-family:var(--f-display); font-size:20px; font-weight:500;">《西方哲学史》期中论文 · 论柏拉图的理型论</h2>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button class="btn sm">⏸ 暂停</button>
+                <button class="btn primary sm">⚡ 一键全批</button>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="widget" style="margin:0;">
+                <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); letter-spacing:0.1em;">平均分</div>
+                <div class="stat-big">78.4</div>
+                <div class="stat-delta">↑ 3.2 vs 去年</div>
+              </div>
+              <div class="widget" style="margin:0;">
+                <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); letter-spacing:0.1em;">AI 置信度</div>
+                <div class="stat-big">92%</div>
+                <div class="stat-delta">↑ 优秀</div>
+              </div>
+              <div class="widget" style="margin:0;">
+                <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); letter-spacing:0.1em;">需人工复核</div>
+                <div class="stat-big">18<span class="u">份</span></div>
+                <div class="stat-delta" style="color:var(--highlighter);">7.3% · 正常</div>
+              </div>
+            </div>
+
+            <div class="essay-card">
+              <div class="essay-head">
+                <div class="essay-student">
+                  <div class="av">林</div>
+                  <div>
+                    <div class="name">林清 · 2023 级计算机</div>
+                    <div class="meta">2140 字 · 提交于 2026-08-24 23:15</div>
+                  </div>
+                </div>
+                <div class="essay-score">
+                  <div class="sc">87<span style="font-size:12px; color:var(--inkwell-2);">/100</span></div>
+                  <div class="lbl">🤖 AI 评分</div>
+                </div>
+              </div>
+              <div class="essay-text">
+                柏拉图的理型论是西方哲学史上最具影响力的形而上学理论之一。他通过"洞穴之喻"生动地描绘了现象世界与理型世界的关系……<b style="background:var(--growth-soft);">这一论证逻辑严密，引用经典</b>。然而，<b style="background:var(--highlighter-soft);">亚里士多德的批判值得更深入的讨论</b>，特别是关于"第三者论证"的难题……
+              </div>
+              <div class="essay-annotations">
+                <div class="a pos"><div class="n">✓ 论点</div><div>清晰把握理型论的核心，引用《理想国》第七卷恰当</div></div>
+                <div class="a neu"><div class="n">△ 深化</div><div>对亚里士多德的批判讨论较浅，建议补充《形而上学》Z 卷内容</div></div>
+                <div class="a pos"><div class="n">✓ 结构</div><div>论证层次分明：现象→理型→辩证法，符合学术写作规范</div></div>
+                <div class="a neg"><div class="n">✗ 引注</div><div>第 3 段引用《斐多篇》未标注页码，需补充</div></div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:6px; margin-top:10px;">
+              <button class="btn sm">✓ 采纳评分</button>
+              <button class="btn sm">✏️ 人工调整</button>
+              <button class="btn sm">💬 让 AI 写评语</button>
+              <button class="btn sm">→ 下一份</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 2 · AI 课件与题目生成 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>场景二 · <em>AI 课件生成</em></h2>
+    <div class="num-tag">AI Content Generator · 从大纲到完整教学资源</div>
+  </div>
+
+  <div class="desktops">
+    <div class="desktop">
+      <div class="desktop-bar">
+        <div class="lights"><i></i><i></i><i></i></div>
+        <div class="title">Lumina · AI 课件工坊 · 高等数学 · 第 12 讲</div>
+        <div style="margin-left:auto; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);"><span class="kbd">⌘</span> + <span class="kbd">G</span> 生成</div>
+      </div>
+      <div class="desktop-content">
+        <div class="d-layout">
+          <div class="d-left">
+            <div class="sb-title">生成模板</div>
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>课件 PPT<span class="ai-tag">HOT</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>考试题库</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>讲义笔记</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>教学视频脚本</div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>讨论话题</div>
+
+            <div class="sb-title">生成历史</div>
+            <div style="font-size:10px; line-height:1.8; padding:0 10px; color:var(--inkwell);">
+              <div>✓ L11 中值定理 · 3 小时前</div>
+              <div>✓ L10 不定积分 · 昨天</div>
+              <div>✓ 期中试卷 · 3 天前</div>
+            </div>
+          </div>
+
+          <div class="d-center">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <h3 style="font-family:var(--f-display); font-size:18px; font-weight:500;">AI 课件工坊</h3>
+              <div style="display:flex; gap:6px;">
+                <button class="btn sm">📥 导入大纲</button>
+                <button class="btn primary sm">⚡ 一键生成</button>
+              </div>
+            </div>
+
+            <div class="gen-form">
+              <div class="prompt-label">🤖 你的需求（AI 理解并生成）</div>
+              <textarea>为《高等数学》第 12 讲「分部积分法」制作 45 分钟课件，包含：
+- 知识回顾（2min）
+- 公式推导（10min）
+- 经典例题 3 道（15min）
+- 学生练习（10min）
+- 课堂小结（3min）
+学生背景：大一计算机专业，已掌握换元积分法</textarea>
+              <div class="gen-options">
+                <span class="gen-chip active">📊 配教学动画</span>
+                <span class="gen-chip active">🎯 配例题</span>
+                <span class="gen-chip">📝 配练习题</span>
+                <span class="gen-chip active">💡 配思政点</span>
+                <span class="gen-chip">🎬 配视频片段</span>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <span class="tag-sm ai">🎨 风格：Lumina 教学</span>
+                <span class="tag-sm ai">📚 参考：同济教材</span>
+                <span class="tag-sm">⏱ 45 分钟</span>
+              </div>
+            </div>
+
+            <div style="font-family:var(--f-mono); font-size:10px; color:var(--ai); letter-spacing:0.1em; margin-bottom:10px;">✨ 生成结果 · 12 页幻灯片 · 3 道例题</div>
+
+            <div class="question-card" style="background:var(--ai-soft); border-color:var(--ai);">
+              <div class="q-head">
+                <span class="q-type">📊 SLIDE 05 · 公式推导</span>
+                <span class="q-diff">⏱ 10 分钟</span>
+              </div>
+              <div style="font-size:12px; line-height:1.6; font-family:var(--f-display);">
+                <b>分部积分公式</b><br/>
+                <div style="margin:8px 0; padding:10px; background:#fff; border-radius:6px; font-family:var(--f-mono); font-size:13px; text-align:center;">
+                  ∫u dv = uv − ∫v du
+                </div>
+                <b>推导思路</b>：由乘积求导法则 (uv)' = u'v + uv' 反推
+              </div>
+              <div style="display:flex; gap:6px; margin-top:8px;">
+                <span class="tag-sm ai">🎬 配动画</span>
+                <span class="tag-sm">📖 同济 P.212</span>
+              </div>
+            </div>
+
+            <div class="question-card">
+              <div class="q-head">
+                <span class="q-type">🎯 例题 01 · 基础</span>
+                <span class="q-diff">⏱ 5 分钟</span>
+              </div>
+              <div class="q-text">求 ∫x·eˣ dx</div>
+              <div style="padding:8px; background:var(--ricepaper); border-radius:5px; font-size:10px; line-height:1.6;">
+                <b>AI 提示</b>：选 u = x, dv = eˣdx，引导学生思考 LIPE 法则
+              </div>
+            </div>
+
+            <div class="question-card">
+              <div class="q-head">
+                <span class="q-type">🎯 例题 02 · 进阶</span>
+                <span class="q-diff">⏱ 5 分钟</span>
+              </div>
+              <div class="q-text">求 ∫ln x dx</div>
+              <div style="padding:8px; background:var(--ricepaper); border-radius:5px; font-size:10px; line-height:1.6;">
+                <b>AI 提示</b>：技巧性题目，看似无法分部，实则 u = ln x, dv = dx
+              </div>
+            </div>
+          </div>
+
+          <div class="d-right">
+            <div class="sb-title">生成统计</div>
+            <div class="widget" style="background:var(--ai-soft); border-color:var(--ai);">
+              <h4>⚡ 生成效率</h4>
+              <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:6px;">
+                <span style="color:var(--inkwell-2);">手动备课</span>
+                <span style="font-family:var(--f-mono);">~ 4 小时</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:6px;">
+                <span style="color:var(--ai); font-weight:500;">AI 辅助</span>
+                <span style="font-family:var(--f-mono); color:var(--ai); font-weight:500;">12 分钟</span>
+              </div>
+              <div style="height:6px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden;">
+                <div style="width:5%; height:100%; background:var(--ai-grad);"></div>
+              </div>
+              <div style="font-family:var(--f-display); font-size:16px; text-align:center; margin-top:6px; color:var(--ai);">
+                节省 95% 时间
+              </div>
+            </div>
+
+            <div class="widget">
+              <h4>📚 已引用资源</h4>
+              <div style="font-size:10px; line-height:1.8;">
+                <div>✓ 同济教材 · 5 处</div>
+                <div>✓ 历年真题 · 3 题</div>
+                <div>✓ 你过往课件 · 8 处</div>
+                <div>✓ 学生错题集 · 2 题</div>
+              </div>
+            </div>
+
+            <div class="widget">
+              <h4>🎯 难度分布</h4>
+              <div style="display:flex; gap:4px; align-items:end; height:50px; margin-bottom:6px;">
+                <div style="flex:1; background:var(--growth-soft); border-radius:3px 3px 0 0; height:40%;"></div>
+                <div style="flex:1; background:var(--highlighter-soft); border-radius:3px 3px 0 0; height:80%;"></div>
+                <div style="flex:1; background:var(--correction-soft); border-radius:3px 3px 0 0; height:50%;"></div>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);">
+                <span>基础</span><span>进阶</span><span>挑战</span>
+              </div>
+            </div>
+
+            <button class="btn primary" style="width:100%;">📤 导出为 PPT</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 3 · AI 课堂 Copilot ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>场景三 · <em>AI 课堂 Copilot</em></h2>
+    <div class="num-tag">Live Teaching Assistant · Real-time</div>
+  </div>
+
+  <div class="desktops">
+    <div class="desktop">
+      <div class="desktop-bar">
+        <div class="lights"><i></i><i></i><i></i></div>
+        <div class="title">Lumina Live · 高等数学 L12 · 42 名学生在线 · AI Copilot 已激活</div>
+        <div style="margin-left:auto; display:flex; gap:6px; align-items:center;">
+          <span style="font-family:var(--f-mono); font-size:10px; color:var(--correction);">● LIVE 00:34:12</span>
+          <span class="kbd">⌘</span><span class="kbd">M</span>
+        </div>
+      </div>
+      <div class="desktop-content">
+        <div class="d-layout">
+          <div class="d-left" style="padding:12px;">
+            <div class="sb-title">课堂状态</div>
+            <div style="padding:8px; background:var(--correction-soft); border:1px solid var(--correction); border-radius:8px; margin-bottom:10px;">
+              <div style="font-family:var(--f-mono); font-size:9px; color:var(--correction); letter-spacing:0.1em; text-transform:uppercase;">● 直播中</div>
+              <div style="font-family:var(--f-display); font-size:18px; font-weight:500; margin-top:4px;">分部积分法</div>
+              <div style="font-size:10px; color:var(--inkwell-2); margin-top:2px;">第 34 分钟 · 42/48 在线</div>
+            </div>
+
+            <div class="widget" style="background:var(--ai-soft); border-color:var(--ai);">
+              <h4 style="font-size:11px;">🤖 AI Copilot</h4>
+              <div style="font-size:10px; line-height:1.6; color:var(--inkwell);">
+                实时监听课堂，提供<b>教学建议</b>、<b>学情洞察</b>、<b>应急方案</b>。
+              </div>
+              <div style="margin-top:8px; display:flex; align-items:center; gap:6px;">
+                <div style="width:6px; height:6px; border-radius:50%; background:var(--growth); animation:blink 1.5s infinite;"></div>
+                <span style="font-family:var(--f-mono); font-size:9px; color:var(--growth); text-transform:uppercase; letter-spacing:0.1em;">运行中 · 讯飞语音</span>
+              </div>
+            </div>
+
+            <div class="sb-title">快捷操作</div>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <button class="btn sm">🎲 随机点名</button>
+              <button class="btn sm">📊 发起投票</button>
+              <button class="btn sm">📝 随堂测验</button>
+              <button class="btn sm">🖥 共享屏幕</button>
+            </div>
+          </div>
+
+          <div class="d-center">
+            <div class="live-bar">
+              <div class="live-indicator"><span class="dot"></span>AI Copilot · 实时分析中</div>
+              <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">30 学生 · 实时状态</div>
+            </div>
+
+            <div class="realtime-panel">
+              <div class="title">📊 课堂理解度 (AI 实时分析)</div>
+              <div class="confusion-meter">
+                <div style="font-size:10px; color:var(--growth); width:30px;">理解</div>
+                <div class="bar"><div class="fill" style="width:72%;"></div></div>
+                <div style="font-size:10px; color:var(--correction); width:30px; text-align:right;">困惑</div>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); margin-bottom:8px;">
+                <span>● 理解 22 人 (73%)</span>
+                <span>● 中立 5 人 (17%)</span>
+                <span>● 困惑 3 人 (10%)</span>
+              </div>
+              <div class="student-grid">
+                <div class="student-cell engaged">林清</div>
+                <div class="student-cell engaged">王明</div>
+                <div class="student-cell neutral">李华</div>
+                <div class="student-cell confused">张琳</div>
+                <div class="student-cell engaged">陈思</div>
+                <div class="student-cell engaged">周杰</div>
+                <div class="student-cell engaged">吴强</div>
+                <div class="student-cell neutral">郑雯</div>
+                <div class="student-cell confused">孙悦</div>
+                <div class="student-cell engaged">刘洋</div>
+                <div class="student-cell engaged">杨帆</div>
+                <div class="student-cell engaged">黄磊</div>
+                <div class="student-cell engaged">赵蕾</div>
+                <div class="student-cell neutral">马涛</div>
+                <div class="student-cell engaged">朱婷</div>
+                <div class="student-cell engaged">徐峰</div>
+                <div class="student-cell engaged">胡敏</div>
+                <div class="student-cell engaged">郭静</div>
+              </div>
+            </div>
+
+            <div style="font-family:var(--f-mono); font-size:10px; color:var(--ai); letter-spacing:0.1em; margin:14px 0 8px;">✨ AI Copilot 实时建议</div>
+
+            <div class="suggestion-card">
+              <div class="type">💡 教学建议 · 34:05</div>
+              <div class="text">
+                <b>张琳、孙悦</b> 已停留当前公式推导 2 分钟，可能不理解"<b>LIPE 法则</b>"。<br/>
+                建议：用 1 分钟举个直观例子（∫x·sin x dx），或邀请 <b>林清</b>（理解良好）分享思路。
+              </div>
+              <div class="action">
+                <button class="btn primary sm">👉 邀请林清回答</button>
+                <button class="btn sm">📝 切到直观例子</button>
+                <button class="btn sm">💬 私聊张琳</button>
+              </div>
+            </div>
+
+            <div class="suggestion-card">
+              <div class="type">🎯 提问建议 · 34:20</div>
+              <div class="text">
+                学生注意力开始下降（平均专注时长已达 32 分钟）。<br/>
+                建议：<b>发起 1 分钟随堂投票</b>「下列哪个积分适合用分部积分？」，激活课堂。
+              </div>
+              <div class="action">
+                <button class="btn primary sm">⚡ 立即发起投票</button>
+                <button class="btn sm">⏸ 休息 2 分钟</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-right">
+            <div class="sb-title">实时转写</div>
+            <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:10px; max-height:180px; overflow:auto; font-size:10px; line-height:1.6;">
+              <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); letter-spacing:0.1em; margin-bottom:4px;">🎙 讯飞语音 V3 实时转写</div>
+              <div style="margin-bottom:6px;"><b>王老师</b>：所以选择 u 的时候，我们遵循 LIPE 法则…</div>
+              <div style="margin-bottom:6px;"><b>王老师</b>：L 是对数函数，I 是反三角函数，P 是幂函数…</div>
+              <div style="background:var(--ai-soft); padding:6px; border-radius:4px; margin-bottom:6px;"><b style="color:var(--ai);">[AI 标注]</b> 关键概念讲解中</div>
+              <div><b>王老师</b>：比如这道题 ∫x·eˣ dx…</div>
+            </div>
+
+            <div class="sb-title">提问队列</div>
+            <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px; font-size:10px;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);">待回答</span>
+                <span style="font-family:var(--f-mono); font-size:9px; color:var(--ai); font-weight:500;">5 个问题</span>
+              </div>
+              <div style="padding:6px; background:var(--correction-soft); border-radius:4px; margin-bottom:4px;">
+                <b>张琳</b>：为什么不能选 eˣ 作 u？
+              </div>
+              <div style="padding:6px; background:var(--ricepaper); border-radius:4px; margin-bottom:4px;">
+                <b>孙悦</b>：LIPE 法则是必须的吗？
+              </div>
+              <div style="padding:6px; background:var(--ricepaper); border-radius:4px;">
+                <b>王明</b>：循环分部积分怎么做？
+              </div>
+            </div>
+
+            <div class="sb-title">AI 自动生成</div>
+            <div style="background:var(--ai-soft); border:1px solid var(--ai); border-radius:8px; padding:10px; font-size:10px;">
+              <div style="font-family:var(--f-mono); font-size:9px; color:var(--ai); letter-spacing:0.1em; margin-bottom:6px;">✨ 课堂笔记（实时）</div>
+              <div style="line-height:1.6;">
+                ✓ 自动记录讲解要点<br/>
+                ✓ 标注学生提问<br/>
+                ✓ 课后发给学生
+              </div>
+              <button class="btn sm" style="margin-top:6px; width:100%;">📥 课后导出</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 4 · AI 学情预测 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>场景四 · <em>AI 学情预测</em></h2>
+    <div class="num-tag">Predictive Analytics · 风险预警 · 早期干预</div>
+  </div>
+
+  <div class="phones">
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="phone-status"><span>9:41</span><span>••• 5G</span></div>
+        <div style="min-height:620px; background:var(--ricepaper);">
+          <div class="app-header" style="background:linear-gradient(135deg, var(--ai-soft), #fff);">
+            <div class="app-title">AI 学情预测 <small>Predictive</small></div>
+            <span class="ai-pill"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> 机器学习</div>
+          </div>
+          <div style="padding:14px;">
+            <div class="insight-card">
+              <div class="title">🚨 高风险预警 · 3 人</div>
+              <div class="content">AI 预测以下学生<b style="color:var(--correction);">期末不及格概率 &gt; 70%</b>，建议本周内一对一约谈。</div>
+              <div class="students">
+                <span class="student at-risk">张琳 · 72%</span>
+                <span class="student at-risk">孙悦 · 68%</span>
+                <span class="student at-risk">周华 · 65%</span>
+              </div>
+            </div>
+
+            <div class="insight-card" style="background:linear-gradient(135deg, var(--highlighter-soft), #fff); border-color:var(--highlighter);">
+              <div class="title" style="color:#8A6500;">⚠ 中风险提醒 · 8 人</div>
+              <div class="content">近期作业下滑 + 课堂缺席，需关注。</div>
+              <div class="students">
+                <span class="student">李华</span>
+                <span class="student">郑雯</span>
+                <span class="student">马涛</span>
+                <span class="student">+ 5 人</span>
+              </div>
+            </div>
+
+            <div class="widget" style="background:var(--ai-soft); border-color:var(--ai);">
+              <h4>🤖 AI 关键洞察</h4>
+              <div style="font-size:10px; line-height:1.7;">
+                <b style="color:var(--ai);">模式识别</b>：张琳自第 8 讲开始连续 3 次作业分数下降 15 分<br/>
+                <b style="color:var(--ai);">行为信号</b>：最近一周视频观看时长下降 60%<br/>
+                <b style="color:var(--ai);">社交信号</b>：讨论区发言减少 80%
+              </div>
+            </div>
+
+            <div style="display:flex; gap:6px;">
+              <button class="btn primary sm">💬 AI 起草约谈邮件</button>
+              <button class="btn sm">📅 预约辅导</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="phone-status"><span>9:41</span><span>••• 5G</span></div>
+        <div style="min-height:620px; background:var(--ricepaper);">
+          <div class="app-header" style="background:linear-gradient(135deg, var(--ai-soft), #fff);">
+            <div class="app-title">AI 班级画像 <small>Class Profile</small></div>
+            <span class="ai-pill"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> 群体分析</div>
+          </div>
+          <div style="padding:14px;">
+            <div class="widget" style="background:linear-gradient(135deg, var(--ai-soft), #fff); border-color:var(--ai);">
+              <h4>🤖 班级整体状态</h4>
+              <div style="display:flex; justify-content:space-around; margin-top:10px;">
+                <div style="text-align:center;">
+                  <div style="font-family:var(--f-display); font-size:26px; font-weight:300; color:var(--growth);">B+</div>
+                  <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);">整体水平</div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-family:var(--f-display); font-size:26px; font-weight:300; color:var(--ai);">78</div>
+                  <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);">平均分</div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-family:var(--f-display); font-size:26px; font-weight:300; color:var(--highlighter);">↑</div>
+                  <div style="font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);">进步趋势</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="widget">
+              <h4>📊 知识掌握热力图</h4>
+              <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:3px; margin-bottom:8px;">
+                <div style="aspect-ratio:1; background:var(--growth); border-radius:3px;" title="极限 92%"></div>
+                <div style="aspect-ratio:1; background:var(--growth); border-radius:3px;" title="连续 88%"></div>
+                <div style="aspect-ratio:1; background:var(--growth); border-radius:3px;" title="导数 85%"></div>
+                <div style="aspect-ratio:1; background:var(--highlighter); border-radius:3px;" title="积分 68%"></div>
+                <div style="aspect-ratio:1; background:var(--correction); border-radius:3px;" title="级数 45%"></div>
+                <div style="aspect-ratio:1; background:var(--growth); border-radius:3px;"></div>
+                <div style="aspect-ratio:1; background:var(--growth); border-radius:3px;"></div>
+                <div style="aspect-ratio:1; background:var(--highlighter); border-radius:3px;"></div>
+                <div style="aspect-ratio:1; background:var(--highlighter); border-radius:3px;"></div>
+                <div style="aspect-ratio:1; background:var(--correction); border-radius:3px;"></div>
+              </div>
+              <div style="font-size:10px; color:var(--inkwell-2); line-height:1.5;">
+                <b style="color:var(--growth);">● 强</b> 极限/连续/导数<br/>
+                <b style="color:var(--highlighter);">● 中</b> 积分方法<br/>
+                <b style="color:var(--correction);">● 弱</b> 级数理论
+              </div>
+            </div>
+
+            <div class="widget" style="background:var(--ai-soft); border-color:var(--ai);">
+              <h4>✨ AI 教学建议</h4>
+              <div style="font-size:10px; line-height:1.6;">
+                本周课堂应重点复习<b>「积分 ↔ 级数」</b>的过渡，这是班级共同的薄弱环节。建议用<b>泰勒展开</b>作为桥梁，连接两个章节。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="phone-status"><span>9:41</span><span>••• 5G</span></div>
+        <div style="min-height:620px; background:var(--ricepaper);">
+          <div class="app-header" style="background:linear-gradient(135deg, var(--ai-soft), #fff);">
+            <div class="app-title">AI 个性化干预 <small>Intervention</small></div>
+            <span class="ai-pill"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> 一对一</div>
+          </div>
+          <div style="padding:14px;">
+            <div style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px; margin-bottom:10px;">
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                <div style="width:40px; height:40px; border-radius:50%; background:var(--correction-soft); color:var(--correction); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-weight:500;">张</div>
+                <div>
+                  <div style="font-family:var(--f-display); font-size:14px; font-weight:500;">张琳 · 2023 级</div>
+                  <div style="font-family:var(--f-mono); font-size:9px; color:var(--correction); text-transform:uppercase; letter-spacing:0.1em;">高风险 · 72%</div>
+                </div>
+              </div>
+              <div style="font-size:10px; line-height:1.7; color:var(--inkwell);">
+                <b>学习风格</b>：视觉型 · 喜欢图形解释<br/>
+                <b>薄弱章节</b>：不定积分 · 分部积分<br/>
+                <b>最近表现</b>：3 次作业下滑，课堂沉默
+              </div>
+            </div>
+
+            <div style="font-family:var(--f-mono); font-size:9px; color:var(--ai); letter-spacing:0.1em; margin-bottom:6px; text-transform:uppercase;">✨ AI 为张琳定制的学习方案</div>
+
+            <div style="background:var(--ai-soft); border:1px solid var(--ai); border-radius:8px; padding:10px; margin-bottom:10px;">
+              <div style="font-family:var(--f-mono); font-size:9px; color:var(--ai); letter-spacing:0.1em; margin-bottom:6px;">📚 本周推荐资源</div>
+              <div style="font-size:10px; line-height:1.8;">
+                ✓ 3Blue1Brown 积分可视化视频 (20min)<br/>
+                ✓ AI 导师对话：分部积分入门引导<br/>
+                ✓ 5 道基础题（AI 根据薄弱点生成）<br/>
+                ✓ 同伴学习：与林清组队（学习互补）
+              </div>
+            </div>
+
+            <div style="background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px;">
+              <div style="font-family:var(--f-mono); font-size:9px; color:var(--ai); letter-spacing:0.1em; margin-bottom:6px;">💬 AI 起草的约谈消息</div>
+              <div style="font-size:11px; line-height:1.6; font-style:italic; padding:8px; background:var(--ricepaper); border-radius:6px; margin-bottom:6px;">
+                张琳你好，最近注意到你在积分部分可能遇到一些困难。我在周三下午 3-5 点有空，要不要一起聊聊？我们可以从你最困惑的地方开始，我会准备一些直观的图形解释。😊
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button class="btn primary sm">📤 发送</button>
+                <button class="btn sm">✏️ 编辑</button>
+                <button class="btn sm">🔄 重写</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · AI 教师端</div>
+  <div>lumina-19-ai-teacher.html · edu/原型/</div>
+  <div>2026-08-25</div>
+</footer>
+
+</body>
+</html>
