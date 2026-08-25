@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · 数据库设计文档 v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding:56px 64px; max-width:1280px; margin:0 auto;}
+
+  /* Cover */
+  .cover{padding:80px 0 64px; border-bottom:1px solid var(--line); margin-bottom:56px; display:grid; grid-template-columns:2fr 1fr; gap:48px; align-items:end;}
+  .cover .brand{display:flex; align-items:center; gap:14px; margin-bottom:32px;}
+  .cover .brand .logo{width:56px; height:56px; border-radius:14px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:28px; font-weight:500; font-style:italic;}
+  .cover .brand .name{font-family:var(--f-display); font-size:20px; font-weight:500;}
+  .cover .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:4px;}
+  .cover .doc-type{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--cobalt); background:var(--cobalt-soft); padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:20px;}
+  .cover h1{font-family:var(--f-display); font-weight:300; font-size:72px; letter-spacing:-0.04em; line-height:1;}
+  .cover h1 em{font-style:italic; color:var(--cobalt);}
+  .cover h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .cover .subtitle{font-size:18px; color:var(--inkwell-2); margin-top:20px; font-weight:300;}
+  .cover .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; line-height:2.2;}
+  .cover .meta .label{color:var(--inkwell-2); font-size:10px; display:block; margin-bottom:2px;}
+  .cover .meta .value{color:var(--inkwell); font-size:13px; text-transform:none; font-family:var(--f-body); font-weight:500;}
+  .cover .meta .row{padding:8px 0; border-top:1px solid var(--line);}
+
+  /* Stats */
+  .stats{display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; margin-bottom:56px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px;}
+  .stat{text-align:center; padding:6px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .val{font-family:var(--f-display); font-size:26px; font-weight:300;}
+  .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  /* TOC */
+  .toc{background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px 28px; margin-bottom:56px;}
+  .toc h3{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2); margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .toc-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:4px 32px;}
+  .toc-grid a{display:block; padding:6px 0; font-size:13px; color:var(--inkwell); text-decoration:none; border-bottom:1px dashed var(--line);}
+  .toc-grid a:hover{color:var(--cobalt);}
+  .toc-grid a .num{font-family:var(--f-mono); font-size:10px; color:var(--cobalt); margin-right:8px;}
+
+  /* Sections */
+  .section{margin-bottom:64px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:24px; padding-bottom:14px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:36px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  h3.sub{font-family:var(--f-display); font-size:22px; font-weight:400; margin:32px 0 14px; letter-spacing:-0.01em;}
+  h3.sub em{font-style:italic; color:var(--cobalt);}
+
+  p{margin-bottom:12px; line-height:1.7;}
+  p.lead{font-size:17px;}
+  ul,ol{margin:0 0 16px 20px; line-height:1.8;}
+  li{margin-bottom:4px;}
+  b{font-weight:600;}
+  code{font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px; font-size:13px; border:1px solid var(--line);}
+
+  /* Tables */
+  table{width:100%; border-collapse:collapse; margin:16px 0 24px; font-size:13px;}
+  th{background:var(--ricepaper); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-strong);}
+  td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  tr:hover td{background:rgba(250,246,236,0.5);}
+  .tag{display:inline-block; font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; padding:2px 7px; border-radius:4px;}
+  .tag.pk{background:var(--cobalt); color:#fff;}
+  .tag.fk{background:var(--ai); color:#fff;}
+  .tag.idx{background:var(--growth); color:#fff;}
+  .tag.nn{background:var(--correction-soft); color:var(--correction);}
+  .tag.uq{background:var(--highlighter-soft); color:#8A6500;}
+
+  /* Code blocks */
+  pre{background:var(--inkwell); color:var(--ricepaper); padding:18px 20px; border-radius:10px; font-family:var(--f-mono); font-size:12px; line-height:1.7; overflow-x:auto; margin:8px 0 14px;}
+  pre .comment{color:rgba(250,246,236,0.5);}
+  pre .keyword{color:var(--highlighter);}
+  pre .type{color:#A78BFA;}
+  pre .string{color:var(--growth-soft);}
+
+  /* Table card */
+  .table-card{background:#fff; border:1px solid var(--line); border-radius:12px; margin:16px 0 24px; overflow:hidden;}
+  .table-header{display:flex; align-items:center; gap:12px; padding:14px 18px; background:var(--ricepaper); border-bottom:1px solid var(--line);}
+  .table-name{font-family:var(--f-mono); font-size:14px; font-weight:600; color:var(--inkwell);}
+  .table-desc{font-size:13px; color:var(--inkwell-2); margin-left:auto;}
+  .table-body{padding:14px 18px;}
+
+  /* ER Diagram */
+  .er-diagram{background:#fff; border:1px solid var(--line); border-radius:12px; padding:24px; margin:20px 0; font-family:var(--f-mono); font-size:12px; line-height:1.8; overflow-x:auto;}
+  .er-entity{display:inline-block; border:2px solid var(--cobalt); border-radius:8px; padding:8px 14px; margin:4px; background:var(--cobalt-soft);}
+  .er-entity.ai{border-color:var(--ai); background:var(--ai-soft);}
+  .er-entity.core{border-color:var(--growth); background:var(--growth-soft);}
+  .er-rel{color:var(--inkwell-2); font-style:italic;}
+
+  /* Footer */
+  footer{margin-top:64px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div>
+    <div class="brand">
+      <div class="logo">墨</div>
+      <div class="name">Lumina · 墨光<small>Database Design</small></div>
+    </div>
+    <div class="doc-type">Database Design · v1.0</div>
+    <h1>
+      <span class="hl">数据</span>库<br/>
+      <em>设计文档</em>
+    </h1>
+    <div class="subtitle">PostgreSQL 16 · 分库分表 · ER 模型 · 索引策略 · 分区方案</div>
+  </div>
+  <div class="meta">
+    <div class="row">
+      <span class="label">文档编号</span>
+      <span class="value">DB-LUMINA-2026-001</span>
+    </div>
+    <div class="row">
+      <span class="label">版本号</span>
+      <span class="value">v1.0 · 初始发布</span>
+    </div>
+    <div class="row">
+      <span class="label">数据库</span>
+      <span class="value">PostgreSQL 16 · Redis 7</span>
+    </div>
+    <div class="row">
+      <span class="label">向量库</span>
+      <span class="value">Milvus 2.3</span>
+    </div>
+    <div class="row">
+      <span class="label">状态</span>
+      <span class="value" style="color:var(--growth); font-weight:600;">● 已发布</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ STATS ============ -->
+<div class="stats">
+  <div class="stat"><div class="val hl">24</div><div class="lbl">数据表</div></div>
+  <div class="stat"><div class="val hl">6</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val">3</div><div class="lbl">分区策略</div></div>
+  <div class="stat"><div class="val">3</div><div class="lbl">存储引擎</div></div>
+  <div class="stat"><div class="val">12+</div><div class="lbl">索引策略</div></div>
+</div>
+
+<!-- ============ TOC ============ -->
+<nav class="toc">
+  <h3>目录 · Table of Contents</h3>
+  <div class="toc-grid">
+    <a href="#s1"><span class="num">01</span>概述与架构</a>
+    <a href="#s2"><span class="num">02</span>ER 关系模型</a>
+    <a href="#s3"><span class="num">03</span>用户模块表结构</a>
+    <a href="#s4"><span class="num">04</span>课程模块表结构</a>
+    <a href="#s5"><span class="num">05</span>作业与成绩</a>
+    <a href="#s6"><span class="num">06</span>直播模块</a>
+    <a href="#s7"><span class="num">07</span>AI 模块（向量库）</a>
+    <a href="#s8"><span class="num">08</span>分区与分片</a>
+    <a href="#s9"><span class="num">09</span>索引策略</a>
+    <a href="#s10"><span class="num">10</span>数据迁移</a>
+  </div>
+</nav>
+
+<!-- ============ 01 · 概述 ============ -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <h2>01 · 概述与架构 <em>Overview</em></h2>
+    <div class="num-tag">Architecture</div>
+  </div>
+
+  <h3 class="sub">1.1 存储架构</h3>
+  <table>
+    <thead><tr><th>存储引擎</th><th>用途</th><th>版本</th><th>部署</th></tr></thead>
+    <tbody>
+      <tr><td><b>PostgreSQL</b></td><td>主数据库 · 业务数据</td><td>16.x</td><td>主从复制 · 读写分离</td></tr>
+      <tr><td><b>Redis</b></td><td>缓存 · 会话 · 限流</td><td>7.x</td><td>Cluster · 6 节点</td></tr>
+      <tr><td><b>Milvus</b></td><td>向量数据库 · RAG 检索</td><td>2.3.x</td><td>分布式 · 3 节点</td></tr>
+      <tr><td><b>MinIO</b></td><td>对象存储 · 文件/视频</td><td>最新版</td><td>分布式 · 4 节点</td></tr>
+      <tr><td><b>Kafka</b></td><td>消息队列 · 事件流</td><td>3.x</td><td>3 Broker · 副本 3</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">1.2 数据规模预估</h3>
+  <table>
+    <thead><tr><th>数据类型</th><th>日增量</th><th>年增量</th><th>3 年预估</th><th>存储策略</th></tr></thead>
+    <tbody>
+      <tr><td><b>业务数据</b></td><td>~ 50 MB</td><td>~ 18 GB</td><td>~ 55 GB</td><td>PostgreSQL</td></tr>
+      <tr><td><b>文件/视频</b></td><td>~ 10 GB</td><td>~ 3.6 TB</td><td>~ 11 TB</td><td>MinIO</td></tr>
+      <tr><td><b>AI 向量</b></td><td>~ 200 MB</td><td>~ 73 GB</td><td>~ 220 GB</td><td>Milvus</td></tr>
+      <tr><td><b>审计日志</b></td><td>~ 500 MB</td><td>~ 180 GB</td><td>~ 540 GB</td><td>冷热分离</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 02 · ER 模型 ============ -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <h2>02 · ER 关系模型 <em>Entity-Relationship</em></h2>
+    <div class="num-tag">Core Entities</div>
+  </div>
+
+  <h3 class="sub">2.1 核心实体关系</h3>
+  <div class="er-diagram">
+    <div style="margin-bottom:16px;">
+      <span class="er-entity core">users</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">courses</span>
+      <span class="er-rel">（教师开课）</span>
+    </div>
+    <div style="margin-bottom:16px;">
+      <span class="er-entity core">users</span>
+      <span class="er-rel">N ── M</span>
+      <span class="er-entity">courses</span>
+      <span class="er-rel">（通过 enrollments 选课）</span>
+    </div>
+    <div style="margin-bottom:16px;">
+      <span class="er-entity">courses</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">chapters</span>
+    </div>
+    <div style="margin-bottom:16px;">
+      <span class="er-entity">courses</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">assignments</span>
+    </div>
+    <div style="margin-bottom:16px;">
+      <span class="er-entity">assignments</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">submissions</span>
+    </div>
+    <div style="margin-bottom:16px;">
+      <span class="er-entity">submissions</span>
+      <span class="er-rel">1 ── 1</span>
+      <span class="er-entity">grades</span>
+    </div>
+    <div style="margin-bottom:16px;">
+      <span class="er-entity">courses</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">live_sessions</span>
+    </div>
+    <div style="margin-bottom:16px;">
+      <span class="er-entity ai">ai_conversations</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity ai">ai_messages</span>
+    </div>
+    <div>
+      <span class="er-entity core">users</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity ai">ai_conversations</span>
+    </div>
+  </div>
+
+  <h3 class="sub">2.2 关系说明</h3>
+  <table>
+    <thead><tr><th>关系</th><th>类型</th><th>中间表</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>用户 ↔ 课程</td><td>N:M</td><td><code>enrollments</code></td><td>学生选课 · 教师开课</td></tr>
+      <tr><td>课程 → 章节</td><td>1:N</td><td>—</td><td>课程包含多个章节</td></tr>
+      <tr><td>课程 → 作业</td><td>1:N</td><td>—</td><td>课程布置多个作业</td></tr>
+      <tr><td>作业 → 提交</td><td>1:N</td><td>—</td><td>一个作业多个学生提交</td></tr>
+      <tr><td>提交 → 成绩</td><td>1:1</td><td>—</td><td>每次提交对应一个成绩</td></tr>
+      <tr><td>用户 → AI 对话</td><td>1:N</td><td>—</td><td>用户发起多个对话</td></tr>
+      <tr><td>对话 → 消息</td><td>1:N</td><td>—</td><td>对话包含多条消息</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 03 · 用户模块 ============ -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <h2>03 · 用户模块 <em>Users</em></h2>
+    <div class="num-tag">3 tables</div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">users</span>
+      <span class="table-desc">用户主表</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键 · gen_random_uuid()</td></tr>
+          <tr><td><code>student_id</code></td><td>VARCHAR(20)</td><td><span class="tag uq">UNIQUE</span></td><td>学号</td></tr>
+          <tr><td><code>name</code></td><td>VARCHAR(50)</td><td><span class="tag nn">NOT NULL</span></td><td>姓名</td></tr>
+          <tr><td><code>email</code></td><td>VARCHAR(100)</td><td><span class="tag uq">UNIQUE</span></td><td>邮箱</td></tr>
+          <tr><td><code>password_hash</code></td><td>VARCHAR(255)</td><td><span class="tag nn">NOT NULL</span></td><td>bcrypt 哈希</td></tr>
+          <tr><td><code>role</code></td><td>ENUM</td><td><span class="tag nn">NOT NULL</span></td><td>student | teacher | admin</td></tr>
+          <tr><td><code>department</code></td><td>VARCHAR(100)</td><td></td><td>院系</td></tr>
+          <tr><td><code>grade</code></td><td>VARCHAR(10)</td><td></td><td>入学年级</td></tr>
+          <tr><td><code>avatar_url</code></td><td>VARCHAR(500)</td><td></td><td>头像 URL</td></tr>
+          <tr><td><code>bio</code></td><td>TEXT</td><td></td><td>个人简介</td></tr>
+          <tr><td><code>last_login_at</code></td><td>TIMESTAMPTZ</td><td></td><td>最后登录时间</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td><span class="tag nn">NOT NULL</span></td><td>创建时间 · DEFAULT now()</td></tr>
+          <tr><td><code>updated_at</code></td><td>TIMESTAMPTZ</td><td></td><td>更新时间</td></tr>
+        </tbody>
+      </table>
+      <pre><span class="comment">-- 索引</span>
+<span class="keyword">CREATE INDEX</span> idx_users_role <span class="keyword">ON</span> users(role);
+<span class="keyword">CREATE INDEX</span> idx_users_department <span class="keyword">ON</span> users(department);
+<span class="keyword">CREATE INDEX</span> idx_users_created <span class="keyword">ON</span> users(created_at <span class="keyword">DESC</span>);</pre>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">sessions</span>
+      <span class="table-desc">登录会话</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>会话 ID</td></tr>
+          <tr><td><code>user_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> → users</td><td>用户 ID</td></tr>
+          <tr><td><code>refresh_token</code></td><td>VARCHAR(500)</td><td><span class="tag uq">UNIQUE</span></td><td>Refresh Token</td></tr>
+          <tr><td><code>device</code></td><td>VARCHAR(20)</td><td></td><td>web | mobile | desktop</td></tr>
+          <tr><td><code>ip_address</code></td><td>VARCHAR(45)</td><td></td><td>登录 IP</td></tr>
+          <tr><td><code>user_agent</code></td><td>TEXT</td><td></td><td>浏览器 UA</td></tr>
+          <tr><td><code>expires_at</code></td><td>TIMESTAMPTZ</td><td></td><td>过期时间</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td></td><td>创建时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">enrollments</span>
+      <span class="table-desc">选课记录</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>user_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> → users</td><td>学生 ID</td></tr>
+          <tr><td><code>course_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> → courses</td><td>课程 ID</td></tr>
+          <tr><td><code>role</code></td><td>ENUM</td><td></td><td>student | teacher | ta</td></tr>
+          <tr><td><code>enrolled_at</code></td><td>TIMESTAMPTZ</td><td></td><td>选课时间</td></tr>
+          <tr><td><code>status</code></td><td>ENUM</td><td></td><td>active | dropped | completed</td></tr>
+        </tbody>
+      </table>
+      <pre><span class="comment">-- 唯一约束：一个用户一门课程一条记录</span>
+<span class="keyword">CREATE UNIQUE INDEX</span> idx_enrollment_unique
+  <span class="keyword">ON</span> enrollments(user_id, course_id);</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 · 课程模块 ============ -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <h2>04 · 课程模块 <em>Courses</em></h2>
+    <div class="num-tag">3 tables</div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">courses</span>
+      <span class="table-desc">课程主表</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>code</code></td><td>VARCHAR(20)</td><td><span class="tag uq">UNIQUE</span></td><td>课程编号 CS201</td></tr>
+          <tr><td><code>title</code></td><td>VARCHAR(200)</td><td><span class="tag nn">NOT NULL</span></td><td>课程名称</td></tr>
+          <tr><td><code>description</code></td><td>TEXT</td><td></td><td>课程描述</td></tr>
+          <tr><td><code>teacher_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> → users</td><td>授课教师</td></tr>
+          <tr><td><code>department</code></td><td>VARCHAR(100)</td><td></td><td>所属院系</td></tr>
+          <tr><td><code>credits</code></td><td>DECIMAL(3,1)</td><td></td><td>学分</td></tr>
+          <tr><td><code>semester</code></td><td>VARCHAR(20)</td><td><span class="tag idx">分区键</span></td><td>学期 2026-1</td></tr>
+          <tr><td><code>schedule</code></td><td>JSONB</td><td></td><td>课程时间安排</td></tr>
+          <tr><td><code>students_count</code></td><td>INTEGER</td><td></td><td>选课人数 · 冗余字段</td></tr>
+          <tr><td><code>status</code></td><td>ENUM</td><td></td><td>draft | published | archived</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td></td><td>创建时间</td></tr>
+        </tbody>
+      </table>
+      <pre><span class="comment">-- 索引</span>
+<span class="keyword">CREATE INDEX</span> idx_courses_semester <span class="keyword">ON</span> courses(semester);
+<span class="keyword">CREATE INDEX</span> idx_courses_teacher <span class="keyword">ON</span> courses(teacher_id);
+<span class="keyword">CREATE INDEX</span> idx_courses_dept <span class="keyword">ON</span> courses(department);</pre>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">chapters</span>
+      <span class="table-desc">章节</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>course_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> → courses</td><td>所属课程</td></tr>
+          <tr><td><code>title</code></td><td>VARCHAR(200)</td><td><span class="tag nn">NOT NULL</span></td><td>章节标题</td></tr>
+          <tr><td><code>content</code></td><td>TEXT</td><td></td><td>章节内容（Markdown）</td></tr>
+          <tr><td><code>order_num</code></td><td>INTEGER</td><td></td><td>排序号</td></tr>
+          <tr><td><code>resources</code></td><td>JSONB</td><td></td><td>资源列表（视频/PDF/链接）</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td></td><td>创建时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">announcements</span>
+      <span class="table-desc">课程公告</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>course_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>所属课程</td></tr>
+          <tr><td><code>author_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> → users</td><td>发布者</td></tr>
+          <tr><td><code>title</code></td><td>VARCHAR(200)</td><td></td><td>标题</td></tr>
+          <tr><td><code>content</code></td><td>TEXT</td><td></td><td>内容</td></tr>
+          <tr><td><code>pinned</code></td><td>BOOLEAN</td><td></td><td>是否置顶</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td></td><td>发布时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 · 作业与成绩 ============ -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <h2>05 · 作业与成绩 <em>Assignments & Grades</em></h2>
+    <div class="num-tag">4 tables</div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">assignments</span>
+      <span class="table-desc">作业</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>course_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>所属课程</td></tr>
+          <tr><td><code>title</code></td><td>VARCHAR(200)</td><td><span class="tag nn">NOT NULL</span></td><td>作业标题</td></tr>
+          <tr><td><code>description</code></td><td>TEXT</td><td></td><td>作业说明</td></tr>
+          <tr><td><code>due_at</code></td><td>TIMESTAMPTZ</td><td></td><td>截止时间</td></tr>
+          <tr><td><code>max_score</code></td><td>INTEGER</td><td></td><td>满分</td></tr>
+          <tr><td><code>ai_grading</code></td><td>BOOLEAN</td><td></td><td>启用 AI 批阅</td></tr>
+          <tr><td><code>rubric</code></td><td>JSONB</td><td></td><td>评分标准</td></tr>
+          <tr><td><code>ai_model</code></td><td>VARCHAR(50)</td><td></td><td>指定 AI 模型</td></tr>
+          <tr><td><code>status</code></td><td>ENUM</td><td></td><td>draft | published | closed</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td></td><td>创建时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">submissions</span>
+      <span class="table-desc">作业提交</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>assignment_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>所属作业</td></tr>
+          <tr><td><code>student_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> → users</td><td>提交学生</td></tr>
+          <tr><td><code>file_urls</code></td><td>JSONB</td><td></td><td>上传文件 URL 列表</td></tr>
+          <tr><td><code>text_answer</code></td><td>TEXT</td><td></td><td>文字答案</td></tr>
+          <tr><td><code>submission_note</code></td><td>TEXT</td><td></td><td>提交备注</td></tr>
+          <tr><td><code>submitted_at</code></td><td>TIMESTAMPTZ</td><td></td><td>提交时间</td></tr>
+          <tr><td><code>late</code></td><td>BOOLEAN</td><td></td><td>是否迟交</td></tr>
+        </tbody>
+      </table>
+      <pre><span class="comment">-- 分区：按课程哈希分片</span>
+<span class="comment">-- 索引</span>
+<span class="keyword">CREATE INDEX</span> idx_sub_assignment <span class="keyword">ON</span> submissions(assignment_id);
+<span class="keyword">CREATE INDEX</span> idx_sub_student <span class="keyword">ON</span> submissions(student_id);</pre>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">grades</span>
+      <span class="table-desc">成绩</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>submission_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> · <span class="tag uq">UNIQUE</span></td><td>对应提交</td></tr>
+          <tr><td><code>total_score</code></td><td>DECIMAL(5,2)</td><td></td><td>总分</td></tr>
+          <tr><td><code>grade_letter</code></td><td>VARCHAR(2)</td><td></td><td>A / B / C / D / F</td></tr>
+          <tr><td><code>feedback</code></td><td>TEXT</td><td></td><td>批阅反馈</td></tr>
+          <tr><td><code>rubric_scores</code></td><td>JSONB</td><td></td><td>各评分维度得分</td></tr>
+          <tr><td><code>graded_by</code></td><td>ENUM</td><td></td><td>teacher | ai</td></tr>
+          <tr><td><code>grader_id</code></td><td>UUID</td><td></td><td>批阅人 ID（教师时）</td></tr>
+          <tr><td><code>ai_model</code></td><td>VARCHAR(50)</td><td></td><td>AI 模型（AI 批阅时）</td></tr>
+          <tr><td><code>confidence</code></td><td>DECIMAL(3,2)</td><td></td><td>AI 置信度</td></tr>
+          <tr><td><code>graded_at</code></td><td>TIMESTAMPTZ</td><td></td><td>批阅时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">grade_records</span>
+      <span class="table-desc">学期成绩汇总</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>student_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>学生</td></tr>
+          <tr><td><code>course_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>课程</td></tr>
+          <tr><td><code>semester</code></td><td>VARCHAR(20)</td><td></td><td>学期</td></tr>
+          <tr><td><code>final_score</code></td><td>DECIMAL(5,2)</td><td></td><td>期末成绩</td></tr>
+          <tr><td><code>gpa_point</code></td><td>DECIMAL(3,2)</td><td></td><td>GPA 绩点</td></tr>
+          <tr><td><code>recorded_at</code></td><td>TIMESTAMPTZ</td><td></td><td>录入时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 06 · 直播 ============ -->
+<section class="section" id="s6">
+  <div class="section-header">
+    <h2>06 · 直播模块 <em>Live</em></h2>
+    <div class="num-tag">2 tables</div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">live_sessions</span>
+      <span class="table-desc">直播场次</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>course_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>所属课程</td></tr>
+          <tr><td><code>teacher_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>开播教师</td></tr>
+          <tr><td><code>title</code></td><td>VARCHAR(200)</td><td></td><td>直播标题</td></tr>
+          <tr><td><code>scheduled_at</code></td><td>TIMESTAMPTZ</td><td></td><td>计划时间</td></tr>
+          <tr><td><code>started_at</code></td><td>TIMESTAMPTZ</td><td></td><td>开始时间</td></tr>
+          <tr><td><code>ended_at</code></td><td>TIMESTAMPTZ</td><td></td><td>结束时间</td></tr>
+          <tr><td><code>status</code></td><td>ENUM</td><td></td><td>scheduled | live | ended</td></tr>
+          <tr><td><code>enable_recording</code></td><td>BOOLEAN</td><td></td><td>开启录制</td></tr>
+          <tr><td><code>enable_chat</code></td><td>BOOLEAN</td><td></td><td>开启聊天</td></tr>
+          <tr><td><code>enable_hand_raise</code></td><td>BOOLEAN</td><td></td><td>开启举手</td></tr>
+          <tr><td><code>replay_url</code></td><td>VARCHAR(500)</td><td></td><td>回放地址</td></tr>
+          <tr><td><code>participant_count</code></td><td>INTEGER</td><td></td><td>参与人数</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">live_messages</span>
+      <span class="table-desc">直播聊天记录</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>BIGSERIAL</td><td><span class="tag pk">PK</span></td><td>主键 · 自增</td></tr>
+          <tr><td><code>session_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>直播场次</td></tr>
+          <tr><td><code>user_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>发送者</td></tr>
+          <tr><td><code>type</code></td><td>ENUM</td><td></td><td>chat | hand_raise | system</td></tr>
+          <tr><td><code>content</code></td><td>TEXT</td><td></td><td>消息内容</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td><span class="tag idx">分区键</span></td><td>发送时间</td></tr>
+        </tbody>
+      </table>
+      <pre><span class="comment">-- 分区：按月分区，便于冷热分离</span>
+<span class="keyword">CREATE TABLE</span> live_messages (
+  ...
+) <span class="keyword">PARTITION BY RANGE</span> (created_at);</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 07 · AI 模块 ============ -->
+<section class="section" id="s7">
+  <div class="section-header">
+    <h2>07 · AI 模块 <em>AI-Powered</em></h2>
+    <div class="num-tag">3 tables · Milvus 向量库</div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">ai_conversations</span>
+      <span class="table-desc">AI 对话</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>user_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> · <span class="tag idx">分片键</span></td><td>用户</td></tr>
+          <tr><td><code>title</code></td><td>VARCHAR(200)</td><td></td><td>对话标题（自动生成）</td></tr>
+          <tr><td><code>model</code></td><td>VARCHAR(50)</td><td></td><td>使用模型 qwen-max</td></tr>
+          <tr><td><code>context_course_id</code></td><td>UUID</td><td></td><td>关联课程</td></tr>
+          <tr><td><code>context_chapter_id</code></td><td>UUID</td><td></td><td>关联章节</td></tr>
+          <tr><td><code>message_count</code></td><td>INTEGER</td><td></td><td>消息数</td></tr>
+          <tr><td><code>total_tokens</code></td><td>INTEGER</td><td></td><td>消耗 Token</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td></td><td>创建时间</td></tr>
+          <tr><td><code>updated_at</code></td><td>TIMESTAMPTZ</td><td></td><td>最后活跃</td></tr>
+        </tbody>
+      </table>
+      <pre><span class="comment">-- 分区：按用户 ID 哈希分片</span>
+<span class="comment">-- 索引</span>
+<span class="keyword">CREATE INDEX</span> idx_ai_conv_user <span class="keyword">ON</span> ai_conversations(user_id);
+<span class="keyword">CREATE INDEX</span> idx_ai_conv_updated <span class="keyword">ON</span> ai_conversations(updated_at <span class="keyword">DESC</span>);</pre>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">ai_messages</span>
+      <span class="table-desc">AI 消息</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>conversation_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>所属对话</td></tr>
+          <tr><td><code>role</code></td><td>ENUM</td><td></td><td>user | assistant | system</td></tr>
+          <tr><td><code>content</code></td><td>TEXT</td><td></td><td>消息内容</td></tr>
+          <tr><td><code>attachments</code></td><td>JSONB</td><td></td><td>附件（图片/音频）</td></tr>
+          <tr><td><code>prompt_tokens</code></td><td>INTEGER</td><td></td><td>输入 Token</td></tr>
+          <tr><td><code>completion_tokens</code></td><td>INTEGER</td><td></td><td>输出 Token</td></tr>
+          <tr><td><code>latency_ms</code></td><td>INTEGER</td><td></td><td>响应延迟</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td></td><td>创建时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name" style="color:var(--ai);">Milvus · knowledge_vectors</span>
+      <span class="table-desc">知识库向量集合</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>INT64</td><td>向量 ID（自增）</td></tr>
+          <tr><td><code>embedding</code></td><td>FLOAT_VECTOR[1536]</td><td>向量 · 百川 Embedding</td></tr>
+          <tr><td><code>source_type</code></td><td>VARCHAR</td><td>来源类型 · course | chapter | textbook</td></tr>
+          <tr><td><code>source_id</code></td><td>VARCHAR</td><td>来源 ID</td></tr>
+          <tr><td><code>content</code></td><td>VARCHAR</td><td>原文内容</td></tr>
+          <tr><td><code>metadata</code></td><td>JSON</td><td>元数据</td></tr>
+        </tbody>
+      </table>
+      <pre><span class="comment">-- Milvus 集合配置</span>
+collection_name: <span class="string">"knowledge_vectors"</span>
+dimension: <span class="number">1536</span>
+metric_type: <span class="string">"COSINE"</span>
+index_type: <span class="string">"IVF_FLAT"</span>
+nlist: <span class="number">1024</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 08 · 分区 ============ -->
+<section class="section" id="s8">
+  <div class="section-header">
+    <h2>08 · 分区与分片 <em>Partitioning</em></h2>
+    <div class="num-tag">Scale Strategy</div>
+  </div>
+
+  <h3 class="sub">8.1 分区策略</h3>
+  <table>
+    <thead><tr><th>数据表</th><th>分片键</th><th>策略</th><th>分区数</th><th>预计规模</th></tr></thead>
+    <tbody>
+      <tr><td><b>courses</b></td><td>semester</td><td>按学期范围分区</td><td>~20 分区</td><td>500 门/学期</td></tr>
+      <tr><td><b>submissions</b></td><td>course_id</td><td>按课程哈希分片</td><td>16 分片</td><td>10 万+/学期</td></tr>
+      <tr><td><b>live_messages</b></td><td>created_at</td><td>按月范围分区</td><td>滚动 12 月</td><td>500 MB/日</td></tr>
+      <tr><td><b>audit_logs</b></td><td>created_at</td><td>按月分区 · 冷热分离</td><td>热 3 月 + 冷归档</td><td>1 TB+/年</td></tr>
+      <tr><td><b>ai_conversations</b></td><td>user_id</td><td>按用户哈希分片</td><td>8 分片</td><td>50 万+会话</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">8.2 分区示例</h3>
+  <pre><span class="comment">-- courses 按学期分区</span>
+<span class="keyword">CREATE TABLE</span> courses (
+  ...
+) <span class="keyword">PARTITION BY LIST</span> (semester);
+
+<span class="keyword">CREATE TABLE</span> courses_2026_1 <span class="keyword">PARTITION OF</span> courses
+  <span class="keyword">FOR VALUES IN</span> (<span class="string">'2026-1'</span>);
+
+<span class="comment">-- live_messages 按月分区</span>
+<span class="keyword">CREATE TABLE</span> live_messages (
+  ...
+) <span class="keyword">PARTITION BY RANGE</span> (created_at);
+
+<span class="keyword">CREATE TABLE</span> live_messages_2026_08 <span class="keyword">PARTITION OF</span> live_messages
+  <span class="keyword">FOR VALUES FROM</span> (<span class="string">'2026-08-01'</span>) <span class="keyword">TO</span> (<span class="string">'2026-09-01'</span>);</pre>
+
+  <h3 class="sub">8.3 冷热分离</h3>
+  <table>
+    <thead><tr><th>数据温度</th><th>存储位置</th><th>查询频率</th><th>保留策略</th></tr></thead>
+    <tbody>
+      <tr><td><b>🔥 热数据</b></td><td>PostgreSQL SSD</td><td>高频 · 毫秒级</td><td>近 3 个月</td></tr>
+      <tr><td><b>🌤️ 温数据</b></td><td>PostgreSQL HDD</td><td>中频 · 秒级</td><td>3-12 个月</td></tr>
+      <tr><td><b>❄️ 冷数据</b></td><td>MinIO 归档</td><td>低频 · 分钟级</td><td>> 12 个月</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 09 · 索引 ============ -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <h2>09 · 索引策略 <em>Indexing</em></h2>
+    <div class="num-tag">Performance</div>
+  </div>
+
+  <h3 class="sub">9.1 索引类型</h3>
+  <table>
+    <thead><tr><th>索引类型</th><th>适用场景</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><b>B-Tree</b></td><td>等值/范围查询 · 排序</td><td><code>CREATE INDEX idx ON users(email)</code></td></tr>
+      <tr><td><b>GIN</b></td><td>JSONB · 全文检索</td><td><code>CREATE INDEX idx ON chapters USING gin(resources)</code></td></tr>
+      <tr><td><b>Hash</b></td><td>等值查询 · 分片键</td><td><code>CREATE INDEX idx ON submissions USING hash(course_id)</code></td></tr>
+      <tr><td><b>Partial</b></td><td>条件过滤</td><td><code>CREATE INDEX idx ON courses(status) WHERE status = 'published'</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">9.2 核心索引清单</h3>
+  <table>
+    <thead><tr><th>表</th><th>索引名</th><th>类型</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td>users</td><td><code>idx_users_role</code></td><td>B-Tree</td><td>按角色筛选</td></tr>
+      <tr><td>users</td><td><code>idx_users_department</code></td><td>B-Tree</td><td>按院系查询</td></tr>
+      <tr><td>courses</td><td><code>idx_courses_semester</code></td><td>B-Tree</td><td>按学期筛选</td></tr>
+      <tr><td>courses</td><td><code>idx_courses_teacher</code></td><td>B-Tree</td><td>教师课程查询</td></tr>
+      <tr><td>enrollments</td><td><code>idx_enrollment_unique</code></td><td>Unique</td><td>选课去重</td></tr>
+      <tr><td>assignments</td><td><code>idx_assign_course</code></td><td>B-Tree</td><td>课程作业查询</td></tr>
+      <tr><td>submissions</td><td><code>idx_sub_assignment</code></td><td>B-Tree</td><td>作业提交查询</td></tr>
+      <tr><td>submissions</td><td><code>idx_sub_student</code></td><td>B-Tree</td><td>学生提交查询</td></tr>
+      <tr><td>grades</td><td><code>idx_grade_submission</code></td><td>Unique</td><td>提交-成绩一对一</td></tr>
+      <tr><td>ai_conversations</td><td><code>idx_ai_conv_user</code></td><td>B-Tree</td><td>用户对话查询</td></tr>
+      <tr><td>ai_conversations</td><td><code>idx_ai_conv_updated</code></td><td>B-Tree DESC</td><td>最近对话排序</td></tr>
+      <tr><td>chapters</td><td><code>idx_chapters_resources</code></td><td>GIN</td><td>JSONB 资源查询</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">9.3 查询优化示例</h3>
+  <pre><span class="comment">-- 查询学生本学期课程（利用索引）</span>
+<span class="keyword">SELECT</span> c.* <span class="keyword">FROM</span> courses c
+<span class="keyword">JOIN</span> enrollments e <span class="keyword">ON</span> c.id = e.course_id
+<span class="keyword">WHERE</span> e.user_id = <span class="string">$1</span>
+  <span class="keyword">AND</span> c.semester = <span class="string">'2026-1'</span>
+  <span class="keyword">AND</span> e.status = <span class="string">'active'</span>;
+
+<span class="comment">-- AI 对话历史（利用索引）</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> ai_conversations
+<span class="keyword">WHERE</span> user_id = <span class="string">$1</span>
+<span class="keyword">ORDER BY</span> updated_at <span class="keyword">DESC</span>
+<span class="keyword">LIMIT</span> <span class="number">20</span>;
+
+<span class="comment">-- 课程作业统计（利用索引）</span>
+<span class="keyword">SELECT</span> a.id, a.title,
+  <span class="keyword">COUNT</span>(s.id) <span class="keyword">AS</span> submission_count
+<span class="keyword">FROM</span> assignments a
+<span class="keyword">LEFT JOIN</span> submissions s <span class="keyword">ON</span> a.id = s.assignment_id
+<span class="keyword">WHERE</span> a.course_id = <span class="string">$1</span>
+<span class="keyword">GROUP BY</span> a.id;</pre>
+</section>
+
+<!-- ============ 10 · 迁移 ============ -->
+<section class="section" id="s10">
+  <div class="section-header">
+    <h2>10 · 数据迁移 <em>Migration</em></h2>
+    <div class="num-tag">Version Control</div>
+  </div>
+
+  <h3 class="sub">10.1 迁移工具</h3>
+  <table>
+    <thead><tr><th>工具</th><th>用途</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><b>golang-migrate</b></td><td>Schema 迁移</td><td>SQL 文件版本管理 · 回滚支持</td></tr>
+      <tr><td><b>pgloader</b></td><td>数据导入</td><td>从 MySQL/CSV 迁移到 PostgreSQL</td></tr>
+      <tr><td><b>pg_repack</b></td><td>在线重组</td><td>无锁表重建 · 减少碎片</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">10.2 迁移目录结构</h3>
+  <pre>migrations/
+├── 001_initial_schema.sql       <span class="comment"># 初始化表结构</span>
+├── 002_add_ai_fields.sql        <span class="comment"># AI 相关字段</span>
+├── 003_partition_courses.sql    <span class="comment"># 课程分区</span>
+├── 004_partition_submissions.sql <span class="comment"># 提交分区</span>
+├── 005_add_indexes.sql          <span class="comment"># 索引创建</span>
+└── rollback/
+    ├── 001_rollback.sql
+    └── ...</pre>
+
+  <h3 class="sub">10.3 迁移示例</h3>
+  <pre><span class="comment">-- 002_add_ai_fields.sql</span>
+<span class="keyword">ALTER TABLE</span> assignments
+  <span class="keyword">ADD COLUMN</span> ai_grading <span class="type">BOOLEAN</span> <span class="keyword">DEFAULT</span> false,
+  <span class="keyword">ADD COLUMN</span> rubric <span class="type">JSONB</span>,
+  <span class="keyword">ADD COLUMN</span> ai_model <span class="type">VARCHAR(50)</span>;
+
+<span class="keyword">CREATE TABLE</span> ai_conversations (
+  id <span class="type">UUID</span> <span class="keyword">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  user_id <span class="type">UUID</span> <span class="keyword">NOT NULL</span> <span class="keyword">REFERENCES</span> users(id),
+  title <span class="type">VARCHAR(200)</span>,
+  model <span class="type">VARCHAR(50)</span>,
+  created_at <span class="type">TIMESTAMPTZ</span> <span class="keyword">DEFAULT</span> now()
+);
+
+<span class="keyword">CREATE TABLE</span> ai_messages (
+  id <span class="type">UUID</span> <span class="keyword">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+  conversation_id <span class="type">UUID</span> <span class="keyword">REFERENCES</span> ai_conversations(id),
+  role <span class="type">VARCHAR(20)</span> <span class="keyword">NOT NULL</span>,
+  content <span class="type">TEXT</span>,
+  created_at <span class="type">TIMESTAMPTZ</span> <span class="keyword">DEFAULT</span> now()
+);</pre>
+
+  <div class="info" style="background:var(--growth-soft); border:1px solid var(--growth); padding:16px 20px; border-radius:10px; margin:20px 0;">
+    <div style="font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--growth); font-weight:600; margin-bottom:6px;">✅ 迁移原则</div>
+    <ul style="margin:0; font-size:13px; line-height:1.8;">
+      <li><b>向后兼容</b>：新字段必须有默认值或允许 NULL</li>
+      <li><b>零停机</b>：大表变更使用 <code>pg_repack</code> 或分批处理</li>
+      <li><b>可回滚</b>：每个迁移配套 rollback SQL</li>
+      <li><b>幂等</b>：迁移脚本可重复执行不报错</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Database Design</div>
+  <div>v1.0 · 24 表 · 6 模块 · PostgreSQL 16 · Milvus 2.3</div>
+  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">DB-LUMINA-2026-001</div>
+</footer>
+
+</body>
+</html>
