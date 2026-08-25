@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 产品需求文档 PRD v1.2</title>
+<title>Lumina 墨光 · 产品需求文档 PRD v1.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -235,12 +235,12 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>教育应用产品需求文档 · PRD</small></div>
     </div>
-    <div class="doc-type">Product Requirements Document · v1.2</div>
+    <div class="doc-type">Product Requirements Document · v1.3</div>
     <h1>
       <span class="hl">Lumina</span> <em>墨光</em><br/>
       六端教学平台
     </h1>
-    <div class="subtitle">面向高校师生的跨端教学协作平台 · 覆盖学生、教师、管理员三类用户的全场景需求 · 📱↔📲 双模式适配 · 🤖 国产模型</div>
+    <div class="subtitle">面向高校师生的跨端教学协作平台 · 覆盖学生、教师、管理员三类用户的全场景需求 · 📁 5 目录 · 📱↔📲 双模式 · 🤖 国产模型</div>
   </div>
   <div class="meta">
     <div class="row">
@@ -249,7 +249,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.2 · 移动端双模式适配</span>
+      <span class="value">v1.3 · 按平台目录重组</span>
     </div>
     <div class="row">
       <span class="label">作者</span>
@@ -274,9 +274,9 @@
 <div class="stats">
   <div class="stat"><div class="val hl">3</div><div class="lbl">目标用户</div></div>
   <div class="stat"><div class="val hl">6</div><div class="lbl">设计表面</div></div>
-  <div class="stat"><div class="val">24</div><div class="lbl">原型文件</div></div>
+  <div class="stat"><div class="val">33</div><div class="lbl">原型文件</div></div>
   <div class="stat"><div class="val">140+</div><div class="lbl">界面页面</div></div>
-  <div class="stat"><div class="val">20</div><div class="lbl">功能模块</div></div>
+  <div class="stat"><div class="val">5</div><div class="lbl">平台目录</div></div>
   <div class="stat"><div class="val">6</div><div class="lbl">项目阶段</div></div>
 </div>
 
@@ -366,6 +366,13 @@
           <td><b>产品+设计</b></td>
           <td><b>📱↔📲 移动端平板双模式适配 · 全部 5 个移动端原型支持手机+平板自适应</b></td>
           <td><span style="color:var(--cobalt); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</span></td>
+        </tr>
+        <tr style="background:var(--highlighter-soft);">
+          <td><span class="tag" style="background:var(--highlighter); color:var(--inkwell);">v1.3</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px; font-weight:500;">2026-08-25</td>
+          <td><b>产品+工程</b></td>
+          <td><b>📁 按平台目录重组 · 手机/平板拆分独立文件 · 5 目录（APP/phone · APP/tablet · Web · PC · AI）· 33 文件</b></td>
+          <td><span style="color:var(--highlighter); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 当前版本</span></td>
         </tr>
       </tbody>
     </table>
@@ -896,12 +903,13 @@
   </div>
 
   <h3 class="sub">9A.4 AI 模块原型文件</h3>
+  <div style="font-size:12px; color:var(--inkwell-2); margin-bottom:10px;">文件位置：<code style="font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px;">AI/</code></div>
   <table>
     <thead><tr><th>文件</th><th>覆盖场景</th><th>规模</th></tr></thead>
     <tbody>
-      <tr><td><b>lumina-18-ai-student.html</b></td><td>AI 导师 · 学习路径 · 知识图谱 · AI 闪卡 · 多模态 · 语音 · RAG</td><td>93 KB</td></tr>
-      <tr><td><b>lumina-19-ai-teacher.html</b></td><td>AI 批阅 · 课件生成 · 课堂 Copilot · 学情预测 · 个性化干预</td><td>95 KB</td></tr>
-      <tr><td><b>lumina-20-ai-admin.html</b></td><td>Agent 编排 · 内容安全 · 成本优化 · 合规审计 · 伦理监测</td><td>82 KB</td></tr>
+      <tr><td><b>AI/lumina-18-ai-student.html</b></td><td>AI 导师 · 学习路径 · 知识图谱 · AI 闪卡 · 多模态 · 语音 · RAG</td><td>93 KB</td></tr>
+      <tr><td><b>AI/lumina-19-ai-teacher.html</b></td><td>AI 批阅 · 课件生成 · 课堂 Copilot · 学情预测 · 个性化干预</td><td>95 KB</td></tr>
+      <tr><td><b>AI/lumina-20-ai-admin.html</b></td><td>Agent 编排 · 内容安全 · 成本优化 · 合规审计 · 伦理监测</td><td>82 KB</td></tr>
     </tbody>
   </table>
 
@@ -1142,14 +1150,14 @@
         <div class="title">Phase 0 · 原型设计</div>
         <div class="time">2026-08 · ✓ 已完成</div>
       </div>
-      <div class="desc">完成 28 个原型文件 · 160+ 界面页面 · 6 个设计表面覆盖 · 🤖 AI 模块交付</div>
+      <div class="desc">完成 33 个原型文件 · 5 个平台目录 · 160+ 界面页面 · 6 个设计表面覆盖 · 🤖 AI 模块交付</div>
       <div class="deliverables">
-        <span class="deliv">设计系统 01</span>
-        <span class="deliv">学生端 03-05</span>
-        <span class="deliv">教师端 06-08</span>
-        <span class="deliv">协作 09-11</span>
-        <span class="deliv">教师深度 12-14</span>
-        <span class="deliv">管理端 15-17</span>
+        <span class="deliv">📱 APP/phone 8</span>
+        <span class="deliv">📲 APP/tablet 6</span>
+        <span class="deliv">🌐 Web 7</span>
+        <span class="deliv">🖥️ PC 7</span>
+        <span class="deliv">🤖 AI 3</span>
+        <span class="deliv">📋 索引 + PRD</span>
       </div>
     </div>
 
@@ -1228,41 +1236,63 @@
 <section class="section" id="s16">
   <div class="section-header">
     <h2>16 · 原型文件索引 <em>Prototype Index</em></h2>
-    <div class="num-tag">28 Files · 1.6 MB</div>
+    <div class="num-tag">33 Files · 5 Directories · 1.5 MB</div>
   </div>
 
   <div class="info note">
     <div class="label">📁 文件位置</div>
-    所有原型统一存放于 <code style="font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px;">edu/原型/</code> 目录下。<br/>
-    入口文件：<b>lumina-00-index.html</b> · 浏览器打开即可导航所有设计稿。
+    原型按平台分目录存放于 <code style="font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px;">edu/原型/</code> 下：<br/>
+    <code style="font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px;">APP/phone/</code>
+    <code style="font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px;">APP/tablet/</code>
+    <code style="font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px;">Web/</code>
+    <code style="font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px;">PC/</code>
+    <code style="font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px;">AI/</code><br/>
+    入口文件：<b>lumina-00-index.html</b>（根目录）· 浏览器打开即可导航所有设计稿。
   </div>
 
   <table>
-    <thead><tr><th>编号</th><th>文件</th><th>模块</th><th>端</th><th>规模</th></tr></thead>
+    <thead><tr><th>目录</th><th>文件</th><th>模块</th><th>平台</th><th>规模</th></tr></thead>
     <tbody>
-      <tr><td>00</td><td>lumina-00-index.html</td><td>索引入口</td><td>—</td><td>47 KB</td></tr>
-      <tr><td>01</td><td>lumina-01-design-system.html</td><td>设计系统</td><td>共享</td><td>9 KB</td></tr>
-      <tr><td>02</td><td>lumina-02-shared.html</td><td>共享页面</td><td>共享</td><td>23 KB</td></tr>
-      <tr><td>03</td><td>lumina-03-student-mobile.html + extended</td><td>学生主页面</td><td>移动</td><td>43 KB</td></tr>
-      <tr><td>04</td><td>lumina-04-student-web.html + extended</td><td>学生学习</td><td>Web</td><td>70 KB</td></tr>
-      <tr><td>05</td><td>lumina-05-student-desktop.html + extended</td><td>学生专注</td><td>桌面</td><td>45 KB</td></tr>
-      <tr><td>06</td><td>lumina-06-teacher-mobile.html + extended</td><td>教师主页面</td><td>移动</td><td>49 KB</td></tr>
-      <tr><td>07</td><td>lumina-07-teacher-web.html + extended</td><td>教师教学</td><td>Web</td><td>58 KB</td></tr>
-      <tr><td>08</td><td>lumina-08-teacher-desktop.html + extended</td><td>教师批阅</td><td>桌面</td><td>77 KB</td></tr>
-      <tr><td>09</td><td>lumina-09-student-collaboration-mobile.html</td><td>学生协作</td><td>移动</td><td>75 KB</td></tr>
-      <tr><td>10</td><td>lumina-10-student-collaboration-web.html</td><td>学生协作</td><td>Web</td><td>63 KB</td></tr>
-      <tr><td>11</td><td>lumina-11-student-collaboration-desktop.html</td><td>学生协作</td><td>桌面</td><td>63 KB</td></tr>
-      <tr><td>12</td><td>lumina-12-teacher-deep-mobile.html</td><td>教师深度</td><td>移动</td><td>73 KB</td></tr>
-      <tr><td>13</td><td>lumina-13-teacher-deep-web.html</td><td>教师深度</td><td>Web</td><td>71 KB</td></tr>
-      <tr><td>14</td><td>lumina-14-teacher-deep-desktop.html</td><td>教师深度</td><td>桌面</td><td>77 KB</td></tr>
-      <tr><td>15</td><td>lumina-15-admin-web.html</td><td>管理端</td><td>Web</td><td>74 KB</td></tr>
-      <tr><td>16</td><td>lumina-16-admin-desktop.html</td><td>管理端</td><td>桌面</td><td>81 KB</td></tr>
-      <tr><td>17</td><td>lumina-17-admin-mobile.html</td><td>管理端</td><td>移动</td><td>67 KB</td></tr>
-      <tr style="background:var(--ai-soft);"><td>18</td><td><b style="color:var(--ai);">lumina-18-ai-student.html</b></td><td>🤖 AI 学生</td><td>三端</td><td>93 KB</td></tr>
-      <tr style="background:var(--ai-soft);"><td>19</td><td><b style="color:var(--ai);">lumina-19-ai-teacher.html</b></td><td>🤖 AI 教师</td><td>三端</td><td>95 KB</td></tr>
-      <tr style="background:var(--ai-soft);"><td>20</td><td><b style="color:var(--ai);">lumina-20-ai-admin.html</b></td><td>🤖 AI 平台</td><td>三端</td><td>82 KB</td></tr>
+      <tr style="background:var(--ricepaper);"><td colspan="5" style="font-family:var(--f-mono); font-size:10px; color:var(--cobalt); text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">📱 APP/phone/ · 手机原型</td></tr>
+      <tr><td>phone</td><td>lumina-03-student-mobile.html + extended</td><td>学生移动</td><td>📱 手机</td><td>43 KB</td></tr>
+      <tr><td>phone</td><td>lumina-06-teacher-mobile.html + extended</td><td>教师移动</td><td>📱 手机</td><td>49 KB</td></tr>
+      <tr><td>phone</td><td>lumina-09-student-collaboration-mobile.html</td><td>学生协作</td><td>📱 手机</td><td>75 KB</td></tr>
+      <tr><td>phone</td><td>lumina-12-teacher-deep-mobile.html</td><td>教师深度</td><td>📱 手机</td><td>73 KB</td></tr>
+      <tr><td>phone</td><td>lumina-17-admin-mobile.html</td><td>管理端</td><td>📱 手机</td><td>67 KB</td></tr>
+      <tr><td>phone</td><td>lumina-18-ai-student.html</td><td>🤖 AI 学生</td><td>📱 手机</td><td>93 KB</td></tr>
+
+      <tr style="background:var(--ricepaper);"><td colspan="5" style="font-family:var(--f-mono); font-size:10px; color:var(--growth); text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">📲 APP/tablet/ · 平板原型</td></tr>
+      <tr><td>tablet</td><td>lumina-03-student-mobile.html</td><td>学生平板</td><td>📲 平板</td><td>13 KB</td></tr>
+      <tr><td>tablet</td><td>lumina-06-teacher-mobile.html</td><td>教师平板</td><td>📲 平板</td><td>14 KB</td></tr>
+      <tr><td>tablet</td><td>lumina-09-student-collaboration-mobile.html</td><td>协作平板</td><td>📲 平板</td><td>18 KB</td></tr>
+      <tr><td>tablet</td><td>lumina-12-teacher-deep-mobile.html</td><td>深度平板</td><td>📲 平板</td><td>14 KB</td></tr>
+      <tr><td>tablet</td><td>lumina-17-admin-mobile.html</td><td>管理平板</td><td>📲 平板</td><td>15 KB</td></tr>
+      <tr><td>tablet</td><td>lumina-18-ai-student.html</td><td>🤖 AI 平板</td><td>📲 平板</td><td>32 KB</td></tr>
+
+      <tr style="background:var(--ricepaper);"><td colspan="5" style="font-family:var(--f-mono); font-size:10px; color:#8A6500; text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">🌐 Web/ · 浏览器端</td></tr>
+      <tr><td>Web</td><td>lumina-04-student-web.html + extended</td><td>学生 Web</td><td>🌐 浏览器</td><td>70 KB</td></tr>
+      <tr><td>Web</td><td>lumina-07-teacher-web.html + extended</td><td>教师 Web</td><td>🌐 浏览器</td><td>58 KB</td></tr>
+      <tr><td>Web</td><td>lumina-10-student-collaboration-web.html</td><td>协作 Web</td><td>🌐 浏览器</td><td>63 KB</td></tr>
+      <tr><td>Web</td><td>lumina-13-teacher-deep-web.html</td><td>深度 Web</td><td>🌐 浏览器</td><td>71 KB</td></tr>
+      <tr><td>Web</td><td>lumina-15-admin-web.html</td><td>管理 Web</td><td>🌐 浏览器</td><td>74 KB</td></tr>
+
+      <tr style="background:var(--ricepaper);"><td colspan="5" style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">🖥️ PC/ · 桌面端</td></tr>
+      <tr><td>PC</td><td>lumina-05-student-desktop.html + extended</td><td>学生桌面</td><td>🖥️ 桌面</td><td>45 KB</td></tr>
+      <tr><td>PC</td><td>lumina-08-teacher-desktop.html + extended</td><td>教师桌面</td><td>🖥️ 桌面</td><td>77 KB</td></tr>
+      <tr><td>PC</td><td>lumina-11-student-collaboration-desktop.html</td><td>协作桌面</td><td>🖥️ 桌面</td><td>63 KB</td></tr>
+      <tr><td>PC</td><td>lumina-14-teacher-deep-desktop.html</td><td>深度桌面</td><td>🖥️ 桌面</td><td>77 KB</td></tr>
+      <tr><td>PC</td><td>lumina-16-admin-desktop.html</td><td>管理桌面</td><td>🖥️ 桌面</td><td>81 KB</td></tr>
+
+      <tr style="background:var(--ai-soft);"><td colspan="5" style="font-family:var(--f-mono); font-size:10px; color:var(--ai); text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">🤖 AI/ · AI 模块（跨平台展示）</td></tr>
+      <tr style="background:var(--ai-soft);"><td>AI</td><td><b style="color:var(--ai);">lumina-18-ai-student.html</b></td><td>🤖 AI 学生</td><td>跨平台</td><td>93 KB</td></tr>
+      <tr style="background:var(--ai-soft);"><td>AI</td><td><b style="color:var(--ai);">lumina-19-ai-teacher.html</b></td><td>🤖 AI 教师</td><td>跨平台</td><td>95 KB</td></tr>
+      <tr style="background:var(--ai-soft);"><td>AI</td><td><b style="color:var(--ai);">lumina-20-ai-admin.html</b></td><td>🤖 AI 平台</td><td>跨平台</td><td>82 KB</td></tr>
     </tbody>
   </table>
+
+  <div style="margin-top:16px; padding:12px; background:var(--cobalt-soft); border:1px solid var(--cobalt); border-radius:8px; font-size:12px; line-height:1.6;">
+    💡 <b>开发友好</b>：手机/平板视图已拆分为独立文件，便于前端按需引用。根目录保留 <b>lumina-00-index.html</b>（索引导航）和 <b>lumina-prd.html</b>（本文档）。
+  </div>
 </section>
 
 <!-- ============ 17 · 验收标准 ============ -->
@@ -1274,11 +1304,12 @@
 
   <h3 class="sub">17.1 原型验收</h3>
   <ul>
-    <li>所有 24 个 HTML 文件可独立打开并在现代浏览器中正常渲染</li>
-    <li>所有内部链接可跳转（相对路径）</li>
+    <li>所有 33 个 HTML 文件可独立打开并在现代浏览器中正常渲染</li>
+    <li>所有内部链接可跳转（相对路径，按目录结构组织）</li>
     <li>所有文字内容为中文（符合目标用户习惯）</li>
     <li>所有图标统一为 Feather Icons SVG（无 emoji）</li>
     <li>设计系统 6 色调色板、3 套字体在所有文件中一致应用</li>
+    <li>手机/平板视图已拆分为独立文件，方便开发按需引用</li>
   </ul>
 
   <h3 class="sub">17.2 功能验收</h3>
@@ -1346,13 +1377,13 @@
   <div class="info success" style="margin-top:20px;">
     <div class="label">✓ 文档签署</div>
     本文档由产品团队编制，经设计、研发、运营三方评审通过。<br/>
-    <b>版本：v1.0 · 发布日期：2026-08-25 · 状态：已发布</b>
+    <b>版本：v1.3 · 发布日期：2026-08-25 · 状态：已发布</b>
   </div>
 </section>
 
 <footer>
-  <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · 产品需求文档 PRD v1.0</div>
-  <div>edu/原型/ · 2026-08-25</div>
+  <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · 产品需求文档 PRD v1.3</div>
+  <div>edu/原型/ · 5 目录 · 33 文件 · 2026-08-25</div>
   <div>PRD-LUMINA-2026-001</div>
 </footer>
 

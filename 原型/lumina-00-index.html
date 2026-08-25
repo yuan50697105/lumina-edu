@@ -12,7 +12,8 @@
     --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
     --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
     --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
-    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --ai:#7C3AED; --ai-2:#A78BFA; --ai-soft:#EDE9FE; --ai-grad:linear-gradient(135deg,#7C3AED,#3D46C9);
+    --line:rgba(15,16,32,0.10); --line-strong:rgba(15,16,32,0.20);
     --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
 
     --f-display:"Fraunces", "Songti SC", serif;
@@ -22,24 +23,24 @@
 
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.5;}
-  body{padding:56px 64px; max-width:1440px; margin:0 auto;}
+  body{padding:48px 56px; max-width:1400px; margin:0 auto;}
 
   /* ====== HERO ====== */
   .hero{
-    padding:48px 0 56px; border-bottom:1px solid var(--line); margin-bottom:56px;
+    padding:40px 0 48px; border-bottom:1px solid var(--line); margin-bottom:48px;
     display:grid; grid-template-columns:1fr auto; gap:48px; align-items:end;
   }
-  .hero .brand{display:flex; align-items:center; gap:14px; margin-bottom:20px;}
+  .hero .brand{display:flex; align-items:center; gap:12px; margin-bottom:24px;}
   .hero .brand .logo{
-    width:44px; height:44px; border-radius:10px;
+    width:40px; height:40px; border-radius:10px;
     background:var(--inkwell); color:var(--highlighter);
     display:flex; align-items:center; justify-content:center;
-    font-family:var(--f-display); font-size:24px; font-weight:500; font-style:italic;
+    font-family:var(--f-display); font-size:22px; font-weight:500; font-style:italic;
   }
-  .hero .brand .name{font-family:var(--f-display); font-size:18px; font-weight:500;}
+  .hero .brand .name{font-family:var(--f-display); font-size:16px; font-weight:500;}
   .hero .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:2px;}
   .hero h1{
-    font-family:var(--f-display); font-weight:300; font-size:88px; letter-spacing:-0.04em; line-height:0.95;
+    font-family:var(--f-display); font-weight:300; font-size:72px; letter-spacing:-0.04em; line-height:1;
   }
   .hero h1 em{font-style:italic; color:var(--cobalt);}
   .hero h1 .hl{
@@ -50,17 +51,17 @@
     font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);
     text-transform:uppercase; letter-spacing:0.14em; text-align:right; line-height:2;
   }
-  .hero .meta .num{font-family:var(--f-display); font-size:40px; font-weight:300; color:var(--inkwell); letter-spacing:-0.02em; display:block; line-height:1;}
+  .hero .meta .num{font-family:var(--f-display); font-size:36px; font-weight:300; color:var(--inkwell); letter-spacing:-0.02em; display:block; line-height:1;}
   .hero .meta .num em{font-style:italic; color:var(--cobalt);}
 
   /* ====== STATS ====== */
   .stats{
-    display:grid; grid-template-columns:repeat(5, 1fr); gap:16px; margin-bottom:56px;
-    padding:24px; background:#fff; border:1px solid var(--line); border-radius:14px;
+    display:grid; grid-template-columns:repeat(5, 1fr); gap:0; margin-bottom:56px;
+    background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden;
   }
-  .stat{text-align:center; padding:8px; border-right:1px solid var(--line);}
+  .stat{text-align:center; padding:20px 8px; border-right:1px solid var(--line);}
   .stat:last-child{border-right:none;}
-  .stat .val{font-family:var(--f-display); font-size:32px; font-weight:300; letter-spacing:-0.02em;}
+  .stat .val{font-family:var(--f-display); font-size:28px; font-weight:300; letter-spacing:-0.02em;}
   .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
   .stat .lbl{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:4px;}
 
@@ -71,7 +72,7 @@
     margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid var(--line);
   }
   .section-header h2{
-    font-family:var(--f-display); font-weight:380; font-size:36px; letter-spacing:-0.02em;
+    font-family:var(--f-display); font-weight:380; font-size:32px; letter-spacing:-0.02em;
   }
   .section-header h2 em{font-style:italic; color:var(--cobalt);}
   .section-header .num-tag{
@@ -80,74 +81,83 @@
   }
   .section-desc{font-size:14px; color:var(--inkwell-2); margin:-12px 0 24px; max-width:720px; line-height:1.6;}
 
-  /* ====== CARDS ====== */
-  .cards{display:grid; grid-template-columns:repeat(2, 1fr); gap:16px;}
-  .card{
-    background:#fff; border:1px solid var(--line); border-radius:12px; padding:22px;
-    text-decoration:none; color:inherit; position:relative; overflow:hidden;
-    transition:transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    display:block;
+  /* ====== DIRECTORY CARDS ====== */
+  .dir-grid{display:grid; grid-template-columns:repeat(5, 1fr); gap:14px; margin-bottom:56px;}
+  .dir-card{
+    background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px;
+    text-decoration:none; color:inherit; display:block;
+    transition:all 0.2s ease;
+    position:relative; overflow:hidden;
   }
-  .card:hover{
-    transform:translateY(-2px); box-shadow:var(--shadow); border-color:var(--cobalt);
+  .dir-card:hover{transform:translateY(-3px); box-shadow:var(--shadow); border-color:var(--cobalt);}
+  .dir-card .icon{
+    width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    font-size:18px; margin-bottom:14px;
   }
-  .card .top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;}
-  .card .tag{
-    font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.14em;
-    padding:3px 8px; border-radius:8px;
+  .dir-card h3{
+    font-family:var(--f-display); font-size:18px; font-weight:400; letter-spacing:-0.01em;
+    margin-bottom:4px; line-height:1.2;
   }
-  .tag.found{background:var(--inkwell); color:var(--ricepaper);}
-  .tag.extended{background:var(--cobalt); color:#fff;}
-  .card .size{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);}
-  .card h3{
-    font-family:var(--f-display); font-size:24px; font-weight:380; letter-spacing:-0.02em;
-    line-height:1.2; margin-bottom:6px;
+  .dir-card .count{
+    font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);
+    margin-bottom:12px;
   }
-  .card .sub{font-size:13px; color:var(--inkwell-2); margin-bottom:14px; line-height:1.5;}
-  .card .chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;}
-  .card .chip{
-    font-size:11px; padding:3px 8px; background:var(--ricepaper); border:1px solid var(--line);
-    border-radius:10px; color:var(--inkwell-2);
+  .dir-card .files{
+    font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);
+    line-height:1.8; border-top:1px solid var(--line); padding-top:10px;
   }
-  .card .arrow{
-    position:absolute; bottom:22px; right:22px;
-    width:28px; height:28px; border-radius:50%; background:var(--ricepaper); border:1px solid var(--line);
-    display:flex; align-items:center; justify-content:center;
+  .dir-card .files span{display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+  .dir-card.phone .icon{background:var(--cobalt-soft); color:var(--cobalt);}
+  .dir-card.tablet .icon{background:var(--growth-soft); color:var(--growth);}
+  .dir-card.web .icon{background:var(--highlighter-soft); color:#8A6500;}
+  .dir-card.pc .icon{background:var(--ricepaper-2); color:var(--inkwell-2);}
+  .dir-card.ai .icon{background:var(--ai-soft); color:var(--ai);}
+  .dir-card.ai{border-color:var(--ai-soft);}
+  .dir-card.ai:hover{border-color:var(--ai);}
+
+  /* ====== PRD CARD ====== */
+  .prd-card{
+    display:grid; grid-template-columns:1fr auto; gap:32px; align-items:center;
+    background:var(--inkwell); color:var(--ricepaper); border-radius:14px; padding:32px;
+    text-decoration:none; margin-bottom:56px;
     transition:all 0.2s ease;
   }
-  .card:hover .arrow{background:var(--cobalt); border-color:var(--cobalt);}
-  .card:hover .arrow svg{stroke:#fff;}
-  .card .arrow svg{width:14px; height:14px; fill:none; stroke:var(--inkwell); stroke-width:2;}
-
-  .card.hero-card{
-    grid-column:1 / -1; display:grid; grid-template-columns:1fr auto; gap:24px; align-items:center;
-    background:var(--inkwell); color:var(--ricepaper); border-color:var(--inkwell);
+  .prd-card:hover{transform:translateY(-2px); box-shadow:0 12px 32px rgba(15,16,32,0.15);}
+  .prd-card .tag{
+    display:inline-block; font-family:var(--f-mono); font-size:10px; text-transform:uppercase;
+    letter-spacing:0.14em; padding:4px 10px; border-radius:6px;
+    background:var(--growth); color:#fff; margin-bottom:12px;
   }
-  .card.hero-card h3{color:var(--ricepaper); font-size:30px;}
-  .card.hero-card .sub{color:rgba(250,246,236,0.7);}
-  .card.hero-card .chip{background:rgba(250,246,236,0.1); border-color:rgba(250,246,236,0.2); color:var(--ricepaper);}
-  .card.hero-card .tag.found{background:var(--highlighter); color:var(--inkwell);}
-  .card.hero-card .arrow{background:rgba(250,246,236,0.1); border-color:rgba(250,246,236,0.2);}
-  .card.hero-card .arrow svg{stroke:var(--ricepaper);}
-  .card.hero-card:hover .arrow{background:var(--highlighter); border-color:var(--highlighter);}
-  .card.hero-card:hover .arrow svg{stroke:var(--inkwell);}
-  .card.hero-card .palette{display:flex; gap:6px;}
-  .card.hero-card .palette .swatch{width:36px; height:36px; border-radius:50%; border:2px solid rgba(250,246,236,0.3);}
+  .prd-card h3{
+    font-family:var(--f-display); font-size:28px; font-weight:380; letter-spacing:-0.02em;
+    color:var(--ricepaper); margin-bottom:8px;
+  }
+  .prd-card .sub{font-size:13px; color:rgba(250,246,236,0.7); line-height:1.6; margin-bottom:14px;}
+  .prd-card .chips{display:flex; flex-wrap:wrap; gap:6px;}
+  .prd-card .chip{
+    font-size:11px; padding:3px 8px; background:rgba(250,246,236,0.1);
+    border:1px solid rgba(250,246,236,0.2); border-radius:10px; color:var(--ricepaper);
+  }
+  .prd-card .phases{display:flex; flex-direction:column; gap:4px;}
+  .prd-card .phase{
+    font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em;
+    padding:4px 10px; border-radius:4px; white-space:nowrap;
+  }
 
   /* ====== MATRIX ====== */
   .matrix{
-    display:grid; grid-template-columns:160px repeat(3, 1fr); gap:1px;
+    display:grid; grid-template-columns:140px repeat(3, 1fr); gap:1px;
     background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden;
-    margin-bottom:56px;
   }
-  .matrix > div{background:#fff; padding:16px; min-height:72px;}
+  .matrix > div{background:#fff; padding:14px; min-height:60px;}
   .matrix .head{
     background:var(--ricepaper); font-family:var(--f-mono); font-size:10px;
     text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);
     display:flex; align-items:center;
   }
   .matrix .row-head{
-    background:var(--ricepaper); font-family:var(--f-display); font-size:16px; font-weight:400;
+    background:var(--ricepaper); font-family:var(--f-display); font-size:15px; font-weight:400;
     display:flex; align-items:center; letter-spacing:-0.01em;
   }
   .matrix .row-head em{font-style:italic; color:var(--cobalt);}
@@ -156,14 +166,52 @@
     font-size:12px; color:var(--inkwell); text-decoration:none;
     padding:6px 10px; background:var(--ricepaper); border-radius:6px;
     display:flex; justify-content:space-between; align-items:center;
-    border:1px solid transparent;
+    border:1px solid transparent; transition:all 0.15s ease;
   }
   .matrix .cell a:hover{border-color:var(--cobalt); background:var(--cobalt-soft);}
   .matrix .cell a .sz{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);}
 
+  /* ====== AI CARDS ====== */
+  .ai-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:14px;}
+  .ai-card{
+    background:#fff; border:1px solid var(--ai-soft); border-radius:12px; padding:22px;
+    text-decoration:none; color:inherit; display:block;
+    transition:all 0.2s ease; position:relative; overflow:hidden;
+  }
+  .ai-card:hover{transform:translateY(-3px); box-shadow:var(--shadow); border-color:var(--ai);}
+  .ai-card .tag{
+    display:inline-block; font-family:var(--f-mono); font-size:10px; text-transform:uppercase;
+    letter-spacing:0.14em; padding:3px 8px; border-radius:6px;
+    background:var(--ai-soft); color:var(--ai); margin-bottom:12px;
+  }
+  .ai-card h3{
+    font-family:var(--f-display); font-size:20px; font-weight:400; letter-spacing:-0.01em;
+    margin-bottom:6px; line-height:1.2;
+  }
+  .ai-card .sub{font-size:12px; color:var(--inkwell-2); line-height:1.5; margin-bottom:12px;}
+  .ai-card .chips{display:flex; flex-wrap:wrap; gap:5px;}
+  .ai-card .chip{
+    font-size:10px; padding:2px 7px; background:var(--ai-soft);
+    border-radius:8px; color:var(--ai);
+  }
+  .ai-card .size{
+    position:absolute; top:22px; right:22px;
+    font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);
+  }
+
+  /* ====== SPECS ====== */
+  .specs{display:grid; grid-template-columns:repeat(3, 1fr); gap:14px;}
+  .spec-card{
+    background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px;
+  }
+  .spec-card h4{
+    font-family:var(--f-display); font-size:18px; font-weight:400; margin-bottom:4px;
+  }
+  .spec-card .sub{font-size:12px; color:var(--inkwell-2); margin-bottom:14px;}
+
   /* ====== FOOTER ====== */
   footer{
-    margin-top:64px; padding-top:24px; border-top:1px solid var(--line);
+    margin-top:56px; padding-top:24px; border-top:1px solid var(--line);
     display:flex; justify-content:space-between; align-items:center;
     font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);
     text-transform:uppercase; letter-spacing:0.12em;
@@ -189,706 +237,181 @@
       <div class="name">Lumina · 墨光<small>教育应用 UI 设计系统</small></div>
     </div>
     <h1>
-      六端 · <em>28</em> 张<br/>
+      五端 · <em>33</em> 张<br/>
       <span class="hl">教学界面</span>
     </h1>
   </div>
   <div class="meta">
     <div>
-      <span class="num"><em>6</em></span>
-      设计表面
+      <span class="num"><em>5</em></span>
+      平台目录
     </div>
-    <div style="margin-top:16px;">
-      <span class="num"><em>28</em></span>
+    <div style="margin-top:14px;">
+      <span class="num"><em>33</em></span>
       HTML 文件
     </div>
-    <div style="margin-top:16px;">
-      <span class="num"><em>140+</em></span>
-      独立页面
+    <div style="margin-top:14px;">
+      <span class="num"><em>1.5</em></span>
+      MB 总计
     </div>
-    <div style="margin-top:16px; padding:6px 10px; background:var(--ricepaper-2); border:1px solid var(--line); border-radius:6px; font-family:var(--f-mono); font-size:10px; letter-spacing:0.05em;">
-      edu/原型/
+    <div style="margin-top:14px; padding:6px 10px; background:var(--ricepaper-2); border:1px solid var(--line); border-radius:6px; font-family:var(--f-mono); font-size:10px; letter-spacing:0.05em;">
+      v1.2 · 2026-08-25
     </div>
   </div>
 </header>
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">3</div><div class="lbl">学生端 · 平台</div></div>
-  <div class="stat"><div class="val hl">3</div><div class="lbl">教师端 · 平台</div></div>
-  <div class="stat"><div class="val">15</div><div class="lbl">主页面</div></div>
-  <div class="stat"><div class="val">6</div><div class="lbl">扩展页面</div></div>
-  <div class="stat"><div class="val">2</div><div class="lbl">共享页面</div></div>
+  <div class="stat"><div class="val hl">8</div><div class="lbl">📱 手机原型</div></div>
+  <div class="stat"><div class="val hl">6</div><div class="lbl">📲 平板原型</div></div>
+  <div class="stat"><div class="val">7</div><div class="lbl">🌐 Web 端</div></div>
+  <div class="stat"><div class="val">7</div><div class="lbl">🖥️ 桌面端</div></div>
+  <div class="stat"><div class="val" style="color:var(--ai);">3</div><div class="lbl">🤖 AI 模块</div></div>
 </div>
 
-<!-- ============ 目录结构 ============ -->
+<!-- ============ DIRECTORY NAV ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>目录结构 <em>Directory</em></h2>
-    <div class="num-tag">33 files · 1.5 MB</div>
+    <h2>原型目录 <em>Directory</em></h2>
+    <div class="num-tag">5 directories · 33 files</div>
   </div>
-  <div class="section-desc">原型按平台分目录存放：<code style="font-family:var(--f-mono); background:var(--inkwell); color:var(--highlighter); padding:2px 6px; border-radius:4px; font-size:11px;">APP/phone/</code> <code style="font-family:var(--f-mono); background:var(--inkwell); color:var(--highlighter); padding:2px 6px; border-radius:4px; font-size:11px;">APP/tablet/</code> <code style="font-family:var(--f-mono); background:var(--inkwell); color:var(--highlighter); padding:2px 6px; border-radius:4px; font-size:11px;">Web/</code> <code style="font-family:var(--f-mono); background:var(--inkwell); color:var(--highlighter); padding:2px 6px; border-radius:4px; font-size:11px;">PC/</code> <code style="font-family:var(--f-mono); background:var(--inkwell); color:var(--highlighter); padding:2px 6px; border-radius:4px; font-size:11px;">AI/</code>。打开 <b>lumina-00-index.html</b> 即可导航全部设计稿。</div>
-  <div class="cards" style="grid-template-columns:repeat(2, 1fr);">
-    <div class="card" style="cursor:default;">
-      <h3 style="font-size:16px;">📁 edu/原型/</h3>
-      <div class="sub" style="margin-bottom:12px; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);">/d/projects/edu/原型/</div>
-      <div style="font-family:var(--f-mono); font-size:11px; line-height:1.9; color:var(--inkwell);">
-        <div>├── <b style="color:var(--cobalt);">lumina-00-index.html</b> · 索引入口</div>
-        <div>├── <b style="color:var(--growth);">lumina-prd.html</b> · <span style="color:var(--growth);">产品需求文档 PRD</span></div>
-        <div>├── <span style="color:var(--cobalt);">📱 APP/phone/</span> · 手机原型 (8)</div>
-        <div>├── <span style="color:var(--cobalt);">📲 APP/tablet/</span> · 平板原型 (6)</div>
-        <div>├── <span style="color:var(--cobalt);">🌐 Web/</span> · 浏览器端 (7)</div>
-        <div>├── <span style="color:var(--cobalt);">🖥️ PC/</span> · 桌面端 (7)</div>
-        <div>└── <span style="color:var(--ai);">🤖 AI/</span> · AI 模块 (3)</div>
+  <div class="section-desc">原型按平台分目录存放，点击目录卡片浏览对应文件。</div>
+
+  <div class="dir-grid">
+    <a class="dir-card phone" href="APP/phone/">
+      <div class="icon">📱</div>
+      <h3>手机原型</h3>
+      <div class="count">APP/phone/ · 8 文件</div>
+      <div class="files">
+        <span>03 学生移动</span>
+        <span>06 教师移动</span>
+        <span>09 学生协作</span>
+        <span>12 教师深度</span>
+        <span>17 管理移动</span>
+        <span>18 AI 学生</span>
+        <span>+ 2 extended</span>
       </div>
-    </div>
+    </a>
 
-    <div class="card" style="cursor:default;">
-      <h3 style="font-size:16px;">📊 文件统计</h3>
-      <div class="sub" style="margin-bottom:12px;">按平台 / 目录汇总</div>
-
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--growth-soft); border:1px solid var(--growth); border-radius:6px;">
-          <span style="font-size:12px;"><b style="color:var(--growth);">📋 产品文档</b> · 根目录</span>
-          <span style="font-family:var(--f-mono); font-size:11px; color:var(--growth);">2 文件 · index + PRD</span>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--ricepaper); border-radius:6px;">
-          <span style="font-size:12px;"><b>📱 APP/phone/</b> · 手机原型</span>
-          <span style="font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);">8 文件 · 含 extended</span>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--ricepaper); border-radius:6px;">
-          <span style="font-size:12px;"><b>📲 APP/tablet/</b> · 平板原型</span>
-          <span style="font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);">6 文件 · 自适应布局</span>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--ricepaper); border-radius:6px;">
-          <span style="font-size:12px;"><b>🌐 Web/</b> · 浏览器端</span>
-          <span style="font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);">7 文件 · 含 extended</span>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--ricepaper); border-radius:6px;">
-          <span style="font-size:12px;"><b>🖥️ PC/</b> · 桌面端</span>
-          <span style="font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);">7 文件 · 含 extended</span>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--ai-soft); border:1px solid var(--ai); border-radius:6px;">
-          <span style="font-size:12px;"><b style="color:var(--ai);">🤖 AI/</b> · AI 模块</span>
-          <span style="font-family:var(--f-mono); font-size:11px; color:var(--ai);">3 文件 · 国产模型</span>
-        </div>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--inkwell); color:var(--ricepaper); border-radius:8px; margin-top:4px;">
-          <span style="font-size:12px; font-weight:500;">合计</span>
-          <span style="font-family:var(--f-mono); font-size:11px; color:var(--highlighter);">33 原型文件 · 5 目录 · 1.5 MB</span>
-        </div>
+    <a class="dir-card tablet" href="APP/tablet/">
+      <div class="icon">📲</div>
+      <h3>平板原型</h3>
+      <div class="count">APP/tablet/ · 6 文件</div>
+      <div class="files">
+        <span>03 学生平板</span>
+        <span>06 教师平板</span>
+        <span>09 协作平板</span>
+        <span>12 深度平板</span>
+        <span>17 管理平板</span>
+        <span>18 AI 平板</span>
       </div>
+    </a>
 
-      <div style="margin-top:14px; padding:10px; background:var(--cobalt-soft); border:1px solid var(--cobalt); border-radius:6px; font-size:11px; line-height:1.6;">
-        📱↔📲 <b>双模式适配</b>：手机/平板视图已拆分为独立文件，方便开发按需引用
+    <a class="dir-card web" href="Web/">
+      <div class="icon">🌐</div>
+      <h3>浏览器端</h3>
+      <div class="count">Web/ · 7 文件</div>
+      <div class="files">
+        <span>04 学生 Web</span>
+        <span>07 教师 Web</span>
+        <span>10 协作 Web</span>
+        <span>13 深度 Web</span>
+        <span>15 管理 Web</span>
+        <span>+ 2 extended</span>
       </div>
+    </a>
 
-      <div style="margin-top:8px; padding:10px; background:var(--highlighter-soft); border:1px solid var(--highlighter); border-radius:6px; font-size:11px; line-height:1.6;">
-        💡 <b>入口文件</b>：<code style="font-family:var(--f-mono); background:#fff; padding:1px 5px; border-radius:3px; font-size:10px;">lumina-00-index.html</code><br/>
-        浏览器打开即可导航所有设计稿与 PRD 文档
+    <a class="dir-card pc" href="PC/">
+      <div class="icon">🖥️</div>
+      <h3>桌面端</h3>
+      <div class="count">PC/ · 7 文件</div>
+      <div class="files">
+        <span>05 学生桌面</span>
+        <span>08 教师桌面</span>
+        <span>11 协作桌面</span>
+        <span>14 深度桌面</span>
+        <span>16 管理桌面</span>
+        <span>+ 2 extended</span>
       </div>
-    </div>
+    </a>
+
+    <a class="dir-card ai" href="AI/">
+      <div class="icon">🤖</div>
+      <h3>AI 模块</h3>
+      <div class="count">AI/ · 3 文件 · 国产模型</div>
+      <div class="files">
+        <span>18 AI 学生</span>
+        <span>19 AI 教师</span>
+        <span>20 AI 平台</span>
+      </div>
+    </a>
   </div>
 </section>
 
-<!-- ============ 产品需求文档 PRD ============ -->
-<section class="section">
-  <div class="section-header">
-    <h2>产品需求文档 <em>PRD</em></h2>
-    <div class="num-tag">Document · v1.0</div>
-  </div>
-  <div class="section-desc">完整的产品需求文档，覆盖 3 类目标用户 · 6 个设计表面 · 17 个功能模块 · 6 个里程碑阶段，作为设计、研发、运营的协作依据。</div>
-  <a class="card hero-card" href="lumina-prd.html" style="grid-column:1/-1; text-decoration:none;">
-    <div style="flex:1;">
-      <div class="top">
-        <div class="tag found" style="background:var(--growth); color:#fff;">📋 PRD v1.0 · 2026-08-25</div>
-        <div class="size">完整产品文档</div>
-      </div>
-      <h3>产品需求文档 · Product Requirements Document</h3>
-      <div class="sub">修订历史 · 产品愿景 · 用户画像 · 功能模块 · 信息架构 · 非功能需求 · 设计规范 · 技术架构 · 依赖许可 · 项目里程碑 · 验收标准 · 术语表</div>
-      <div class="chips">
-        <span class="chip">3 类用户</span>
-        <span class="chip">6 设计表面</span>
-        <span class="chip">17 功能模块</span>
-        <span class="chip">140+ 界面</span>
-        <span class="chip">12 月路线图</span>
-        <span class="chip">18 章节</span>
-      </div>
-    </div>
-    <div style="display:flex; flex-direction:column; gap:4px; padding:8px 0;">
-      <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em; padding:4px 10px; background:var(--ricepaper); border-radius:4px;">Phase 0 ✓ Done</div>
-      <div style="font-family:var(--f-mono); font-size:10px; color:var(--highlighter); text-transform:uppercase; letter-spacing:0.1em; padding:4px 10px; background:var(--highlighter-soft); border-radius:4px;">Phase 1 ● Current</div>
-      <div style="font-family:var(--f-mono); font-size:10px; color:var(--cobalt); text-transform:uppercase; letter-spacing:0.1em; padding:4px 10px; background:var(--cobalt-soft); border-radius:4px;">Phase 2-5 Plan</div>
-    </div>
-    <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-  </a>
-</section>
-
-<!-- ============ 设计基础 ============ -->
-<section class="section">
-  <div class="section-header">
-    <h2>设计基础 <em>Foundation</em></h2>
-    <div class="num-tag">01 — 02</div>
-  </div>
-  <div class="section-desc">全局调色板、字体规范、组件库与跨端共享页面（登录、个人中心、消息、状态）。</div>
-  <div class="cards">
-    <div class="card hero-card" style="cursor:default; opacity:0.7;">
-      <div>
-        <div class="top">
-          <div class="tag" style="background:var(--inkwell-2); color:var(--ricepaper);">01 · 已归档</div>
-          <div class="size">设计系统</div>
-        </div>
-        <h3>设计系统 · Design System</h3>
-        <div class="sub">调色板 · 字体规范 · 荧光笔签名效果 · 组件示例（已归档）</div>
-        <div class="chips">
-          <span class="chip">ricepaper</span>
-          <span class="chip">cobalt</span>
-          <span class="chip">highlighter</span>
-          <span class="chip">Fraunces</span>
-          <span class="chip">Inter</span>
-          <span class="chip">JetBrains Mono</span>
-        </div>
-      </div>
-      <div class="palette">
-        <div class="swatch" style="background:#FAF6EC;"></div>
-        <div class="swatch" style="background:#0F1020;"></div>
-        <div class="swatch" style="background:#3D46C9;"></div>
-        <div class="swatch" style="background:#F5B800;"></div>
-        <div class="swatch" style="background:#E85D3A;"></div>
-        <div class="swatch" style="background:#2A7F4F;"></div>
-      </div>
-    </div>
-
-    <div class="card" style="cursor:default; opacity:0.7;">
-      <div class="top">
-        <div class="tag" style="background:var(--inkwell-2); color:var(--ricepaper);">02 · 已归档</div>
-        <div class="size">共享页面</div>
-      </div>
-      <h3>共享页面 · Shared</h3>
-      <div class="sub">登录、个人中心、消息、状态页（已归档）</div>
-      <div class="chips">
-        <span class="chip">Login</span>
-        <span class="chip">Profile</span>
-        <span class="chip">Messages</span>
-        <span class="chip">States</span>
-      </div>
+<!-- ============ PRD ============ -->
+<a class="prd-card" href="lumina-prd.html">
+  <div>
+    <div class="tag">📋 PRD v1.2 · 2026-08-25</div>
+    <h3>产品需求文档 · Product Requirements</h3>
+    <div class="sub">3 类用户 · 6 设计表面 · 17 功能模块 · 140+ 界面 · 12 月路线图 · 国产 AI 模型 · 双模式适配</div>
+    <div class="chips">
+      <span class="chip">修订历史</span>
+      <span class="chip">用户画像</span>
+      <span class="chip">信息架构</span>
+      <span class="chip">技术架构</span>
+      <span class="chip">验收标准</span>
     </div>
   </div>
-</section>
-
-<!-- ============ 学生端 ============ -->
-<section class="section">
-  <div class="section-header">
-    <h2>学生端 <em>Student</em></h2>
-    <div class="num-tag">03 — 05</div>
+  <div class="phases">
+    <div class="phase" style="background:var(--growth); color:#fff;">Phase 0 ✓ Done</div>
+    <div class="phase" style="background:var(--highlighter); color:var(--inkwell);">Phase 1 ● Current</div>
+    <div class="phase" style="background:var(--cobalt-soft); color:var(--cobalt);">Phase 2–5 Plan</div>
   </div>
-  <div class="section-desc">覆盖移动端、Web 端、桌面端三套界面，每套包含主入口页与扩展子页面。</div>
-  <div class="cards">
-    <a class="card" href="APP/phone/lumina-03-student-mobile.html">
-      <div class="top">
-        <div class="tag found">03 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> 移动端</div>
-        <div class="size">9 KB</div>
-      </div>
-      <h3>学生移动端 · 首页</h3>
-      <div class="sub">今日课程、即将到来、底部导航 · iPhone 14 Pro 外壳</div>
-      <div class="chips">
-        <span class="chip">今日课程</span>
-        <span class="chip">即将到来</span>
-        <span class="chip">底部导航</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="APP/phone/lumina-03-student-mobile-extended.html">
-      <div class="top">
-        <div class="tag extended">03+ · 扩展</div>
-        <div class="size">29 KB</div>
-      </div>
-      <h3>学生移动端 · 5 个子页面</h3>
-      <div class="sub">课程详情、作业提交、讨论区、成绩册、日历 · 5 部手机网格</div>
-      <div class="chips">
-        <span class="chip">课程详情</span>
-        <span class="chip">作业提交</span>
-        <span class="chip">讨论区</span>
-        <span class="chip">成绩册</span>
-        <span class="chip">日历</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="Web/lumina-04-student-web.html">
-      <div class="top">
-        <div class="tag found">04 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="20" x2="22" y2="20"/></svg> Web</div>
-        <div class="size">16 KB</div>
-      </div>
-      <h3>学生 Web · 学习仪表盘</h3>
-      <div class="sub">侧边栏、6 门课程 / 128h / 3.72 GPA、截止日期、公告</div>
-      <div class="chips">
-        <span class="chip">Dashboard</span>
-        <span class="chip">课程卡片</span>
-        <span class="chip">截止日期</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="Web/lumina-04-student-web-extended.html">
-      <div class="top">
-        <div class="tag extended">04+ · 扩展</div>
-        <div class="size">49 KB</div>
-      </div>
-      <h3>学生 Web · 7 个子页面</h3>
-      <div class="sub">课程详情、作业、讨论、日历、成绩、在线考试、资源库</div>
-      <div class="chips">
-        <span class="chip">课程详情</span>
-        <span class="chip">作业</span>
-        <span class="chip">讨论</span>
-        <span class="chip">日历</span>
-        <span class="chip">成绩</span>
-        <span class="chip">在线考试</span>
-        <span class="chip">资源</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="PC/lumina-05-student-desktop.html">
-      <div class="top">
-        <div class="tag found">05 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> 桌面端</div>
-        <div class="size">14 KB</div>
-      </div>
-      <h3>学生桌面端 · 专注模式</h3>
-      <div class="sub">深色主题、番茄钟 23:41、离线下载、专注日志</div>
-      <div class="chips">
-        <span class="chip">Focus Mode</span>
-        <span class="chip">Pomodoro</span>
-        <span class="chip">Downloads</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="PC/lumina-05-student-desktop-extended.html">
-      <div class="top">
-        <div class="tag extended">05+ · 扩展</div>
-        <div class="size">31 KB</div>
-      </div>
-      <h3>学生桌面端 · 3 个子页面</h3>
-      <div class="sub">笔记管理（Markdown）、下载管理、应用设置</div>
-      <div class="chips">
-        <span class="chip">笔记管理</span>
-        <span class="chip">下载管理</span>
-        <span class="chip">设置</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-  </div>
-</section>
-
-<!-- ============ 学生协作场景 ============ -->
-<section class="section">
-  <div class="section-header">
-    <h2>学生协作场景 <em>Student · Collaboration</em></h2>
-    <div class="num-tag">09 — 11</div>
-  </div>
-  <div class="section-desc">直播课堂、小组协作、学习报告与成就、选课中心 — 每端独立设计。</div>
-  <div class="cards">
-    <a class="card" href="APP/phone/lumina-09-student-collaboration-mobile.html">
-      <div class="top">
-        <div class="tag found">09 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> 移动端</div>
-        <div class="size">75 KB</div>
-      </div>
-      <h3>学生协作 · 移动端 · 4 场景</h3>
-      <div class="sub">直播课堂（主画面/笔记/举手）、小组协作（项目/讨论）、学习报告、选课中心 · 9 部手机</div>
-      <div class="chips">
-        <span class="chip">直播课堂</span>
-        <span class="chip">小组协作</span>
-        <span class="chip">学习报告</span>
-        <span class="chip">成就徽章</span>
-        <span class="chip">选课中心</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="Web/lumina-10-student-collaboration-web.html">
-      <div class="top">
-        <div class="tag found">10 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="20" x2="22" y2="20"/></svg> Web</div>
-        <div class="size">63 KB</div>
-      </div>
-      <h3>学生协作 · Web · 4 场景</h3>
-      <div class="sub">直播+聊天侧栏、看板协作、成绩雷达图、课程筛选 · 4 个浏览器窗口</div>
-      <div class="chips">
-        <span class="chip">直播 + 聊天</span>
-        <span class="chip">看板协作</span>
-        <span class="chip">成绩雷达</span>
-        <span class="chip">选课筛选</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="PC/lumina-11-student-collaboration-desktop.html">
-      <div class="top">
-        <div class="tag found">11 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> 桌面端</div>
-        <div class="size">63 KB</div>
-      </div>
-      <h3>学生协作 · 桌面端 · 4 场景</h3>
-      <div class="sub">画中画直播 + 快捷键、4 列看板、能力条状图、3 列课程卡 · 4 个桌面窗口</div>
-      <div class="chips">
-        <span class="chip">画中画直播</span>
-        <span class="chip">4 列看板</span>
-        <span class="chip">能力分布</span>
-        <span class="chip">3 列选课</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-  </div>
-</section>
-
-<!-- ============ 教师端 ============ -->
-<section class="section">
-  <div class="section-header">
-    <h2>教师端 <em>Teacher</em></h2>
-    <div class="num-tag">06 — 08</div>
-  </div>
-  <div class="section-desc">同样覆盖移动 / Web / 桌面三端，面向教学管理与数据分析场景。</div>
-  <div class="cards">
-    <a class="card" href="APP/phone/lumina-06-teacher-mobile.html">
-      <div class="top">
-        <div class="tag found">06 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> 移动端</div>
-        <div class="size">10 KB</div>
-      </div>
-      <h3>教师移动端 · 工作台</h3>
-      <div class="sub">快捷操作（批作业/发通知/考勤/答疑）、待批阅列表、今日课程</div>
-      <div class="chips">
-        <span class="chip">Quick Actions</span>
-        <span class="chip">待批阅</span>
-        <span class="chip">今日课程</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="APP/phone/lumina-06-teacher-mobile-extended.html">
-      <div class="top">
-        <div class="tag extended">06+ · 扩展</div>
-        <div class="size">36 KB</div>
-      </div>
-      <h3>教师移动端 · 4 个子页面</h3>
-      <div class="sub">课程管理、学生详情（周子涵档案）、考勤（88% 到勤）、消息通知</div>
-      <div class="chips">
-        <span class="chip">课程管理</span>
-        <span class="chip">学生详情</span>
-        <span class="chip">考勤</span>
-        <span class="chip">消息</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="Web/lumina-07-teacher-web.html">
-      <div class="top">
-        <div class="tag found">07 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="20" x2="22" y2="20"/></svg> Web</div>
-        <div class="size">17 KB</div>
-      </div>
-      <h3>教师 Web · 课程分析</h3>
-      <div class="sub">74% 均分、学生风险（周子涵预警）、章节进度、教师备注</div>
-      <div class="chips">
-        <span class="chip">Analytics</span>
-        <span class="chip">学生风险</span>
-        <span class="chip">章节进度</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="Web/lumina-07-teacher-web-extended.html">
-      <div class="top">
-        <div class="tag extended">07+ · 扩展</div>
-        <div class="size">36 KB</div>
-      </div>
-      <h3>教师 Web · 5 个子页面</h3>
-      <div class="sub">课程编辑器、作业创建器、考勤（34/2/2）、成绩录入、答疑管理</div>
-      <div class="chips">
-        <span class="chip">课程编辑</span>
-        <span class="chip">作业创建</span>
-        <span class="chip">考勤</span>
-        <span class="chip">成绩录入</span>
-        <span class="chip">答疑</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="PC/lumina-08-teacher-desktop.html">
-      <div class="top">
-        <div class="tag found">08 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> 桌面端</div>
-        <div class="size">20 KB</div>
-      </div>
-      <h3>教师桌面端 · 批量批阅</h3>
-      <div class="sub">快捷键批阅、离线模式、桌面通知、2.3 GB 云端同步</div>
-      <div class="chips">
-        <span class="chip">Batch Grading</span>
-        <span class="chip">Offline</span>
-        <span class="chip">Shortcuts</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="PC/lumina-08-teacher-desktop-extended.html">
-      <div class="top">
-        <div class="tag extended">08+ · 扩展</div>
-        <div class="size">51 KB</div>
-      </div>
-      <h3>教师桌面端 · 4 个子页面</h3>
-      <div class="sub">成绩录入、课程编辑、答疑管理、离线同步冲突解决</div>
-      <div class="chips">
-        <span class="chip">成绩录入</span>
-        <span class="chip">课程编辑</span>
-        <span class="chip">答疑管理</span>
-        <span class="chip">同步管理</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-  </div>
-</section>
-
-<!-- ============ 教师深度功能 ============ -->
-<section class="section">
-  <div class="section-header">
-    <h2>教师深度功能 <em>Teacher · Deep</em></h2>
-    <div class="num-tag">12 — 14</div>
-  </div>
-  <div class="section-desc">直播授课控制、数据分析仪表盘、题库与智能组卷、课程评估问卷 — 每端独立设计。</div>
-  <div class="cards">
-    <a class="card" href="APP/phone/lumina-12-teacher-deep-mobile.html">
-      <div class="top">
-        <div class="tag found">12 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> 移动端</div>
-        <div class="size">73 KB</div>
-      </div>
-      <h3>教师深度 · 移动端 · 4 场景</h3>
-      <div class="sub">直播控制（举手队列/答题）、学情分析（成绩分布/风险预警）、题库管理、评估问卷 · 6 部手机</div>
-      <div class="chips">
-        <span class="chip">直播控制</span>
-        <span class="chip">学情分析</span>
-        <span class="chip">题库管理</span>
-        <span class="chip">课程评估</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="Web/lumina-13-teacher-deep-web.html">
-      <div class="top">
-        <div class="tag found">13 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="20" x2="22" y2="20"/></svg> Web</div>
-        <div class="size">71 KB</div>
-      </div>
-      <h3>教师深度 · Web · 4 场景</h3>
-      <div class="sub">直播+聊天侧栏、学情趋势图+风险表、题库筛选+智能组卷、评估多维评分 · 4 个浏览器窗口</div>
-      <div class="chips">
-        <span class="chip">直播 + 聊天</span>
-        <span class="chip">学情趋势</span>
-        <span class="chip">智能组卷</span>
-        <span class="chip">多维评估</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="PC/lumina-14-teacher-deep-desktop.html">
-      <div class="top">
-        <div class="tag found">14 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> 桌面端</div>
-        <div class="size">77 KB</div>
-      </div>
-      <h3>教师深度 · 桌面端 · 4 场景</h3>
-      <div class="sub">画中画+快捷键、风险学生多列表格、题库宽屏列表、评估三列布局 · 4 个 macOS 窗口</div>
-      <div class="chips">
-        <span class="chip">画中画 + ⌘</span>
-        <span class="chip">风险表格</span>
-        <span class="chip">题库宽屏</span>
-        <span class="chip">评估布局</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-  </div>
-</section>
-
-<!-- ============ 管理端 ============ -->
-<section class="section">
-  <div class="section-header">
-    <h2>管理端 <em>Admin</em></h2>
-    <div class="num-tag">15 — 17</div>
-  </div>
-  <div class="section-desc">数据总览、用户管理、课程审批、系统设置、审计日志 — 面向超级管理员与运营。</div>
-  <div class="cards">
-    <a class="card" href="Web/lumina-15-admin-web.html">
-      <div class="top">
-        <div class="tag found">15 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="20" x2="22" y2="20"/></svg> Web</div>
-        <div class="size">74 KB</div>
-      </div>
-      <h3>管理端 · Web · 4 场景</h3>
-      <div class="sub">数据总览+健康度+审计日志、用户管理表格、课程审批队列、系统设置配置 · 4 个浏览器窗口</div>
-      <div class="chips">
-        <span class="chip">数据总览</span>
-        <span class="chip">用户管理</span>
-        <span class="chip">课程审批</span>
-        <span class="chip">系统设置</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="PC/lumina-16-admin-desktop.html">
-      <div class="top">
-        <div class="tag found">16 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> 桌面端</div>
-        <div class="size">81 KB</div>
-      </div>
-      <h3>管理端 · 桌面端 · 4 场景</h3>
-      <div class="sub">实时指标+健康度+审计、宽屏用户表格+侧栏详情、左右分栏审批+详情预览、完整审计日志 · 4 个 macOS 窗口</div>
-      <div class="chips">
-        <span class="chip">实时指标</span>
-        <span class="chip">宽屏表格</span>
-        <span class="chip">左右分栏</span>
-        <span class="chip">审计日志</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card" href="APP/phone/lumina-17-admin-mobile.html">
-      <div class="top">
-        <div class="tag found">17 · <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> 移动端</div>
-        <div class="size">67 KB</div>
-      </div>
-      <h3>管理端 · 移动端 · 3 场景</h3>
-      <div class="sub">管理员首屏+紧急警报、审批列表+详情、通知中心+用户查询 · 6 部手机</div>
-      <div class="chips">
-        <span class="chip">紧急警报</span>
-        <span class="chip">快捷审批</span>
-        <span class="chip">通知中心</span>
-        <span class="chip">用户查询</span>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-  </div>
-</section>
-
-<!-- ============ AI 模块 ============ -->
-<section class="section">
-  <div class="section-header">
-    <h2>🤖 AI 模块 <em>AI-Powered</em></h2>
-    <div class="num-tag">18 — 20 · 2026 新增</div>
-  </div>
-  <div class="section-desc">面向 2026 年教育 AI 浪潮的最新能力模块。覆盖大语言模型（LLM）、多模态 AI、Multi-Agent 编排、内容安全、智能运维等前沿场景。</div>
-  <div class="cards">
-    <a class="card hero-card" href="AI/lumina-18-ai-student.html" style="border-color:var(--ai);">
-      <div>
-        <div class="top">
-          <div class="tag" style="background:var(--ai-soft); color:var(--ai);">18 · AI 学生</div>
-          <div class="size">93 KB</div>
-        </div>
-        <h3>AI 学生 · 智能学习伙伴</h3>
-        <div class="sub">苏格拉底导师 · 个性化路径 · 知识图谱 · AI 闪卡 · 课堂笔记 · RAG 问答 · 多模态提问 · 语音助手</div>
-        <div class="chips">
-          <span class="chip">通义千问</span>
-          <span class="chip">Qwen-VL</span>
-          <span class="chip">讯飞语音</span>
-          <span class="chip">RAG</span>
-          <span class="chip">Adaptive Learning</span>
-        </div>
-      </div>
-      <div class="palette">
-        <div class="swatch" style="background:#7C3AED;"></div>
-        <div class="swatch" style="background:#A78BFA;"></div>
-        <div class="swatch" style="background:#EDE9FE;"></div>
-        <div class="swatch" style="background:linear-gradient(135deg, #7C3AED, #3D46C9);"></div>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card hero-card" href="AI/lumina-19-ai-teacher.html" style="border-color:var(--ai);">
-      <div>
-        <div class="top">
-          <div class="tag" style="background:var(--ai-soft); color:var(--ai);">19 · AI 教师</div>
-          <div class="size">95 KB</div>
-        </div>
-        <h3>AI 教师 · 智能教研助手</h3>
-        <div class="sub">AI 批阅 · AI 课件生成 · AI 课堂 Copilot · AI 学情预测 · 个性化干预 · 班级画像 · 实时学情</div>
-        <div class="chips">
-          <span class="chip">AI Grading</span>
-          <span class="chip">Content Gen</span>
-          <span class="chip">Live Copilot</span>
-          <span class="chip">Predictive</span>
-          <span class="chip">Intervention</span>
-        </div>
-      </div>
-      <div class="palette">
-        <div class="swatch" style="background:#7C3AED;"></div>
-        <div class="swatch" style="background:#A78BFA;"></div>
-        <div class="swatch" style="background:#EDE9FE;"></div>
-        <div class="swatch" style="background:linear-gradient(135deg, #7C3AED, #3D46C9);"></div>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-
-    <a class="card hero-card" href="AI/lumina-20-ai-admin.html" style="border-color:var(--ai);">
-      <div>
-        <div class="top">
-          <div class="tag" style="background:var(--ai-soft); color:var(--ai);">20 · AI 平台</div>
-          <div class="size">82 KB</div>
-        </div>
-        <h3>AI 平台 · 智能运维中枢</h3>
-        <div class="sub">Multi-Agent 编排 · 内容安全审核 · AI 成本优化 · 合规审计 · 决策追溯 · 伦理偏见监测</div>
-        <div class="chips">
-          <span class="chip">Agent Orchestration</span>
-          <span class="chip">Content Safety</span>
-          <span class="chip">Cost Analytics</span>
-          <span class="chip">Audit Trail</span>
-          <span class="chip">Ethics</span>
-        </div>
-      </div>
-      <div class="palette">
-        <div class="swatch" style="background:#7C3AED;"></div>
-        <div class="swatch" style="background:#A78BFA;"></div>
-        <div class="swatch" style="background:#EDE9FE;"></div>
-        <div class="swatch" style="background:linear-gradient(135deg, #7C3AED, #3D46C9);"></div>
-      </div>
-      <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
-    </a>
-  </div>
-</section>
+</a>
 
 <!-- ============ MATRIX ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>角色 × 平台矩阵 <em>Matrix</em></h2>
-    <div class="num-tag">4 场景组 × 3 平台</div>
+    <h2>角色 × 平台 <em>Matrix</em></h2>
+    <div class="num-tag">快速导航 · 按角色和平台查找</div>
   </div>
-  <div class="section-desc">每个单元格对应一个独立 HTML 文件。基础端提供核心入口，扩展页面与场景覆盖深度功能。</div>
+  <div class="section-desc">每个单元格对应一个独立 HTML 文件。基础端提供核心入口，扩展页面覆盖深度功能。</div>
 
   <div class="matrix">
     <div class="head">角色 \ 平台</div>
-    <div class="head"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> 移动端 Mobile</div>
-    <div class="head"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="20" x2="22" y2="20"/></svg> Web 端 Web</div>
-    <div class="head"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="vertical-align:-0.1em"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> 桌面端 Desktop</div>
+    <div class="head">📱 移动端</div>
+    <div class="head">🌐 Web 端</div>
+    <div class="head">🖥️ 桌面端</div>
 
-    <div class="row-head"><em>学生</em> Student</div>
+    <div class="row-head"><em>学生</em></div>
     <div class="cell">
-      <a href="APP/phone/lumina-03-student-mobile.html">主页 <span class="sz">9 KB</span></a>
-      <a href="APP/phone/lumina-03-student-mobile-extended.html">扩展 · 5 页 <span class="sz">29 KB</span></a>
+      <a href="APP/phone/lumina-03-student-mobile.html">首页 <span class="sz">9 KB</span></a>
+      <a href="APP/phone/lumina-03-student-mobile-extended.html">5 子页 <span class="sz">29 KB</span></a>
     </div>
     <div class="cell">
-      <a href="Web/lumina-04-student-web.html">主页 <span class="sz">16 KB</span></a>
-      <a href="Web/lumina-04-student-web-extended.html">扩展 · 7 页 <span class="sz">49 KB</span></a>
+      <a href="Web/lumina-04-student-web.html">仪表盘 <span class="sz">16 KB</span></a>
+      <a href="Web/lumina-04-student-web-extended.html">7 子页 <span class="sz">49 KB</span></a>
     </div>
     <div class="cell">
-      <a href="PC/lumina-05-student-desktop.html">主页 <span class="sz">14 KB</span></a>
-      <a href="PC/lumina-05-student-desktop-extended.html">扩展 · 3 页 <span class="sz">31 KB</span></a>
-    </div>
-
-    <div class="row-head"><em>教师</em> Teacher</div>
-    <div class="cell">
-      <a href="APP/phone/lumina-06-teacher-mobile.html">主页 <span class="sz">10 KB</span></a>
-      <a href="APP/phone/lumina-06-teacher-mobile-extended.html">扩展 · 4 页 <span class="sz">36 KB</span></a>
-    </div>
-    <div class="cell">
-      <a href="Web/lumina-07-teacher-web.html">主页 <span class="sz">17 KB</span></a>
-      <a href="Web/lumina-07-teacher-web-extended.html">扩展 · 5 页 <span class="sz">36 KB</span></a>
-    </div>
-    <div class="cell">
-      <a href="PC/lumina-08-teacher-desktop.html">主页 <span class="sz">20 KB</span></a>
-      <a href="PC/lumina-08-teacher-desktop-extended.html">扩展 · 4 页 <span class="sz">51 KB</span></a>
+      <a href="PC/lumina-05-student-desktop.html">专注模式 <span class="sz">14 KB</span></a>
+      <a href="PC/lumina-05-student-desktop-extended.html">3 子页 <span class="sz">31 KB</span></a>
     </div>
 
-    <div class="row-head"><em>协作</em> Collab</div>
+    <div class="row-head"><em>教师</em></div>
+    <div class="cell">
+      <a href="APP/phone/lumina-06-teacher-mobile.html">工作台 <span class="sz">10 KB</span></a>
+      <a href="APP/phone/lumina-06-teacher-mobile-extended.html">4 子页 <span class="sz">36 KB</span></a>
+    </div>
+    <div class="cell">
+      <a href="Web/lumina-07-teacher-web.html">课程分析 <span class="sz">17 KB</span></a>
+      <a href="Web/lumina-07-teacher-web-extended.html">5 子页 <span class="sz">36 KB</span></a>
+    </div>
+    <div class="cell">
+      <a href="PC/lumina-08-teacher-desktop.html">批量批阅 <span class="sz">20 KB</span></a>
+      <a href="PC/lumina-08-teacher-desktop-extended.html">4 子页 <span class="sz">51 KB</span></a>
+    </div>
+
+    <div class="row-head"><em>协作</em></div>
     <div class="cell">
       <a href="APP/phone/lumina-09-student-collaboration-mobile.html">4 场景 · 9 机 <span class="sz">75 KB</span></a>
     </div>
@@ -899,7 +422,7 @@
       <a href="PC/lumina-11-student-collaboration-desktop.html">4 场景 · 4 窗 <span class="sz">63 KB</span></a>
     </div>
 
-    <div class="row-head"><em>教师深度</em> Deep</div>
+    <div class="row-head"><em>深度</em></div>
     <div class="cell">
       <a href="APP/phone/lumina-12-teacher-deep-mobile.html">4 场景 · 6 机 <span class="sz">73 KB</span></a>
     </div>
@@ -910,7 +433,7 @@
       <a href="PC/lumina-14-teacher-deep-desktop.html">4 场景 · 4 窗 <span class="sz">77 KB</span></a>
     </div>
 
-    <div class="row-head"><em>管理端</em> Admin</div>
+    <div class="row-head"><em>管理</em></div>
     <div class="cell">
       <a href="APP/phone/lumina-17-admin-mobile.html">3 场景 · 6 机 <span class="sz">67 KB</span></a>
     </div>
@@ -923,50 +446,101 @@
   </div>
 </section>
 
-<!-- ============ 设计规范速览 ============ -->
+<!-- ============ AI MODULES ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>设计规范速览 <em>Specs</em></h2>
+    <h2>🤖 AI 模块 <em>AI-Powered</em></h2>
+    <div class="num-tag">国产模型 · 通义 / 智谱 / 讯飞 / 豆包</div>
+  </div>
+  <div class="section-desc">覆盖大语言模型、多模态 AI、Multi-Agent 编排、内容安全、智能运维等前沿场景。</div>
+
+  <div class="ai-grid">
+    <a class="ai-card" href="AI/lumina-18-ai-student.html">
+      <span class="size">93 KB</span>
+      <div class="tag">18 · AI 学生</div>
+      <h3>智能学习伙伴</h3>
+      <div class="sub">苏格拉底导师 · 个性化路径 · 知识图谱 · AI 闪卡 · RAG 问答 · 多模态提问 · 语音助手</div>
+      <div class="chips">
+        <span class="chip">通义千问</span>
+        <span class="chip">Qwen-VL</span>
+        <span class="chip">讯飞语音</span>
+        <span class="chip">RAG</span>
+      </div>
+    </a>
+
+    <a class="ai-card" href="AI/lumina-19-ai-teacher.html">
+      <span class="size">95 KB</span>
+      <div class="tag">19 · AI 教师</div>
+      <h3>智能教研助手</h3>
+      <div class="sub">AI 批阅 · AI 课件生成 · AI 课堂 Copilot · AI 学情预测 · 个性化干预</div>
+      <div class="chips">
+        <span class="chip">AI Grading</span>
+        <span class="chip">Content Gen</span>
+        <span class="chip">Copilot</span>
+        <span class="chip">Predictive</span>
+      </div>
+    </a>
+
+    <a class="ai-card" href="AI/lumina-20-ai-admin.html">
+      <span class="size">82 KB</span>
+      <div class="tag">20 · AI 平台</div>
+      <h3>智能运维中枢</h3>
+      <div class="sub">Multi-Agent 编排 · 内容安全审核 · AI 成本优化 · 合规审计 · 伦理偏见监测</div>
+      <div class="chips">
+        <span class="chip">Agent Orch.</span>
+        <span class="chip">Safety</span>
+        <span class="chip">Cost Analytics</span>
+        <span class="chip">Audit</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ============ DESIGN SPECS ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>设计规范 <em>Specs</em></h2>
     <div class="num-tag">Design Tokens</div>
   </div>
-  <div class="cards" style="grid-template-columns:repeat(3, 1fr);">
-    <div class="card" style="cursor:default;">
-      <h3 style="font-size:18px;">调色板 · Palette</h3>
-      <div class="sub" style="margin-bottom:10px;">6 色系统 + 2 中性色</div>
-      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;">
-        <div style="aspect-ratio:1; background:var(--ricepaper); border:1px solid var(--line); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:9px; font-family:var(--f-mono);">ricepaper</div>
-        <div style="aspect-ratio:1; background:var(--inkwell); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:9px; font-family:var(--f-mono); color:#fff;">inkwell</div>
-        <div style="aspect-ratio:1; background:var(--cobalt); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:9px; font-family:var(--f-mono); color:#fff;">cobalt</div>
-        <div style="aspect-ratio:1; background:var(--highlighter); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:9px; font-family:var(--f-mono);">hl</div>
-        <div style="aspect-ratio:1; background:var(--correction); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:9px; font-family:var(--f-mono); color:#fff;">correction</div>
-        <div style="aspect-ratio:1; background:var(--growth); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:9px; font-family:var(--f-mono); color:#fff;">growth</div>
-        <div style="aspect-ratio:1; background:var(--cobalt-soft); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:9px; font-family:var(--f-mono);">cobalt-soft</div>
-        <div style="aspect-ratio:1; background:var(--highlighter-soft); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:9px; font-family:var(--f-mono);">hl-soft</div>
+
+  <div class="specs">
+    <div class="spec-card">
+      <h4>调色板 · Palette</h4>
+      <div class="sub">6 色系统 + 2 中性色 + AI 紫</div>
+      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:5px;">
+        <div style="aspect-ratio:1; background:var(--ricepaper); border:1px solid var(--line); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:8px; font-family:var(--f-mono);">rice</div>
+        <div style="aspect-ratio:1; background:var(--inkwell); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:8px; font-family:var(--f-mono); color:#fff;">ink</div>
+        <div style="aspect-ratio:1; background:var(--cobalt); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:8px; font-family:var(--f-mono); color:#fff;">cobalt</div>
+        <div style="aspect-ratio:1; background:var(--highlighter); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:8px; font-family:var(--f-mono);">hl</div>
+        <div style="aspect-ratio:1; background:var(--correction); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:8px; font-family:var(--f-mono); color:#fff;">corr</div>
+        <div style="aspect-ratio:1; background:var(--growth); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:8px; font-family:var(--f-mono); color:#fff;">grow</div>
+        <div style="aspect-ratio:1; background:var(--ai); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:8px; font-family:var(--f-mono); color:#fff;">AI</div>
+        <div style="aspect-ratio:1; background:var(--ai-soft); border-radius:6px; display:flex; align-items:flex-end; padding:4px; font-size:8px; font-family:var(--f-mono);">ai-soft</div>
       </div>
     </div>
 
-    <div class="card" style="cursor:default;">
-      <h3 style="font-size:18px;">字体 · Typography</h3>
-      <div class="sub" style="margin-bottom:10px;">3 套字体，中英兼顾</div>
-      <div style="font-family:var(--f-display); font-size:24px; font-weight:380; letter-spacing:-0.02em; margin-bottom:6px;">
-        Fraunces <em style="color:var(--cobalt);">italic</em> 标题
+    <div class="spec-card">
+      <h4>字体 · Typography</h4>
+      <div class="sub">3 套字体，中英兼顾</div>
+      <div style="font-family:var(--f-display); font-size:22px; font-weight:380; letter-spacing:-0.02em; margin-bottom:6px;">
+        Fraunces <em style="color:var(--cobalt);">italic</em>
       </div>
-      <div style="font-family:var(--f-body); font-size:14px; margin-bottom:6px;">
-        Inter · 正文 · 中文使用 PingFang SC
+      <div style="font-family:var(--f-body); font-size:13px; margin-bottom:6px;">
+        Inter · 正文 · PingFang SC
       </div>
-      <div style="font-family:var(--f-mono); font-size:12px; color:var(--inkwell-2);">
-        JetBrains Mono · 数字 · 标签 · 时间
+      <div style="font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);">
+        JetBrains Mono · 数字 · 标签
       </div>
     </div>
 
-    <div class="card" style="cursor:default;">
-      <h3 style="font-size:18px;">签名效果 · Signature</h3>
-      <div class="sub" style="margin-bottom:10px;">Lumina 的视觉 DNA</div>
-      <div style="font-family:var(--f-display); font-size:32px; font-weight:380; letter-spacing:-0.02em;">
+    <div class="spec-card">
+      <h4>签名效果 · Signature</h4>
+      <div class="sub">Lumina 的视觉 DNA</div>
+      <div style="font-family:var(--f-display); font-size:26px; font-weight:380; letter-spacing:-0.02em;">
         <span style="background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 6px;">荧光笔划重点</span>
       </div>
-      <div style="font-size:11px; color:var(--inkwell-2); margin-top:10px; font-family:var(--f-mono);">
-        highlighter · 62% → 88% · var(--highlighter)
+      <div style="font-size:10px; color:var(--inkwell-2); margin-top:10px; font-family:var(--f-mono);">
+        62% → 88% · var(--highlighter)
       </div>
     </div>
   </div>
@@ -974,8 +548,8 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span></div>
-  <div>教育 UI 设计系统 · 27 文件 · 1.5 MB · 📱↔📲 双模式 · 🤖 国产模型</div>
-  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">edu/原型/ · 2026-08-25</div>
+  <div>教育 UI 设计系统 · 33 文件 · 5 目录 · 📱↔📲 双模式 · 🤖 国产模型</div>
+  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">v1.2 · 2026-08-25</div>
 </footer>
 
 </body>

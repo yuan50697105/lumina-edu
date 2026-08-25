@@ -1,0 +1,22 @@
+# 语雀配置
+# 复制此文件为 yuque-config.local.json 并填入你的配置
+# ⚠️ 不要将 yuque-config.local.json 提交到 git！
+
+{
+  "token": "",
+  "repo_namespace": "",
+  "docs": {
+    "prd": {
+      "slug": "lumina-prd",
+      "title": "Lumina 墨光 · 产品需求文档 PRD"
+    },
+    "index": {
+      "slug": "lumina-index",
+      "title": "Lumina 墨光 · 设计索引"
+    },
+    "specs": {
+      "slug": "lumina-specs",
+      "title": "Lumina 墨光 · 设计规范"
+    }
+  }
+}

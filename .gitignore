@@ -51,3 +51,7 @@ wheels/
 .cache/
 *.bak
 *.backup
+
+# Local config (tokens, secrets)
+scripts/yuque-config.local.json
+.env
