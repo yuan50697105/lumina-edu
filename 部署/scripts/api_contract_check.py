@@ -15,7 +15,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]          # edu/
 SVC = ROOT / "服务"
-NGINX_CONF = ROOT / "部署" / "config" / "nginx" / "conf.d" / "lumina.conf"
+MONOLITH = SVC / "lumina-app"                       # 单体应用目录
+NGINX_CONF = ROOT / "部署" / "nginx" / "nginx.conf"
 COMPOSE = ROOT / "部署" / "docker-compose.yml"
 WEB_SRC = SVC / "web-frontend" / "src"
 
@@ -37,20 +38,8 @@ def _router_prefix(sig: str) -> str:
 
 
 def collect_backend_endpoints() -> dict[str, set[str]]:
-    """返回 {服务名: {完整端点路径}}。尽力而为：解析 decorator 到 include 拼路径。"""
+    """返回 {模块名: {完整端点路径}}。扫描单体应用 app/modules/ 下的 routers。"""
     result: dict[str, set[str]] = {}
-
-    def _find_router_file(sdir: Path, parts: list[str]) -> Path | None:
-        """定位 include 引用变量所在的 .py：优先 父名同名文件，回退 routers.py"""
-        if len(parts) == 2:                       # grades.course_router
-            cand = sdir / "app" / "routers" / f"{parts[0]}.py"
-            if cand.exists():
-                return cand
-            cand = sdir / "app" / f"{parts[0]}.py"
-            if cand.exists():
-                return cand
-        cand = sdir / "app" / "routers.py"        # 单文件别名（router as chat_router）
-        return cand if cand.exists() else None
 
     def _module_routes(file: Path) -> dict[str, dict]:
         """file 内所有 router 变量 → {'prefix':.., 'endpoints':[{method,path}]}"""
@@ -63,29 +52,41 @@ def collect_backend_endpoints() -> dict[str, set[str]]:
             mods[var]["endpoints"].append((method.upper(), path))
         return mods
 
-    for sdir in sorted(SVC.iterdir()):
-        main = sdir / "app" / "main.py"
-        if not main.exists():
+    # 扫描单体应用的模块
+    modules_dir = MONOLITH / "app" / "modules"
+    if not modules_dir.exists():
+        warnings.append(f"单体应用模块目录不存在: {modules_dir}")
+        return result
+
+    for mod_dir in sorted(modules_dir.iterdir()):
+        if not mod_dir.is_dir():
             continue
-        main_text = main.read_text(encoding="utf-8")
-        for inc_path, inc_prefix in INCLUDE.findall(main_text):
-            parts = inc_path.split(".")
-            var = parts[-1]
-            rfile = _find_router_file(sdir, parts)
-            if rfile is None:
-                warnings.append(f"{sdir.name} 找不到 {inc_path} 的路由文件")
-                continue
+
+        # 查找路由文件
+        router_files = []
+        routers_py = mod_dir / "routers.py"
+        if routers_py.exists():
+            router_files.append(routers_py)
+
+        # 子目录 routers/
+        routers_dir = mod_dir / "routers"
+        if routers_dir.exists():
+            for f in routers_dir.glob("*.py"):
+                if f.name != "__init__.py":
+                    router_files.append(f)
+
+        # 特殊文件（如 user 模块的 routers_auth.py, routers_users.py）
+        for f in mod_dir.glob("routers_*.py"):
+            router_files.append(f)
+
+        for rfile in router_files:
             mods = _module_routes(rfile)
-            mod = mods.get(var)
-            if mod is None and len(parts) == 1:
-                # 单段别名（from .routers import router as chat_router）→ 取 router 或唯一定义
-                mod = mods.get("router") or (next(iter(mods.values()), None))
-            if mod is None:
-                warnings.append(f"{sdir.name}/{rfile.name} 未定义 router 变量 {var}")
-                continue
-            for method, path in mod["endpoints"]:
-                full = f"{inc_prefix}{mod['prefix']}{path}" or "/"
-                result.setdefault(sdir.name, set()).add(f"{method} {full}")
+            for var, mod in mods.items():
+                for method, path in mod["endpoints"]:
+                    # 单体应用 main.py 用 prefix="/api/v1" 挂载所有路由
+                    full = f"/api/v1{mod['prefix']}{path}" or "/api/v1"
+                    result.setdefault(mod_dir.name, set()).add(f"{method} {full}")
+
     return result
 
 
@@ -167,36 +168,42 @@ def compose_service_names() -> set[str] | None:
 def main() -> int:
     backend = collect_backend_endpoints()
     all_endpoints = set()
-    for svc, eps in backend.items():
+    for mod, eps in backend.items():
         for ep in eps:
             all_endpoints.add(ep.split(" ", 1)[1])
     regex_locs, prefix_locs = collect_nginx_routes()
     frontend = collect_frontend_urls()
     comp_services = compose_service_names()
 
-    # 3.1 前端 URL 必须能路由到后端端点
+    # 3.1 前端 URL 必须能路由到后端端点（单体：所有模块都在 lumina-app）
     for url in sorted(frontend):
         upstream = nginx_upstream(url, regex_locs, prefix_locs)
-        svc_eps = backend.get(f"{upstream}-service") or backend.get(upstream, set())
-        reachable = any(_norm(p) == _norm(url) for _, p in (e.split(" ", 1) for e in svc_eps))
+        # 单体模式：检查所有模块的端点
+        reachable = False
+        matched_mod = None
+        for mod, eps in backend.items():
+            if any(_norm(p) == _norm(url) for _, p in (e.split(" ", 1) for e in eps)):
+                reachable = True
+                matched_mod = mod
+                break
         status = "✓" if reachable else "✗ 端点缺失" if upstream else "✗ 无 Nginx 路由"
-        print(f"{status:12} 前端 {url:48} → {upstream or '?'}")
+        print(f"{status:12} 前端 {url:48} → {upstream or '?'} ({matched_mod or '-'})")
         if upstream is None:
             problems.append(f"前端 {url} 无 Nginx 路由")
         elif not reachable:
             problems.append(f"前端 {url} 未命中后端端点（Nginx → {upstream}）")
 
-    # 3.2 后端每个端点必须有 Nginx 路由（公共端点除外）
+    # 3.2 后端每个端点必须有 Nginx 路由
     print("\n── 后端端点 → Nginx 覆盖 ──")
-    for svc, eps in sorted(backend.items()):
+    for mod, eps in sorted(backend.items()):
         for ep in sorted(eps):
             method, path = ep.split(" ", 1)
             upstream = nginx_upstream(path, regex_locs, prefix_locs)
-            msg = f"{svc:20} {ep:52} → {upstream}"
-            ok = upstream is not None and upstream.endswith(svc)
+            msg = f"{mod:20} {ep:52} → {upstream}"
+            ok = upstream is not None  # 单体模式：只要能路由到 lumina-app 即可
             print(f"{'✓' if ok else '⚠' if upstream else '✗'}  {msg}")
             if upstream is None:
-                problems.append(f"后端 {svc} {ep} 无 Nginx 路由")
+                problems.append(f"后端 {mod} {ep} 无 Nginx 路由")
 
     # 3.3 Nginx upstream 须存在于 compose
     if comp_services:
@@ -211,7 +218,7 @@ def main() -> int:
         if bad_ups:
             problems.append(f"Nginx upstream 不在 compose 中: {bad_ups}")
 
-    print(f"\n前端调用总数: {len(frontend)} | 后端端点总数: {len(all_endpoints)}")
+    print(f"\n前端调用总数: {len(frontend)} | 后端端点总数: {len(all_endpoints)} | 模块数: {len(backend)}")
     for w in warnings:
         print(f"[警告] {w}")
     if problems:
