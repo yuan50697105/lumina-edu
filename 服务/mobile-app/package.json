@@ -1,0 +1,30 @@
+{
+  "name": "lumina-mobile",
+  "version": "1.0.0",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "2.1.1",
+    "@react-navigation/native": "^7.1.7",
+    "@react-navigation/native-stack": "^7.3.12",
+    "expo": "~52.0.0",
+    "expo-status-bar": "~2.0.0",
+    "react": "18.3.1",
+    "react-native": "0.76.9",
+    "react-native-safe-area-context": "~4.12.0",
+    "react-native-screens": "~3.34.0",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0",
+    "@types/react": "~18.3.12",
+    "typescript": "~5.6.3"
+  }
+}

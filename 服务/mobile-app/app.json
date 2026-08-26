@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Lumina 墨光",
+    "slug": "lumina-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#FAF6EC"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "edu.lumina.mobile"
+    },
+    "android": {
+      "package": "edu.lumina.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#FAF6EC"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

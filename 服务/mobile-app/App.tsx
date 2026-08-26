@@ -1,0 +1,43 @@
+// ============================================
+// Lumina 墨光 · 移动端入口
+// React Navigation + 登录守卫
+// ============================================
+import { NavigationContainer } from '@react-navigation/native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { StatusBar } from 'expo-status-bar'
+import { useAuthStore } from './src/store/auth'
+import type { RootStackParamList } from './src/navigation'
+import Login from './src/pages/Login'
+import Home from './src/pages/Home'
+import CourseDetail from './src/pages/CourseDetail'
+import AIChat from './src/pages/AIChat'
+import Grades from './src/pages/Grades'
+
+const Stack = createNativeStackNavigator<RootStackParamList>()
+
+export default function App() {
+  const token = useAuthStore((s) => s.token)
+
+  return (
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <StatusBar style="dark" />
+        <Stack.Navigator
+          initialRouteName={token ? 'Home' : 'Login'}
+          screenOptions={{
+            headerStyle: { backgroundColor: '#FAF6EC' },
+            headerTintColor: '#0F1020',
+            headerTitleStyle: { fontWeight: '700' },
+          }}
+        >
+          <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+          <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
+          <Stack.Screen name="CourseDetail" component={CourseDetail} options={{ title: '课程详情' }} />
+          <Stack.Screen name="AIChat" component={AIChat} options={{ title: 'AI 导师' }} />
+          <Stack.Screen name="Grades" component={Grades} options={{ title: '我的成绩单' }} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
+  )
+}
