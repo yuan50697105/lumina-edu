@@ -120,6 +120,39 @@ SELECT COUNT(DISTINCT user_id) FROM event_tracking
 WHERE created_at > now() - interval '24 hours';
 ```
 
+## ❤️‍🩹 联调与冒烟（WBS 2.12）
+
+联调前置：compose 全部服务在线（`./scripts/start.sh`），并预置 admin/teacher/student 账号。
+
+### 1. API 契约核对（静态，无需启动）
+
+```bash
+python 部署/scripts/api_contract_check.py
+```
+
+自动核验三层一致：
+前端调用 URL（`web-frontend/src`）⊂ 后端服务端点（9 个服务）⊂ Nginx 路由（`lumina.conf`），
+并交叉检查 Nginx upstream 是否存在于 compose。当前基线：**13 前端调用 + 44 后端端点，全部闭环**。
+
+### 2. 端到端冒烟（需服务在线）
+
+```bash
+export LUMINA_TEACHER_EMAIL=t@lumina.edu  LUMINA_TEACHER_PASSWORD=xxx
+export LUMINA_STUDENT_EMAIL=s@lumina.edu  LUMINA_STUDENT_PASSWORD=xxx
+export LUMINA_ADMIN_EMAIL=a@lumina.edu    LUMINA_ADMIN_PASSWORD=xxx
+
+# 走 Nginx :80
+python 部署/scripts/smoke_test.py
+# 直连用户服务（绕过网关排障）
+python 部署/scripts/smoke_test.py --base http://localhost:8080 --ai
+# 离线自检流程/请求构造（不发 HTTP）
+python 部署/scripts/smoke_test.py --dry-run
+```
+
+覆盖链路：登录（教师/学生/管理员）→ 建课 → 章节 → 选课 → 发布作业 → 学生提交 →
+教师批阅 →（可选 AI 批阅）→ 录入期末成绩 → 学生查成绩单 → 埋点统计 → 日志查询。
+`--ai` 模式在模型未配置时自动降级 SKIP，不阻塞主链路。
+
 ## 🔄 数据备份
 
 ```bash
