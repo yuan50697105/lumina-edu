@@ -238,6 +238,35 @@ services:
       - lumina-network
 
   # ============================================
+  # AI 批阅服务 (ai-grade-service / FastAPI)
+  # AI 辅助批阅 · 结构化成绩 · 写 grades 表
+  # 消费 ai-gateway 统一调用（透传用户 JWT）
+  # ============================================
+  ai-grade-service:
+    build: ../服务/ai-grade-service
+    container_name: lumina-ai-grade
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lumina}:${POSTGRES_PASSWORD:-lumina_secure_password}@postgres:5432/${POSTGRES_DB:-lumina}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change_me_jwt_secret_key}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      AI_GATEWAY_URL: http://ai-gateway-service:8093
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ai-gateway-service:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8095/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - lumina-network
+
+  # ============================================
   nginx:
     image: nginx:alpine
     container_name: lumina-nginx
@@ -258,6 +287,7 @@ services:
       - grade-service
       - ai-gateway-service
       - ai-chat-service
+      - ai-grade-service
     networks:
       - lumina-network
 
