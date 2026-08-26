@@ -32,6 +32,7 @@ edu/
 │   ├── lumina-operations.html         # 📋 部署运维手册 v1.0
 │   ├── lumina-testcases.html          # 📋 测试用例文档 v1.0
 │   ├── lumina-userguide.html          # 📋 用户手册 v1.0
+│   ├── lumina-launch-wbs.html         # 📋 上线 WBS v1.0
 │   │
 │   ├── APP/phone/      (8 文件)       # 📱 手机 APP 原型
 │   ├── APP/tablet/     (6 文件)       # 📲 平板 APP 原型
@@ -54,7 +55,7 @@ edu/
 | **界面页面** | 160+ 个 |
 | **设计表面** | 6 个（学生/教师 × 移动/Web/桌面）|
 | **功能模块** | 20+ 个 |
-| **文档** | PRD v1.3 + TDD v1.0 + API v1.0 + DB v1.0 + OPS v1.0 + QA v1.0 + UG v1.0 + 索引 |
+| **文档** | PRD v1.3 + TDD v1.0 + API v1.0 + DB v1.0 + OPS v1.0 + QA v1.0 + UG v1.0 + WBS v1.0 + 索引 |
 | **API 接口** | 42 个端点（8 模块 · JWT · WebSocket）|
 
 ## 📖 文档体系
@@ -70,6 +71,7 @@ edu/
 | 📋 **OPS v1.0** | 部署运维手册，10 章 | `lumina-operations.html` |
 | 📋 **QA v1.0** | 测试用例文档，10 章 · 156 用例 | `lumina-testcases.html` |
 | 📋 **UG v1.0** | 用户手册，10 章 · 3 角色 | `lumina-userguide.html` |
+| 📋 **WBS v1.0** | 上线工作分解结构，12 周计划 | `lumina-launch-wbs.html` |
 
 ## 🎨 设计系统
 
@@ -164,6 +166,7 @@ python scripts/yuque-sync.py
 | 部署运维 | `原型/lumina-operations.html` |
 | 测试用例 | `原型/lumina-testcases.html` |
 | 用户手册 | `原型/lumina-userguide.html` |
+| 上线 WBS | `原型/lumina-launch-wbs.html` |
 
 ## 📋 版本历史
 
@@ -180,6 +183,7 @@ python scripts/yuque-sync.py
 | **OPS v1.0** | 2026-08-25 | 部署运维手册发布，K8s 部署 |
 | **QA v1.0** | 2026-08-25 | 测试用例文档发布，156 用例 |
 | **UG v1.0** | 2026-08-25 | 用户手册发布，3 角色指南 |
+| **WBS v1.0** | 2026-08-26 | 上线工作分解结构发布，12 周计划 |
 
 ## 📄 许可证
 

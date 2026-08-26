@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · 上线 WBS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding:56px 64px; max-width:1280px; margin:0 auto;}
+
+  .cover{padding:80px 0 64px; border-bottom:1px solid var(--line); margin-bottom:56px;}
+  .cover .brand{display:flex; align-items:center; gap:14px; margin-bottom:32px;}
+  .cover .brand .logo{width:56px; height:56px; border-radius:14px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:28px; font-weight:500; font-style:italic;}
+  .cover .brand .name{font-family:var(--f-display); font-size:20px; font-weight:500;}
+  .cover .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:4px;}
+  .cover .doc-type{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--cobalt); background:var(--cobalt-soft); padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:20px;}
+  .cover h1{font-family:var(--f-display); font-weight:300; font-size:72px; letter-spacing:-0.04em; line-height:1;}
+  .cover h1 em{font-style:italic; color:var(--cobalt);}
+  .cover h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .cover .subtitle{font-size:18px; color:var(--inkwell-2); margin-top:20px; font-weight:300;}
+  .cover .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:24px; line-height:2;}
+
+  .stats{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:56px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px;}
+  .stat{text-align:center; padding:6px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .val{font-family:var(--f-display); font-size:26px; font-weight:300;}
+  .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  .section{margin-bottom:64px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:24px; padding-bottom:14px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:36px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  h3.sub{font-family:var(--f-display); font-size:22px; font-weight:400; margin:32px 0 14px; letter-spacing:-0.01em;}
+  h3.sub em{font-style:italic; color:var(--cobalt);}
+
+  p{margin-bottom:12px; line-height:1.7;}
+  ul,ol{margin:0 0 16px 20px; line-height:1.8;}
+  li{margin-bottom:4px;}
+  b{font-weight:600;}
+  code{font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px; font-size:13px; border:1px solid var(--line);}
+
+  table{width:100%; border-collapse:collapse; margin:16px 0 24px; font-size:13px;}
+  th{background:var(--ricepaper); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-strong);}
+  td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  tr:hover td{background:rgba(250,246,236,0.5);}
+  .tag{display:inline-block; font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; padding:2px 7px; border-radius:4px;}
+  .tag.phase1{background:var(--correction); color:#fff;}
+  .tag.phase2{background:var(--highlighter); color:var(--inkwell);}
+  .tag.phase3{background:var(--cobalt); color:#fff;}
+  .tag.phase4{background:var(--growth); color:#fff;}
+  .tag.critical{background:var(--correction); color:#fff;}
+  .tag.high{background:var(--highlighter); color:var(--inkwell);}
+  .tag.medium{background:var(--cobalt-soft); color:var(--cobalt);}
+  .tag.low{background:var(--ricepaper-2); color:var(--inkwell-2);}
+
+  .info{padding:16px 20px; border-radius:10px; margin:16px 0 20px; font-size:13px; line-height:1.7;}
+  .info .label{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; font-weight:600;}
+  .info.note{background:var(--cobalt-soft); border:1px solid var(--cobalt);}
+  .info.warn{background:var(--highlighter-soft); border:1px solid var(--highlighter);}
+  .info.success{background:var(--growth-soft); border:1px solid var(--growth);}
+
+  .gantt{background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; margin:20px 0; overflow-x:auto;}
+  .gantt-row{display:grid; grid-template-columns:200px 1fr; gap:12px; padding:8px 0; border-bottom:1px dashed var(--line); align-items:center;}
+  .gantt-row:last-child{border-bottom:none;}
+  .gantt-label{font-size:13px; font-weight:500;}
+  .gantt-label.sub{padding-left:20px; font-weight:400; color:var(--inkwell-2);}
+  .gantt-bar-container{position:relative; height:24px; background:var(--ricepaper); border-radius:4px;}
+  .gantt-bar{position:absolute; height:100%; border-radius:4px; display:flex; align-items:center; padding:0 8px; font-family:var(--f-mono); font-size:10px; color:#fff; font-weight:600;}
+  .gantt-bar.phase1{background:var(--correction);}
+  .gantt-bar.phase2{background:var(--highlighter); color:var(--inkwell);}
+  .gantt-bar.phase3{background:var(--cobalt);}
+  .gantt-bar.phase4{background:var(--growth);}
+  .gantt-timeline{display:grid; grid-template-columns:repeat(12, 1fr); gap:0; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
+  .gantt-week{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-align:center;}
+
+  footer{margin-top:64px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div>
+    <div class="brand">
+      <div class="logo">墨</div>
+      <div class="name">Lumina · 墨光<small>Launch WBS</small></div>
+    </div>
+    <div class="doc-type">Work Breakdown Structure · v1.0</div>
+    <h1>
+      <span class="hl">上线</span>工作分解<br/>
+      <em>结构</em>
+    </h1>
+    <div class="subtitle">12 周计划 · 4 阶段 · 48 任务包 · 关键里程碑</div>
+  </div>
+  <div class="meta">
+    文档编号：WBS-LUMINA-2026-001<br/>
+    版本号：v1.0 · 2026-08-26<br/>
+    项目周期：12 周（2026-09-01 → 2026-11-22）<br/>
+    团队规模：8-10 人
+  </div>
+</header>
+
+<!-- ============ STATS ============ -->
+<div class="stats">
+  <div class="stat"><div class="val hl">12</div><div class="lbl">周</div></div>
+  <div class="stat"><div class="val hl">4</div><div class="lbl">阶段</div></div>
+  <div class="stat"><div class="val hl">48</div><div class="lbl">任务包</div></div>
+  <div class="stat"><div class="val hl">6</div><div class="lbl">里程碑</div></div>
+</div>
+
+<!-- ============ 01 · 概览 ============ -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <h2>01 · 项目概览 <em>Overview</em></h2>
+    <div class="num-tag">Project Scope</div>
+  </div>
+
+  <h3 class="sub">1.1 项目目标</h3>
+  <p>将 Lumina 墨光教育平台从文档设计阶段推进到生产环境上线，完成所有技术实施、测试验证、数据迁移、用户培训和运营准备工作。</p>
+
+  <h3 class="sub">1.2 成功标准</h3>
+  <ul>
+    <li><b>功能完整性</b>：核心功能 100% 可用，无 P0/P1 缺陷</li>
+    <li><b>性能达标</b>：P99 < 500ms · 支持 1000 并发用户</li>
+    <li><b>数据完整</b>：迁移数据 100% 校验通过</li>
+    <li><b>用户就绪</b>：完成 3 轮用户培训 · 覆盖 80% 目标用户</li>
+    <li><b>运营就绪</b>：监控告警 · 运维手册 · 应急预案完备</li>
+  </ul>
+
+  <h3 class="sub">1.3 项目范围</h3>
+  <table>
+    <thead><tr><th>维度</th><th>范围</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><b>平台</b></td><td>Web + 移动端（iOS/Android）</td><td>桌面端延后</td></tr>
+      <tr><td><b>用户</b></td><td>学生 1500 + 教师 200 + 管理员 20</td><td>首批上线用户</td></tr>
+      <tr><td><b>功能</b></td><td>核心模块（用户/课程/作业/成绩/AI）</td><td>直播模块二期</td></tr>
+      <tr><td><b>数据</b></td><td>从旧系统迁移 3 年历史数据</td><td>学生/课程/成绩</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">1.4 项目阶段</h3>
+  <table>
+    <thead><tr><th>阶段</th><th>周期</th><th>目标</th><th>关键交付物</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="tag phase1">阶段一</span> <b>基础设施</b></td>
+        <td>Week 1-3</td>
+        <td>环境搭建 · 基础服务部署</td>
+        <td>K8s 集群 · CI/CD · 数据库 · 监控</td>
+      </tr>
+      <tr>
+        <td><span class="tag phase2">阶段二</span> <b>开发实施</b></td>
+        <td>Week 4-7</td>
+        <td>功能开发 · 接口联调 · 单元测试</td>
+        <td>12 微服务 · API 联调 · 80% 覆盖率</td>
+      </tr>
+      <tr>
+        <td><span class="tag phase3">阶段三</span> <b>测试验证</b></td>
+        <td>Week 8-10</td>
+        <td>集成测试 · 性能测试 · 用户验收</td>
+        <td>测试报告 · 性能报告 · UAT 签字</td>
+      </tr>
+      <tr>
+        <td><span class="tag phase4">阶段四</span> <b>上线运营</b></td>
+        <td>Week 11-12</td>
+        <td>数据迁移 · 用户培训 · 正式上线</td>
+        <td>迁移报告 · 培训材料 · 上线 checklist</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 02 · WBS 详细 ============ -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <h2>02 · WBS 详细分解 <em>Detailed WBS</em></h2>
+    <div class="num-tag">48 Work Packages</div>
+  </div>
+
+  <h3 class="sub">2.1 阶段一：基础设施（Week 1-3）</h3>
+  <table>
+    <thead><tr><th>编号</th><th>任务</th><th>负责人</th><th>工期</th><th>依赖</th><th>交付物</th><th>优先级</th></tr></thead>
+    <tbody>
+      <tr><td><b>1.1</b></td><td>云资源申请与配置</td><td>运维</td><td>3 天</td><td>—</td><td>服务器 · 网络 · 存储</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>1.2</b></td><td>K8s 集群搭建</td><td>运维</td><td>5 天</td><td>1.1</td><td>3 Master + 9 Worker</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>1.3</b></td><td>数据库部署（PostgreSQL 主从）</td><td>DBA</td><td>3 天</td><td>1.2</td><td>主从集群 · 备份策略</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>1.4</b></td><td>Redis 集群部署</td><td>运维</td><td>2 天</td><td>1.2</td><td>6 节点 Cluster</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>1.5</b></td><td>Kafka 集群部署</td><td>运维</td><td>3 天</td><td>1.2</td><td>3 Broker · Strimzi</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>1.6</b></td><td>MinIO 对象存储部署</td><td>运维</td><td>2 天</td><td>1.2</td><td>4 节点分布式</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>1.7</b></td><td>Milvus 向量库部署</td><td>AI 团队</td><td>3 天</td><td>1.2</td><td>3 节点分布式</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>1.8</b></td><td>CI/CD Pipeline 搭建</td><td>运维</td><td>5 天</td><td>1.2</td><td>GitHub Actions · 8 阶段</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>1.9</b></td><td>监控告警系统部署</td><td>运维</td><td>4 天</td><td>1.2</td><td>Prometheus · Grafana · AlertManager</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>1.10</b></td><td>日志系统部署</td><td>运维</td><td>3 天</td><td>1.2</td><td>EFK Stack · Loki</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>1.11</b></td><td>域名与 SSL 证书</td><td>运维</td><td>2 天</td><td>1.2</td><td>api.lumina.edu · Let's Encrypt</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>1.12</b></td><td>网络安全配置</td><td>安全</td><td>3 天</td><td>1.2</td><td>NetworkPolicy · WAF · 防火墙</td><td><span class="tag critical">P0</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="info note">
+    <div class="label">🎯 里程碑 M1</div>
+    <b>Week 3 结束</b>：基础设施就绪 · 所有基础服务可用 · CI/CD 打通
+  </div>
+
+  <h3 class="sub">2.2 阶段二：开发实施（Week 4-7）</h3>
+  <table>
+    <thead><tr><th>编号</th><th>任务</th><th>负责人</th><th>工期</th><th>依赖</th><th>交付物</th><th>优先级</th></tr></thead>
+    <tbody>
+      <tr><td><b>2.1</b></td><td>用户服务开发</td><td>后端</td><td>5 天</td><td>1.3</td><td>user-service · 6 API</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.2</b></td><td>课程服务开发</td><td>后端</td><td>7 天</td><td>1.3</td><td>course-service · 8 API</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.3</b></td><td>作业服务开发</td><td>后端</td><td>7 天</td><td>2.2</td><td>assignment-service · 6 API</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.4</b></td><td>成绩服务开发</td><td>后端</td><td>5 天</td><td>2.3</td><td>grade-service · 4 API</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.5</b></td><td>通知服务开发</td><td>后端</td><td>4 天</td><td>1.5</td><td>notification-service · 3 API</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>2.6</b></td><td>AI 网关服务开发</td><td>AI 团队</td><td>6 天</td><td>1.7</td><td>ai-gateway · 智能路由</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.7</b></td><td>AI 对话服务开发</td><td>AI 团队</td><td>8 天</td><td>2.6</td><td>ai-chat · SSE 流式</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.8</b></td><td>AI 批阅服务开发</td><td>AI 团队</td><td>6 天</td><td>2.6</td><td>ai-grade · 评分建议</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>2.9</b></td><td>前端 Web 开发</td><td>前端</td><td>15 天</td><td>2.1-2.4</td><td>React 18 · 全部页面</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.10</b></td><td>前端移动端开发</td><td>前端</td><td>15 天</td><td>2.1-2.4</td><td>React Native · iOS/Android</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.11</b></td><td>API 联调</td><td>全栈</td><td>5 天</td><td>2.1-2.10</td><td>42 API 联调通过</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.12</b></td><td>单元测试编写</td><td>开发</td><td>10 天</td><td>2.1-2.8</td><td>覆盖率 ≥ 80%</td><td><span class="tag critical">P0</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="info note">
+    <div class="label">🎯 里程碑 M2</div>
+    <b>Week 7 结束</b>：所有服务开发完成 · API 联调通过 · 单元测试覆盖率 ≥ 80%
+  </div>
+
+  <h3 class="sub">2.3 阶段三：测试验证（Week 8-10）</h3>
+  <table>
+    <thead><tr><th>编号</th><th>任务</th><th>负责人</th><th>工期</th><th>依赖</th><th>交付物</th><th>优先级</th></tr></thead>
+    <tbody>
+      <tr><td><b>3.1</b></td><td>集成测试</td><td>QA</td><td>5 天</td><td>2.11</td><td>200+ 集成用例通过</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>3.2</b></td><td>E2E 测试</td><td>QA</td><td>5 天</td><td>3.1</td><td>30 核心流程通过</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>3.3</b></td><td>性能测试</td><td>QA + 运维</td><td>5 天</td><td>3.1</td><td>性能报告 · 优化建议</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>3.4</b></td><td>安全测试</td><td>安全</td><td>5 天</td><td>3.1</td><td>渗透测试报告 · 漏洞修复</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>3.5</b></td><td>兼容性测试</td><td>QA</td><td>3 天</td><td>2.9-2.10</td><td>浏览器/设备兼容报告</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>3.6</b></td><td>Bug 修复</td><td>开发</td><td>10 天</td><td>3.1-3.5</td><td>P0/P1 = 0 · P2 ≤ 3</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>3.7</b></td><td>性能优化</td><td>开发 + 运维</td><td>5 天</td><td>3.3</td><td>P99 < 500ms 达标</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>3.8</b></td><td>用户验收测试（UAT）</td><td>业务方</td><td>5 天</td><td>3.6</td><td>UAT 签字确认</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>3.9</b></td><td>文档更新</td><td>开发</td><td>3 天</td><td>3.6</td><td>API 文档 · 用户手册同步</td><td><span class="tag high">P1</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="info note">
+    <div class="label">🎯 里程碑 M3</div>
+    <b>Week 10 结束</b>：测试全部通过 · UAT 签字 · 达到上线标准
+  </div>
+
+  <h3 class="sub">2.4 阶段四：上线运营（Week 11-12）</h3>
+  <table>
+    <thead><tr><th>编号</th><th>任务</th><th>负责人</th><th>工期</th><th>依赖</th><th>交付物</th><th>优先级</th></tr></thead>
+    <tbody>
+      <tr><td><b>4.1</b></td><td>数据迁移方案设计</td><td>DBA</td><td>3 天</td><td>3.8</td><td>迁移方案 · 回滚方案</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.2</b></td><td>数据迁移脚本开发</td><td>DBA</td><td>5 天</td><td>4.1</td><td>迁移脚本 · 校验脚本</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.3</b></td><td>数据迁移演练</td><td>DBA</td><td>2 天</td><td>4.2</td><td>演练报告 · 问题修复</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.4</b></td><td>生产数据迁移</td><td>DBA</td><td>1 天</td><td>4.3</td><td>迁移完成 · 校验通过</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.5</b></td><td>培训材料准备</td><td>产品</td><td>5 天</td><td>3.8</td><td>PPT · 视频 · 操作手册</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>4.6</b></td><td>管理员培训</td><td>产品</td><td>2 天</td><td>4.5</td><td>培训完成 · 考核通过</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>4.7</b></td><td>教师培训</td><td>产品</td><td>3 天</td><td>4.5</td><td>培训完成 · 考核通过</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>4.8</b></td><td>学生培训（分批）</td><td>产品</td><td>5 天</td><td>4.5</td><td>培训覆盖 80%</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>4.9</b></td><td>上线 Checklist 检查</td><td>项目经理</td><td>1 天</td><td>4.4, 4.8</td><td>Checklist 全部打勾</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.10</b></td><td>灰度发布（10%）</td><td>运维</td><td>2 天</td><td>4.9</td><td>灰度稳定 · 无重大问题</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.11</b></td><td>全量发布</td><td>运维</td><td>1 天</td><td>4.10</td><td>全量上线 · 监控正常</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.12</b></td><td>上线后监控（1 周）</td><td>运维</td><td>7 天</td><td>4.11</td><td>稳定性报告</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.13</b></td><td>问题收集与修复</td><td>开发</td><td>7 天</td><td>4.11</td><td>问题修复 · 版本迭代</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>4.14</b></td><td>项目总结与复盘</td><td>项目经理</td><td>1 天</td><td>4.12</td><td>复盘报告 · 经验沉淀</td><td><span class="tag medium">P2</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="info success">
+    <div class="label">🎯 里程碑 M4</div>
+    <b>Week 12 结束</b>：正式上线 · 稳定运行 1 周 · 项目复盘完成
+  </div>
+</section>
+
+<!-- ============ 03 · 甘特图 ============ -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <h2>03 · 项目甘特图 <em>Gantt Chart</em></h2>
+    <div class="num-tag">12 Weeks Timeline</div>
+  </div>
+
+  <div class="gantt">
+    <div class="gantt-row">
+      <div class="gantt-label"><span class="tag phase1">阶段一</span> 基础设施</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase1" style="left:0%; width:25%;">Week 1-3</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">云资源 · K8s · 数据库</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase1" style="left:0%; width:16.7%; opacity:0.7;">W1</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">中间件 · 监控 · CI/CD</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase1" style="left:8.3%; width:16.7%; opacity:0.7;">W2</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">安全 · 网络 · 域名</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase1" style="left:16.7%; width:8.3%; opacity:0.7;">W3</div>
+      </div>
+    </div>
+
+    <div class="gantt-row">
+      <div class="gantt-label"><span class="tag phase2">阶段二</span> 开发实施</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase2" style="left:25%; width:33.3%;">Week 4-7</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">后端服务开发</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase2" style="left:25%; width:25%; opacity:0.7;">W4-6</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">前端 Web + 移动端</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase2" style="left:33.3%; width:16.7%; opacity:0.7;">W5-6</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">API 联调 · 单元测试</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase2" style="left:50%; width:8.3%; opacity:0.7;">W7</div>
+      </div>
+    </div>
+
+    <div class="gantt-row">
+      <div class="gantt-label"><span class="tag phase3">阶段三</span> 测试验证</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase3" style="left:58.3%; width:25%;">Week 8-10</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">集成 · E2E · 性能 · 安全</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase3" style="left:58.3%; width:16.7%; opacity:0.7;">W8-9</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">Bug 修复 · 性能优化</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase3" style="left:66.7%; width:8.3%; opacity:0.7;">W9</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">UAT · 文档更新</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase3" style="left:75%; width:8.3%; opacity:0.7;">W10</div>
+      </div>
+    </div>
+
+    <div class="gantt-row">
+      <div class="gantt-label"><span class="tag phase4">阶段四</span> 上线运营</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase4" style="left:83.3%; width:16.7%;">Week 11-12</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">数据迁移 · 培训</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase4" style="left:83.3%; width:8.3%; opacity:0.7;">W11</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">灰度 · 全量 · 监控</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase4" style="left:91.7%; width:8.3%; opacity:0.7;">W12</div>
+      </div>
+    </div>
+
+    <div class="gantt-timeline">
+      <div class="gantt-week">W1</div>
+      <div class="gantt-week">W2</div>
+      <div class="gantt-week">W3</div>
+      <div class="gantt-week">W4</div>
+      <div class="gantt-week">W5</div>
+      <div class="gantt-week">W6</div>
+      <div class="gantt-week">W7</div>
+      <div class="gantt-week">W8</div>
+      <div class="gantt-week">W9</div>
+      <div class="gantt-week">W10</div>
+      <div class="gantt-week">W11</div>
+      <div class="gantt-week">W12</div>
+    </div>
+  </div>
+
+  <h3 class="sub">关键里程碑</h3>
+  <table>
+    <thead><tr><th>里程碑</th><th>时间</th><th>标志</th><th>验收标准</th></tr></thead>
+    <tbody>
+      <tr><td><b>M1 基础设施就绪</b></td><td>Week 3 结束</td><td>所有基础服务可用</td><td>K8s · 数据库 · 监控 · CI/CD 就绪</td></tr>
+      <tr><td><b>M2 开发完成</b></td><td>Week 7 结束</td><td>功能开发完成</td><td>12 微服务 · API 联调 · 80% 覆盖率</td></tr>
+      <tr><td><b>M3 测试通过</b></td><td>Week 10 结束</td><td>达到上线标准</td><td>无 P0/P1 · UAT 签字 · 性能达标</td></tr>
+      <tr><td><b>M4 正式上线</b></td><td>Week 12 结束</td><td>全量上线</td><td>稳定运行 1 周 · 无重大问题</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 04 · 资源计划 ============ -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <h2>04 · 资源计划 <em>Resources</em></h2>
+    <div class="num-tag">Team & Budget</div>
+  </div>
+
+  <h3 class="sub">4.1 团队配置</h3>
+  <table>
+    <thead><tr><th>角色</th><th>人数</th><th>职责</th><th>投入周期</th></tr></thead>
+    <tbody>
+      <tr><td><b>项目经理</b></td><td>1</td><td>整体协调 · 进度管控 · 风险管理</td><td>全程 12 周</td></tr>
+      <tr><td><b>运维工程师</b></td><td>2</td><td>基础设施 · K8s · 监控 · 部署</td><td>全程 12 周</td></tr>
+      <tr><td><b>后端开发</b></td><td>3</td><td>微服务开发 · API 实现</td><td>Week 1-10</td></tr>
+      <tr><td><b>前端开发</b></td><td>2</td><td>Web · 移动端开发</td><td>Week 4-10</td></tr>
+      <tr><td><b>AI 工程师</b></td><td>2</td><td>AI 服务 · 模型集成</td><td>Week 4-10</td></tr>
+      <tr><td><b>QA 工程师</b></td><td>2</td><td>测试 · 质量保障</td><td>Week 8-12</td></tr>
+      <tr><td><b>DBA</b></td><td>1</td><td>数据库设计 · 迁移 · 优化</td><td>Week 1-12</td></tr>
+      <tr><td><b>安全工程师</b></td><td>1</td><td>安全测试 · 合规检查</td><td>Week 1-3, 8-10</td></tr>
+      <tr><td><b>产品经理</b></td><td>1</td><td>需求确认 · 培训 · 验收</td><td>Week 1-2, 8-12</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">4.2 预算估算</h3>
+  <table>
+    <thead><tr><th>项目</th><th>费用（元）</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><b>云资源（3 个月）</b></td><td>36,000</td><td>K8s 集群 · 存储 · 网络</td></tr>
+      <tr><td><b>AI 模型调用</b></td><td>9,000</td><td>3 个月预估</td></tr>
+      <tr><td><b>人力成本</b></td><td>~360,000</td><td>15 人 · 3 个月</td></tr>
+      <tr><td><b>工具与服务</b></td><td>5,000</td><td>域名 · 证书 · 第三方服务</td></tr>
+      <tr><td><b>培训费用</b></td><td>3,000</td><td>培训材料 · 场地</td></tr>
+      <tr><td><b>总计</b></td><td><b>~413,000</b></td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">4.3 风险评估</h3>
+  <table>
+    <thead><tr><th>风险</th><th>概率</th><th>影响</th><th>应对措施</th></tr></thead>
+    <tbody>
+      <tr><td><b>需求变更</b></td><td>中</td><td>高</td><td>严格变更控制 · 预留 2 周 buffer</td></tr>
+      <tr><td><b>技术难题</b></td><td>中</td><td>中</td><td>技术预研 · 外部专家支持</td></tr>
+      <tr><td><b>人员离职</b></td><td>低</td><td>高</td><td>知识文档化 · 交叉培训</td></tr>
+      <tr><td><b>数据迁移失败</b></td><td>中</td><td>高</td><td>多次演练 · 回滚方案</td></tr>
+      <tr><td><b>性能不达标</b></td><td>中</td><td>中</td><td>早期性能测试 · 预留优化时间</td></tr>
+      <tr><td><b>安全漏洞</b></td><td>低</td><td>高</td><td>安全扫描 · 渗透测试</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 05 · 验收标准 ============ -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <h2>05 · 上线验收标准 <em>Go-Live Criteria</em></h2>
+    <div class="num-tag">Checklist</div>
+  </div>
+
+  <h3 class="sub">5.1 技术验收</h3>
+  <table>
+    <thead><tr><th>检查项</th><th>标准</th><th>验证方式</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td><b>功能完整性</b></td><td>核心功能 100% 可用</td><td>功能测试报告</td><td>☐ 待验证</td></tr>
+      <tr><td><b>缺陷数</b></td><td>P0/P1 = 0 · P2 ≤ 3</td><td>Bug 跟踪系统</td><td>☐ 待验证</td></tr>
+      <tr><td><b>性能指标</b></td><td>P99 < 500ms · 1000 QPS</td><td>性能测试报告</td><td>☐ 待验证</td></tr>
+      <tr><td><b>测试覆盖率</b></td><td>≥ 80%</td><td>覆盖率报告</td><td>☐ 待验证</td></tr>
+      <tr><td><b>安全扫描</b></td><td>无高危漏洞</td><td>安全测试报告</td><td>☐ 待验证</td></tr>
+      <tr><td><b>监控告警</b></td><td>全部配置完成</td><td>Grafana 面板</td><td>☐ 待验证</td></tr>
+      <tr><td><b>日志系统</b></td><td>日志可查 · 可追溯</td><td>日志查询验证</td><td>☐ 待验证</td></tr>
+      <tr><td><b>备份恢复</b></td><td>备份成功 · 恢复演练通过</td><td>恢复演练报告</td><td>☐ 待验证</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">5.2 业务验收</h3>
+  <table>
+    <thead><tr><th>检查项</th><th>标准</th><th>验证方式</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td><b>数据迁移</b></td><td>100% 迁移 · 校验通过</td><td>数据校验报告</td><td>☐ 待验证</td></tr>
+      <tr><td><b>UAT 测试</b></td><td>业务方签字确认</td><td>UAT 签字单</td><td>☐ 待验证</td></tr>
+      <tr><td><b>用户培训</b></td><td>覆盖 80% 目标用户</td><td>培训签到表</td><td>☐ 待验证</td></tr>
+      <tr><td><b>操作手册</b></td><td>文档齐全 · 用户可查</td><td>文档清单</td><td>☐ 待验证</td></tr>
+      <tr><td><b>应急预案</b></td><td>预案完备 · 演练通过</td><td>演练报告</td><td>☐ 待验证</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">5.3 运营验收</h3>
+  <table>
+    <thead><tr><th>检查项</th><th>标准</th><th>验证方式</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td><b>运维手册</b></td><td>Runbook 完备</td><td>运维手册评审</td><td>☐ 待验证</td></tr>
+      <tr><td><b>值班安排</b></td><td>7×24 值班表确定</td><td>值班表</td><td>☐ 待验证</td></tr>
+      <tr><td><b>支持渠道</b></td><td>客服 · 邮件 · 电话就绪</td><td>渠道测试</td><td>☐ 待验证</td></tr>
+      <tr><td><b>灰度发布</b></td><td>10% 用户稳定运行 2 天</td><td>灰度监控报告</td><td>☐ 待验证</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info success">
+    <div class="label">✅ 上线决策</div>
+    所有检查项通过 · 项目经理签字 · 技术负责人签字 · 业务负责人签字 · 方可正式上线
+  </div>
+</section>
+
+<!-- ============ 06 · 沟通计划 ============ -->
+<section class="section" id="s6">
+  <div class="section-header">
+    <h2>06 · 沟通与汇报 <em>Communication</em></h2>
+    <div class="num-tag">Stakeholder Management</div>
+  </div>
+
+  <h3 class="sub">6.1 例会机制</h3>
+  <table>
+    <thead><tr><th>会议</th><th>频率</th><th>参与人</th><th>时长</th><th>产出</th></tr></thead>
+    <tbody>
+      <tr><td><b>每日站会</b></td><td>每日 9:30</td><td>全体开发</td><td>15 分钟</td><td>进展 · 阻碍 · 计划</td></tr>
+      <tr><td><b>周报会议</b></td><td>每周五 14:00</td><td>项目经理 + 各组 Lead</td><td>1 小时</td><td>周报 · 风险 · 下周计划</td></tr>
+      <tr><td><b>里程碑评审</b></td><td>M1/M2/M3/M4</td><td>全体 + 管理层</td><td>2 小时</td><td>阶段验收 · 下阶段启动</td></tr>
+      <tr><td><b>技术指导委员会</b></td><td>每月一次</td><td>技术高管 + 架构师</td><td>1 小时</td><td>技术决策 · 资源协调</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">6.2 汇报机制</h3>
+  <table>
+    <thead><tr><th>汇报对象</th><th>频率</th><th>内容</th><th>形式</th></tr></thead>
+    <tbody>
+      <tr><td><b>项目团队</b></td><td>每日</td><td>任务进展 · 阻碍</td><td>站会 · 钉钉群</td></tr>
+      <tr><td><b>项目经理</b></td><td>每周</td><td>进度 · 风险 · 资源</td><td>周报 · 会议</td></tr>
+      <tr><td><b>管理层</b></td><td>每两周</td><td>整体进展 · 重大风险 · 决策需求</td><td>管理简报</td></tr>
+      <tr><td><b>业务方</b></td><td>里程碑</td><td>阶段成果 · 演示 · 反馈收集</td><td>评审会</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">6.3 工具与平台</h3>
+  <ul>
+    <li><b>项目管理</b>：Jira / PingCode（任务跟踪 · 看板）</li>
+    <li><b>代码管理</b>：GitHub（代码 · PR · CI/CD）</li>
+    <li><b>文档协作</b>：语雀 / 飞书文档（需求 · 设计 · 手册）</li>
+    <li><b>沟通协作</b>：钉钉 / 飞书（即时沟通 · 会议）</li>
+    <li><b>设计协作</b>：Figma（原型 · 设计稿）</li>
+    <li><b>监控告警</b>：Grafana · AlertManager · 钉钉机器人</li>
+  </ul>
+</section>
+
+<footer>
+  <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Launch WBS</div>
+  <div>v1.0 · 12 周 · 4 阶段 · 48 任务包 · 2026-09-01 启动</div>
+  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">WBS-LUMINA-2026-001</div>
+</footer>
+
+</body>
+</html>
