@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/api/client.ts","./src/api/types.ts","./src/components/layout.tsx","./src/pages/aichat.tsx","./src/pages/adminmodels.tsx","./src/pages/coursedetail.tsx","./src/pages/dashboard.tsx","./src/pages/grades.tsx","./src/pages/login.tsx","./src/store/auth.ts","./src/utils/tracker.ts"],"version":"5.9.3"}
