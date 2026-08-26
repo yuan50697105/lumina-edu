@@ -176,6 +176,35 @@ services:
   # ============================================
   # Nginx 反向代理（可选）
   # ============================================
+  # AI 网关服务 (ai-gateway-service / FastAPI)
+  # 模型池·智能路由·用量统计 + 监控埋点
+  # ============================================
+  ai-gateway-service:
+    build: ../服务/ai-gateway-service
+    container_name: lumina-ai-gateway
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lumina}:${POSTGRES_PASSWORD:-lumina_secure_password}@postgres:5432/${POSTGRES_DB:-lumina}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change_me_jwt_secret_key}
+      # 模型供应商 API Key（可选，配置后对话/批阅可用）
+      QWEN_API_KEY: ${QWEN_API_KEY:-}
+      GLM_API_KEY: ${GLM_API_KEY:-}
+      SPARK_API_KEY: ${SPARK_API_KEY:-}
+      DOUBAO_API_KEY: ${DOUBAO_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8093/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - lumina-network
+
+  # ============================================
   nginx:
     image: nginx:alpine
     container_name: lumina-nginx
@@ -194,6 +223,7 @@ services:
       - course-service
       - assignment-service
       - grade-service
+      - ai-gateway-service
     networks:
       - lumina-network
 

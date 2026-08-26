@@ -51,7 +51,8 @@ edu/
 │   ├── user-service/                 # ✅ 用户认证 + 资料 + 埋点（:8080）
 │   ├── course-service/               # ✅ 课程·章节·选课·公告 + 埋点（:8090）
 │   ├── assignment-service/           # ✅ 作业·提交·批阅 + 埋点（:8091）
-│   └── grade-service/                # ✅ 成绩汇总·成绩单·统计 + 埋点（:8092）
+│   ├── grade-service/                # ✅ 成绩汇总·成绩单·统计 + 埋点（:8092）
+│   └── ai-gateway-service/           # ✅ AI 模型池·智能路由·用量（:8093）
 │
 ├── 开发进度.md                       # 📈 WBS 开发进度追踪
 │
@@ -189,7 +190,7 @@ cp .env.example .env
 ./scripts/monitor.sh
 ```
 
-已编排服务：PostgreSQL · Redis · MinIO · user-service(8080) · course-service(8090) · assignment-service(8091) · grade-service(8092) · Nginx(80/443)
+已编排服务：PostgreSQL · Redis · MinIO · user-service(8080) · course-service(8090) · assignment-service(8091) · grade-service(8092) · ai-gateway(8093) · Nginx(80/443)
 
 详见 `部署/README.md`
 
@@ -229,6 +230,7 @@ cp .env.example .env
 | **课程服务 v0.1** | 2026-08-26 | course-service 开发完成（课程·章节·选课·公告·埋点）|
 | **作业服务 v0.1** | 2026-08-26 | assignment-service 开发完成（作业·提交·批阅·埋点）|
 | **成绩服务 v0.1** | 2026-08-26 | grade-service 开发完成（成绩汇总·成绩单·统计·埋点）|
+| **AI 网关 v0.1** | 2026-08-26 | ai-gateway-service 开发完成（模型池·智能路由·用量）|
 
 ## 📄 许可证
 
