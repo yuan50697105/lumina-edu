@@ -65,14 +65,19 @@ async def api_logging_middleware(request: Request, call_next):
     duration_ms = int((time.perf_counter() - t0) * 1000)
     try:
         db = SessionLocal()
-        db.add(models.APILog(
-            method=request.method, path=request.url.path,
-            status_code=response.status_code, duration_ms=duration_ms,
-        ))
-        db.commit()
-        db.close()
+        try:
+            db.add(models.APILog(
+                method=request.method, path=request.url.path,
+                status_code=response.status_code, duration_ms=duration_ms,
+            ))
+            db.commit()
+        except Exception as exc:
+            db.rollback()
+            logger.warning("API 日志写入失败: %s", exc)
+        finally:
+            db.close()
     except Exception as exc:
-        logger.warning("API 日志写入失败: %s", exc)
+        logger.warning("API 日志会话创建失败: %s", exc)
     return response
 
 
@@ -85,9 +90,13 @@ def health():
 def ready():
     try:
         db = SessionLocal()
-        db.execute(text("SELECT 1"))
-        db.close()
-        db_status = "ok"
+        try:
+            db.execute(text("SELECT 1"))
+            db_status = "ok"
+        except Exception:
+            db_status = "down"
+        finally:
+            db.close()
     except Exception:
         db_status = "down"
     return {"status": "ok" if db_status == "ok" else "degraded", "db": db_status}

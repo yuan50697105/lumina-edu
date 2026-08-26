@@ -1,13 +1,16 @@
 # ============================================
-# Lumina 墨光 · 应用配置
+# Lumina 墨光 · 应用配置（单体统一）
 # ============================================
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     """应用配置，从环境变量读取"""
 
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
     # 应用
-    APP_NAME: str = "lumina-user-service"
+    APP_NAME: str = "lumina-app"
     APP_ENV: str = "development"  # development / testing / production
     APP_DEBUG: bool = True
 
@@ -28,12 +31,18 @@ class Settings(BaseSettings):
     # 日志
     LOG_LEVEL: str = "INFO"
 
-    # AI 网关地址（单体内指向自身，微服务时指向 ai-gateway 服务）
+    # AI 网关地址（单体内指向自身）
     AI_GATEWAY_URL: str = "http://localhost:8080"
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    # AI 供应商 API Key（不入库，由环境变量注入）
+    QWEN_API_KEY: str = ""
+    GLM_API_KEY: str = ""
+    SPARK_API_KEY: str = ""
+    DOUBAO_API_KEY: str = ""
+    BCE_API_KEY: str = ""
+    MOONSHOT_API_KEY: str = ""
+    ANTHROPIC_API_KEY: str = ""
+    GEMINI_API_KEY: str = ""
 
 
 settings = Settings()
