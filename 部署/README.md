@@ -153,6 +153,17 @@ python 部署/scripts/smoke_test.py --dry-run
 教师批阅 →（可选 AI 批阅）→ 录入期末成绩 → 学生查成绩单 → 埋点统计 → 日志查询。
 `--ai` 模式在模型未配置时自动降级 SKIP，不阻塞主链路。
 
+### 3. 统一单元测试（一键全量，无需数据库）
+
+```bash
+# 运行全部服务纯单元测试 + 静态契约核对（基线 142 用例）
+python 部署/scripts/run_tests.py
+# 额外包含 *_api.py 集成测试（PG 未就绪时自动 skip）
+python 部署/scripts/run_tests.py --include-api
+# 指定解释器 / 跳过某服务
+python 部署/scripts/run_tests.py --python <venv>/Scripts/python.exe --exclude user-service
+```
+
 ## 🔄 数据备份
 
 ```bash
