@@ -104,27 +104,27 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Launch WBS</small></div>
     </div>
-    <div class="doc-type">Work Breakdown Structure · v1.0</div>
+    <div class="doc-type">Work Breakdown Structure · v1.1</div>
     <h1>
       <span class="hl">上线</span>工作分解<br/>
       <em>结构</em>
     </h1>
-    <div class="subtitle">12 周计划 · 4 阶段 · 48 任务包 · 关键里程碑</div>
+    <div class="subtitle">10 周计划 · 4 阶段 · 轻量架构 · 功能优先 · 埋点内置</div>
   </div>
   <div class="meta">
     文档编号：WBS-LUMINA-2026-001<br/>
-    版本号：v1.0 · 2026-08-26<br/>
-    项目周期：12 周（2026-09-01 → 2026-11-22）<br/>
-    团队规模：8-10 人
+    版本号：v1.1 · 2026-08-26<br/>
+    项目周期：10 周（2026-09-01 → 2026-11-08）<br/>
+    团队规模：6-8 人
   </div>
 </header>
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">12</div><div class="lbl">周</div></div>
+  <div class="stat"><div class="val hl">10</div><div class="lbl">周</div></div>
   <div class="stat"><div class="val hl">4</div><div class="lbl">阶段</div></div>
-  <div class="stat"><div class="val hl">48</div><div class="lbl">任务包</div></div>
-  <div class="stat"><div class="val hl">6</div><div class="lbl">里程碑</div></div>
+  <div class="stat"><div class="val hl">36</div><div class="lbl">任务包</div></div>
+  <div class="stat"><div class="val hl">5</div><div class="lbl">里程碑</div></div>
 </div>
 
 <!-- ============ 01 · 概览 ============ -->
@@ -157,36 +157,42 @@
     </tbody>
   </table>
 
-  <h3 class="sub">1.4 项目阶段</h3>
+  <h3 class="sub">1.4 项目阶段（轻量版）</h3>
   <table>
     <thead><tr><th>阶段</th><th>周期</th><th>目标</th><th>关键交付物</th></tr></thead>
     <tbody>
       <tr>
-        <td><span class="tag phase1">阶段一</span> <b>基础设施</b></td>
-        <td>Week 1-3</td>
-        <td>环境搭建 · 基础服务部署</td>
-        <td>K8s 集群 · CI/CD · 数据库 · 监控</td>
+        <td><span class="tag phase1">阶段一</span> <b>基础环境</b></td>
+        <td>Week 1-2</td>
+        <td>简单环境搭建 · 快速启动</td>
+        <td>服务器 · 数据库 · 基础部署脚本</td>
       </tr>
       <tr>
-        <td><span class="tag phase2">阶段二</span> <b>开发实施</b></td>
-        <td>Week 4-7</td>
-        <td>功能开发 · 接口联调 · 单元测试</td>
-        <td>12 微服务 · API 联调 · 80% 覆盖率</td>
+        <td><span class="tag phase2">阶段二</span> <b>功能开发</b></td>
+        <td>Week 3-6</td>
+        <td>核心功能开发 · 埋点内置</td>
+        <td>12 微服务 · 监控埋点 · 基础日志</td>
       </tr>
       <tr>
-        <td><span class="tag phase3">阶段三</span> <b>测试验证</b></td>
-        <td>Week 8-10</td>
-        <td>集成测试 · 性能测试 · 用户验收</td>
-        <td>测试报告 · 性能报告 · UAT 签字</td>
+        <td><span class="tag phase3">阶段三</span> <b>测试优化</b></td>
+        <td>Week 7-8</td>
+        <td>功能测试 · 性能优化</td>
+        <td>测试报告 · 性能达标 · Bug 修复</td>
       </tr>
       <tr>
         <td><span class="tag phase4">阶段四</span> <b>上线运营</b></td>
-        <td>Week 11-12</td>
-        <td>数据迁移 · 用户培训 · 正式上线</td>
-        <td>迁移报告 · 培训材料 · 上线 checklist</td>
+        <td>Week 9-10</td>
+        <td>数据迁移 · 用户培训 · 上线</td>
+        <td>迁移完成 · 培训完成 · 正式上线</td>
       </tr>
     </tbody>
   </table>
+
+  <div class="info warn">
+    <div class="label">⚡ 轻量架构策略</div>
+    <b>初期</b>：单机/少量服务器 · Docker 直接部署 · 简单脚本发布 · 应用内埋点<br/>
+    <b>后期</b>：用户量增长后，再考虑迁移到 K8s · 完善 CI/CD · 独立监控系统
+  </div>
 </section>
 
 <!-- ============ 02 · WBS 详细 ============ -->
@@ -196,99 +202,105 @@
     <div class="num-tag">48 Work Packages</div>
   </div>
 
-  <h3 class="sub">2.1 阶段一：基础设施（Week 1-3）</h3>
+  <h3 class="sub">2.1 阶段一：基础环境（Week 1-2）</h3>
   <table>
     <thead><tr><th>编号</th><th>任务</th><th>负责人</th><th>工期</th><th>依赖</th><th>交付物</th><th>优先级</th></tr></thead>
     <tbody>
-      <tr><td><b>1.1</b></td><td>云资源申请与配置</td><td>运维</td><td>3 天</td><td>—</td><td>服务器 · 网络 · 存储</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>1.2</b></td><td>K8s 集群搭建</td><td>运维</td><td>5 天</td><td>1.1</td><td>3 Master + 9 Worker</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>1.3</b></td><td>数据库部署（PostgreSQL 主从）</td><td>DBA</td><td>3 天</td><td>1.2</td><td>主从集群 · 备份策略</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>1.4</b></td><td>Redis 集群部署</td><td>运维</td><td>2 天</td><td>1.2</td><td>6 节点 Cluster</td><td><span class="tag high">P1</span></td></tr>
-      <tr><td><b>1.5</b></td><td>Kafka 集群部署</td><td>运维</td><td>3 天</td><td>1.2</td><td>3 Broker · Strimzi</td><td><span class="tag high">P1</span></td></tr>
-      <tr><td><b>1.6</b></td><td>MinIO 对象存储部署</td><td>运维</td><td>2 天</td><td>1.2</td><td>4 节点分布式</td><td><span class="tag high">P1</span></td></tr>
-      <tr><td><b>1.7</b></td><td>Milvus 向量库部署</td><td>AI 团队</td><td>3 天</td><td>1.2</td><td>3 节点分布式</td><td><span class="tag high">P1</span></td></tr>
-      <tr><td><b>1.8</b></td><td>CI/CD Pipeline 搭建</td><td>运维</td><td>5 天</td><td>1.2</td><td>GitHub Actions · 8 阶段</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>1.9</b></td><td>监控告警系统部署</td><td>运维</td><td>4 天</td><td>1.2</td><td>Prometheus · Grafana · AlertManager</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>1.10</b></td><td>日志系统部署</td><td>运维</td><td>3 天</td><td>1.2</td><td>EFK Stack · Loki</td><td><span class="tag high">P1</span></td></tr>
-      <tr><td><b>1.11</b></td><td>域名与 SSL 证书</td><td>运维</td><td>2 天</td><td>1.2</td><td>api.lumina.edu · Let's Encrypt</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>1.12</b></td><td>网络安全配置</td><td>安全</td><td>3 天</td><td>1.2</td><td>NetworkPolicy · WAF · 防火墙</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>1.1</b></td><td>云服务器申请（2-3 台）</td><td>运维</td><td>2 天</td><td>—</td><td>应用服务器 · 数据库服务器</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>1.2</b></td><td>PostgreSQL 数据库部署</td><td>DBA</td><td>2 天</td><td>1.1</td><td>单机主库 · 备份脚本</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>1.3</b></td><td>Redis 部署（单机）</td><td>运维</td><td>1 天</td><td>1.1</td><td>缓存服务</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>1.4</b></td><td>MinIO 对象存储部署</td><td>运维</td><td>1 天</td><td>1.1</td><td>文件存储服务</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>1.5</b></td><td>域名与 SSL 证书</td><td>运维</td><td>1 天</td><td>1.1</td><td>api.lumina.edu · HTTPS</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>1.6</b></td><td>基础部署脚本</td><td>运维</td><td>3 天</td><td>1.1-1.4</td><td>Docker Compose · 一键部署</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>1.7</b></td><td>开发环境搭建</td><td>开发</td><td>2 天</td><td>1.1</td><td>本地开发环境 · 测试数据库</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>1.8</b></td><td>代码仓库与分支策略</td><td>开发</td><td>1 天</td><td>—</td><td>Git 仓库 · main/develop/feature</td><td><span class="tag high">P1</span></td></tr>
     </tbody>
   </table>
 
   <div class="info note">
     <div class="label">🎯 里程碑 M1</div>
-    <b>Week 3 结束</b>：基础设施就绪 · 所有基础服务可用 · CI/CD 打通
+    <b>Week 2 结束</b>：基础环境就绪 · 开发可以开始 · 一键部署脚本可用
   </div>
 
-  <h3 class="sub">2.2 阶段二：开发实施（Week 4-7）</h3>
+  <h3 class="sub">2.2 阶段二：功能开发（Week 3-6）</h3>
+  <div class="info tip">
+    <div class="label">💡 埋点策略</div>
+    监控埋点内置到业务代码中：关键操作日志 · 性能指标采集 · 错误追踪 · 用户行为记录
+  </div>
   <table>
     <thead><tr><th>编号</th><th>任务</th><th>负责人</th><th>工期</th><th>依赖</th><th>交付物</th><th>优先级</th></tr></thead>
     <tbody>
-      <tr><td><b>2.1</b></td><td>用户服务开发</td><td>后端</td><td>5 天</td><td>1.3</td><td>user-service · 6 API</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>2.2</b></td><td>课程服务开发</td><td>后端</td><td>7 天</td><td>1.3</td><td>course-service · 8 API</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>2.3</b></td><td>作业服务开发</td><td>后端</td><td>7 天</td><td>2.2</td><td>assignment-service · 6 API</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>2.4</b></td><td>成绩服务开发</td><td>后端</td><td>5 天</td><td>2.3</td><td>grade-service · 4 API</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>2.5</b></td><td>通知服务开发</td><td>后端</td><td>4 天</td><td>1.5</td><td>notification-service · 3 API</td><td><span class="tag high">P1</span></td></tr>
-      <tr><td><b>2.6</b></td><td>AI 网关服务开发</td><td>AI 团队</td><td>6 天</td><td>1.7</td><td>ai-gateway · 智能路由</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>2.7</b></td><td>AI 对话服务开发</td><td>AI 团队</td><td>8 天</td><td>2.6</td><td>ai-chat · SSE 流式</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>2.8</b></td><td>AI 批阅服务开发</td><td>AI 团队</td><td>6 天</td><td>2.6</td><td>ai-grade · 评分建议</td><td><span class="tag high">P1</span></td></tr>
-      <tr><td><b>2.9</b></td><td>前端 Web 开发</td><td>前端</td><td>15 天</td><td>2.1-2.4</td><td>React 18 · 全部页面</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>2.10</b></td><td>前端移动端开发</td><td>前端</td><td>15 天</td><td>2.1-2.4</td><td>React Native · iOS/Android</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>2.11</b></td><td>API 联调</td><td>全栈</td><td>5 天</td><td>2.1-2.10</td><td>42 API 联调通过</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>2.12</b></td><td>单元测试编写</td><td>开发</td><td>10 天</td><td>2.1-2.8</td><td>覆盖率 ≥ 80%</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.1</b></td><td>用户服务开发 + 埋点</td><td>后端</td><td>5 天</td><td>1.2</td><td>user-service · 登录/注册埋点</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.2</b></td><td>课程服务开发 + 埋点</td><td>后端</td><td>7 天</td><td>1.2</td><td>course-service · 选课/浏览埋点</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.3</b></td><td>作业服务开发 + 埋点</td><td>后端</td><td>7 天</td><td>2.2</td><td>assignment-service · 提交/批阅埋点</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.4</b></td><td>成绩服务开发 + 埋点</td><td>后端</td><td>5 天</td><td>2.3</td><td>grade-service · 查询埋点</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.5</b></td><td>AI 网关服务开发</td><td>AI 团队</td><td>5 天</td><td>1.2</td><td>ai-gateway · 调用统计埋点</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.6</b></td><td>AI 对话服务开发</td><td>AI 团队</td><td>7 天</td><td>2.5</td><td>ai-chat · 对话质量埋点</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.7</b></td><td>AI 批阅服务开发</td><td>AI 团队</td><td>5 天</td><td>2.5</td><td>ai-grade · 批阅准确率埋点</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>2.8</b></td><td>前端 Web 开发 + 埋点</td><td>前端</td><td>12 天</td><td>2.1-2.4</td><td>React 18 · 页面访问/点击埋点</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.9</b></td><td>前端移动端开发 + 埋点</td><td>前端</td><td>12 天</td><td>2.1-2.4</td><td>React Native · 移动端埋点</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.10</b></td><td>埋点数据收集与存储</td><td>后端</td><td>3 天</td><td>2.1-2.7</td><td>埋点数据表 · 日志格式规范</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.11</b></td><td>基础日志系统</td><td>运维</td><td>2 天</td><td>1.6</td><td>结构化日志 · 日志查询</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>2.12</b></td><td>API 联调与测试</td><td>全栈</td><td>5 天</td><td>2.1-2.9</td><td>42 API 联调通过</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.13</b></td><td>单元测试编写</td><td>开发</td><td>8 天</td><td>2.1-2.7</td><td>覆盖率 ≥ 70%</td><td><span class="tag high">P1</span></td></tr>
     </tbody>
   </table>
 
   <div class="info note">
     <div class="label">🎯 里程碑 M2</div>
-    <b>Week 7 结束</b>：所有服务开发完成 · API 联调通过 · 单元测试覆盖率 ≥ 80%
+    <b>Week 6 结束</b>：所有服务开发完成 · 埋点数据可采集 · API 联调通过
   </div>
 
-  <h3 class="sub">2.3 阶段三：测试验证（Week 8-10）</h3>
+  <h3 class="sub">2.3 阶段三：测试优化（Week 7-8）</h3>
   <table>
     <thead><tr><th>编号</th><th>任务</th><th>负责人</th><th>工期</th><th>依赖</th><th>交付物</th><th>优先级</th></tr></thead>
     <tbody>
-      <tr><td><b>3.1</b></td><td>集成测试</td><td>QA</td><td>5 天</td><td>2.11</td><td>200+ 集成用例通过</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>3.2</b></td><td>E2E 测试</td><td>QA</td><td>5 天</td><td>3.1</td><td>30 核心流程通过</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>3.3</b></td><td>性能测试</td><td>QA + 运维</td><td>5 天</td><td>3.1</td><td>性能报告 · 优化建议</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>3.4</b></td><td>安全测试</td><td>安全</td><td>5 天</td><td>3.1</td><td>渗透测试报告 · 漏洞修复</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>3.5</b></td><td>兼容性测试</td><td>QA</td><td>3 天</td><td>2.9-2.10</td><td>浏览器/设备兼容报告</td><td><span class="tag high">P1</span></td></tr>
-      <tr><td><b>3.6</b></td><td>Bug 修复</td><td>开发</td><td>10 天</td><td>3.1-3.5</td><td>P0/P1 = 0 · P2 ≤ 3</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>3.7</b></td><td>性能优化</td><td>开发 + 运维</td><td>5 天</td><td>3.3</td><td>P99 < 500ms 达标</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>3.8</b></td><td>用户验收测试（UAT）</td><td>业务方</td><td>5 天</td><td>3.6</td><td>UAT 签字确认</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>3.9</b></td><td>文档更新</td><td>开发</td><td>3 天</td><td>3.6</td><td>API 文档 · 用户手册同步</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>3.1</b></td><td>功能测试</td><td>QA</td><td>5 天</td><td>2.12</td><td>核心功能测试通过</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>3.2</b></td><td>埋点数据验证</td><td>QA + 开发</td><td>3 天</td><td>2.10</td><td>埋点数据准确性验证</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>3.3</b></td><td>性能测试</td><td>QA + 运维</td><td>3 天</td><td>3.1</td><td>性能报告 · 瓶颈分析</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>3.4</b></td><td>Bug 修复</td><td>开发</td><td>7 天</td><td>3.1</td><td>P0/P1 = 0 · P2 ≤ 5</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>3.5</b></td><td>性能优化</td><td>开发 + 运维</td><td>3 天</td><td>3.3</td><td>P99 < 500ms 达标</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>3.6</b></td><td>用户验收测试（UAT）</td><td>业务方</td><td>3 天</td><td>3.4</td><td>UAT 签字确认</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>3.7</b></td><td>文档更新</td><td>开发</td><td>2 天</td><td>3.4</td><td>API 文档 · 用户手册同步</td><td><span class="tag medium">P2</span></td></tr>
     </tbody>
   </table>
 
   <div class="info note">
     <div class="label">🎯 里程碑 M3</div>
-    <b>Week 10 结束</b>：测试全部通过 · UAT 签字 · 达到上线标准
+    <b>Week 8 结束</b>：测试通过 · 埋点验证完成 · UAT 签字 · 达到上线标准
   </div>
 
-  <h3 class="sub">2.4 阶段四：上线运营（Week 11-12）</h3>
+  <h3 class="sub">2.4 阶段四：上线运营（Week 9-10）</h3>
   <table>
     <thead><tr><th>编号</th><th>任务</th><th>负责人</th><th>工期</th><th>依赖</th><th>交付物</th><th>优先级</th></tr></thead>
     <tbody>
-      <tr><td><b>4.1</b></td><td>数据迁移方案设计</td><td>DBA</td><td>3 天</td><td>3.8</td><td>迁移方案 · 回滚方案</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>4.2</b></td><td>数据迁移脚本开发</td><td>DBA</td><td>5 天</td><td>4.1</td><td>迁移脚本 · 校验脚本</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>4.3</b></td><td>数据迁移演练</td><td>DBA</td><td>2 天</td><td>4.2</td><td>演练报告 · 问题修复</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>4.4</b></td><td>生产数据迁移</td><td>DBA</td><td>1 天</td><td>4.3</td><td>迁移完成 · 校验通过</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>4.5</b></td><td>培训材料准备</td><td>产品</td><td>5 天</td><td>3.8</td><td>PPT · 视频 · 操作手册</td><td><span class="tag high">P1</span></td></tr>
-      <tr><td><b>4.6</b></td><td>管理员培训</td><td>产品</td><td>2 天</td><td>4.5</td><td>培训完成 · 考核通过</td><td><span class="tag high">P1</span></td></tr>
-      <tr><td><b>4.7</b></td><td>教师培训</td><td>产品</td><td>3 天</td><td>4.5</td><td>培训完成 · 考核通过</td><td><span class="tag high">P1</span></td></tr>
-      <tr><td><b>4.8</b></td><td>学生培训（分批）</td><td>产品</td><td>5 天</td><td>4.5</td><td>培训覆盖 80%</td><td><span class="tag high">P1</span></td></tr>
-      <tr><td><b>4.9</b></td><td>上线 Checklist 检查</td><td>项目经理</td><td>1 天</td><td>4.4, 4.8</td><td>Checklist 全部打勾</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>4.10</b></td><td>灰度发布（10%）</td><td>运维</td><td>2 天</td><td>4.9</td><td>灰度稳定 · 无重大问题</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>4.11</b></td><td>全量发布</td><td>运维</td><td>1 天</td><td>4.10</td><td>全量上线 · 监控正常</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>4.12</b></td><td>上线后监控（1 周）</td><td>运维</td><td>7 天</td><td>4.11</td><td>稳定性报告</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>4.13</b></td><td>问题收集与修复</td><td>开发</td><td>7 天</td><td>4.11</td><td>问题修复 · 版本迭代</td><td><span class="tag high">P1</span></td></tr>
-      <tr><td><b>4.14</b></td><td>项目总结与复盘</td><td>项目经理</td><td>1 天</td><td>4.12</td><td>复盘报告 · 经验沉淀</td><td><span class="tag medium">P2</span></td></tr>
+      <tr><td><b>4.1</b></td><td>数据迁移脚本开发</td><td>DBA</td><td>3 天</td><td>3.6</td><td>迁移脚本 · 校验脚本</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.2</b></td><td>数据迁移演练</td><td>DBA</td><td>1 天</td><td>4.1</td><td>演练报告</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.3</b></td><td>生产数据迁移</td><td>DBA</td><td>1 天</td><td>4.2</td><td>迁移完成 · 校验通过</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.4</b></td><td>培训材料准备</td><td>产品</td><td>3 天</td><td>3.6</td><td>PPT · 操作手册</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>4.5</b></td><td>管理员培训</td><td>产品</td><td>1 天</td><td>4.4</td><td>培训完成</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>4.6</b></td><td>教师培训</td><td>产品</td><td>2 天</td><td>4.4</td><td>培训完成</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>4.7</b></td><td>学生培训（分批）</td><td>产品</td><td>3 天</td><td>4.4</td><td>培训覆盖 80%</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>4.8</b></td><td>上线 Checklist 检查</td><td>项目经理</td><td>1 天</td><td>4.3, 4.7</td><td>Checklist 全部打勾</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.9</b></td><td>灰度发布（10%）</td><td>运维</td><td>2 天</td><td>4.8</td><td>灰度稳定</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.10</b></td><td>全量发布</td><td>运维</td><td>1 天</td><td>4.9</td><td>全量上线</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.11</b></td><td>上线后监控（1 周）</td><td>运维 + 开发</td><td>7 天</td><td>4.10</td><td>稳定性报告 · 埋点数据分析</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>4.12</b></td><td>问题收集与修复</td><td>开发</td><td>7 天</td><td>4.10</td><td>问题修复</td><td><span class="tag high">P1</span></td></tr>
     </tbody>
   </table>
 
   <div class="info success">
     <div class="label">🎯 里程碑 M4</div>
-    <b>Week 12 结束</b>：正式上线 · 稳定运行 1 周 · 项目复盘完成
+    <b>Week 10 结束</b>：正式上线 · 稳定运行 · 埋点数据开始产出
+  </div>
+
+  <div class="info note">
+    <div class="label">📊 后续演进（上线后 3-6 个月）</div>
+    根据业务发展，逐步引入：<br/>
+    • <b>K8s 集群</b>：用户量 > 5000 时考虑<br/>
+    • <b>完善 CI/CD</b>：自动化测试 · 自动部署<br/>
+    • <b>独立监控系统</b>：Prometheus + Grafana + AlertManager<br/>
+    • <b>数据分析平台</b>：基于埋点数据的深度分析
   </div>
 </section>
 
@@ -301,96 +313,78 @@
 
   <div class="gantt">
     <div class="gantt-row">
-      <div class="gantt-label"><span class="tag phase1">阶段一</span> 基础设施</div>
+      <div class="gantt-label"><span class="tag phase1">阶段一</span> 基础环境</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase1" style="left:0%; width:25%;">Week 1-3</div>
+        <div class="gantt-bar phase1" style="left:0%; width:20%;">Week 1-2</div>
       </div>
     </div>
     <div class="gantt-row">
-      <div class="gantt-label sub">云资源 · K8s · 数据库</div>
+      <div class="gantt-label sub">服务器 · 数据库 · 部署脚本</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase1" style="left:0%; width:16.7%; opacity:0.7;">W1</div>
-      </div>
-    </div>
-    <div class="gantt-row">
-      <div class="gantt-label sub">中间件 · 监控 · CI/CD</div>
-      <div class="gantt-bar-container">
-        <div class="gantt-bar phase1" style="left:8.3%; width:16.7%; opacity:0.7;">W2</div>
-      </div>
-    </div>
-    <div class="gantt-row">
-      <div class="gantt-label sub">安全 · 网络 · 域名</div>
-      <div class="gantt-bar-container">
-        <div class="gantt-bar phase1" style="left:16.7%; width:8.3%; opacity:0.7;">W3</div>
+        <div class="gantt-bar phase1" style="left:0%; width:20%; opacity:0.7;">W1-2</div>
       </div>
     </div>
 
     <div class="gantt-row">
-      <div class="gantt-label"><span class="tag phase2">阶段二</span> 开发实施</div>
+      <div class="gantt-label"><span class="tag phase2">阶段二</span> 功能开发</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase2" style="left:25%; width:33.3%;">Week 4-7</div>
+        <div class="gantt-bar phase2" style="left:20%; width:40%;">Week 3-6</div>
       </div>
     </div>
     <div class="gantt-row">
-      <div class="gantt-label sub">后端服务开发</div>
+      <div class="gantt-label sub">后端服务 + 埋点</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase2" style="left:25%; width:25%; opacity:0.7;">W4-6</div>
+        <div class="gantt-bar phase2" style="left:20%; width:30%; opacity:0.7;">W3-5</div>
       </div>
     </div>
     <div class="gantt-row">
-      <div class="gantt-label sub">前端 Web + 移动端</div>
+      <div class="gantt-label sub">前端 Web + 移动端 + 埋点</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase2" style="left:33.3%; width:16.7%; opacity:0.7;">W5-6</div>
+        <div class="gantt-bar phase2" style="left:30%; width:20%; opacity:0.7;">W4-5</div>
       </div>
     </div>
     <div class="gantt-row">
       <div class="gantt-label sub">API 联调 · 单元测试</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase2" style="left:50%; width:8.3%; opacity:0.7;">W7</div>
+        <div class="gantt-bar phase2" style="left:50%; width:10%; opacity:0.7;">W6</div>
       </div>
     </div>
 
     <div class="gantt-row">
-      <div class="gantt-label"><span class="tag phase3">阶段三</span> 测试验证</div>
+      <div class="gantt-label"><span class="tag phase3">阶段三</span> 测试优化</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase3" style="left:58.3%; width:25%;">Week 8-10</div>
+        <div class="gantt-bar phase3" style="left:60%; width:20%;">Week 7-8</div>
       </div>
     </div>
     <div class="gantt-row">
-      <div class="gantt-label sub">集成 · E2E · 性能 · 安全</div>
+      <div class="gantt-label sub">功能测试 · 埋点验证</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase3" style="left:58.3%; width:16.7%; opacity:0.7;">W8-9</div>
+        <div class="gantt-bar phase3" style="left:60%; width:10%; opacity:0.7;">W7</div>
       </div>
     </div>
     <div class="gantt-row">
-      <div class="gantt-label sub">Bug 修复 · 性能优化</div>
+      <div class="gantt-label sub">Bug 修复 · 性能优化 · UAT</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase3" style="left:66.7%; width:8.3%; opacity:0.7;">W9</div>
-      </div>
-    </div>
-    <div class="gantt-row">
-      <div class="gantt-label sub">UAT · 文档更新</div>
-      <div class="gantt-bar-container">
-        <div class="gantt-bar phase3" style="left:75%; width:8.3%; opacity:0.7;">W10</div>
+        <div class="gantt-bar phase3" style="left:70%; width:10%; opacity:0.7;">W8</div>
       </div>
     </div>
 
     <div class="gantt-row">
       <div class="gantt-label"><span class="tag phase4">阶段四</span> 上线运营</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase4" style="left:83.3%; width:16.7%;">Week 11-12</div>
+        <div class="gantt-bar phase4" style="left:80%; width:20%;">Week 9-10</div>
       </div>
     </div>
     <div class="gantt-row">
       <div class="gantt-label sub">数据迁移 · 培训</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase4" style="left:83.3%; width:8.3%; opacity:0.7;">W11</div>
+        <div class="gantt-bar phase4" style="left:80%; width:10%; opacity:0.7;">W9</div>
       </div>
     </div>
     <div class="gantt-row">
       <div class="gantt-label sub">灰度 · 全量 · 监控</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase4" style="left:91.7%; width:8.3%; opacity:0.7;">W12</div>
+        <div class="gantt-bar phase4" style="left:90%; width:10%; opacity:0.7;">W10</div>
       </div>
     </div>
 
@@ -405,8 +399,6 @@
       <div class="gantt-week">W8</div>
       <div class="gantt-week">W9</div>
       <div class="gantt-week">W10</div>
-      <div class="gantt-week">W11</div>
-      <div class="gantt-week">W12</div>
     </div>
   </div>
 
@@ -414,10 +406,10 @@
   <table>
     <thead><tr><th>里程碑</th><th>时间</th><th>标志</th><th>验收标准</th></tr></thead>
     <tbody>
-      <tr><td><b>M1 基础设施就绪</b></td><td>Week 3 结束</td><td>所有基础服务可用</td><td>K8s · 数据库 · 监控 · CI/CD 就绪</td></tr>
-      <tr><td><b>M2 开发完成</b></td><td>Week 7 结束</td><td>功能开发完成</td><td>12 微服务 · API 联调 · 80% 覆盖率</td></tr>
-      <tr><td><b>M3 测试通过</b></td><td>Week 10 结束</td><td>达到上线标准</td><td>无 P0/P1 · UAT 签字 · 性能达标</td></tr>
-      <tr><td><b>M4 正式上线</b></td><td>Week 12 结束</td><td>全量上线</td><td>稳定运行 1 周 · 无重大问题</td></tr>
+      <tr><td><b>M1 环境就绪</b></td><td>Week 2 结束</td><td>基础环境可用</td><td>服务器 · 数据库 · 部署脚本就绪</td></tr>
+      <tr><td><b>M2 开发完成</b></td><td>Week 6 结束</td><td>功能开发完成</td><td>12 微服务 · 埋点内置 · API 联调通过</td></tr>
+      <tr><td><b>M3 测试通过</b></td><td>Week 8 结束</td><td>达到上线标准</td><td>无 P0/P1 · 埋点验证 · UAT 签字</td></tr>
+      <tr><td><b>M4 正式上线</b></td><td>Week 10 结束</td><td>全量上线</td><td>稳定运行 · 埋点数据产出</td></tr>
     </tbody>
   </table>
 </section>
@@ -429,34 +421,40 @@
     <div class="num-tag">Team & Budget</div>
   </div>
 
-  <h3 class="sub">4.1 团队配置</h3>
+  <h3 class="sub">4.1 团队配置（精简版）</h3>
   <table>
     <thead><tr><th>角色</th><th>人数</th><th>职责</th><th>投入周期</th></tr></thead>
     <tbody>
-      <tr><td><b>项目经理</b></td><td>1</td><td>整体协调 · 进度管控 · 风险管理</td><td>全程 12 周</td></tr>
-      <tr><td><b>运维工程师</b></td><td>2</td><td>基础设施 · K8s · 监控 · 部署</td><td>全程 12 周</td></tr>
-      <tr><td><b>后端开发</b></td><td>3</td><td>微服务开发 · API 实现</td><td>Week 1-10</td></tr>
-      <tr><td><b>前端开发</b></td><td>2</td><td>Web · 移动端开发</td><td>Week 4-10</td></tr>
-      <tr><td><b>AI 工程师</b></td><td>2</td><td>AI 服务 · 模型集成</td><td>Week 4-10</td></tr>
-      <tr><td><b>QA 工程师</b></td><td>2</td><td>测试 · 质量保障</td><td>Week 8-12</td></tr>
-      <tr><td><b>DBA</b></td><td>1</td><td>数据库设计 · 迁移 · 优化</td><td>Week 1-12</td></tr>
-      <tr><td><b>安全工程师</b></td><td>1</td><td>安全测试 · 合规检查</td><td>Week 1-3, 8-10</td></tr>
-      <tr><td><b>产品经理</b></td><td>1</td><td>需求确认 · 培训 · 验收</td><td>Week 1-2, 8-12</td></tr>
+      <tr><td><b>项目经理</b></td><td>1</td><td>整体协调 · 进度管控</td><td>全程 10 周</td></tr>
+      <tr><td><b>运维工程师</b></td><td>1</td><td>基础环境 · 部署 · 简单运维</td><td>全程 10 周</td></tr>
+      <tr><td><b>后端开发</b></td><td>2</td><td>微服务开发 · 埋点实现</td><td>Week 1-8</td></tr>
+      <tr><td><b>前端开发</b></td><td>2</td><td>Web · 移动端 · 前端埋点</td><td>Week 3-8</td></tr>
+      <tr><td><b>AI 工程师</b></td><td>1</td><td>AI 服务开发</td><td>Week 3-8</td></tr>
+      <tr><td><b>QA 工程师</b></td><td>1</td><td>测试 · 埋点验证</td><td>Week 7-10</td></tr>
+      <tr><td><b>DBA</b></td><td>1</td><td>数据库设计 · 迁移</td><td>Week 1-10</td></tr>
+      <tr><td><b>产品经理</b></td><td>1</td><td>需求确认 · 培训</td><td>Week 1-2, 7-10</td></tr>
     </tbody>
   </table>
 
-  <h3 class="sub">4.2 预算估算</h3>
+  <h3 class="sub">4.2 预算估算（精简版）</h3>
   <table>
     <thead><tr><th>项目</th><th>费用（元）</th><th>说明</th></tr></thead>
     <tbody>
-      <tr><td><b>云资源（3 个月）</b></td><td>36,000</td><td>K8s 集群 · 存储 · 网络</td></tr>
-      <tr><td><b>AI 模型调用</b></td><td>9,000</td><td>3 个月预估</td></tr>
-      <tr><td><b>人力成本</b></td><td>~360,000</td><td>15 人 · 3 个月</td></tr>
-      <tr><td><b>工具与服务</b></td><td>5,000</td><td>域名 · 证书 · 第三方服务</td></tr>
-      <tr><td><b>培训费用</b></td><td>3,000</td><td>培训材料 · 场地</td></tr>
-      <tr><td><b>总计</b></td><td><b>~413,000</b></td><td>—</td></tr>
+      <tr><td><b>云资源（2.5 个月）</b></td><td>15,000</td><td>2-3 台服务器 · 简化配置</td></tr>
+      <tr><td><b>AI 模型调用</b></td><td>6,000</td><td>2.5 个月预估</td></tr>
+      <tr><td><b>人力成本</b></td><td>~200,000</td><td>10 人 · 2.5 个月</td></tr>
+      <tr><td><b>工具与服务</b></td><td>3,000</td><td>域名 · 证书</td></tr>
+      <tr><td><b>培训费用</b></td><td>2,000</td><td>培训材料</td></tr>
+      <tr><td><b>总计</b></td><td><b>~226,000</b></td><td>节省 45%</td></tr>
     </tbody>
   </table>
+
+  <div class="info success">
+    <div class="label">💰 成本对比</div>
+    <b>原方案</b>：41.3 万 · 15 人 · 12 周（K8s + CI/CD + 完整监控）<br/>
+    <b>精简方案</b>：22.6 万 · 10 人 · 10 周（轻量架构 + 应用埋点）<br/>
+    <b>节省</b>：18.7 万（45%）· 5 人 · 2 周
+  </div>
 
   <h3 class="sub">4.3 风险评估</h3>
   <table>
@@ -565,7 +563,7 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Launch WBS</div>
-  <div>v1.0 · 12 周 · 4 阶段 · 48 任务包 · 2026-09-01 启动</div>
+  <div>v1.1 · 10 周 · 4 阶段 · 36 任务包 · 2026-09-01 启动</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">WBS-LUMINA-2026-001</div>
 </footer>
 
