@@ -292,6 +292,31 @@ services:
       - lumina-network
 
   # ============================================
+  # 基础日志系统 (logs-service / FastAPI)
+  # api_logs 检索统计 · 结构化 JSON 日志规范
+  # ============================================
+  logs-service:
+    build: ../服务/logs-service
+    container_name: lumina-logs
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-lumina}:${POSTGRES_PASSWORD:-lumina_secure_password}@postgres:5432/${POSTGRES_DB:-lumina}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change_me_jwt_secret_key}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8097/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - lumina-network
+
+  # ============================================
   nginx:
     image: nginx:alpine
     container_name: lumina-nginx
@@ -314,6 +339,7 @@ services:
       - ai-chat-service
       - ai-grade-service
       - analytics-service
+      - logs-service
     networks:
       - lumina-network
 

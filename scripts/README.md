@@ -1,4 +1,15 @@
-# Lumina 墨光 · 语雀同步工具
+# Lumina 墨光 · 工具脚本
+
+脚本清单：
+
+| 脚本 | 用途 |
+|------|------|
+| `yuque-sync.py` | 设计文档同步到语雀知识库 |
+| `log_json.py` | 结构化 JSON 日志（JSONLines）演示/生成器 |
+
+---
+
+## 🗂 语雀同步工具
 
 将 Lumina 设计文档同步到语雀知识库。
 
@@ -38,6 +49,43 @@ YUQUE_CONFIG = {
 2. 点击「新建」
 3. 填写名称（如 `Lumina Sync`）
 4. 勾选权限：`读取` + `写入`
+
+---
+
+## 🪵 结构化 JSON 日志（log_json.py）
+
+Lumina 所有服务统一输出 **JSONLines**（每行一个 JSON 对象），便于采集进
+ELK / Loki / 自研日志系统。
+
+### 运行演示
+
+```bash
+python scripts/log_json.py
+```
+
+输出示例（每行一个 JSON）：
+
+```json
+{"ts": "2026-08-26T10:00:00+0800", "level": "INFO", "logger": "lumina.demo", "message": "演示：正常日志", "module": "log_json", "func": "<module>", "line": 28, "thread": 1, "service": "demo", "method": "GET", "path": "/api/v1/courses"}
+{"ts": "2026-08-26T10:00:00+0800", "level": "ERROR", "logger": "lumina.demo", "message": "演示：错误日志（含堆栈）", "module": "log_json", "func": "<module>", "line": 33, "thread": 1, "service": "demo", "request_id": "REQ-DEMO-001", "user_id": "u-001", "traceback": "Traceback ..."}
+```
+
+### 接入任意现有服务（3 步）
+
+1. 复制 `服务/logs-service/app/logging_json.py` 到服务 `app/` 下
+2. 在 `main.py` 导入并启用：
+   ```python
+   from logging_json import install_json_logging
+   install_json_logging()
+   ```
+3. 日志打点时附上链路字段：
+   ```python
+   logger.error("批阅失败", extra={"request_id": req_id, "user_id": str(user_id)}, exc_info=True)
+   ```
+
+字段约定：基础字段 `ts/level/logger/message/module/func/line/thread`；
+扩展字段 `request_id`（请求链路 ID）、`user_id`、`course_id`、`service`；
+异常自动附加 `traceback`。中文保持 UTF-8（`ensure_ascii=False`）。
 5. 创建并复制 Token
 
 ## 📚 配置知识库
