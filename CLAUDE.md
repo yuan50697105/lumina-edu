@@ -127,3 +127,61 @@ background: linear-gradient(
 3. **视觉一致**: 所有 HTML 文档使用相同的 CSS 变量和样式
 4. **中文优先**: 所有文档内容使用简体中文
 5. **HTML 格式**: 原型和文档均为纯 HTML，无外部依赖（字体除外）
+
+## ⚠️ Mandatory Workflow (强制工作流)
+
+**所有文档/原型变更必须遵循以下流程：**
+
+### Step 1: Create/Edit (创建/编辑)
+```bash
+# 创建新文档时，复制现有文档的 HTML 结构
+# 必须使用 Lumina 设计系统的 CSS 变量
+# 保持视觉风格一致
+```
+
+### Step 2: Update Index (更新索引)
+当新增/删除文档时，**必须**更新以下文件：
+- `原型/lumina-00-index.html` - 添加/移除文档卡片
+- `README.md` - 更新项目结构、统计、文档列表、版本历史
+
+### Step 3: Validate (验证)
+```bash
+# 检查 HTML 文件是否可在浏览器中正常打开
+# 检查所有链接是否正确
+# 检查文档版本号是否更新
+```
+
+### Step 4: Git Commit (提交)
+```bash
+# 提交信息格式
+git commit -m "docs: 简要描述变更
+
+详细说明（可选）：
+- 变更点1
+- 变更点2
+- ..."
+```
+
+### Step 5: Git Push (推送)
+```bash
+# 立即推送到远程仓库
+git push origin master
+```
+
+### Step 6: Confirm (确认)
+- ✅ 检查 GitHub 仓库是否更新
+- ✅ 确认文件可正常访问
+
+### Quick Reference (快速参考)
+```bash
+# 完整工作流一键执行
+git add -A && \
+git commit -m "docs: 描述" && \
+git push origin master
+```
+
+**重要提醒：**
+- 🚨 每次变更必须推送，不允许本地积压
+- 🚨 新增文档必须更新索引页和 README
+- 🚨 保持视觉风格一致性
+- 🚨 使用中文进行所有文档编写
