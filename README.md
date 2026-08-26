@@ -40,6 +40,13 @@ edu/
 │   ├── PC/             (7 文件)       # 🖥️ 桌面端原型
 │   └── AI/             (3 文件)       # 🤖 AI 模块原型
 │
+├── 部署/                             # Docker 部署方案（环境搭建）
+│   ├── docker-compose.yml            # 服务编排
+│   ├── .env.example                  # 环境变量模板
+│   ├── config/                       # Nginx/PostgreSQL 配置
+│   ├── scripts/                      # 启停/备份/监控脚本
+│   └── README.md                     # 部署使用说明
+│
 └── scripts/                           # 工具脚本
     ├── yuque-sync.py                  # 🔌 语雀同步工具
     ├── yuque-config.example.json      # 配置模板
@@ -153,6 +160,29 @@ python scripts/yuque-sync.py
 2. 通过索引页面导航到各个设计稿
 3. 每个 HTML 文件可独立打开查看
 
+### 快速部署（轻量方案）
+
+初期上线使用 Docker Compose 一键部署，无需 K8s：
+
+```bash
+# 1. 进入部署目录
+cd 部署
+
+# 2. 配置环境变量（修改密码）
+cp .env.example .env
+
+# 3. 启动所有服务
+./scripts/start.sh
+
+# 4. 查看服务状态
+./scripts/status.sh
+
+# 5. 查看运行监控（API 请求/用户行为埋点）
+./scripts/monitor.sh
+```
+
+详见 `部署/README.md`
+
 ### 查看文档
 
 | 文档 | 打开方式 |
@@ -184,6 +214,7 @@ python scripts/yuque-sync.py
 | **QA v1.0** | 2026-08-25 | 测试用例文档发布，156 用例 |
 | **UG v1.0** | 2026-08-25 | 用户手册发布，3 角色指南 |
 | **WBS v1.0** | 2026-08-26 | 上线工作分解结构发布，12 周计划 |
+| **部署 v1.0** | 2026-08-26 | Docker Compose 轻量部署方案：服务编排 + 脚本 |
 
 ## 📄 许可证
 

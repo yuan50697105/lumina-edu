@@ -55,3 +55,10 @@ wheels/
 # Local config (tokens, secrets)
 scripts/yuque-config.local.json
 .env
+.env.*
+!.env.example
+
+# Deployment artifacts
+部署/backups/
+部署/ssl/
+部署/.env
