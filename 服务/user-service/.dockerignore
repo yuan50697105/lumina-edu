@@ -1,9 +1,0 @@
-# Docker 构建忽略
-.venv/
-__pycache__/
-*.py[cod]
-*.log
-*.md
-tests/
-.gitkeep
-pytest.ini
