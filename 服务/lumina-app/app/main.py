@@ -1,0 +1,126 @@
+# ============================================
+# Lumina 墨光 · 单体应用入口（合并 9 微服务）
+# ============================================
+import logging
+import time
+import os
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from sqlalchemy import text
+
+from app.config import settings
+from app.database import Base, SessionLocal, engine
+from app import models  # noqa: F401
+from app.logging_json import install_json_logging
+
+# 模块路由
+from app.modules.user import routers as user_routers
+from app.modules.course import routers as course_routers
+from app.modules.assignment import routers as assignment_routers
+from app.modules.grade import routers as grade_routers
+from app.modules.ai_gateway import routers as ai_gateway_routers
+from app.modules.ai_chat import routers as ai_chat_routers
+from app.modules.ai_grade import routers as ai_grade_routers
+from app.modules.analytics import routers as analytics_routers
+from app.modules.logs import routers as logs_routers
+
+install_json_logging()
+logger = logging.getLogger("lumina.app")
+
+SERVICE_NAME = "lumina-app"
+SERVICE_VERSION = "1.0.0"
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if os.getenv("APP_ENV", "development") == "development":
+        Base.metadata.create_all(bind=engine)
+        logger.info("数据库表已创建（development 模式）")
+    yield
+
+
+app = FastAPI(
+    title="Lumina 墨光 · 跨端教学协作平台 API",
+    description="用户·课程·作业·成绩·AI 对话·批阅·埋点·日志 全链路 API",
+    version=SERVICE_VERSION,
+    lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.middleware("http")
+async def api_logging_middleware(request: Request, call_next):
+    t0 = time.perf_counter()
+    response = await call_next(request)
+    duration_ms = int((time.perf_counter() - t0) * 1000)
+    try:
+        db = SessionLocal()
+        db.add(models.APILog(
+            method=request.method, path=request.url.path,
+            status_code=response.status_code, duration_ms=duration_ms,
+        ))
+        db.commit()
+        db.close()
+    except Exception as exc:
+        logger.warning("API 日志写入失败: %s", exc)
+    return response
+
+
+@app.get("/health", summary="健康检查")
+def health():
+    return {"status": "ok", "service": SERVICE_NAME, "version": SERVICE_VERSION}
+
+
+@app.get("/health/ready", summary="就绪检查")
+def ready():
+    try:
+        db = SessionLocal()
+        db.execute(text("SELECT 1"))
+        db.close()
+        db_status = "ok"
+    except Exception:
+        db_status = "down"
+    return {"status": "ok" if db_status == "ok" else "degraded", "db": db_status}
+
+
+# ─── 路由挂载（prefix 与原各服务一致）───
+# 用户/认证
+app.include_router(user_routers.auth_router, prefix="/api/v1")
+app.include_router(user_routers.users_router, prefix="/api/v1")
+# 课程
+app.include_router(course_routers.router, prefix="/api/v1")
+# 作业
+app.include_router(assignment_routers.router, prefix="/api/v1")
+app.include_router(assignment_routers.course_router, prefix="/api/v1")
+# 成绩
+app.include_router(grade_routers.router, prefix="/api/v1")
+app.include_router(grade_routers.course_router, prefix="/api/v1")
+# AI 网关
+app.include_router(ai_gateway_routers.router, prefix="/api/v1")
+# AI 对话
+app.include_router(ai_chat_routers.router, prefix="/api/v1")
+# AI 批阅
+app.include_router(ai_grade_routers.router, prefix="/api/v1")
+# 埋点
+app.include_router(analytics_routers.router, prefix="/api/v1")
+# 日志
+app.include_router(logs_routers.router, prefix="/api/v1")
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.exception("未处理异常: %s %s", request.method, request.url.path)
+    return JSONResponse(
+        status_code=500,
+        content={"code": "INTERNAL_ERROR", "detail": "服务器内部错误"},
+    )

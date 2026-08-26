@@ -19,6 +19,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SVC = ROOT / "服务"
+MONOLITH = SVC / "lumina-app"
 SUMMARY_RE = re.compile(r"(?P<passed>\d+) passed(?:, (?P<failed>\d+) failed)?(?:, (?P<skipped>\d+) skipped)?")
 
 
@@ -60,6 +61,9 @@ def main() -> int:
     print(f"🔍 Python: {py}\n")
 
     files = sorted(p for p in SVC.glob("*/tests/test_*.py"))
+    # 同时扫描单体应用的 tests 目录
+    monolith_tests = sorted(p for p in MONOLITH.glob("tests/test_*.py"))
+    files = files + [f for f in monolith_tests if f not in files]
     if not args.include_api:
         files = [f for f in files if not f.name.endswith("_api.py")]
     files = [f for f in files if not any(x in str(f) for x in args.exclude)]
