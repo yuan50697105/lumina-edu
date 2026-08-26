@@ -144,7 +144,7 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">12</div><div class="lbl">微服务</div></div>
+  <div class="stat"><div class="val hl">1</div><div class="lbl">单体应用</div></div>
   <div class="stat"><div class="val hl">3</div><div class="lbl">环境</div></div>
   <div class="stat"><div class="val">24/7</div><div class="lbl">监控</div></div>
   <div class="stat"><div class="val">RPO 1h</div><div class="lbl">恢复点</div></div>
@@ -235,105 +235,69 @@
 <span class="keyword">metadata</span>:
   <span class="key">name</span>: <span class="string">lumina-monitoring</span>  <span class="comment"># 监控栈</span></pre>
 
-  <h3 class="sub">2.2 微服务部署示例</h3>
-  <pre><span class="comment"># deployments/user-service.yaml</span>
-<span class="keyword">apiVersion</span>: apps/v1
-<span class="keyword">kind</span>: Deployment
-<span class="keyword">metadata</span>:
-  <span class="key">name</span>: <span class="string">user-service</span>
-  <span class="key">namespace</span>: <span class="string">lumina-prod</span>
-  <span class="key">labels</span>:
-    <span class="key">app</span>: <span class="string">user-service</span>
-    <span class="key">version</span>: <span class="string">v1.0.0</span>
-<span class="keyword">spec</span>:
-  <span class="key">replicas</span>: <span class="number">3</span>
-  <span class="key">selector</span>:
-    <span class="key">matchLabels</span>:
-      <span class="key">app</span>: <span class="string">user-service</span>
-  <span class="keyword">template</span>:
-    <span class="keyword">metadata</span>:
-      <span class="key">labels</span>:
-        <span class="key">app</span>: <span class="string">user-service</span>
-    <span class="keyword">spec</span>:
-      <span class="keyword">containers</span>:
-      - <span class="key">name</span>: <span class="string">user-service</span>
-        <span class="key">image</span>: <span class="string">registry.lumina.edu/user-service:1.0.0</span>
-        <span class="key">ports</span>:
-        - <span class="key">containerPort</span>: <span class="number">8080</span>
-        <span class="key">resources</span>:
-          <span class="key">requests</span>:
-            <span class="key">cpu</span>: <span class="string">"200m"</span>
-            <span class="key">memory</span>: <span class="string">"256Mi"</span>
-          <span class="key">limits</span>:
-            <span class="key">cpu</span>: <span class="string">"1000m"</span>
-            <span class="key">memory</span>: <span class="string">"512Mi"</span>
-        <span class="key">livenessProbe</span>:
-          <span class="key">httpGet</span>:
-            <span class="key">path</span>: <span class="string">/health</span>
-            <span class="key">port</span>: <span class="number">8080</span>
-          <span class="key">initialDelaySeconds</span>: <span class="number">30</span>
-          <span class="key">periodSeconds</span>: <span class="number">10</span>
-        <span class="key">readinessProbe</span>:
-          <span class="key">httpGet</span>:
-            <span class="key">path</span>: <span class="string">/ready</span>
-            <span class="key">port</span>: <span class="number">8080</span>
-          <span class="key">initialDelaySeconds</span>: <span class="number">5</span>
-          <span class="key">periodSeconds</span>: <span class="number">5</span>
-        <span class="key">env</span>:
-        - <span class="key">name</span>: <span class="string">DB_HOST</span>
-          <span class="key">valueFrom</span>:
-            <span class="key">secretKeyRef</span>:
-              <span class="key">name</span>: <span class="string">db-credentials</span>
-              <span class="key">key</span>: <span class="string">host</span></pre>
+  <h3 class="sub">2.2 单体应用部署（Docker Compose）</h3>
+  <pre><span class="comment"># docker-compose.yml</span>
+<span class="keyword">services</span>:
+  <span class="key">postgres</span>:
+    <span class="key">image</span>: <span class="string">postgres:16-alpine</span>
+    <span class="key">environment</span>:
+      <span class="key">POSTGRES_DB</span>: <span class="string">lumina</span>
+      <span class="key">POSTGRES_USER</span>: <span class="string">lumina</span>
+      <span class="key">POSTGRES_PASSWORD</span>: <span class="string">${POSTGRES_PASSWORD}</span>
+    <span class="key">volumes</span>:
+      - <span class="string">pg_data:/var/lib/postgresql/data</span>
+    <span class="key">ports</span>:
+      - <span class="string">"5432:5432"</span>
 
-  <h3 class="sub">2.3 服务暴露</h3>
-  <pre><span class="comment"># services/user-service.yaml</span>
-<span class="keyword">apiVersion</span>: v1
-<span class="keyword">kind</span>: Service
-<span class="keyword">metadata</span>:
-  <span class="key">name</span>: <span class="string">user-service</span>
-<span class="keyword">spec</span>:
-  <span class="key">selector</span>:
-    <span class="key">app</span>: <span class="string">user-service</span>
-  <span class="key">ports</span>:
-  - <span class="key">port</span>: <span class="number">80</span>
-    <span class="key">targetPort</span>: <span class="number">8080</span>
-  <span class="key">type</span>: ClusterIP
+  <span class="key">redis</span>:
+    <span class="key">image</span>: <span class="string">redis:7-alpine</span>
+    <span class="key">ports</span>:
+      - <span class="string">"6379:6379"</span>
 
-<span class="comment"># ingress/api-ingress.yaml</span>
-<span class="keyword">apiVersion</span>: networking.k8s.io/v1
-<span class="keyword">kind</span>: Ingress
-<span class="keyword">metadata</span>:
-  <span class="key">name</span>: <span class="string">lumina-api</span>
-  <span class="key">annotations</span>:
-    <span class="key">nginx.ingress.kubernetes.io/rewrite-target</span>: <span class="string">/</span>
-    <span class="key">cert-manager.io/cluster-issuer</span>: <span class="string">letsencrypt-prod</span>
-<span class="keyword">spec</span>:
-  <span class="key">tls</span>:
-  - <span class="key">hosts</span>:
-    - <span class="string">api.lumina.edu</span>
-    <span class="key">secretName</span>: <span class="string">api-tls</span>
-  <span class="keyword">rules</span>:
-  - <span class="key">host</span>: <span class="string">api.lumina.edu</span>
-    <span class="key">http</span>:
-      <span class="keyword">paths</span>:
-      - <span class="key">path</span>: <span class="string">/users</span>
-        <span class="key">pathType</span>: Prefix
-        <span class="key">backend</span>:
-          <span class="key">service</span>:
-            <span class="key">name</span>: <span class="string">user-service</span>
-            <span class="key">port</span>:
-              <span class="key">number</span>: <span class="number">80</span></pre>
+  <span class="key">lumina-app</span>:
+    <span class="key">build</span>: <span class="string">../服务/lumina-app</span>
+    <span class="key">environment</span>:
+      <span class="key">DATABASE_URL</span>: <span class="string">postgresql://lumina:${POSTGRES_PASSWORD}@postgres:5432/lumina</span>
+      <span class="key">JWT_SECRET_KEY</span>: <span class="string">${JWT_SECRET_KEY}</span>
+    <span class="key">ports</span>:
+      - <span class="string">"8080:8080"</span>
+    <span class="key">depends_on</span>:
+      - <span class="string">postgres</span>
+      - <span class="string">redis</span></pre>
 
-  <h3 class="sub">2.4 Helm 部署命令</h3>
-  <pre><span class="comment"># 部署到生产环境</span>
-helm repo add lumina https://charts.lumina.edu
-helm repo update
+  <h3 class="sub">2.3 Nginx 反向代理</h3>
+  <pre><span class="comment"># nginx.conf</span>
+<span class="keyword">server</span> {
+    <span class="key">listen</span> <span class="number">80</span>;
+    <span class="key">server_name</span> <span class="string">_</span>;
 
-<span class="comment"># 安装 user-service</span>
-helm upgrade --install user-service lumina/user-service \
-  --namespace lumina-prod \
-  --values values-prod.yaml \
+    <span class="comment"># 前端静态文件</span>
+    <span class="key">root</span> <span class="string">/usr/share/nginx/html</span>;
+    <span class="key">location</span> / {
+        <span class="key">try_files</span> <span class="string">$uri $uri/ /index.html</span>;
+    }
+
+    <span class="comment"># API 反向代理（统一转发至单体应用）</span>
+    <span class="key">location</span> /api/ {
+        <span class="key">proxy_pass</span>         <span class="string">http://lumina-app:8080</span>;
+        <span class="key">proxy_set_header</span>   <span class="string">X-Real-IP $remote_addr</span>;
+        <span class="key">proxy_read_timeout</span> <span class="number">300s</span>;  <span class="comment"># AI 流式响应</span>
+        <span class="key">proxy_buffering</span>    <span class="string">off</span>;   <span class="comment"># SSE 不缓冲</span>
+    }
+}</pre>
+
+  <h3 class="sub">2.4 启动命令</h3>
+  <pre><span class="comment"># 启动所有服务</span>
+docker-compose up -d
+
+<span class="comment"># 查看服务状态</span>
+docker-compose ps
+
+<span class="comment"># 查看日志</span>
+docker-compose logs -f lumina-app
+
+<span class="comment"># 停止服务</span>
+docker-compose down</pre>
   --set image.tag=1.0.0
 
 <span class="comment"># 批量部署所有服务</span>
@@ -471,7 +435,7 @@ helm upgrade --install lumina-stack lumina/lumina-stack \
 {
   <span class="key">"timestamp"</span>: <span class="string">"2026-08-25T10:30:00.000Z"</span>,
   <span class="key">"level"</span>: <span class="string">"INFO"</span>,
-  <span class="key">"service"</span>: <span class="string">"user-service"</span>,
+  <span class="key">"service"</span>: <span class="string">"lumina-app"</span>,
   <span class="key">"trace_id"</span>: <span class="string">"abc123def456"</span>,
   <span class="key">"span_id"</span>: <span class="string">"span789"</span>,
   <span class="key">"user_id"</span>: <span class="string">"550e8400-..."</span>,
@@ -505,11 +469,11 @@ helm upgrade --install lumina-stack lumina/lumina-stack \
   <pre><span class="comment"># 查看 Pod 状态</span>
 kubectl get pods -n lumina-prod
 
-<span class="comment"># 查看 Pod 日志</span>
-kubectl logs -f deployment/user-service -n lumina-prod
+<span class="comment"># 查看应用日志</span>
+docker-compose logs -f lumina-app
 
-<span class="comment"># 进入 Pod 调试</span>
-kubectl exec -it user-service-xxx -n lumina-prod -- /bin/sh
+<span class="comment"># 进入容器调试</span>
+docker-compose exec lumina-app /bin/sh
 
 <span class="comment"># 查看服务 endpoints</span>
 kubectl get endpoints -n lumina-prod
@@ -562,9 +526,9 @@ kubectl describe ingress lumina-api -n lumina-prod</pre>
     <p><b>触发条件</b>：CPU &gt; 80% 持续 5 分钟 或 请求量激增</p>
     <p><b>操作步骤</b>：</p>
     <ol>
-      <li>确认扩容目标：<code>kubectl get hpa -n lumina-prod</code></li>
-      <li>手动扩容：<code>kubectl scale deployment/user-service --replicas=6 -n lumina-prod</code></li>
-      <li>观察新 Pod 启动：<code>kubectl get pods -w -n lumina-prod</code></li>
+      <li>确认扩容目标：<code>docker-compose ps</code></li>
+      <li>手动扩容：<code>docker-compose up -d --scale lumina-app=3</code></li>
+      <li>观察新容器启动：<code>docker-compose ps -a</code></li>
       <li>确认流量均匀分布</li>
     </ol>
   </div>
@@ -577,8 +541,9 @@ kubectl describe ingress lumina-api -n lumina-prod</pre>
     <p><b>触发条件</b>：新版本出现严重 Bug</p>
     <p><b>操作步骤</b>：</p>
     <ol>
-      <li>确认上一个稳定版本：<code>helm history user-service -n lumina-prod</code></li>
-      <li>回滚到指定版本：<code>helm rollback user-service 5 -n lumina-prod</code></li>
+      <li>确认上一个稳定版本：<code>git log --oneline -5</code></li>
+      <li>回滚到指定版本：<code>git checkout &lt;commit-hash&gt; -- 服务/lumina-app</code></li>
+      <li>重新部署：<code>docker-compose up -d --build lumina-app</code></li>
       <li>验证服务恢复</li>
       <li>记录事故报告</li>
     </ol>
@@ -696,7 +661,7 @@ kubectl describe ingress lumina-api -n lumina-prod</pre>
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Operations Runbook</div>
-  <div>v1.0 · 12 微服务 · K8s 1.28 · 99.9% SLA</div>
+  <div>v1.1 · 单体 FastAPI · Docker Compose · 99.9% SLA</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">OPS-LUMINA-2026-001</div>
 </footer>
 

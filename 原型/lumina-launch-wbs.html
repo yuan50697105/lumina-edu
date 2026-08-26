@@ -171,7 +171,7 @@
         <td><span class="tag phase2">阶段二</span> <b>功能开发</b></td>
         <td>Week 3-6</td>
         <td>核心功能开发 · 埋点内置</td>
-        <td>12 微服务 · 监控埋点 · 基础日志</td>
+        <td>单体 FastAPI 应用 · 监控埋点 · 基础日志</td>
       </tr>
       <tr>
         <td><span class="tag phase3">阶段三</span> <b>测试优化</b></td>
@@ -230,10 +230,10 @@
   <table>
     <thead><tr><th>编号</th><th>任务</th><th>负责人</th><th>工期</th><th>依赖</th><th>交付物</th><th>优先级</th></tr></thead>
     <tbody>
-      <tr><td><b>2.1</b></td><td>用户服务开发 + 埋点</td><td>后端</td><td>5 天</td><td>1.2</td><td>user-service · 登录/注册埋点</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>2.2</b></td><td>课程服务开发 + 埋点</td><td>后端</td><td>7 天</td><td>1.2</td><td>course-service · 选课/浏览埋点</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>2.3</b></td><td>作业服务开发 + 埋点</td><td>后端</td><td>7 天</td><td>2.2</td><td>assignment-service · 提交/批阅埋点</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>2.4</b></td><td>成绩服务开发 + 埋点</td><td>后端</td><td>5 天</td><td>2.3</td><td>grade-service · 查询埋点</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.1</b></td><td>用户模块开发 + 埋点</td><td>后端</td><td>5 天</td><td>1.2</td><td>lumina-app · 登录/注册埋点</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.2</b></td><td>课程模块开发 + 埋点</td><td>后端</td><td>7 天</td><td>1.2</td><td>lumina-app · 选课/浏览埋点</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.3</b></td><td>作业模块开发 + 埋点</td><td>后端</td><td>7 天</td><td>2.2</td><td>lumina-app · 提交/批阅埋点</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>2.4</b></td><td>成绩模块开发 + 埋点</td><td>后端</td><td>5 天</td><td>2.3</td><td>lumina-app · 查询埋点</td><td><span class="tag critical">P0</span></td></tr>
       <tr><td><b>2.5</b></td><td>AI 网关服务开发</td><td>AI 团队</td><td>5 天</td><td>1.2</td><td>ai-gateway · 调用统计埋点</td><td><span class="tag critical">P0</span></td></tr>
       <tr><td><b>2.6</b></td><td>AI 对话服务开发</td><td>AI 团队</td><td>7 天</td><td>2.5</td><td>ai-chat · 对话质量埋点</td><td><span class="tag critical">P0</span></td></tr>
       <tr><td><b>2.7</b></td><td>AI 批阅服务开发</td><td>AI 团队</td><td>5 天</td><td>2.5</td><td>ai-grade · 批阅准确率埋点</td><td><span class="tag high">P1</span></td></tr>
@@ -407,7 +407,7 @@
     <thead><tr><th>里程碑</th><th>时间</th><th>标志</th><th>验收标准</th></tr></thead>
     <tbody>
       <tr><td><b>M1 环境就绪</b></td><td>Week 2 结束</td><td>基础环境可用</td><td>服务器 · 数据库 · 部署脚本就绪</td></tr>
-      <tr><td><b>M2 开发完成</b></td><td>Week 6 结束</td><td>功能开发完成</td><td>12 微服务 · 埋点内置 · API 联调通过</td></tr>
+      <tr><td><b>M2 开发完成</b></td><td>Week 6 结束</td><td>功能开发完成</td><td>单体 FastAPI · 埋点内置 · API 联调通过</td></tr>
       <tr><td><b>M3 测试通过</b></td><td>Week 8 结束</td><td>达到上线标准</td><td>无 P0/P1 · 埋点验证 · UAT 签字</td></tr>
       <tr><td><b>M4 正式上线</b></td><td>Week 10 结束</td><td>全量上线</td><td>稳定运行 · 埋点数据产出</td></tr>
     </tbody>
@@ -427,7 +427,7 @@
     <tbody>
       <tr><td><b>项目经理</b></td><td>1</td><td>整体协调 · 进度管控</td><td>全程 10 周</td></tr>
       <tr><td><b>运维工程师</b></td><td>1</td><td>基础环境 · 部署 · 简单运维</td><td>全程 10 周</td></tr>
-      <tr><td><b>后端开发</b></td><td>2</td><td>微服务开发 · 埋点实现</td><td>Week 1-8</td></tr>
+      <tr><td><b>后端开发</b></td><td>2</td><td>单体应用开发 · 埋点实现</td><td>Week 1-8</td></tr>
       <tr><td><b>前端开发</b></td><td>2</td><td>Web · 移动端 · 前端埋点</td><td>Week 3-8</td></tr>
       <tr><td><b>AI 工程师</b></td><td>1</td><td>AI 服务开发</td><td>Week 3-8</td></tr>
       <tr><td><b>QA 工程师</b></td><td>1</td><td>测试 · 埋点验证</td><td>Week 7-10</td></tr>

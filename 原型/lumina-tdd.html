@@ -242,7 +242,7 @@
           <td><span class="tag p1">v0.5</span></td>
           <td style="font-family:var(--f-mono); font-size:11px;">2026-08-24</td>
           <td>架构+后端</td>
-          <td>完成微服务拆分 · 数据库设计 · API 规范</td>
+          <td>单体 FastAPI 应用 · 数据库设计 · API 规范</td>
           <td style="color:var(--cobalt); font-family:var(--f-mono); font-size:10px;">评审</td>
         </tr>
         <tr style="background:var(--growth-soft);">
@@ -270,7 +270,7 @@
     <tbody>
       <tr><td><b>高可用</b></td><td>SLA ≥ 99.9%（月度停机 ≤ 43 分钟）</td><td>多可用区部署 · 服务熔断 · 自动扩缩容</td></tr>
       <tr><td><b>低延迟</b></td><td>API P95 ≤ 200ms · 直播 ≤ 2s</td><td>边缘缓存 · 读写分离 · WebSocket 长连接</td></tr>
-      <tr><td><b>可扩展</b></td><td>支持 10,000 并发用户</td><td>微服务 · 消息队列 · 水平扩展</td></tr>
+      <tr><td><b>可扩展</b></td><td>支持 10,000 并发用户</td><td>单体应用 · 水平扩展 · 读写分离</td></tr>
       <tr><td><b>跨端一致</b></td><td>设计 Token 复用率 ≥ 95%</td><td>Design System · 共享组件库 · 统一 API</td></tr>
       <tr><td><b>AI 原生</b></td><td>AI 功能响应 ≤ 3s（首 token）</td><td>国产模型池 · 智能路由 · 流式响应</td></tr>
       <tr><td><b>安全合规</b></td><td>等保三级 · 个保法合规</td><td>零信任 · 数据加密 · 审计追溯 7 年</td></tr>
@@ -382,11 +382,11 @@
   <table>
     <thead><tr><th>决策点</th><th>方案</th><th>备选方案</th><th>决策理由</th></tr></thead>
     <tbody>
-      <tr><td><b>架构风格</b></td><td>微服务（12 个服务）</td><td>单体 / Serverless</td><td>业务边界清晰，团队可独立迭代</td></tr>
+      <tr><td><b>架构风格</b></td><td>单体应用（FastAPI + 模块化）</td><td>微服务 / Serverless</td><td>开发效率高，部署简单，适合快速验证</td></tr>
       <tr><td><b>前端框架</b></td><td>React 18 + TypeScript</td><td>Vue 3 / Svelte</td><td>生态成熟，招聘容易，跨端共享逻辑</td></tr>
       <tr><b>移动端</b></td><td>React Native</td><td>Flutter / 原生</td><td>与 Web 共享 TS 代码，热更新</td></tr>
       <tr><td><b>桌面端</b></td><td>Electron + React</td><td>Tauri / Qt</td><td>复用 Web 代码，离线能力强</td></tr>
-      <tr><td><b>后端语言</b></td><td>Go（核心）+ Python（AI）</td><td>Java / Node.js</td><td>Go 高并发低延迟，Python AI 生态</td></tr>
+      <tr><td><b>后端语言</b></td><td>Python · FastAPI</td><td>Go / Java / Node.js</td><td>Python AI 生态完善，FastAPI 高性能异步</td></tr>
       <tr><td><b>数据库</b></td><td>PostgreSQL 16</td><td>MySQL 8</td><td>JSON 支持、全文搜索、扩展性</td></tr>
       <tr><td><b>AI 模型</b></td><td>国产模型池（通义/智谱/讯飞）</td><td>OpenAI / Claude</td><td>合规 · 成本 · 数据主权</td></tr>
     </tbody>
@@ -473,41 +473,43 @@
     <div class="num-tag">Microservices · Go + Python</div>
   </div>
 
-  <h3 class="sub">5.1 微服务拆分</h3>
+  <h3 class="sub">5.1 单体应用模块划分</h3>
+  <div class="info note">
+    <div class="label">架构决策 · 快速验证优先</div>
+    采用 <b>Python FastAPI 单体应用 + 模块化目录结构</b>，9 个业务模块共享同一进程和数据库，通过 <code>app/modules/</code> 实现逻辑隔离。后续可按需拆分微服务。
+  </div>
   <table>
-    <thead><tr><th>服务</th><th>职责</th><th>技术</th><th>数据存储</th><th>SLA</th></tr></thead>
+    <thead><tr><th>模块</th><th>职责</th><th>路由前缀</th><th>端点数</th></tr></thead>
     <tbody>
-      <tr><td><b>用户服务</b></td><td>注册/登录/RBAC/组织架构</td><td>Go · Gin</td><td>PostgreSQL</td><td>99.99%</td></tr>
-      <tr><td><b>课程服务</b></td><td>课程 CRUD · 章节 · 课件版本</td><td>Go · Gin</td><td>PostgreSQL · OSS</td><td>99.9%</td></tr>
-      <tr><td><b>作业服务</b></td><td>发布/提交/批阅/截止提醒</td><td>Go · Gin</td><td>PostgreSQL · OSS</td><td>99.9%</td></tr>
-      <tr><td><b>成绩服务</b></td><td>成绩录入 · GPA · 统计</td><td>Go · Gin</td><td>PostgreSQL</td><td>99.9%</td></tr>
-      <tr><td><b>直播服务</b></td><td>WebRTC · 录制 · 聊天 · 举手</td><td>Go · SFU</td><td>Redis · OSS</td><td>99.9%</td></tr>
-      <tr><td><b>协作服务</b></td><td>看板 · 文档协同 · 讨论</td><td>Go · CRDT</td><td>PostgreSQL · Redis</td><td>99.9%</td></tr>
-      <tr><td><b>通知服务</b></td><td>推送 · 邮件 · 短信 · 站内信</td><td>Go · Kafka</td><td>PostgreSQL · Redis</td><td>99.5%</td></tr>
-      <tr><td><b>审批服务</b></td><td>课程审批 · 流程引擎</td><td>Go · Gin</td><td>PostgreSQL</td><td>99.9%</td></tr>
-      <tr><td><b>审计服务</b></td><td>操作日志 · 合规追溯</td><td>Go · Kafka</td><td>Elasticsearch</td><td>99.9%</td></tr>
-      <tr style="background:var(--ai-soft);"><td><b style="color:var(--ai);">AI 网关</b></td><td style="color:var(--ai);">模型路由 · 负载均衡 · 限流</td><td>Go · gRPC</td><td>Redis</td><td>99.9%</td></tr>
-      <tr style="background:var(--ai-soft);"><td><b style="color:var(--ai);">AI 推理服务</b></td><td style="color:var(--ai);">批阅 · 生成 · 导师 · 预测</td><td>Python · FastAPI</td><td>Milvus · Redis</td><td>99.5%</td></tr>
-      <tr style="background:var(--ai-soft);"><td><b style="color:var(--ai);">AI 安全服务</b></td><td style="color:var(--ai);">内容审核 · 偏见检测</td><td>Python · FastAPI</td><td>PostgreSQL</td><td>99.9%</td></tr>
+      <tr><td><b>用户模块</b></td><td>注册/登录/RBAC/会话管理</td><td>/auth, /users</td><td>9</td></tr>
+      <tr><td><b>课程模块</b></td><td>课程 CRUD · 章节 · 选课</td><td>/courses</td><td>14</td></tr>
+      <tr><td><b>作业模块</b></td><td>发布/提交/批阅</td><td>/assignments</td><td>8</td></tr>
+      <tr><td><b>成绩模块</b></td><td>成绩录入 · GPA · 统计</td><td>/grades</td><td>5</td></tr>
+      <tr><td><b>AI 网关</b></td><td>模型路由 · 供应商管理 · 用量统计</td><td>/ai</td><td>10</td></tr>
+      <tr><td><b>AI 对话</b></td><td>苏格拉底导师 · 多轮对话 · SSE 流式</td><td>/ai</td><td>4</td></tr>
+      <tr><td><b>AI 批阅</b></td><td>作业批阅 · 结构化评分</td><td>/ai</td><td>1</td></tr>
+      <tr><td><b>埋点模块</b></td><td>事件采集 · 统计分析</td><td>/events</td><td>4</td></tr>
+      <tr><td><b>日志模块</b></td><td>结构化日志 · 查询</td><td>/logs</td><td>2</td></tr>
+      <tr style="background:var(--ai-soft);"><td colspan="2"><b>合计</b></td><td>—</td><td><b>58</b></td></tr>
     </tbody>
   </table>
 
-  <h3 class="sub">5.2 服务通信</h3>
+  <h3 class="sub">5.2 模块通信</h3>
   <div class="flow">
     <div class="flow-step">客户端</div>
     <div class="flow-arrow">→</div>
-    <div class="flow-step active">API Gateway</div>
+    <div class="flow-step active">Nginx</div>
     <div class="flow-arrow">→</div>
-    <div class="flow-step">业务服务</div>
+    <div class="flow-step">FastAPI 单体</div>
     <div class="flow-arrow">→</div>
-    <div class="flow-step">数据层</div>
+    <div class="flow-step">PostgreSQL</div>
   </div>
   <table>
     <thead><tr><th>通信方式</th><th>场景</th><th>技术</th></tr></thead>
     <tbody>
-      <tr><td><b>同步 RPC</b></td><td>服务间实时调用（查询/写入）</td><td>gRPC · Protobuf · 超时 3s</td></tr>
-      <tr><td><b>异步消息</b></td><td>事件驱动（通知/审计/解耦）</td><td>Kafka · 至少一次投递</td></tr>
-      <tr><td><b>实时推送</b></td><td>直播 · 聊天 · 协同编辑</td><td>WebSocket · SSE</td></tr>
+      <tr><td><b>函数调用</b></td><td>模块间同步调用（查询/写入）</td><td>Python import · SQLAlchemy Session</td></tr>
+      <tr><td><b>异步任务</b></td><td>耗时操作（邮件/批阅/导出）</td><td>Celery + Redis（后续扩展）</td></tr>
+      <tr><td><b>实时推送</b></td><td>AI 流式响应 · 通知</td><td>SSE (Server-Sent Events)</td></tr>
     </tbody>
   </table>
 </section>
