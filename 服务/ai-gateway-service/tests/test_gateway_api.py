@@ -16,7 +16,8 @@ from jose import jwt
 from sqlalchemy import text
 
 from app.database import Base, SessionLocal, engine
-from app.main import app, seed_model_pool
+from app.main import app
+from app.models import AIModel, AIProvider
 
 try:
     db = SessionLocal()
@@ -41,12 +42,50 @@ def make_token(user_id: str, role: str) -> str:
     )
 
 
+def _ensure_pool(db) -> None:
+    """等价运营端自定义配置：写入自定义模型池（幂等，ON CONFLICT 不报错）。
+
+    服务不再预置 seed——模型/供应商全部由管理端创建，此处即为测试的"运营配置"。
+    """
+    providers = {
+        # name: (display, desc, endpoint_base)
+        "qwen": ("通义千问", "阿里云 · OpenAI 兼容", "https://dashscope.aliyuncs.com/compatible-mode/v1"),
+        "glm": ("智谱 GLM", "智谱 AI", "https://open.bigmodel.cn/api/paas/v4"),
+        "spark": ("讯飞星火", "科大讯飞", "https://spark-api-open.xf-yun.com/v1"),
+    }
+    p_objs = {}
+    for name, (disp, desc, endpoint) in providers.items():
+        p = db.query(AIProvider).filter(AIProvider.name == name).first()
+        if not p:
+            p = AIProvider(name=name, display_name=disp, description=desc, endpoint_base=endpoint)
+            db.add(p)
+        p_objs[name] = p
+    db.flush()
+
+    models = [
+        # (provider, model_name, display, task_types, priority, cost, max_tokens, api_style)
+        ("qwen", "qwen-max", "通义千问 Max", ["chat", "generate"], 10, "0.0200", 8192, "openai"),
+        ("qwen", "qwen-vl", "通义千问-VL", ["vl"], 10, "0.0800", 4096, "openai"),
+        ("glm", "glm-4", "智谱 GLM-4", ["chat", "grade", "generate"], 20, "0.0500", 8192, "openai"),
+        ("spark", "spark-v3", "讯飞语音 V3", ["speech"], 10, "0.0000", 4096, "openai"),
+    ]
+    for prv, mn, disp, tasks, prio, cost, mx, style in models:
+        if db.query(AIModel).filter(AIModel.model_name == mn).first():
+            continue
+        db.add(AIModel(
+            provider_id=p_objs[prv].id, model_name=mn, display_name=disp, task_types=tasks,
+            priority=prio, cost_per_1k_tokens=cost, max_tokens=mx,
+            api_style=style, openai_compatible=(style == "openai"),
+        ))
+    db.commit()
+
+
 @pytest.fixture(scope="module", autouse=True)
 def setup():
     Base.metadata.create_all(bind=engine)
-    seed_model_pool()  # 幂等：表空才写入
 
     db = SessionLocal()
+    _ensure_pool(db)
     admin_id = str(uuid.uuid4())
     student_id = str(uuid.uuid4())
     db.execute(text("""
@@ -62,11 +101,12 @@ def setup():
     yield {"admin_id": uuid.UUID(admin_id), "student_id": uuid.UUID(student_id)}
 
     db = SessionLocal()
-    # 清理测试注册的模型/调用日志（保留 seed）
+    # 清理测试注册的模型/调用日志/测试供应商（保留运营数据）
     db.execute(text("""
         DELETE FROM ai_call_logs
         WHERE model_name LIKE 'test-%' OR user_id IN (:sid, :aid);
-        DELETE FROM ai_models WHERE model_name LIKE 'test-%';
+        DELETE FROM ai_models WHERE model_name IN ('qwen-max', 'qwen-vl', 'glm-4', 'spark-v3');
+        DELETE FROM ai_providers WHERE name IN ('qwen', 'glm', 'spark');
         DELETE FROM event_tracking WHERE user_id IN (:sid, :aid);
         DELETE FROM api_logs WHERE user_id IN (:sid, :aid);
         DELETE FROM users WHERE email IN (:amail, :smail)

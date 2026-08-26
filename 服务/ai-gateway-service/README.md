@@ -8,9 +8,9 @@ FastAPI AI 网关：模型池管理、智能路由、统一协议调用、用量
 - **可用模型列表**：对外只暴露已启用模型，可按任务类型过滤（`/ai/models`）
 - **智能路由**：按任务类型（chat/grade/generate/vl/speech）返回主选+备选模型；规则 = 启用状态 + 优先级 + 供应商预算配额
 - **统一协议调用**：一个 `/gateway/completions` 端点发真实 LLM 请求，自动适配 OpenAI / Anthropic / Gemini 三套协议（含 SSE 流式）
+- **自定义模型池（运营端）**：供应商/模型全部由运营端通过管理 API 配置，不预置任何模型——首次接入厂商流程：注册供应商 → 注册模型 → 配置环境变量 Key
 - **用量记录**：对话/批阅服务调用后上报 token/延迟/成本，自动累加供应商已用额度
 - **用量统计**：近 N 天按模型/用户的调用量、总 token、总成本
-- **种子模型池**：首次启动自动预置 6 家供应商 + 8 个国产模型
 - **埋点**：`ai.*` 事件 + 全量请求日志
 
 ## 路由表
@@ -27,18 +27,45 @@ FastAPI AI 网关：模型池管理、智能路由、统一协议调用、用量
 | PATCH | `/ai/gateway/models/{id}` | 启停/更新模型 | 管理员 |
 | GET/POST | `/ai/gateway/providers` | 供应商列表/新增 | 管理员 |
 
-## 预置模型池
+## 配置模型池（运营端自定义）
 
-| 供应商 | 模型 | 任务 | 价格(¥/千token) | 优先级 |
-|--------|------|------|-----------------|--------|
-| qwen 通义 | qwen-max | chat, generate | 0.020 | 10 |
-| qwen 通义 | qwen-vl | vl 多模态 | 0.080 | 10 |
-| glm 智谱 | glm-4 | chat, grade, generate | 0.050 | 20 |
-| spark 讯飞 | spark-v4 | chat | 0.030 | 30 |
-| spark 讯飞 | spark-v3 | speech 语音 | 按分钟 | 10 |
-| doubao 豆包 | doubao-lite | chat | 0.005 | 40 |
-| bce 百川 | bce-embedding | generate(RAG) | 0.0007 | 10 |
-| moonshot 月暗 | kimi | chat, grade | 0.060 | 50 |
+不预置任何模型——首次接入需按以下顺序配置：
+
+### 1. 注册供应商
+
+```bash
+# OpenAI 兼容系（国内厂商 endpoint 为 /v1 或 compatible-mode）
+curl -X POST http://localhost:8093/api/v1/ai/gateway/providers \
+  -H "Authorization: Bearer <admin_token>" -H "Content-Type: application/json" \
+  -d '{"name":"qwen","display_name":"通义千问","endpoint_base":"https://dashscope.aliyuncs.com/compatible-mode/v1","monthly_quota":500}'
+
+# Anthropic 系
+curl -X POST .../providers -d '{"name":"anthropic","display_name":"Anthropic","endpoint_base":"https://api.anthropic.com","monthly_quota":100}'
+
+# Gemini 系
+curl -X POST .../providers -d '{"name":"gemini","display_name":"Google Gemini","endpoint_base":"https://generativelanguage.googleapis.com","monthly_quota":100}'
+```
+
+### 2. 在模型池注册模型
+
+```bash
+# OpenAI 兼容模型（api_style=openai）
+curl -X POST http://localhost:8093/api/v1/ai/gateway/models \
+  -H "Authorization: Bearer <admin_token>" -H "Content-Type: application/json" \
+  -d '{"provider_name":"qwen","model_name":"qwen-max","display_name":"通义千问 Max","task_types":["chat","generate"],"priority":10,"cost_per_1k_tokens":0.02,"max_tokens":8192,"api_style":"openai"}'
+
+# Anthropic 模型（api_style=anthropic，自动切 x-api-key 协议）
+curl -X POST .../models -d '{"provider_name":"anthropic","model_name":"claude-3-5-sonnet","display_name":"Claude Sonnet","task_types":["chat","grade"],"priority":5,"cost_per_1k_tokens":0.1,"api_style":"anthropic"}'
+
+# Gemini 模型（api_style=gemini，自动切 x-goog-api-key 协议）
+curl -X POST .../models -d '{"provider_name":"gemini","model_name":"gemini-2.0-flash","display_name":"Gemini 2.0 Flash","task_types":["chat","generate"],"priority":5,"cost_per_1k_tokens":0.08,"api_style":"gemini"}'
+```
+
+### 3. 配置环境变量 Key
+
+在 `.env` / compose 中为对应厂商注入 Key（`QWEN_API_KEY` / `ANTHROPIC_API_KEY` / `GEMINI_API_KEY` 等），重启网关生效。Key 不入库。
+
+> **提示**：`api_style` 决定 `/gateway/completions` 走哪套协议（openai / anthropic / gemini）；`endpoint_base` 是厂商 API Base URL。两者在注册时可随时通过 PATCH 调整。
 
 ## 架构说明
 

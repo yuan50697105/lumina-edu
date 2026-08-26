@@ -22,7 +22,7 @@ logging.basicConfig(
 logger = logging.getLogger("lumina.ai-gateway")
 
 SERVICE_NAME = "ai-gateway-service"
-SERVICE_VERSION = "0.2.0"
+SERVICE_VERSION = "0.3.0"
 
 
 def migrate_schema() -> None:
@@ -44,69 +44,13 @@ def migrate_schema() -> None:
         db.close()
 
 
-def seed_model_pool() -> None:
-    """首次启动时预置国产生态模型池（幂等：表空才写入）"""
-    db = SessionLocal()
-    try:
-        if db.query(AIProvider).count() > 0:
-            return
-
-        providers = {
-            # name: (display, desc, endpoint_base)
-            "qwen": ("通义千问", "阿里云 · 100%兼容 OpenAI", "https://dashscope.aliyuncs.com/compatible-mode/v1"),
-            "glm": ("智谱 GLM", "智谱 AI · 教育专用", "https://open.bigmodel.cn/api/paas/v4"),
-            "spark": ("讯飞星火", "科大讯飞 · 语音/教育", "https://spark-api-open.xf-yun.com/v1"),
-            "doubao": ("豆包", "字节跳动 · 轻量快速", "https://ark.cn-beijing.volces.com/api/v3"),
-            "bce": ("百川", "百川智能 · 文本嵌入", "https://api.baichuan-ai.com/v1"),
-            "moonshot": ("月之暗面", "Kimi · 长文本", "https://api.moonshot.cn/v1"),
-        }
-        p_objs = {}
-        for name, (display, desc, endpoint) in providers.items():
-            p = AIProvider(name=name, display_name=display, description=desc, endpoint_base=endpoint)
-            db.add(p)
-            p_objs[name] = p
-        db.flush()
-
-        models = [
-            # (provider, model_name, display, task_types, priority, cost_per_1k, max_tokens, api_style)
-            ("qwen", "qwen-max", "通义千问 Max", ["chat", "generate"], 10, 0.0200, 8192, "openai"),
-            ("qwen", "qwen-vl", "通义千问-VL", ["vl"], 10, 0.0800, 4096, "openai"),
-            ("glm", "glm-4", "智谱 GLM-4", ["chat", "grade", "generate"], 20, 0.0500, 8192, "openai"),
-            ("spark", "spark-v4", "讯飞星火 V4", ["chat"], 30, 0.0300, 4096, "openai"),
-            ("spark", "spark-v3", "讯飞语音 V3", ["speech"], 10, 0.0000, 4096, "openai"),
-            ("doubao", "doubao-lite", "豆包 Lite", ["chat"], 40, 0.0050, 4096, "openai"),
-            ("bce", "bce-embedding", "百川 Embedding", ["generate"], 10, 0.0007, 2048, "openai"),
-            ("moonshot", "kimi", "Kimi", ["chat", "grade"], 50, 0.0600, 16384, "openai"),
-        ]
-        for provider_name, model_name, display, task_types, priority, cost, max_tokens, style in models:
-            db.add(AIModel(
-                provider_id=p_objs[provider_name].id,
-                model_name=model_name,
-                display_name=display,
-                task_types=task_types,
-                priority=priority,
-                cost_per_1k_tokens=str(cost),
-                max_tokens=max_tokens,
-                api_style=style,
-                openai_compatible=(style == "openai"),
-            ))
-        db.commit()
-        logger.info(f"AI 模型池种子数据已写入（{len(models)} 个模型 / {len(providers)} 家供应商）")
-    except Exception as exc:
-        db.rollback()
-        logger.warning(f"种子数据写入失败: {exc}")
-    finally:
-        db.close()
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """启动时建表 + 迁移 + 预置模型池"""
+    """启动时建表 + 迁移（不预置模型，由运营端通过管理 API 自定义配置）"""
     import os
     if os.getenv("APP_ENV", "development") == "development":
         Base.metadata.create_all(bind=engine)
     migrate_schema()
-    seed_model_pool()
     yield
 
 
