@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     GLM_API_KEY: str = ""
     SPARK_API_KEY: str = ""
     DOUBAO_API_KEY: str = ""
+    BCE_API_KEY: str = ""
+    MOONSHOT_API_KEY: str = ""
+    ANTHROPIC_API_KEY: str = ""
+    GEMINI_API_KEY: str = ""
 
     class Config:
         env_file = ".env"

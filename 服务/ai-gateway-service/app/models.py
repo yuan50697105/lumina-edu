@@ -24,10 +24,11 @@ class AIProvider(Base):
     __tablename__ = "ai_providers"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(30), unique=True, nullable=False)     # qwen / glm / spark / doubao
+    name = Column(String(30), unique=True, nullable=False)     # qwen / glm / spark / doubao / anthropic / gemini
     display_name = Column(String(50), nullable=False)
     description = Column(String(200), nullable=True)
     domain = Column(String(200), nullable=True)                # 供应商域名标识
+    endpoint_base = Column(String(300), nullable=True)         # API Base URL（OpenAI 兼容风格 / Anthropic / Gemini）
     enabled = Column(Boolean, default=True)                    # 是否启用整家供应商
     monthly_quota = Column(Numeric(12, 2), default=0)          # 月度预算（元），0=不限
     used_quota = Column(Numeric(12, 2), default=0)             # 已用额度（元）
@@ -42,7 +43,7 @@ class AIModel(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     provider_id = Column(UUID(as_uuid=True), ForeignKey("ai_providers.id"), nullable=False)
-    model_name = Column(String(50), unique=True, nullable=False)   # qwen-max
+    model_name = Column(String(50), unique=True, nullable=False)   # qwen-max / claude-3-5-sonnet / gemini-2.0-flash
     display_name = Column(String(50), nullable=False)              # 通义千问 Max
     task_types = Column(JSON, default=list)                        # ["chat","grade","generate","vl","speech"]
     description = Column(String(200), nullable=True)
@@ -50,7 +51,8 @@ class AIModel(Base):
     priority = Column(Integer, default=10)                         # 路由优先级（数值小优先）
     cost_per_1k_tokens = Column(Numeric(8, 4), default=0)          # 单价（元/千token）
     max_tokens = Column(Integer, default=4096)
-    openai_compatible = Column(Boolean, default=True)              # 是否兼容 OpenAI SDK 格式
+    api_style = Column(String(20), default="openai")               # openai / anthropic / gemini
+    openai_compatible = Column(Boolean, default=True)              # 兼容保留：历史字段，等同(api_style=='openai')
     created_at = Column(DateTime(timezone=True), default=_now)
 
     provider = relationship("AIProvider", back_populates="models")

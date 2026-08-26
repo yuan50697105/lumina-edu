@@ -20,6 +20,7 @@ class ProviderCreate(BaseModel):
     name: str = Field(..., max_length=30, pattern="^[a-z0-9_-]+$")
     display_name: str = Field(..., max_length=50)
     description: Optional[str] = None
+    endpoint_base: Optional[str] = Field(None, max_length=300, description="API Base URL（如开箱即用：OpenAI 系列家用家 base/v1）")
     monthly_quota: Decimal = Field(Decimal("0"), ge=0)
 
 
@@ -29,6 +30,7 @@ class ProviderOut(BaseModel):
     display_name: str
     description: Optional[str]
     domain: Optional[str]
+    endpoint_base: Optional[str]
     enabled: bool
     monthly_quota: Optional[Decimal]
     used_quota: Optional[Decimal]
@@ -45,6 +47,8 @@ class ModelCreate(BaseModel):
     cost_per_1k_tokens: Decimal = Decimal("0")
     max_tokens: int = 4096
     openai_compatible: bool = True
+    api_style: str = Field("openai", pattern="^(openai|anthropic|gemini)$",
+                           description="协议风格：openai / anthropic / gemini")
 
 
 class ModelUpdate(BaseModel):
@@ -54,6 +58,8 @@ class ModelUpdate(BaseModel):
     enabled: Optional[bool] = None
     priority: Optional[int] = None
     cost_per_1k_tokens: Optional[Decimal] = None
+    api_style: Optional[str] = Field(None, pattern="^(openai|anthropic|gemini)$",
+                                     description="协议风格变更")
 
 
 class ModelOut(BaseModel):
@@ -69,6 +75,7 @@ class ModelOut(BaseModel):
     cost_per_1k_tokens: Optional[Decimal]
     max_tokens: int
     openai_compatible: bool
+    api_style: Optional[str] = None
 
 
 # ─── 智能路由 ───
@@ -108,6 +115,30 @@ class UsageStats(BaseModel):
     total_cost: Decimal = Decimal("0")
     by_model: dict[str, dict] = {}
     by_user: dict[str, dict] = {}
+
+
+# ─── 统一调用（completions）───
+class ChatMessage(BaseModel):
+    role: str = Field(..., pattern="^(system|user|assistant)$")
+    content: str
+
+
+class CompletionsRequest(BaseModel):
+    model_id: Optional[uuid.UUID] = None          # 二选一
+    model_name: Optional[str] = None              # 二选一
+    messages: list[ChatMessage] = Field(..., min_length=1)
+    task_type: str = Field("chat", pattern="^(chat|grade|generate)$")
+    max_tokens: int = Field(2048, ge=64, le=16384)
+    temperature: Optional[float] = Field(None, ge=0, le=2)
+    stream: bool = False
+
+
+class CompletionsOut(BaseModel):
+    content: str
+    model: Optional[str]
+    finish_reason: Optional[str] = None
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
 
 
 # ─── 对外模型列表 ───

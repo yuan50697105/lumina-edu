@@ -20,9 +20,22 @@ from ..instrumentation import (
     EVENT_AI_USAGE,
     Instrumentation,
 )
+from ..config import settings
+from ..adapters import (
+    SUPPORTED_STYLES,
+    STYLE_ANTHROPIC,
+    STYLE_GEMINI,
+    STYLE_OPENAI,
+    ProviderError,
+    call_chat,
+    stream_chat,
+)
 from ..models import AICallLog, AIModel, AIProvider
 from ..schemas import (
     CallRecordRequest,
+    ChatMessage,
+    CompletionsOut,
+    CompletionsRequest,
     ModelCreate,
     ModelOut,
     ModelUpdate,
@@ -36,6 +49,26 @@ from ..schemas import (
 )
 
 router = APIRouter(prefix="/ai", tags=["AI 网关"])
+
+
+# ─── 供应商 API Key 映射（环境变量，不入库）───
+PROVIDER_KEY_MAP = {
+    "qwen": "QWEN_API_KEY",
+    "glm": "GLM_API_KEY",
+    "spark": "SPARK_API_KEY",
+    "doubao": "DOUBAO_API_KEY",
+    "bce": "BCE_API_KEY",
+    "moonshot": "MOONSHOT_API_KEY",
+    "anthropic": "ANTHROPIC_API_KEY",
+    "gemini": "GEMINI_API_KEY",
+}
+
+
+def _provider_api_key(provider: AIProvider) -> str:
+    env_name = PROVIDER_KEY_MAP.get(provider.name)
+    if not env_name:
+        raise ProviderError(f"供应商 {provider.name} 未配置 Key 映射")
+    return getattr(settings, env_name) or ""
 
 
 # ─── 工具 ───
@@ -254,7 +287,8 @@ def register_model(
         priority=payload.priority,
         cost_per_1k_tokens=payload.cost_per_1k_tokens,
         max_tokens=payload.max_tokens,
-        openai_compatible=payload.openai_compatible,
+        api_style=payload.api_style,
+        openai_compatible=(payload.api_style == "openai") or payload.openai_compatible,
     )
     db.add(m)
     db.commit()
@@ -311,3 +345,142 @@ def register_provider(
     db.commit()
     db.refresh(p)
     return p
+
+
+# ─── 统一调用（协议适配核心）───
+def _log_call(db, user, model, task_type, prompt_tokens, completion_tokens,
+              latency_ms, ok=True, error_message=None) -> None:
+    """记录调用用量并累加供应商已用额度"""
+    cost = (Decimal(prompt_tokens + completion_tokens) / 1000) * (model.cost_per_1k_tokens or Decimal("0"))
+    db.add(AICallLog(
+        user_id=user.id, model_id=model.id, model_name=model.model_name, task_type=task_type,
+        prompt_tokens=prompt_tokens, completion_tokens=completion_tokens,
+        latency_ms=latency_ms, cost=cost, ok=ok, error_message=error_message,
+    ))
+    if model.provider:
+        model.provider.used_quota = (model.provider.used_quota or Decimal("0")) + cost
+    db.commit()
+
+
+@router.post("/gateway/completions", response_model=CompletionsOut, summary="统一模型调用（协议自适应）")
+def completions(
+    payload: CompletionsRequest,
+    request: Request,
+    user: AuthUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """按模型 api_style 自动适配 OpenAI/Anthropic/Gemini 协议，返回统一结构。
+
+    流式调用（stream=true）走 SSE：
+    data: {"type":"token","content":"..."}
+    data: {"type":"done","model":"...","usage":{"tokens":N}}
+    """
+    messages = [m.model_dump() for m in payload.messages]
+    if payload.stream:
+        return _stream_sse(payload, messages, user, db)
+
+    import time as t
+    t0 = t.perf_counter()
+    try:
+        result = _run_completions(db, user, payload, messages)
+    except ProviderError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    latency = int((t.perf_counter() - t0) * 1000)
+
+    model = payload_model(db, payload)
+    _log_call(db, user, model, payload.task_type,
+              result.prompt_tokens, result.completion_tokens, latency)
+    Instrumentation(db, request, str(user.id)).track(
+        "ai.call", properties={
+            "model": model.model_name, "task_type": payload.task_type,
+            "tokens": result.prompt_tokens + result.completion_tokens,
+        }
+    )
+    return CompletionsOut(
+        content=result.content, model=result.model, finish_reason=result.finish_reason,
+        prompt_tokens=result.prompt_tokens, completion_tokens=result.completion_tokens,
+    )
+
+
+def payload_model(db: Session, payload: CompletionsRequest) -> AIModel:
+    model = None
+    if payload.model_id:
+        model = db.get(AIModel, payload.model_id)
+    elif payload.model_name:
+        model = db.query(AIModel).filter(AIModel.model_name == payload.model_name).first()
+    if not model:
+        raise HTTPException(status_code=404, detail="模型不存在")
+    if not model.enabled or not (model.provider and model.provider.enabled):
+        raise HTTPException(status_code=403, detail="模型已被停用")
+    if not model.openai_compatible and model.api_style not in SUPPORTED_STYLES:
+        raise HTTPException(status_code=400, detail=f"不支持的协议风格: {model.api_style}")
+    return model
+
+
+def _run_completions(db: Session, user: AuthUser, payload: CompletionsRequest, messages: list[dict]):
+    """真实调用模型，按 api_style 适配协议"""
+    model = payload_model(db, payload)
+    provider = model.provider
+    api_key = _provider_api_key(provider)
+    if not api_key:
+        raise ProviderError(f"供应商 {provider.name} 未配置 API Key")
+
+    return call_chat(
+        style=model.api_style or STYLE_OPENAI,
+        base_url=provider.endpoint_base or "",
+        model=model.model_name,
+        api_key=api_key,
+        provider_name=provider.name,
+        messages=messages,
+        max_tokens=payload.max_tokens,
+        stream=False,
+    )
+
+
+def _stream_sse(payload: CompletionsRequest, messages: list[dict], user: AuthUser, db: Session):
+    """SSE 流式：归一三种厂商事件 → {type:token/done} 统一格式"""
+    from fastapi.responses import StreamingResponse
+
+    model = payload_model(db, payload)
+    provider = model.provider
+    api_key = _provider_api_key(provider)
+    if not api_key:
+        raise HTTPException(status_code=400, detail=f"供应商 {provider.name} 未配置 API Key")
+
+    import json as _json
+    import time as t
+
+    def _sse(obj: dict) -> str:
+        return f"data: {_json.dumps(obj, ensure_ascii=False)}\n\n"
+
+    def gen():
+        t0 = t.perf_counter()
+        prompt_tokens = completion_tokens = 0
+        try:
+            for event in stream_chat(
+                style=model.api_style or STYLE_OPENAI,
+                base_url=provider.endpoint_base or "",
+                model=model.model_name,
+                api_key=api_key,
+                provider_name=provider.name,
+                messages=messages,
+                max_tokens=payload.max_tokens,
+            ):
+                if event["type"] == "token":
+                    yield _sse({"type": "token", "content": event["content"]})
+                elif event["type"] == "usage":
+                    prompt_tokens = event.get("prompt_tokens", 0)
+                    completion_tokens = event.get("completion_tokens", 0)
+                elif event["type"] == "error":
+                    raise ProviderError(event["message"])
+        except ProviderError as e:
+            yield _sse({"type": "error", "message": str(e)})
+            return
+
+        latency = int((t.perf_counter() - t0) * 1000)
+        _log_call(db, user, model, payload.task_type, prompt_tokens, completion_tokens, latency)
+        yield _sse({"type": "done", "model": model.model_name,
+                    "usage": {"tokens": prompt_tokens + completion_tokens}})
+
+    return StreamingResponse(gen(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})

@@ -22,7 +22,26 @@ logging.basicConfig(
 logger = logging.getLogger("lumina.ai-gateway")
 
 SERVICE_NAME = "ai-gateway-service"
-SERVICE_VERSION = "0.1.0"
+SERVICE_VERSION = "0.2.0"
+
+
+def migrate_schema() -> None:
+    """轻量迁移：为旧库补 endpoint_base / api_style 列（幂等）"""
+    from sqlalchemy import text
+    db = SessionLocal()
+    try:
+        db.execute(text("ALTER TABLE ai_providers ADD COLUMN IF NOT EXISTS endpoint_base VARCHAR(300)"))
+        db.execute(text("ALTER TABLE ai_models ADD COLUMN IF NOT EXISTS api_style VARCHAR(20) DEFAULT 'openai'"))
+        db.execute(text("""
+            UPDATE ai_models SET api_style = 'openai' WHERE api_style IS NULL OR api_style = ''
+        """))
+        db.commit()
+        logger.info("AI 网关表结构已同步（endpoint_base / api_style）")
+    except Exception as exc:
+        db.rollback()
+        logger.warning(f"表结构同步跳过: {exc}")
+    finally:
+        db.close()
 
 
 def seed_model_pool() -> None:
@@ -33,32 +52,33 @@ def seed_model_pool() -> None:
             return
 
         providers = {
-            "qwen": ("通义千问", "阿里云 · 100%兼容 OpenAI"),
-            "glm": ("智谱 GLM", "智谱 AI · 教育专用"),
-            "spark": ("讯飞星火", "科大讯飞 · 语音/教育"),
-            "doubao": ("豆包", "字节跳动 · 轻量快速"),
-            "bce": ("百川", "百川智能 · 文本嵌入"),
-            "moonshot": ("月之暗面", "Kimi · 长文本"),
+            # name: (display, desc, endpoint_base)
+            "qwen": ("通义千问", "阿里云 · 100%兼容 OpenAI", "https://dashscope.aliyuncs.com/compatible-mode/v1"),
+            "glm": ("智谱 GLM", "智谱 AI · 教育专用", "https://open.bigmodel.cn/api/paas/v4"),
+            "spark": ("讯飞星火", "科大讯飞 · 语音/教育", "https://spark-api-open.xf-yun.com/v1"),
+            "doubao": ("豆包", "字节跳动 · 轻量快速", "https://ark.cn-beijing.volces.com/api/v3"),
+            "bce": ("百川", "百川智能 · 文本嵌入", "https://api.baichuan-ai.com/v1"),
+            "moonshot": ("月之暗面", "Kimi · 长文本", "https://api.moonshot.cn/v1"),
         }
         p_objs = {}
-        for name, (display, desc) in providers.items():
-            p = AIProvider(name=name, display_name=display, description=desc)
+        for name, (display, desc, endpoint) in providers.items():
+            p = AIProvider(name=name, display_name=display, description=desc, endpoint_base=endpoint)
             db.add(p)
             p_objs[name] = p
         db.flush()
 
         models = [
-            # (provider, model_name, display, task_types, priority, cost_per_1k, max_tokens)
-            ("qwen", "qwen-max", "通义千问 Max", ["chat", "generate"], 10, 0.0200, 8192),
-            ("qwen", "qwen-vl", "通义千问-VL", ["vl"], 10, 0.0800, 4096),
-            ("glm", "glm-4", "智谱 GLM-4", ["chat", "grade", "generate"], 20, 0.0500, 8192),
-            ("spark", "spark-v4", "讯飞星火 V4", ["chat"], 30, 0.0300, 4096),
-            ("spark", "spark-v3", "讯飞语音 V3", ["speech"], 10, 0.0000, 4096),
-            ("doubao", "doubao-lite", "豆包 Lite", ["chat"], 40, 0.0050, 4096),
-            ("bce", "bce-embedding", "百川 Embedding", ["generate"], 10, 0.0007, 2048),
-            ("moonshot", "kimi", "Kimi", ["chat", "grade"], 50, 0.0600, 16384),
+            # (provider, model_name, display, task_types, priority, cost_per_1k, max_tokens, api_style)
+            ("qwen", "qwen-max", "通义千问 Max", ["chat", "generate"], 10, 0.0200, 8192, "openai"),
+            ("qwen", "qwen-vl", "通义千问-VL", ["vl"], 10, 0.0800, 4096, "openai"),
+            ("glm", "glm-4", "智谱 GLM-4", ["chat", "grade", "generate"], 20, 0.0500, 8192, "openai"),
+            ("spark", "spark-v4", "讯飞星火 V4", ["chat"], 30, 0.0300, 4096, "openai"),
+            ("spark", "spark-v3", "讯飞语音 V3", ["speech"], 10, 0.0000, 4096, "openai"),
+            ("doubao", "doubao-lite", "豆包 Lite", ["chat"], 40, 0.0050, 4096, "openai"),
+            ("bce", "bce-embedding", "百川 Embedding", ["generate"], 10, 0.0007, 2048, "openai"),
+            ("moonshot", "kimi", "Kimi", ["chat", "grade"], 50, 0.0600, 16384, "openai"),
         ]
-        for provider_name, model_name, display, task_types, priority, cost, max_tokens in models:
+        for provider_name, model_name, display, task_types, priority, cost, max_tokens, style in models:
             db.add(AIModel(
                 provider_id=p_objs[provider_name].id,
                 model_name=model_name,
@@ -67,6 +87,8 @@ def seed_model_pool() -> None:
                 priority=priority,
                 cost_per_1k_tokens=str(cost),
                 max_tokens=max_tokens,
+                api_style=style,
+                openai_compatible=(style == "openai"),
             ))
         db.commit()
         logger.info(f"AI 模型池种子数据已写入（{len(models)} 个模型 / {len(providers)} 家供应商）")
@@ -79,10 +101,11 @@ def seed_model_pool() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """启动时建表 + 预置模型池"""
+    """启动时建表 + 迁移 + 预置模型池"""
     import os
     if os.getenv("APP_ENV", "development") == "development":
         Base.metadata.create_all(bind=engine)
+    migrate_schema()
     seed_model_pool()
     yield
 
