@@ -41,11 +41,17 @@ edu/
 │   └── AI/             (3 文件)       # 🤖 AI 模块原型
 │
 ├── 部署/                             # Docker 部署方案（环境搭建）
-│   ├── docker-compose.yml            # 服务编排
+│   ├── docker-compose.yml            # 服务编排（PG/Redis/MinIO/用户/课程/Nginx）
 │   ├── .env.example                  # 环境变量模板
 │   ├── config/                       # Nginx/PostgreSQL 配置
 │   ├── scripts/                      # 启停/备份/监控脚本
 │   └── README.md                     # 部署使用说明
+│
+├── 服务/                             # 后端微服务（FastAPI）
+│   ├── user-service/                 # ✅ 用户认证 + 资料 + 埋点（:8080）
+│   └── course-service/               # ✅ 课程·章节·选课·公告 + 埋点（:8090）
+│
+├── 开发进度.md                       # 📈 WBS 开发进度追踪
 │
 └── scripts/                           # 工具脚本
     ├── yuque-sync.py                  # 🔌 语雀同步工具
@@ -181,6 +187,8 @@ cp .env.example .env
 ./scripts/monitor.sh
 ```
 
+已编排服务：PostgreSQL · Redis · MinIO · user-service(8080) · course-service(8090) · Nginx(80/443)
+
 详见 `部署/README.md`
 
 ### 查看文档
@@ -215,6 +223,8 @@ cp .env.example .env
 | **UG v1.0** | 2026-08-25 | 用户手册发布，3 角色指南 |
 | **WBS v1.0** | 2026-08-26 | 上线工作分解结构发布，12 周计划 |
 | **部署 v1.0** | 2026-08-26 | Docker Compose 轻量部署方案：服务编排 + 脚本 |
+| **用户服务 v0.1** | 2026-08-26 | user-service 开发完成（认证·资料·监控埋点）|
+| **课程服务 v0.1** | 2026-08-26 | course-service 开发完成（课程·章节·选课·公告·埋点）|
 
 ## 📄 许可证
 
