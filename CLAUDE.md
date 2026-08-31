@@ -151,7 +151,7 @@ cd 服务/mobile-app && npm install && npx expo start
 | iOS / Android | ✅ 已实现 | `服务/mobile-app/`（React Native / Expo SDK 52） |
 | Web | ✅ 已实现 | `服务/web-frontend/`（React 18 + Vite） |
 | 桌面 | 🟡 原型 | `原型/PC/`（Electron 方案规划中，TDD §3.2） |
-| 鸿蒙 HarmonyOS | ⏳ 演进评估 | **Expo 官方不支持鸿蒙**；WBS D-09 立项评估 RNOH（bare RN 迁移）+ 依赖替换，不阻塞 M4，校园信创诉求触发 |
+| 鸿蒙 HarmonyOS | ⏳ 演进评估 | **Expo 官方不支持鸿蒙**；WBS D-09 三路线评估：原生 ArkTS／ArkUI 独立客户端（DevEco，移动端 6 页 · 推荐）· RNOH bare 迁移 · uni-app；不阻塞 M4 |
 
 > 详见 `原型/lumina-wbs-pending.html` v1.1 D-09 任务包。
 
