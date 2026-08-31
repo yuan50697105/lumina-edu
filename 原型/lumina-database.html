@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 数据库设计文档 v1.0</title>
+<title>Lumina 墨光 · 数据库设计文档 v1.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -120,12 +120,12 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Database Design</small></div>
     </div>
-    <div class="doc-type">Database Design · v1.0</div>
+    <div class="doc-type">Database Design · v1.1</div>
     <h1>
       <span class="hl">数据</span>库<br/>
       <em>设计文档</em>
     </h1>
-    <div class="subtitle">PostgreSQL 16 · 分库分表 · ER 模型 · 索引策略 · 分区方案</div>
+    <div class="subtitle">PostgreSQL 16 · 单库模型 · ER 模型 · 索引策略 · 分区方案</div>
   </div>
   <div class="meta">
     <div class="row">
@@ -134,15 +134,15 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.0 · 初始发布</span>
+      <span class="value">v1.1 · 同步单体架构</span>
     </div>
     <div class="row">
       <span class="label">数据库</span>
-      <span class="value">PostgreSQL 16 · Redis 7</span>
+      <span class="value">PostgreSQL 16（单库）</span>
     </div>
     <div class="row">
-      <span class="label">向量库</span>
-      <span class="value">Milvus 2.3</span>
+      <span class="label">向量检索</span>
+      <span class="value">规划中 · 知识存 PG</span>
     </div>
     <div class="row">
       <span class="label">状态</span>
@@ -153,11 +153,11 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">24</div><div class="lbl">数据表</div></div>
-  <div class="stat"><div class="val hl">6</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val hl">17</div><div class="lbl">数据表</div></div>
+  <div class="stat"><div class="val hl">9</div><div class="lbl">模块</div></div>
   <div class="stat"><div class="val">3</div><div class="lbl">分区策略</div></div>
-  <div class="stat"><div class="val">3</div><div class="lbl">存储引擎</div></div>
-  <div class="stat"><div class="val">12+</div><div class="lbl">索引策略</div></div>
+  <div class="stat"><div class="val">1</div><div class="lbl">数据库引擎</div></div>
+  <div class="stat"><div class="val">14+</div><div class="lbl">索引策略</div></div>
 </div>
 
 <!-- ============ TOC ============ -->
@@ -170,8 +170,8 @@
     <a href="#s4"><span class="num">04</span>课程模块表结构</a>
     <a href="#s5"><span class="num">05</span>作业与成绩</a>
     <a href="#s6"><span class="num">06</span>直播模块</a>
-    <a href="#s7"><span class="num">07</span>AI 模块（向量库）</a>
-    <a href="#s8"><span class="num">08</span>分区与分片</a>
+    <a href="#s7"><span class="num">07</span>AI 模块</a>
+    <a href="#s8"><span class="num">08</span>分区策略</a>
     <a href="#s9"><span class="num">09</span>索引策略</a>
     <a href="#s10"><span class="num">10</span>数据迁移</a>
   </div>
@@ -188,24 +188,72 @@
   <table>
     <thead><tr><th>存储引擎</th><th>用途</th><th>版本</th><th>部署</th></tr></thead>
     <tbody>
-      <tr><td><b>PostgreSQL</b></td><td>主数据库 · 业务数据</td><td>16.x</td><td>主从复制 · 读写分离</td></tr>
-      <tr><td><b>Redis</b></td><td>缓存 · 会话 · 限流</td><td>7.x</td><td>Cluster · 6 节点</td></tr>
-      <tr><td><b>Milvus</b></td><td>向量数据库 · RAG 检索</td><td>2.3.x</td><td>分布式 · 3 节点</td></tr>
-      <tr><td><b>MinIO</b></td><td>对象存储 · 文件/视频</td><td>最新版</td><td>分布式 · 4 节点</td></tr>
-      <tr><td><b>Kafka</b></td><td>消息队列 · 事件流</td><td>3.x</td><td>3 Broker · 副本 3</td></tr>
+      <tr><td><b>PostgreSQL 16</b></td><td>数据主库 · 全部业务/AI 数据</td><td>16.x</td><td>单库 · 单体直连</td></tr>
+      <tr><td><b>本地 uploads/</b></td><td>临时上传目录（替代对象存储）</td><td>—</td><td>单体本地目录</td></tr>
     </tbody>
   </table>
+  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：单体架构仅依赖 PostgreSQL 单库，业务 / AI / 日志数据统一落 PG；表由 <code>Base.metadata.create_all</code> 自动创建（development 模式）。缓存 / 消息队列 / 对象存储等中间件已从单体移除。单体包含 9 个业务模块：user / course / assignment / grade / ai_gateway / ai_chat / ai_grade / analytics / logs。</p>
 
   <h3 class="sub">1.2 数据规模预估</h3>
   <table>
     <thead><tr><th>数据类型</th><th>日增量</th><th>年增量</th><th>3 年预估</th><th>存储策略</th></tr></thead>
     <tbody>
       <tr><td><b>业务数据</b></td><td>~ 50 MB</td><td>~ 18 GB</td><td>~ 55 GB</td><td>PostgreSQL</td></tr>
-      <tr><td><b>文件/视频</b></td><td>~ 10 GB</td><td>~ 3.6 TB</td><td>~ 11 TB</td><td>MinIO</td></tr>
-      <tr><td><b>AI 向量</b></td><td>~ 200 MB</td><td>~ 73 GB</td><td>~ 220 GB</td><td>Milvus</td></tr>
-      <tr><td><b>审计日志</b></td><td>~ 500 MB</td><td>~ 180 GB</td><td>~ 540 GB</td><td>冷热分离</td></tr>
+      <tr><td><b>文件/视频</b></td><td>~ 10 GB</td><td>~ 3.6 TB</td><td>~ 11 TB</td><td>本地 uploads/（后续可接对象存储）</td></tr>
+      <tr><td><b>AI 对话/批阅</b></td><td>~ 200 MB</td><td>~ 73 GB</td><td>~ 220 GB</td><td>PostgreSQL</td></tr>
+      <tr><td><b>审计日志</b></td><td>~ 500 MB</td><td>~ 180 GB</td><td>~ 540 GB</td><td>冷热分离（PG 分区）</td></tr>
     </tbody>
   </table>
+
+  <h3 class="sub">1.3 监控与日志共享表 <em>Analytics &amp; Logs</em></h3>
+  <p>以下两张表为全模块共享的埋点审计表，随单体统一落 PG：</p>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">api_logs</span>
+      <span class="table-desc">API 访问日志（监控埋点）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>BIGINT</td><td><span class="tag pk">PK</span></td><td>主键 · 自增</td></tr>
+          <tr><td><code>method</code></td><td>VARCHAR(10)</td><td><span class="tag nn">NOT NULL</span></td><td>HTTP 方法</td></tr>
+          <tr><td><code>path</code></td><td>VARCHAR(500)</td><td><span class="tag nn">NOT NULL</span></td><td>请求路径</td></tr>
+          <tr><td><code>status_code</code></td><td>INTEGER</td><td></td><td>HTTP 状态码（如 200 / 422 / 429）</td></tr>
+          <tr><td><code>duration_ms</code></td><td>INTEGER</td><td></td><td>耗时（毫秒）</td></tr>
+          <tr><td><code>user_id</code></td><td>UUID</td><td></td><td>用户 ID</td></tr>
+          <tr><td><code>request_id</code></td><td>VARCHAR(100)</td><td></td><td>请求追踪 ID</td></tr>
+          <tr><td><code>error_message</code></td><td>TEXT</td><td></td><td>错误信息</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td><span class="tag idx">分区键</span></td><td>记录时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">event_tracking</span>
+      <span class="table-desc">用户行为事件（监控埋点）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>BIGINT</td><td><span class="tag pk">PK</span></td><td>主键 · 自增</td></tr>
+          <tr><td><code>event_name</code></td><td>VARCHAR(100)</td><td><span class="tag nn">NOT NULL</span></td><td>事件名</td></tr>
+          <tr><td><code>user_id</code></td><td>UUID</td><td></td><td>用户 ID</td></tr>
+          <tr><td><code>session_id</code></td><td>VARCHAR(100)</td><td></td><td>会话 ID</td></tr>
+          <tr><td><code>course_id</code></td><td>UUID</td><td></td><td>课程 ID</td></tr>
+          <tr><td><code>properties</code></td><td>JSONB</td><td></td><td>事件属性</td></tr>
+          <tr><td><code>page_url</code></td><td>VARCHAR(500)</td><td></td><td>页面 URL</td></tr>
+          <tr><td><code>user_agent</code></td><td>TEXT</td><td></td><td>浏览器 UA</td></tr>
+          <tr><td><code>ip_address</code></td><td>VARCHAR(45)</td><td></td><td>IP 地址</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td><span class="tag idx">分区键</span></td><td>事件时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </section>
 
 <!-- ============ 02 · ER 模型 ============ -->
@@ -248,11 +296,6 @@
       <span class="er-entity">submissions</span>
       <span class="er-rel">1 ── 1</span>
       <span class="er-entity">grades</span>
-    </div>
-    <div style="margin-bottom:16px;">
-      <span class="er-entity">courses</span>
-      <span class="er-rel">1 ── N</span>
-      <span class="er-entity">live_sessions</span>
     </div>
     <div style="margin-bottom:16px;">
       <span class="er-entity ai">ai_conversations</span>
@@ -496,7 +539,7 @@
           <tr><td><code>late</code></td><td>BOOLEAN</td><td></td><td>是否迟交</td></tr>
         </tbody>
       </table>
-      <pre><span class="comment">-- 分区：按课程哈希分片</span>
+      <pre><span class="comment">-- 分区：按 submitted_at 时间 RANGE 分区（PG 原生）</span>
 <span class="comment">-- 索引</span>
 <span class="keyword">CREATE INDEX</span> idx_sub_assignment <span class="keyword">ON</span> submissions(assignment_id);
 <span class="keyword">CREATE INDEX</span> idx_sub_student <span class="keyword">ON</span> submissions(student_id);</pre>
@@ -554,8 +597,10 @@
 <section class="section" id="s6">
   <div class="section-header">
     <h2>06 · 直播模块 <em>Live</em></h2>
-    <div class="num-tag">2 tables</div>
+    <div class="num-tag">2 tables · 规划中</div>
   </div>
+
+  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：直播模块在单体化架构中尚未实现，<code>live_sessions</code> / <code>live_messages</code> 为规划中表结构，当前 17 表不包含直播模块。</p>
 
   <div class="table-card">
     <div class="table-header">
@@ -613,7 +658,7 @@
 <section class="section" id="s7">
   <div class="section-header">
     <h2>07 · AI 模块 <em>AI-Powered</em></h2>
-    <div class="num-tag">3 tables · Milvus 向量库</div>
+    <div class="num-tag">5 tables · 知识存 PG</div>
   </div>
 
   <div class="table-card">
@@ -626,7 +671,7 @@
         <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
         <tbody>
           <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
-          <tr><td><code>user_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> · <span class="tag idx">分片键</span></td><td>用户</td></tr>
+          <tr><td><code>user_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> · <span class="tag idx">IDX</span></td><td>用户</td></tr>
           <tr><td><code>title</code></td><td>VARCHAR(200)</td><td></td><td>对话标题（自动生成）</td></tr>
           <tr><td><code>model</code></td><td>VARCHAR(50)</td><td></td><td>使用模型 qwen-max</td></tr>
           <tr><td><code>context_course_id</code></td><td>UUID</td><td></td><td>关联课程</td></tr>
@@ -637,7 +682,7 @@
           <tr><td><code>updated_at</code></td><td>TIMESTAMPTZ</td><td></td><td>最后活跃</td></tr>
         </tbody>
       </table>
-      <pre><span class="comment">-- 分区：按用户 ID 哈希分片</span>
+      <pre><span class="comment">-- 分区：按 created_at 时间 RANGE 分区（PG 原生）</span>
 <span class="comment">-- 索引</span>
 <span class="keyword">CREATE INDEX</span> idx_ai_conv_user <span class="keyword">ON</span> ai_conversations(user_id);
 <span class="keyword">CREATE INDEX</span> idx_ai_conv_updated <span class="keyword">ON</span> ai_conversations(updated_at <span class="keyword">DESC</span>);</pre>
@@ -669,47 +714,104 @@
 
   <div class="table-card">
     <div class="table-header">
-      <span class="table-name" style="color:var(--ai);">Milvus · knowledge_vectors</span>
-      <span class="table-desc">知识库向量集合</span>
+      <span class="table-name">ai_providers</span>
+      <span class="table-desc">模型供应商</span>
     </div>
     <div class="table-body">
       <table>
-        <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
         <tbody>
-          <tr><td><code>id</code></td><td>INT64</td><td>向量 ID（自增）</td></tr>
-          <tr><td><code>embedding</code></td><td>FLOAT_VECTOR[1536]</td><td>向量 · 百川 Embedding</td></tr>
-          <tr><td><code>source_type</code></td><td>VARCHAR</td><td>来源类型 · course | chapter | textbook</td></tr>
-          <tr><td><code>source_id</code></td><td>VARCHAR</td><td>来源 ID</td></tr>
-          <tr><td><code>content</code></td><td>VARCHAR</td><td>原文内容</td></tr>
-          <tr><td><code>metadata</code></td><td>JSON</td><td>元数据</td></tr>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>name</code></td><td>VARCHAR(30)</td><td><span class="tag uq">UNIQUE</span></td><td>qwen / glm / spark / doubao / anthropic / gemini</td></tr>
+          <tr><td><code>display_name</code></td><td>VARCHAR(50)</td><td><span class="tag nn">NOT NULL</span></td><td>展示名</td></tr>
+          <tr><td><code>description</code></td><td>VARCHAR(200)</td><td></td><td>描述</td></tr>
+          <tr><td><code>endpoint_base</code></td><td>VARCHAR(300)</td><td></td><td>API Base URL</td></tr>
+          <tr><td><code>enabled</code></td><td>BOOLEAN</td><td></td><td>是否启用整家供应商</td></tr>
+          <tr><td><code>monthly_quota</code></td><td>DECIMAL(12,2)</td><td></td><td>月度预算（元）</td></tr>
+          <tr><td><code>used_quota</code></td><td>DECIMAL(12,2)</td><td></td><td>已用额度（元）</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td></td><td>创建时间</td></tr>
         </tbody>
       </table>
-      <pre><span class="comment">-- Milvus 集合配置</span>
-collection_name: <span class="string">"knowledge_vectors"</span>
-dimension: <span class="number">1536</span>
-metric_type: <span class="string">"COSINE"</span>
-index_type: <span class="string">"IVF_FLAT"</span>
-nlist: <span class="number">1024</span></pre>
+      <p style="font-size:12px; color:var(--inkwell-2); margin:8px 0 0;">API Key 不入库，存环境变量。</p>
     </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">ai_models</span>
+      <span class="table-desc">模型单（路由与计价）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>provider_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> → ai_providers</td><td>所属供应商</td></tr>
+          <tr><td><code>model_name</code></td><td>VARCHAR(50)</td><td><span class="tag uq">UNIQUE</span></td><td>qwen-max / claude-3-5-sonnet …</td></tr>
+          <tr><td><code>task_types</code></td><td>JSONB</td><td></td><td>chat / grade / generate / vl / speech</td></tr>
+          <tr><td><code>enabled</code></td><td>BOOLEAN</td><td></td><td>是否启用</td></tr>
+          <tr><td><code>priority</code></td><td>INTEGER</td><td></td><td>路由优先级（数值小优先）</td></tr>
+          <tr><td><code>cost_per_1k_tokens</code></td><td>DECIMAL(8,4)</td><td></td><td>单价（元/千 token）</td></tr>
+          <tr><td><code>max_tokens</code></td><td>INTEGER</td><td></td><td>单次最大输出</td></tr>
+          <tr><td><code>api_style</code></td><td>VARCHAR(20)</td><td></td><td>openai / anthropic / gemini</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td></td><td>创建时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">ai_call_logs</span>
+      <span class="table-desc">AI 调用用量日志</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>BIGINT</td><td><span class="tag pk">PK</span></td><td>主键 · 自增</td></tr>
+          <tr><td><code>user_id</code></td><td>UUID</td><td></td><td>用户 ID</td></tr>
+          <tr><td><code>model_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> → ai_models</td><td>模型</td></tr>
+          <tr><td><code>model_name</code></td><td>VARCHAR(50)</td><td></td><td>模型名（快照）</td></tr>
+          <tr><td><code>task_type</code></td><td>VARCHAR(20)</td><td></td><td>chat / grade / generate / vl / speech</td></tr>
+          <tr><td><code>prompt_tokens</code></td><td>INTEGER</td><td></td><td>输入 Token</td></tr>
+          <tr><td><code>completion_tokens</code></td><td>INTEGER</td><td></td><td>输出 Token</td></tr>
+          <tr><td><code>latency_ms</code></td><td>INTEGER</td><td></td><td>耗时（毫秒）</td></tr>
+          <tr><td><code>cost</code></td><td>DECIMAL(10,4)</td><td></td><td>费用（元）</td></tr>
+          <tr><td><code>ok</code></td><td>BOOLEAN</td><td></td><td>是否成功</td></tr>
+          <tr><td><code>error_message</code></td><td>TEXT</td><td></td><td>错误信息</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td><span class="tag idx">分区键</span></td><td>调用时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="info" style="background:var(--ai-soft); border:1px solid var(--ai); padding:16px 20px; border-radius:10px; margin:20px 0;">
+    <div style="font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--ai); font-weight:600; margin-bottom:6px;">🤖 向量检索（规划中）</div>
+    <ul style="margin:0; font-size:13px; line-height:1.8;">
+      <li>当前用户知识存于 PG 表：<code>chapters.content</code>、<code>ai_messages.content</code> 等。</li>
+      <li>原 Milvus 向量库方案已移除；后续接入向量检索时再沉淀独立向量集合。</li>
+    </ul>
   </div>
 </section>
 
 <!-- ============ 08 · 分区 ============ -->
 <section class="section" id="s8">
   <div class="section-header">
-    <h2>08 · 分区与分片 <em>Partitioning</em></h2>
-    <div class="num-tag">Scale Strategy</div>
+    <h2>08 · 分区策略 <em>Partitioning</em></h2>
+    <div class="num-tag">PostgreSQL 原生分区</div>
   </div>
 
   <h3 class="sub">8.1 分区策略</h3>
+  <p><b>说明</b>：采用 PostgreSQL 原生分区（LIST / RANGE / HASH），所有分区表仍落在同一数据库实例，分区对上层应用透明，无需任何分片中间件。</p>
   <table>
-    <thead><tr><th>数据表</th><th>分片键</th><th>策略</th><th>分区数</th><th>预计规模</th></tr></thead>
+    <thead><tr><th>数据表</th><th>分区键</th><th>策略</th><th>分区数</th><th>预计规模</th></tr></thead>
     <tbody>
-      <tr><td><b>courses</b></td><td>semester</td><td>按学期范围分区</td><td>~20 分区</td><td>500 门/学期</td></tr>
-      <tr><td><b>submissions</b></td><td>course_id</td><td>按课程哈希分片</td><td>16 分片</td><td>10 万+/学期</td></tr>
-      <tr><td><b>live_messages</b></td><td>created_at</td><td>按月范围分区</td><td>滚动 12 月</td><td>500 MB/日</td></tr>
-      <tr><td><b>audit_logs</b></td><td>created_at</td><td>按月分区 · 冷热分离</td><td>热 3 月 + 冷归档</td><td>1 TB+/年</td></tr>
-      <tr><td><b>ai_conversations</b></td><td>user_id</td><td>按用户哈希分片</td><td>8 分片</td><td>50 万+会话</td></tr>
+      <tr><td><b>courses</b></td><td>semester</td><td>LIST 分区（学期）</td><td>~20 分区</td><td>500 门/学期</td></tr>
+      <tr><td><b>submissions</b></td><td>submitted_at</td><td>RANGE 分区（时间）</td><td>滚动 12 月</td><td>10 万+/学期</td></tr>
+      <tr><td><b>api_logs</b></td><td>created_at</td><td>RANGE 分区 · 冷热分离</td><td>热 3 月 + 冷归档</td><td>500 MB/日</td></tr>
+      <tr><td><b>ai_conversations</b></td><td>created_at</td><td>RANGE 分区（时间）</td><td>滚动 12 月</td><td>50 万+会话</td></tr>
+      <tr><td><b>live_messages</b></td><td>created_at</td><td>RANGE 分区（时间）</td><td>滚动 12 月</td><td>规划中</td></tr>
     </tbody>
   </table>
 
@@ -722,12 +824,12 @@ nlist: <span class="number">1024</span></pre>
 <span class="keyword">CREATE TABLE</span> courses_2026_1 <span class="keyword">PARTITION OF</span> courses
   <span class="keyword">FOR VALUES IN</span> (<span class="string">'2026-1'</span>);
 
-<span class="comment">-- live_messages 按月分区</span>
-<span class="keyword">CREATE TABLE</span> live_messages (
+<span class="comment">-- submissions 按提交时间 RANGE 分区</span>
+<span class="keyword">CREATE TABLE</span> submissions (
   ...
-) <span class="keyword">PARTITION BY RANGE</span> (created_at);
+) <span class="keyword">PARTITION BY RANGE</span> (submitted_at);
 
-<span class="keyword">CREATE TABLE</span> live_messages_2026_08 <span class="keyword">PARTITION OF</span> live_messages
+<span class="keyword">CREATE TABLE</span> submissions_2026_08 <span class="keyword">PARTITION OF</span> submissions
   <span class="keyword">FOR VALUES FROM</span> (<span class="string">'2026-08-01'</span>) <span class="keyword">TO</span> (<span class="string">'2026-09-01'</span>);</pre>
 
   <h3 class="sub">8.3 冷热分离</h3>
@@ -736,7 +838,7 @@ nlist: <span class="number">1024</span></pre>
     <tbody>
       <tr><td><b>🔥 热数据</b></td><td>PostgreSQL SSD</td><td>高频 · 毫秒级</td><td>近 3 个月</td></tr>
       <tr><td><b>🌤️ 温数据</b></td><td>PostgreSQL HDD</td><td>中频 · 秒级</td><td>3-12 个月</td></tr>
-      <tr><td><b>❄️ 冷数据</b></td><td>MinIO 归档</td><td>低频 · 分钟级</td><td>> 12 个月</td></tr>
+      <tr><td><b>❄️ 冷数据</b></td><td>PostgreSQL 冷分区</td><td>低频 · 分钟级</td><td>> 12 个月</td></tr>
     </tbody>
   </table>
 </section>
@@ -754,7 +856,7 @@ nlist: <span class="number">1024</span></pre>
     <tbody>
       <tr><td><b>B-Tree</b></td><td>等值/范围查询 · 排序</td><td><code>CREATE INDEX idx ON users(email)</code></td></tr>
       <tr><td><b>GIN</b></td><td>JSONB · 全文检索</td><td><code>CREATE INDEX idx ON chapters USING gin(resources)</code></td></tr>
-      <tr><td><b>Hash</b></td><td>等值查询 · 分片键</td><td><code>CREATE INDEX idx ON submissions USING hash(course_id)</code></td></tr>
+      <tr><td><b>Hash</b></td><td>等值查询 · 分区键</td><td><code>CREATE INDEX idx ON submissions USING hash(course_id)</code></td></tr>
       <tr><td><b>Partial</b></td><td>条件过滤</td><td><code>CREATE INDEX idx ON courses(status) WHERE status = 'published'</code></td></tr>
     </tbody>
   </table>
@@ -775,6 +877,8 @@ nlist: <span class="number">1024</span></pre>
       <tr><td>ai_conversations</td><td><code>idx_ai_conv_user</code></td><td>B-Tree</td><td>用户对话查询</td></tr>
       <tr><td>ai_conversations</td><td><code>idx_ai_conv_updated</code></td><td>B-Tree DESC</td><td>最近对话排序</td></tr>
       <tr><td>chapters</td><td><code>idx_chapters_resources</code></td><td>GIN</td><td>JSONB 资源查询</td></tr>
+      <tr><td>api_logs</td><td><code>idx_api_logs_created</code></td><td>B-Tree</td><td>日志按时间查询</td></tr>
+      <tr><td>ai_call_logs</td><td><code>idx_aicall_created</code></td><td>B-Tree</td><td>AI 调用量查询</td></tr>
     </tbody>
   </table>
 
@@ -812,25 +916,25 @@ nlist: <span class="number">1024</span></pre>
   <table>
     <thead><tr><th>工具</th><th>用途</th><th>说明</th></tr></thead>
     <tbody>
-      <tr><td><b>golang-migrate</b></td><td>Schema 迁移</td><td>SQL 文件版本管理 · 回滚支持</td></tr>
-      <tr><td><b>pgloader</b></td><td>数据导入</td><td>从 MySQL/CSV 迁移到 PostgreSQL</td></tr>
+      <tr><td><b>Base.metadata.create_all</b></td><td>Schema 创建</td><td>development 模式启动自动建表（lifespan）</td></tr>
+      <tr><td><b>Alembic（规划中）</b></td><td>Schema 迁移</td><td>生产版本化迁移 · 回滚支持</td></tr>
       <tr><td><b>pg_repack</b></td><td>在线重组</td><td>无锁表重建 · 减少碎片</td></tr>
     </tbody>
   </table>
 
   <h3 class="sub">10.2 迁移目录结构</h3>
-  <pre>migrations/
-├── 001_initial_schema.sql       <span class="comment"># 初始化表结构</span>
-├── 002_add_ai_fields.sql        <span class="comment"># AI 相关字段</span>
-├── 003_partition_courses.sql    <span class="comment"># 课程分区</span>
-├── 004_partition_submissions.sql <span class="comment"># 提交分区</span>
-├── 005_add_indexes.sql          <span class="comment"># 索引创建</span>
-└── rollback/
-    ├── 001_rollback.sql
-    └── ...</pre>
+  <pre><span class="comment"># 单体架构：development 模式由 Base.metadata.create_all 自动建表
+# 生产环境建议引入 Alembic 做版本化迁移（规划中）</span>
+alembic/
+├── versions/
+│   ├── 0001_initial_schema.py   <span class="comment"># 初始化表结构</span>
+│   ├── 0002_add_ai_fields.py    <span class="comment"># AI 相关字段</span>
+│   └── ...
+├── alembic.ini
+└── env.py</pre>
 
   <h3 class="sub">10.3 迁移示例</h3>
-  <pre><span class="comment">-- 002_add_ai_fields.sql</span>
+  <pre><span class="comment">-- 迁移示例（Alembic 规划中）</span>
 <span class="keyword">ALTER TABLE</span> assignments
   <span class="keyword">ADD COLUMN</span> ai_grading <span class="type">BOOLEAN</span> <span class="keyword">DEFAULT</span> false,
   <span class="keyword">ADD COLUMN</span> rubric <span class="type">JSONB</span>,
@@ -865,7 +969,7 @@ nlist: <span class="number">1024</span></pre>
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Database Design</div>
-  <div>v1.0 · 24 表 · 6 模块 · PostgreSQL 16 · Milvus 2.3</div>
+  <div>v1.1 · 17 表 · 9 模块 · PostgreSQL 16</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">DB-LUMINA-2026-001</div>
 </footer>
 
