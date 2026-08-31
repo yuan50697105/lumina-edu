@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 测试用例文档 v1.1</title>
+<title>Lumina 墨光 · 测试用例文档 v1.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -111,7 +111,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Test Cases</small></div>
     </div>
-    <div class="doc-type">Test Cases · v1.1</div>
+    <div class="doc-type">Test Cases · v1.2</div>
     <h1>
       <span class="hl">测试</span>用例<br/>
       <em>文档</em>
@@ -125,7 +125,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.1 · 同步单体</span>
+      <span class="value">v1.2 · 单测基线 81</span>
     </div>
     <div class="row">
       <span class="label">测试框架</span>
@@ -145,15 +145,15 @@
 <!-- ============ STATS ============ -->
 <div class="stats">
   <div class="stat"><div class="val hl">9</div><div class="lbl">测试模块</div></div>
-  <div class="stat"><div class="val hl">76</div><div class="lbl">测试用例</div></div>
+  <div class="stat"><div class="val hl">81</div><div class="lbl">测试用例</div></div>
   <div class="stat"><div class="val">44</div><div class="lbl">API 测试</div></div>
   <div class="stat"><div class="val">80%</div><div class="lbl">覆盖率</div></div>
   <div class="stat"><div class="val">3</div><div class="lbl">性能场景</div></div>
 </div>
 
 <div class="info note" style="margin:-40px 0 56px;">
-  <div class="label">统计口径 · 单体 v1.0</div>
-  76 个 pytest 用例全部通过；另 4 项跳过（bcrypt 兼容）。含集成 / 契约 100+ 用例待环境（运行器 <code>--include-api</code> 启用）。
+  <div class="label">统计口径 · 单体 v1.2</div>
+  81 个 pytest 用例全部通过（含 bcrypt 兼容修复后 4 项跳过转通过）。含集成 / 契约 100+ 用例待环境（运行器 <code>--include-api</code> 启用）。
 </div>
 
 <!-- ============ TOC ============ -->
@@ -184,7 +184,7 @@
   <table>
     <thead><tr><th>层级</th><th>类型</th><th>数量</th><th>工具</th><th>执行时间</th></tr></thead>
     <tbody>
-      <tr><td><b>① 单元测试</b></td><td>函数/方法级别（security · models · queries · logging_json · adapters 5 个测试文件）</td><td>76</td><td>pytest</td><td>&lt; 30s</td></tr>
+      <tr><td><b>① 单元测试</b></td><td>函数/方法级别（security · models · queries · logging_json · adapters 5 个测试文件）</td><td>81</td><td>pytest</td><td>&lt; 30s</td></tr>
       <tr><td><b>② 集成测试</b></td><td>模块间交互</td><td>100+（需 MySQL，未就绪自动跳过）</td><td>pytest · --include-api</td><td>~2 min</td></tr>
       <tr><td><b>③ API 测试</b></td><td>接口契约</td><td>44</td><td>api_contract_check.py</td><td>~5 min</td></tr>
       <tr><td><b>④ E2E 测试</b></td><td>用户流程</td><td>15 步</td><td>smoke_test.py</td><td>~15 min</td></tr>
@@ -478,7 +478,7 @@
 
   <div class="info warn">
     <div class="label">⚠️ 规划中</div>
-    直播模块在单体 v1.0 中未实现，对应 module 不在 9 个业务模块（user / course / assignment / grade / ai_gateway / ai_chat / ai_grade / analytics / logs）内；以下用例为规划用例，暂不纳入本轮 76 条执行范围。
+    直播模块在单体 v1.2 中未实现，对应 module 不在 9 个业务模块（user / course / assignment / grade / ai_gateway / ai_chat / ai_grade / analytics / logs）内；以下用例为规划用例，暂不纳入本轮 81 条执行范围。
   </div>
 
   <div class="test-case">
@@ -755,7 +755,7 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Test Cases</div>
-  <div>v1.1 · 76 用例 · 9 模块 · 2026-08-31</div>
+  <div>v1.2 · 81 用例 · 9 模块 · 2026-08-31</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">QA-LUMINA-2026-001</div>
 </footer>
 

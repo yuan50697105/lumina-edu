@@ -32,7 +32,7 @@ edu/
 │   ├── lumina-app/             # ✅ 单体 FastAPI（9 模块 · 44 端点 · 17 表）
 │   │   ├── app/                # 应用代码（main.py / models.py / security.py ...）
 │   │   │   └── modules/        # 9 业务模块：user/course/assignment/grade/ai_gateway/ai_chat/ai_grade/analytics/logs
-│   │   ├── tests/              # 单元测试（76 passed · 4 skipped）
+│   │   ├── tests/              # 单元测试（81 passed）
 │   │   ├── requirements.txt    # Python 依赖
 │   │   └── Dockerfile          # API 容器镜像
 │   ├── web-frontend/           # Web 前端（React 18 + TS + Vite）
@@ -128,13 +128,13 @@ background: linear-gradient(
 4. **OpenAPI** (机器可读) - YAML 格式 API 规范
 5. **Database** (数据库) - 17 表、ER 模型、分区策略
 6. **Operations** (运维) - Docker Compose 部署、监控告警、Runbook
-7. **Test Cases** (测试) - 156 用例、80% 覆盖率
+7. **Test Cases** (测试) - 81 用例、80% 覆盖率
 8. **User Guide** (用户手册) - 3 角色指南、FAQ
 9. **WBS v1.1** (上线计划) - 10 周轻量方案
 
 所有文档使用统一的 Lumina 视觉风格，可直接在浏览器中打开查看。
 
-单体应用 `服务/lumina-app/` 快照：44 端点 · 9 模块 · 17 表 · 单元测试 76 通过 4 跳过。
+单体应用 `服务/lumina-app/` 快照：44 端点 · 9 模块 · 17 表 · 单元测试 81 通过。
 
 ## Platform Coverage
 
