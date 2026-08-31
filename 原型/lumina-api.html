@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · API 接口文档 v1.4</title>
+<title>Lumina 墨光 · API 接口文档 v1.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -137,7 +137,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>API Reference</small></div>
     </div>
-    <div class="doc-type">API Reference · v1.4</div>
+    <div class="doc-type">API Reference · v1.5</div>
     <h1>
       <span class="hl">API</span> 接口<br/>
       <em>文档</em>
@@ -151,7 +151,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.4 · 生产基准 · MySQL 9.7</span>
+      <span class="value">v1.5 · 生产基准 · MySQL 9.7</span>
     </div>
     <div class="row">
       <span class="label">基础路径</span>
@@ -170,9 +170,9 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">11</div><div class="lbl">模块</div></div>
-  <div class="stat"><div class="val hl">77</div><div class="lbl">接口数</div></div>
-  <div class="stat"><div class="val">27</div><div class="lbl">协作端点</div></div>
+  <div class="stat"><div class="val hl">12</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val hl">82</div><div class="lbl">接口数</div></div>
+  <div class="stat"><div class="val">31</div><div class="lbl">协作+通知端点</div></div>
   <div class="stat"><div class="val">16</div><div class="lbl">直播端点</div></div>
   <div class="stat"><div class="val">JWT</div><div class="lbl">认证方式</div></div>
   <div class="stat"><div class="val">RFC 7807</div><div class="lbl">错误格式</div></div>
@@ -213,9 +213,9 @@
 
   <div class="info note">
     <div class="label">单体架构 · 模块清单</div>
-    本接口文档对齐单体应用 <b>lumina-app</b>（FastAPI · 77 业务端点），共 <b>11</b> 个业务模块：
-    <code>user</code> · <code>course</code> · <code>assignment</code> · <code>grade</code> · <code>live</code> · <code>collab</code> · <code>ai_gateway</code> · <code>ai_chat</code> · <code>ai_grade</code> · <code>analytics</code> · <code>logs</code>。<br/>
-    其中 <code>analytics</code> 提供 <code>/events</code> 事件上报与统计，<code>logs</code> 提供 <code>/logs/query</code>、<code>/logs/summary</code> 日志检索（均限管理员）；AI 流式响应使用 SSE（<code>text/event-stream</code>）；直播模块（D-01）与协作模块（D-02）采用 REST + 轮询增量，无 WebSocket。
+    本接口文档对齐单体应用 <b>lumina-app</b>（FastAPI · 82 业务端点），共 <b>12</b> 个业务模块：
+    <code>user</code> · <code>course</code> · <code>assignment</code> · <code>grade</code> · <code>live</code> · <code>collab</code> · <code>ai_gateway</code> · <code>ai_chat</code> · <code>ai_grade</code> · <code>notif</code> · <code>analytics</code> · <code>logs</code>。<br/>
+    其中 <code>notif</code> 提供 <code>/notifications/my</code> 消息通知中心（D-03 新增，含已读/未读数/全部已读）；<code>analytics</code> 提供 <code>/events</code> 事件上报与统计，<code>logs</code> 提供 <code>/logs/query</code>、<code>/logs/summary</code> 日志检索（均限管理员）；AI 流式响应使用 SSE（<code>text/event-stream</code>）；直播模块（D-01）与协作模块（D-02）采用 REST + 轮询增量，无 WebSocket。
   </div>
 
   <table>
@@ -325,6 +325,101 @@
       <tr><td><b>admin</b></td><td>管理员</td><td>全局数据 · 系统配置 · 审批</td></tr>
     </tbody>
   </table>
+
+  <h3 class="sub">2.4 自助注册</h3>
+  <div class="info note">
+    <div class="label">注册即登录</div>
+    注册成功后自动登录并返回令牌（同登录响应）；邮箱 / 学号冲突返回 <b>409</b>（<code>EMAIL_EXISTS</code> / <code>STUDENT_ID_EXISTS</code>）。默认角色 <code>student</code>。<br/>
+    注册同时写入一条「欢迎加入 Lumina 墨光」系统通知（<code>notif</code> 模块）。
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/auth/register</span>
+      <span class="endpoint-desc">自助注册（D-03）</span>
+    </div>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"name"</span>: <span class="string">"林清"</span>,
+  <span class="key">"email"</span>: <span class="string">"linqing@lumina.edu"</span>,
+  <span class="key">"password"</span>: <span class="string">"Passw0rd!"</span>,     <span class="comment">// 至少 8 位</span>
+  <span class="key">"student_id"</span>: <span class="string">"20260001"</span>,      <span class="comment">// 可选</span>
+  <span class="key">"role"</span>: <span class="string">"student"</span>,              <span class="comment">// student(默认) | teacher</span>
+  <span class="key">"device"</span>: <span class="string">"web"</span>                <span class="comment">// web | mobile | desktop</span>
+}</pre>
+    <h4>响应 201 · 注册成功返回令牌</h4>
+    <pre>{
+  <span class="key">"code"</span>: <span class="number">0</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"access_token"</span>: <span class="string">"eyJhbGciOiJIUzI1NiIs..."</span>,
+    <span class="key">"refresh_token"</span>: <span class="string">"eyJhbGciOiJIUzI1NiIs..."</span>,
+    <span class="key">"expires_in"</span>: <span class="number">900</span>,
+    <span class="key">"token_type"</span>: <span class="string">"Bearer"</span>,
+    <span class="key">"user"</span>: { <span class="key">"id"</span>: <span class="string">"550e8400-..."</span>, <span class="key">"name"</span>: <span class="string">"林清"</span>, <span class="key">"role"</span>: <span class="string">"student"</span> }
+  }
+}</pre>
+  </div>
+
+  <h3 class="sub">2.5 消息通知 <em>Notif</em></h3>
+  <div class="info note">
+    <div class="label">通知触发场景</div>
+    注册欢迎 · 作业批阅完成（<code>assignment_graded</code>）· 直播点名（<code>live_call</code>）。支持 <code>ref_type</code>/<code>ref_id</code> 跳转关联对象（<b>course</b> / <b>live_room</b>）。仅本人可见，非本人访问返回 <b>404</b>。
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/notifications/my</span>
+      <span class="endpoint-desc">我的通知列表</span>
+    </div>
+    <h4>查询参数</h4>
+    <p><code>limit</code>（默认 20）· <code>unread_only</code>（true / false，只看未读）</p>
+    <h4>响应</h4>
+    <pre>[
+  {
+    <span class="key">"id"</span>: <span class="string">"550e8400-..."</span>,
+    <span class="key">"user_id"</span>: <span class="string">"550e8400-..."</span>,
+    <span class="key">"type"</span>: <span class="string">"assignment_graded"</span>,
+    <span class="key">"title"</span>: <span class="string">"✅ 《高数》批阅完成"</span>,
+    <span class="key">"content"</span>: <span class="string">"得分 85 分（满分 100）"</span>,
+    <span class="key">"ref_type"</span>: <span class="string">"assignment"</span>,
+    <span class="key">"ref_id"</span>: <span class="string">"550e8400-..."</span>,
+    <span class="key">"is_read"</span>: <span class="keyword">false</span>,
+    <span class="key">"created_at"</span>: <span class="string">"2026-08-31T09:41:00+08:00"</span>
+  }
+]</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/notifications/my/unread-count</span>
+      <span class="endpoint-desc">未读数（顶栏铃铛轮询）</span>
+    </div>
+    <h4>响应</h4>
+    <pre>{ <span class="key">"unread_count"</span>: <span class="number">2</span> }</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/notifications/my/{notification_id}/read</span>
+      <span class="endpoint-desc">单条已读</span>
+    </div>
+    <h4>响应</h4>
+    <pre>{ <span class="key">"success"</span>: <span class="keyword">true</span> }</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/notifications/my/read-all</span>
+      <span class="endpoint-desc">全部已读（幂等）</span>
+    </div>
+    <h4>响应</h4>
+    <pre>{ <span class="key">"success"</span>: <span class="keyword">true</span> }</pre>
+  </div>
 </section>
 
 <!-- ============ 03 · 用户 ============ -->
@@ -1145,7 +1240,7 @@ curl -X POST https://api.lumina.edu/api/v1/ai/chat \
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · API Reference</div>
-  <div>v1.4 · 11 模块 · 77 接口 · 2026-08-31 · 生产基准</div>
+  <div>v1.5 · 12 模块 · 82 接口 · 2026-08-31 · 生产基准</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">API-LUMINA-2026-001</div>
 </footer>
 

@@ -49,7 +49,7 @@ edu/
 │   └── README.md                     # 部署使用说明
 │
 ├── 服务/                             # 单体应用 + 前端
-│   ├── lumina-app/                   # ✅ 单体 FastAPI（11 模块 · 77 端点 · 30 表）
+│   ├── lumina-app/                   # ✅ 单体 FastAPI（12 模块 · 82 端点 · 31 表）
 │   ├── web-frontend/                 # ✅ Web 前端（React 18 + TS + Vite）
 │   └── mobile-app/                   # ✅ 移动端前端（React Native / Expo）
 │
@@ -69,10 +69,10 @@ edu/
 | **平台目录** | 5 个（phone/tablet/Web/PC/AI）|
 | **界面页面** | 160+ 个 |
 | **设计表面** | 6 个（学生/教师 × 移动/Web/桌面）|
-| **后端模块** | 11 个业务模块（用户/课程/作业/成绩/直播/协作/AI 网关·对话·批阅/埋点/日志）|
-| **文档** | PRD v1.3 + TDD v1.3 + API v1.4 + DB v1.4 + OPS v1.3 + QA v1.3 + UG v1.1 + WBS v1.1 + WBS-P v1.1 + 索引 |
-| **API 接口** | 77 个端点（11 模块 · JWT · SSE 流式 · 直播课堂 · 协作工具）|
-| **数据表** | 30 张（单体应用）|
+| **后端模块** | 12 个业务模块（用户/课程/作业/成绩/直播/协作/通知/AI 网关·对话·批阅/埋点/日志）|
+| **文档** | PRD v1.3 + TDD v1.4 + API v1.5 + DB v1.5 + OPS v1.4 + QA v1.4 + UG v1.1 + WBS v1.1 + WBS-P v1.2 + 索引 |
+| **API 接口** | 82 个端点（12 模块 · JWT · SSE 流式 · 直播课堂 · 协作工具 · 通知中心）|
+| **数据表** | 31 张（单体应用）|
 
 ## 📖 文档体系
 
@@ -80,15 +80,15 @@ edu/
 |------|------|------|
 | 📋 **设计索引** | 原型导航入口，按平台分类 | `lumina-00-index.html` |
 | 📋 **PRD v1.3** | 产品需求文档，18 章 | `lumina-prd.html` |
-| 📋 **TDD v1.3** | 技术设计文档，18 章 | `lumina-tdd.html` |
-| 📋 **API v1.4** | API 接口文档，12 章 · 77 端点 | `lumina-api.html` |
-| 📋 **OpenAPI 3.1** | 机器可读 API 规范（YAML · 60 路径） | `lumina-api-openapi.yaml` |
-| 📋 **DB v1.4** | 数据库设计文档，11 章 · 30 表 | `lumina-database.html` |
-| 📋 **OPS v1.3** | 部署运维手册，10 章 | `lumina-operations.html` |
-| 📋 **QA v1.3** | 测试用例文档，10 章 · 125 用例 | `lumina-testcases.html` |
+| 📋 **TDD v1.4** | 技术设计文档，18 章 | `lumina-tdd.html` |
+| 📋 **API v1.5** | API 接口文档，12 章 · 82 端点 | `lumina-api.html` |
+| 📋 **OpenAPI 3.1** | 机器可读 API 规范（YAML · 65 路径） | `lumina-api-openapi.yaml` |
+| 📋 **DB v1.5** | 数据库设计文档，11 章 · 31 表 | `lumina-database.html` |
+| 📋 **OPS v1.4** | 部署运维手册，10 章 | `lumina-operations.html` |
+| 📋 **QA v1.4** | 测试用例文档，10 章 · 138 用例 | `lumina-testcases.html` |
 | 📋 **UG v1.1** | 用户手册，10 章 · 3 角色 | `lumina-userguide.html` |
 | 📋 **WBS v1.1** | 上线工作分解结构，10 周轻量方案 | `lumina-launch-wbs.html` |
-| 📋 **WBS-P v1.1** | 未实现内容落地 WBS：M4 上线 + 收口认证 + V1.1 演进 | `lumina-wbs-pending.html` |
+| 📋 **WBS-P v1.2** | 未实现内容落地 WBS：M4 上线 + 收口认证 + V1.1 演进 | `lumina-wbs-pending.html` |
 
 ## 🎨 设计系统
 
@@ -191,7 +191,7 @@ cp .env.example .env
 ./scripts/monitor.sh
 ```
 
-已编排服务：MySQL 9.7 · Redis · lumina-app 单体（:8080 · 11 模块 · 77 端点）· Nginx(80/443)
+已编排服务：MySQL 9.7 · Redis · lumina-app 单体（:8080 · 12 模块 · 82 端点）· Nginx(80/443)
 
 详见 `部署/README.md`
 
@@ -247,6 +247,12 @@ cp .env.example .env
 | **QA v1.3** | 2026-08-31 | 单测 125 用例（协作 +16 · 全部通过） |
 | **WBS v1.1** | 2026-08-26 | 上线计划轻量方案更新；阶段三/四执行资产就绪（本机 MySQL 实测；真实上线待 Docker 生产环境）|
 | **WBS-P v1.1** | 2026-08-31 | 未实现内容落地规划：M4 上线 + 收口认证 + V1.1 演进（33 任务包 · T0 相对周轴）|
+| **TDD v1.4** | 2026-08-31 | 账户补全同步（D-03）· 12 模块 · 82 端点 · 31 表 |
+| **API v1.5** | 2026-08-31 | 自助注册 + 消息通知章节（02·2.4/2.5）· OpenAPI 65 paths · 45 schemas |
+| **DB v1.5** | 2026-08-31 | notifications 表卡（D-03）· 31 表 · 12 模块 |
+| **OPS v1.4** | 2026-08-31 | 账户补全快照 · 12 模块 · 31 表 |
+| **QA v1.4** | 2026-08-31 | 单测 138 用例（通知 +13 · 全部通过）· 注册/通知用例 TC-USER-005 / TC-NOTIF-001 |
+| **WBS-P v1.2** | 2026-08-31 | D-03 账户补全已实施 · 后续编号顺延 D-04~D-10 |
 
 ## 📄 许可证
 

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Lumina 墨光 · API
-  version: 1.4.0
+  version: 1.5.0
   description: |
     Lumina（墨光）教育应用 RESTful API，覆盖用户、课程、作业、成绩、直播、协作、AI 等模块。
 
@@ -12,6 +12,7 @@ info:
     - SSE 流式响应（AI 接口）
     - 直播课堂：REST + after_id 轮询（聊天/举手/答题/点名）· HLS 流媒体（LIVE_STREAM_* 可插拔，未接入返回 mock://）
     - 小组协作：课程小组 / 成员 / 项目 / 看板拖拽 / 共享文件 / 组内讨论（D-02）
+    - 账户补全：自助注册（POST /auth/register）+ 消息通知中心（/notifications/my · D-03）
 
   contact:
     name: Lumina Team
@@ -42,6 +43,8 @@ tags:
     description: 直播模块
   - name: collab
     description: 协作模块（小组/项目/看板/文件/讨论）
+  - name: notif
+    description: 消息通知中心（D-03）
   - name: ai
     description: AI 能力模块
 
@@ -149,6 +152,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: 自助注册（D-03）
+      description: 注册学生/教师账号，成功即自动登录返回令牌；邮箱/学号冲突返回 409
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: 注册成功，返回令牌
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/TokenResponse'
+        '409':
+          description: 邮箱或学号已存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 参数校验失败（角色非法 / 密码过短）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ═══════ USERS ═══════
   /users/me:
@@ -1823,6 +1864,75 @@ paths:
               schema:
                 $ref: '#/components/schemas/CollabReply'
 
+  # ═══════ NOTIFICATIONS（D-03）═══════
+  /notifications/my:
+    get:
+      tags: [notif]
+      summary: 我的通知列表
+      description: 仅本人可见；支持 limit / unread_only 过滤
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: unread_only
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: 通知列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationOut'
+
+  /notifications/my/unread-count:
+    get:
+      tags: [notif]
+      summary: 未读数统计（顶栏铃铛）
+      responses:
+        '200':
+          description: 未读数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCountOut'
+
+  /notifications/my/{notification_id}/read:
+    post:
+      tags: [notif]
+      summary: 单条已读
+      description: 非本人通知返回 404
+      parameters:
+        - name: notification_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 已标记已读
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /notifications/my/read-all:
+    post:
+      tags: [notif]
+      summary: 全部已读（幂等）
+      responses:
+        '200':
+          description: 全部已读
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
 # ─── 组件 ───
 components:
 
@@ -2812,3 +2922,64 @@ components:
       properties:
         content:
           type: string
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          description: 至少 8 位
+        student_id:
+          type: string
+          description: 学号/工号（可选）
+        role:
+          type: string
+          enum: [student, teacher]
+          default: student
+        device:
+          type: string
+          enum: [web, mobile, desktop]
+          default: web
+
+    NotificationOut:
+      type: object
+      required: [id, user_id, type, title, is_read, created_at]
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        type:
+          type: string
+          description: 通知类型（welcome / assignment_graded / live_call）
+        title:
+          type: string
+        content:
+          type: string
+          nullable: true
+        ref_type:
+          type: string
+          nullable: true
+          description: 关联对象类型（course / live_room / assignment）
+        ref_id:
+          type: string
+          nullable: true
+        is_read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    UnreadCountOut:
+      type: object
+      required: [unread_count]
+      properties:
+        unread_count:
+          type: integer

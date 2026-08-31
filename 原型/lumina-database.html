@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 数据库设计文档 v1.4</title>
+<title>Lumina 墨光 · 数据库设计文档 v1.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -120,7 +120,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Database Design</small></div>
     </div>
-    <div class="doc-type">Database Design · v1.4</div>
+    <div class="doc-type">Database Design · v1.5</div>
     <h1>
       <span class="hl">数据</span>库<br/>
       <em>设计文档</em>
@@ -134,7 +134,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.4 · MySQL 9.7 · 30 表 · 11 模块</span>
+      <span class="value">v1.5 · MySQL 9.7 · 31 表 · 12 模块</span>
     </div>
     <div class="row">
       <span class="label">数据库</span>
@@ -153,8 +153,8 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">30</div><div class="lbl">数据表</div></div>
-  <div class="stat"><div class="val hl">11</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val hl">31</div><div class="lbl">数据表</div></div>
+  <div class="stat"><div class="val hl">12</div><div class="lbl">模块</div></div>
   <div class="stat"><div class="val">3</div><div class="lbl">分区策略</div></div>
   <div class="stat"><div class="val">1</div><div class="lbl">数据库引擎</div></div>
   <div class="stat"><div class="val">14+</div><div class="lbl">索引策略</div></div>
@@ -358,7 +358,7 @@
 <section class="section" id="s3">
   <div class="section-header">
     <h2>03 · 用户模块 <em>Users</em></h2>
-    <div class="num-tag">3 tables</div>
+    <div class="num-tag">4 tables</div>
   </div>
 
   <div class="table-card">
@@ -434,6 +434,34 @@
       <pre><span class="comment">-- 唯一约束：一个用户一门课程一条记录</span>
 <span class="keyword">CREATE UNIQUE INDEX</span> idx_enrollment_unique
   <span class="keyword">ON</span> enrollments(user_id, course_id);</pre>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">notifications</span>
+      <span class="table-desc">消息通知（D-03）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>user_id</code></td><td>UUID</td><td><span class="tag idx">INDEX</span></td><td>接收用户（仅本人可见）</td></tr>
+          <tr><td><code>type</code></td><td>VARCHAR(50)</td><td><span class="tag nn">NOT NULL</span></td><td>welcome | assignment_graded | live_call …</td></tr>
+          <tr><td><code>title</code></td><td>VARCHAR(120)</td><td><span class="tag nn">NOT NULL</span></td><td>通知标题</td></tr>
+          <tr><td><code>content</code></td><td>TEXT</td><td></td><td>摘要内容</td></tr>
+          <tr><td><code>ref_type</code></td><td>VARCHAR(50)</td><td></td><td>course | live_room | assignment …</td></tr>
+          <tr><td><code>ref_id</code></td><td>UUID</td><td></td><td>跳转对象 ID</td></tr>
+          <tr><td><code>is_read</code></td><td>BOOLEAN</td><td><span class="tag nn">NOT NULL</span></td><td>是否已读 · DEFAULT false</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td><span class="tag nn">NOT NULL</span></td><td>创建时间 · DEFAULT now()</td></tr>
+        </tbody>
+      </table>
+      <pre><span class="comment">-- 索引：按用户查询通知</span>
+<span class="keyword">CREATE INDEX</span> idx_notifications_user <span class="keyword">ON</span> notifications(user_id);</pre>
+      <div style="margin-top:10px; padding:10px 12px; background:var(--ai-soft, #EDE9FE); border-radius:8px; font-size:12px; line-height:1.7; color:var(--inkwell);">
+        <b>写入场景（随调用方事务提交）</b>：注册欢迎（auth/register）· 作业批阅（assignment/grade）· 直播点名（live/call）。inbox 模式，不做推送投递队列，前端轮询 <code>unread-count</code>。
+      </div>
     </div>
   </div>
 </section>
@@ -1238,7 +1266,7 @@ alembic/
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Database Design</div>
-  <div>v1.4 · 30 表 · 11 模块 · MySQL 9.7</div>
+  <div>v1.5 · 31 表 · 12 模块 · MySQL 9.7</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">DB-LUMINA-2026-001</div>
 </footer>
 

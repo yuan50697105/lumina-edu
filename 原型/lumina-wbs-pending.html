@@ -119,7 +119,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Pending Work WBS</small></div>
     </div>
-    <div class="doc-type">Work Breakdown Structure · v1.1</div>
+    <div class="doc-type">Work Breakdown Structure · v1.2</div>
     <h1>
       <span class="hl">未实现内容</span>落地<br/>
       <em>工作分解结构</em>
@@ -128,9 +128,9 @@
   </div>
   <div class="meta">
     文档编号：WBS-LUMINA-2026-002<br/>
-    版本号：v1.1 · 2026-08-31<br/>
+    版本号：v1.2 · 2026-08-31<br/>
     时间轴：T0（生产环境就绪）起约 8 周 · 演进滚动<br/>
-    依据：上线 WBS v1.1 · 开发进度.md（M1-M3 达成）· PRD v1.3 · QA v1.2
+    依据：上线 WBS v1.1 · 开发进度.md（M1-M3 + D-01~D-03 达成）· PRD v1.3 · QA v1.4
   </div>
 </header>
 
@@ -159,7 +159,7 @@
       <tr><td><b>M4 正式上线</b></td><td>生产环境就绪 · 数据迁移 · 灰度/全量发布 · 监控 1 周 · 问题修复</td><td><span class="tag pending">未执行</span></td></tr>
       <tr><td><b>收口认证</b></td><td>UAT 人工签字 · AI 真批阅验收 · 三类角色培训 · 移动端收官</td><td><span class="tag pending">未执行</span></td></tr>
       <tr><td><b>V1.1 演进</b></td><td>PRD P1 功能 · AI 基础设施 · 运营演进（规模化）</td><td><span class="tag pending">待排期</span></td></tr>
-      <tr><td><b>已完成（不重复规划）</b></td><td>阶段一~三（M1-M3）· 阶段四离线资产（init.sql/seed/检查清单/文档 v1.2 已生产化）· 直播课堂（D-01 · 2026-08-31）</td><td><span class="tag done">已达成</span></td></tr>
+      <tr><td><b>已完成（不重复规划）</b></td><td>阶段一~三（M1-M3）· 阶段四离线资产（init.sql/seed/检查清单/文档 v1.2 已生产化）· 直播课堂（D-01 · 2026-08-31）· 协作工具（D-02）· 账户补全（D-03）</td><td><span class="tag done">已达成</span></td></tr>
     </tbody>
   </table>
 
@@ -180,8 +180,8 @@
   <table>
     <thead><tr><th>维度</th><th>基线</th><th>未实现差距</th></tr></thead>
     <tbody>
-      <tr><td><b>功能</b></td><td>单体 77 端点 · 11 模块 · 30 表 · 冒烟 25/25 + 协作 21/21 · 直播（D-01）与协作（D-02）已落地</td><td>PRD P1 模块（题库/学情等）未实现</td></tr>
-      <tr><td><b>测试</b></td><td>单测 125/0 · 契约三层一致（41 ⊂ 77 ⊂ Nginx） · 压测 365 req/s · p50 26ms</td><td>UAT 人工签字未完成 · AI 真批阅未跑真实模型</td></tr>
+      <tr><td><b>功能</b></td><td>单体 82 端点 · 12 模块 · 31 表 · 冒烟 25/25 + 协作 21/21 + 通知 12/12 · 直播（D-01）· 协作（D-02）· 账户补全（D-03）已落地</td><td>PRD P1 模块（题库/学情等）未实现</td></tr>
+      <tr><td><b>测试</b></td><td>单测 138/0 · 契约三层一致（46 ⊂ 82 ⊂ Nginx） · 压测 365 req/s · p50 26ms</td><td>UAT 人工签字未完成 · AI 真批阅未跑真实模型</td></tr>
       <tr><td><b>部署</b></td><td>离线资产生产化（init.sql/seed 幂等/监控/文档 v1.2）</td><td>真实生产环境（MySQL + Docker + TLS + 域名）未就绪</td></tr>
       <tr><td><b>前端</b></td><td>Web 构建通过 · 埋点链路闭合</td><td>移动端 typecheck 待 RN 工具链 · 未真机冒烟</td></tr>
     </tbody>
@@ -213,9 +213,9 @@
       <tr><td>AI 真批阅（真实模型）</td><td>ai-grade 模块（容错解析 / 置信度落库）· 网关适配器 3 套协议</td><td>外部模型 API key</td><td>C-02</td></tr>
       <tr><td>三角色培训 + 材料</td><td><code>lumina-userguide.html</code> v1.1 · <code>lumina-operations.html</code> v1.2</td><td>业务方排期</td><td>C-03 / C-04</td></tr>
       <tr><td><b>移动端</b></td><td>typecheck / 真机冒烟</td><td><code>服务/mobile-app/</code>（Expo SDK 52 骨架）</td><td>RN 工具链环境</td><td>C-05</td></tr>
-      <tr><td rowspan="3"><b>V1.1 演进</b></td><td>PRD P0/P1 功能缺口</td><td>单体 11 模块地基 · 原型 40 文件 · D-01/D-02 已实施</td><td>M4 后迭代排期</td><td>D-03 ~ D-06</td></tr>
-      <tr><td>AI 基础设施 / 规模运营</td><td>AI 网关可扩展（openai/anthropic/gemini）</td><td>模型成本 · 用户量阈值</td><td>D-06 ~ D-08</td></tr>
-      <tr><td>平台覆盖 / 国产化</td><td>鸿蒙（HarmonyOS）适配评估</td><td>校园信创诉求 · 移动端 Expo RN 现状</td><td>D-09</td></tr>
+      <tr><td rowspan="3"><b>V1.1 演进</b></td><td>PRD P0/P1 功能缺口</td><td>单体 12 模块地基 · 原型 40 文件 · D-01~D-03 已实施</td><td>M4 后迭代排期</td><td>D-04 ~ D-08</td></tr>
+      <tr><td>AI 基础设施 / 规模运营</td><td>AI 网关可扩展（openai/anthropic/gemini）</td><td>模型成本 · 用户量阈值</td><td>D-07 ~ D-09</td></tr>
+      <tr><td>平台覆盖 / 国产化</td><td>鸿蒙（HarmonyOS）适配评估</td><td>校园信创诉求 · 移动端 Expo RN 现状</td><td>D-10</td></tr>
     </tbody>
   </table>
 
@@ -286,14 +286,15 @@
     <thead><tr><th>编号</th><th>任务</th><th>对应 PRD</th><th>优先级</th><th>说明</th></tr></thead>
     <tbody>
       <tr><td><b>D-01</b></td><td>直播课堂（观看/举手/答题/聊天）</td><td>04 · P0</td><td><span class="tag done">✅ 已实施</span></td><td>REST + after_id 轮询 · 本地 mediamtx HLS 已接入（2026-08-31）；生产 CDN 选型待定</td></tr>
-      <tr><td><b>D-02</b></td><td>协作工具（小组/看板/文件/讨论）</td><td>05 · P1</td><td><span class="tag done">✅ 已实施</span></td><td>collab 模块 27 端点 · 8 表（30 表）· Web 看板/讨论/共享文件（2026-08-31，冒烟 21/21）；移动端待鸿蒙评估（D-09）</td></tr>
-      <tr><td><b>D-03</b></td><td>题库与考试（组卷/在线考试/评分）</td><td>07 · P1</td><td><span class="tag high">P1</span></td><td>可接 AI 组卷</td></tr>
-      <tr><td><b>D-04</b></td><td>学情分析 + 学生档案</td><td>08 · 10 · P1</td><td><span class="tag high">P1</span></td><td>基于 analytics 模块扩展</td></tr>
-      <tr><td><b>D-05</b></td><td>课程审批 + 系统设置 + 审计日志</td><td>14 · 16 · 17 · P1</td><td><span class="tag medium">P2</span></td><td>管理端补齐</td></tr>
-      <tr><td><b>D-06</b></td><td>AI 基础设施：RAG 向量检索 / Agent 编排 / MCP / 内容审核</td><td>18-20 · 规划中</td><td><span class="tag high">P1</span></td><td>Milvus / AgentScope / 知网 AIGC</td></tr>
-      <tr><td><b>D-07</b></td><td>运营演进：独立监控 + CI/CD</td><td>—</td><td><span class="tag medium">P2</span></td><td>Prometheus + Grafana · GitHub Actions</td></tr>
-      <tr><td><b>D-08</b></td><td>规模演进：K8s 集群</td><td>—</td><td><span class="tag medium">P2</span></td><td>触发条件：用户量 > 5000</td></tr>
-      <tr><td><b>D-09</b></td><td>鸿蒙（HarmonyOS）适配评估 + 移动端平台矩阵</td><td>—</td><td><span class="tag medium">P2</span></td><td><b>Expo 官方不支持鸿蒙</b>（现状移动端仅 iOS/Android）；三路线评估：**原生 ArkTS / ArkUI 独立客户端（DevEco Studio，移动端仅 6 页面 · 推荐评估项）** · RNOH（bare RN 迁移 + 依赖替换）· uni-app 跨端；产出兼容矩阵结论，不阻塞 M4 · 校园信创诉求触发评审</td></tr>
+      <tr><td><b>D-02</b></td><td>协作工具（小组/看板/文件/讨论）</td><td>05 · P1</td><td><span class="tag done">✅ 已实施</span></td><td>collab 模块 27 端点 · 8 表 · Web 看板/讨论/共享文件（2026-08-31，冒烟 21/21）；移动端待鸿蒙评估（D-10）</td></tr>
+      <tr><td><b>D-03</b></td><td>账户与认证补齐（P0 缺口 · 注册/消息中心）</td><td>P0 缺口 #1 #2</td><td><span class="tag done">✅ 已实施</span></td><td>notif 模块 4 端点 · notifications 表（31 表）· Web 登录/注册双 Tab + 顶栏通知铃铛（2026-08-31，冒烟 12/12）；账户管理/批量操作仍待 D-05</td></tr>
+      <tr><td><b>D-04</b></td><td>题库与考试（组卷/在线考试/评分）</td><td>07 · P1</td><td><span class="tag high">P1</span></td><td>可接 AI 组卷</td></tr>
+      <tr><td><b>D-05</b></td><td>学情分析 + 学生档案（含课程资料浏览/学生分组等 P0 缺口）</td><td>08 · 10 · P1</td><td><span class="tag high">P1</span></td><td>基于 analytics 模块扩展</td></tr>
+      <tr><td><b>D-06</b></td><td>课程审批 + 系统设置 + 审计日志（含账户管理/批量操作、监控大盘）</td><td>14 · 16 · 17 · P1</td><td><span class="tag medium">P2</span></td><td>管理端补齐</td></tr>
+      <tr><td><b>D-07</b></td><td>AI 基础设施：RAG 向量检索 / Agent 编排 / MCP / 内容审核（含学习路径/知识图谱、课件生成/课堂 Copilot/学情预测）</td><td>18-20 · 规划中</td><td><span class="tag high">P1</span></td><td>Milvus / AgentScope / 知网 AIGC</td></tr>
+      <tr><td><b>D-08</b></td><td>运营演进：独立监控 + CI/CD</td><td>—</td><td><span class="tag medium">P2</span></td><td>Prometheus + Grafana · GitHub Actions</td></tr>
+      <tr><td><b>D-09</b></td><td>规模演进：K8s 集群</td><td>—</td><td><span class="tag medium">P2</span></td><td>触发条件：用户量 > 5000</td></tr>
+      <tr><td><b>D-10</b></td><td>鸿蒙（HarmonyOS）适配评估 + 移动端平台矩阵</td><td>—</td><td><span class="tag medium">P2</span></td><td><b>Expo 官方不支持鸿蒙</b>（现状移动端仅 iOS/Android）；三路线评估：**原生 ArkTS / ArkUI 独立客户端（DevEco Studio，移动端仅 6 页面 · 推荐评估项）** · RNOH（bare RN 迁移 + 依赖替换）· uni-app 跨端；产出兼容矩阵结论，不阻塞 M4 · 校园信创诉求触发评审</td></tr>
     </tbody>
   </table>
 
@@ -405,7 +406,7 @@
     <div class="gantt-row">
       <div class="gantt-label sub">P1 功能 · AI 基础设施 · 运营</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase-d" style="left:62%; width:36%; opacity:0.75;">D-01..09</div>
+        <div class="gantt-bar phase-d" style="left:62%; width:36%; opacity:0.75;">D-01..10</div>
       </div>
     </div>
 
@@ -516,9 +517,10 @@
   <h3 class="sub">7.3 V1.1 演进验收（D 阶段）</h3>
   <ul>
     <li>每个功能模块以 <b>PRD v1.3 对应验收标准</b>为准，DoD = 功能可用 + 单测回归全绿 + 埋点事件合规（<code>events_catalog.py</code>）</li>
-    <li>直播（D-01）<b>已实施</b>（REST 16 端点 + 本地 HLS 已跑通）；剩余事项：生产流媒体/CDN 选型评审 + 移动端直播对齐 + 鸿蒙适配评估（D-09）</li>
+    <li>直播（D-01）<b>已实施</b>（REST 16 端点 + 本地 HLS 已跑通）；剩余事项：生产流媒体/CDN 选型评审 + 移动端直播对齐 + 鸿蒙适配评估（D-10）</li>
     <li>协作工具（D-02）<b>已实施</b>（collab 27 端点 · 8 表 · Web 看板/讨论/共享文件 · 冒烟 21/21，2026-08-31）</li>
-    <li>AI 基础设施（D-06）按版本推进，RAG / Agent 编排与现有网关<code>/gateway/completions</code> 协议兼容</li>
+    <li>账户补全（D-03）<b>已实施</b>（注册 + 消息通知中心 · notif 4 端点 · 冒烟 12/12，2026-08-31）</li>
+    <li>AI 基础设施（D-07）按版本推进，RAG / Agent 编排与现有网关<code>/gateway/completions</code> 协议兼容</li>
   </ul>
 
   <div class="info success">
@@ -530,7 +532,7 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Pending WBS</div>
-  <div>v1.1 · 承接 launch-wbs v1.1 · M1-M3 达成基线</div>
+  <div>v1.2 · 承接 launch-wbs v1.1 · M1-M3 + D-01~D-03 达成基线</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">WBS-LUMINA-2026-002</div>
 </footer>
 
