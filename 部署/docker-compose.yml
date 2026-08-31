@@ -80,7 +80,7 @@ services:
     volumes:
       - ../部署/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ../部署/nginx/ssl:/etc/nginx/ssl:ro
-      - ../前端/Web/dist:/usr/share/nginx/html:ro
+      - ../服务/web-frontend/dist:/usr/share/nginx/html:ro
     depends_on:
       - lumina-app
 
