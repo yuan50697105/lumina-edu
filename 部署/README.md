@@ -111,7 +111,7 @@ docker-compose logs -f      # 实时日志
 ```sql
 -- 最近 1 小时慢请求
 SELECT path, AVG(duration_ms) FROM api_logs
-WHERE created_at > now() - interval '1 hour'
+WHERE created_at > now() - interval 1 hour
 GROUP BY path ORDER BY AVG(duration_ms) DESC LIMIT 10;
 
 -- 今日活跃用户
@@ -155,9 +155,9 @@ python 部署/scripts/smoke_test.py --dry-run
 ### 3. 统一单元测试（一键全量，无需数据库）
 
 ```bash
-# 运行全部服务纯单元测试 + 静态契约核对（基线 142 用例）
+# 运行全部服务纯单元测试 + 静态契约核对（基线 81 用例）
 python 部署/scripts/run_tests.py
-# 额外包含 *_api.py 集成测试（PG 未就绪时自动 skip）
+# 额外包含 *_api.py 集成测试（MySQL 未就绪时自动 skip）
 python 部署/scripts/run_tests.py --include-api
 # 指定解释器 / 跳过某服务
 python 部署/scripts/run_tests.py --python <venv>/Scripts/python.exe --exclude lumina-app

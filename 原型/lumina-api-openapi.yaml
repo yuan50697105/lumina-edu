@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Lumina 墨光 · API
-  version: 1.0.0
+  version: 1.2.0
   description: |
     Lumina（墨光）教育应用 RESTful API，覆盖用户、课程、作业、成绩、直播、AI 等模块。
 

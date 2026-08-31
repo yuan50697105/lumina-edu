@@ -49,7 +49,7 @@ case $TYPE in
                    MAX(duration_ms) AS max_ms,
                    SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END) AS errors
             FROM api_logs
-            WHERE created_at > NOW() - INTERVAL 1 HOUR
+            WHERE created_at > UTC_TIMESTAMP() - INTERVAL 1 HOUR
             GROUP BY method, path
             ORDER BY requests DESC
             LIMIT 20;"
@@ -62,7 +62,7 @@ case $TYPE in
             SELECT event_name, COUNT(*) AS events,
                    COUNT(DISTINCT user_id) AS users
             FROM event_tracking
-            WHERE created_at > NOW() - INTERVAL 24 HOUR
+            WHERE created_at > UTC_TIMESTAMP() - INTERVAL 24 HOUR
             GROUP BY event_name
             ORDER BY events DESC
             LIMIT 30;"
@@ -73,7 +73,7 @@ case $TYPE in
         echo -e "${GREEN}▶ 用户活跃度：${NC}"
         mysqlq "
             SELECT role, COUNT(*) AS total_users,
-                   SUM(CASE WHEN last_login_at > NOW() - INTERVAL 7 DAY THEN 1 ELSE 0 END) AS active_7d
+                   SUM(CASE WHEN last_login_at > UTC_TIMESTAMP() - INTERVAL 7 DAY THEN 1 ELSE 0 END) AS active_7d
             FROM users
             GROUP BY role;"
         ;;
@@ -109,7 +109,7 @@ case $TYPE in
                    MAX(created_at) AS last_occurred
             FROM api_logs
             WHERE status_code >= 500
-              AND created_at > NOW() - INTERVAL 24 HOUR
+              AND created_at > UTC_TIMESTAMP() - INTERVAL 24 HOUR
             GROUP BY method, path, status_code
             ORDER BY errors DESC
             LIMIT 20;"

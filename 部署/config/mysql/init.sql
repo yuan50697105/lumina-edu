@@ -2,8 +2,10 @@
 -- Lumina 墨光 · MySQL 9.7 初始化脚本
 -- 单体应用 create_all 会自动建表；本脚本供 compose
 -- /docker-entrypoint-initdb.d 或生产环境初始化使用。
--- 由 app/models.py（SQLAlchemy）自动生成，勿手工编辑。
+-- 由 app/models.py（SQLAlchemy）自动生成，勿手工编辑；
+-- 重新生成：python 部署/scripts/gen_init_sql.py
 -- ============================================
+
 
 CREATE TABLE ai_conversations (
 	id CHAR(36) NOT NULL, 
@@ -15,11 +17,14 @@ CREATE TABLE ai_conversations (
 	message_count INTEGER, 
 	total_tokens INTEGER, 
 	created_at DATETIME, 
-	updated_at DATETIME, 
+	updated_at DATETIME DEFAULT now(), 
 	PRIMARY KEY (id)
-);
+)
+
+;
 
 CREATE INDEX ix_ai_conversations_user_id ON ai_conversations (user_id);
+
 
 CREATE TABLE ai_providers (
 	id CHAR(36) NOT NULL, 
@@ -34,7 +39,10 @@ CREATE TABLE ai_providers (
 	created_at DATETIME, 
 	PRIMARY KEY (id), 
 	UNIQUE (name)
-);
+)
+
+;
+
 
 CREATE TABLE api_logs (
 	id BIGINT NOT NULL AUTO_INCREMENT, 
@@ -47,7 +55,10 @@ CREATE TABLE api_logs (
 	error_message TEXT, 
 	created_at DATETIME, 
 	PRIMARY KEY (id)
-);
+)
+
+;
+
 
 CREATE TABLE courses (
 	id CHAR(36) NOT NULL, 
@@ -61,10 +72,13 @@ CREATE TABLE courses (
 	department VARCHAR(100), 
 	schedule JSON, 
 	students_count INTEGER, 
-	created_at DATETIME NOT NULL, 
+	created_at DATETIME NOT NULL DEFAULT now(), 
 	PRIMARY KEY (id), 
 	UNIQUE (code)
-);
+)
+
+;
+
 
 CREATE TABLE event_tracking (
 	id BIGINT NOT NULL AUTO_INCREMENT, 
@@ -78,7 +92,10 @@ CREATE TABLE event_tracking (
 	ip_address VARCHAR(45), 
 	created_at DATETIME, 
 	PRIMARY KEY (id)
-);
+)
+
+;
+
 
 CREATE TABLE users (
 	id CHAR(36) NOT NULL, 
@@ -92,12 +109,15 @@ CREATE TABLE users (
 	grade VARCHAR(10), 
 	bio TEXT, 
 	last_login_at DATETIME, 
-	created_at DATETIME NOT NULL, 
-	updated_at DATETIME, 
+	created_at DATETIME NOT NULL DEFAULT now(), 
+	updated_at DATETIME DEFAULT now(), 
 	PRIMARY KEY (id), 
 	UNIQUE (student_id), 
 	UNIQUE (email)
-);
+)
+
+;
+
 
 CREATE TABLE ai_messages (
 	id CHAR(36) NOT NULL, 
@@ -111,9 +131,12 @@ CREATE TABLE ai_messages (
 	created_at DATETIME, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(conversation_id) REFERENCES ai_conversations (id) ON DELETE CASCADE
-);
+)
+
+;
 
 CREATE INDEX ix_ai_messages_conversation_id ON ai_messages (conversation_id);
+
 
 CREATE TABLE ai_models (
 	id CHAR(36) NOT NULL, 
@@ -132,7 +155,10 @@ CREATE TABLE ai_models (
 	PRIMARY KEY (id), 
 	FOREIGN KEY(provider_id) REFERENCES ai_providers (id), 
 	UNIQUE (model_name)
-);
+)
+
+;
+
 
 CREATE TABLE announcements (
 	id CHAR(36) NOT NULL, 
@@ -144,7 +170,10 @@ CREATE TABLE announcements (
 	created_at DATETIME, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE CASCADE
-);
+)
+
+;
+
 
 CREATE TABLE assignments (
 	id CHAR(36) NOT NULL, 
@@ -157,10 +186,13 @@ CREATE TABLE assignments (
 	rubric JSON, 
 	ai_model VARCHAR(50), 
 	status VARCHAR(20), 
-	created_at DATETIME NOT NULL, 
+	created_at DATETIME NOT NULL DEFAULT now(), 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE CASCADE
-);
+)
+
+;
+
 
 CREATE TABLE chapters (
 	id CHAR(36) NOT NULL, 
@@ -172,18 +204,24 @@ CREATE TABLE chapters (
 	created_at DATETIME, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE CASCADE
-);
+)
+
+;
+
 
 CREATE TABLE enrollments (
 	id CHAR(36) NOT NULL, 
 	user_id CHAR(36) NOT NULL, 
 	course_id CHAR(36) NOT NULL, 
 	`role` VARCHAR(20), 
-	enrolled_at DATETIME NOT NULL, 
+	enrolled_at DATETIME NOT NULL DEFAULT now(), 
 	status VARCHAR(20), 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE CASCADE
-)COMMENT='选课记录，UNIQUE(user_id, course_id) 在外部索引保证';
+)COMMENT='选课记录，UNIQUE(user_id, course_id) 在外部索引保证'
+
+;
+
 
 CREATE TABLE grade_records (
 	id CHAR(36) NOT NULL, 
@@ -192,11 +230,14 @@ CREATE TABLE grade_records (
 	semester VARCHAR(20) NOT NULL, 
 	final_score NUMERIC(5, 2), 
 	gpa_point NUMERIC(3, 2), 
-	recorded_at DATETIME NOT NULL, 
+	recorded_at DATETIME NOT NULL DEFAULT now(), 
 	PRIMARY KEY (id), 
 	CONSTRAINT uq_grade_record UNIQUE (student_id, course_id, semester), 
 	FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE CASCADE
-);
+)
+
+;
+
 
 CREATE TABLE sessions (
 	id CHAR(36) NOT NULL, 
@@ -210,7 +251,10 @@ CREATE TABLE sessions (
 	PRIMARY KEY (id), 
 	FOREIGN KEY(user_id) REFERENCES users (id) ON DELETE CASCADE, 
 	UNIQUE (refresh_token)
-);
+)
+
+;
+
 
 CREATE TABLE ai_call_logs (
 	id BIGINT NOT NULL AUTO_INCREMENT, 
@@ -227,7 +271,10 @@ CREATE TABLE ai_call_logs (
 	created_at DATETIME, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(model_id) REFERENCES ai_models (id)
-);
+)
+
+;
+
 
 CREATE TABLE submissions (
 	id CHAR(36) NOT NULL, 
@@ -236,11 +283,14 @@ CREATE TABLE submissions (
 	file_urls JSON, 
 	text_answer TEXT, 
 	submission_note TEXT, 
-	submitted_at DATETIME NOT NULL, 
+	submitted_at DATETIME NOT NULL DEFAULT now(), 
 	late BOOL, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(assignment_id) REFERENCES assignments (id) ON DELETE CASCADE
-);
+)
+
+;
+
 
 CREATE TABLE grades (
 	id CHAR(36) NOT NULL, 
@@ -253,8 +303,11 @@ CREATE TABLE grades (
 	grader_id CHAR(36), 
 	ai_model VARCHAR(50), 
 	confidence NUMERIC(3, 2), 
-	graded_at DATETIME NOT NULL, 
+	graded_at DATETIME NOT NULL DEFAULT now(), 
 	PRIMARY KEY (id), 
 	UNIQUE (submission_id), 
 	FOREIGN KEY(submission_id) REFERENCES submissions (id) ON DELETE CASCADE
-);
+)
+
+;
+
