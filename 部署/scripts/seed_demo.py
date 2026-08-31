@@ -65,6 +65,10 @@ def main() -> int:
     student_id = ensure("SELECT id FROM users WHERE email=:e", {"e": "student@lumina.edu"},
         "INSERT IGNORE INTO users (id,name,email,password_hash,role,student_id) VALUES (:id,'张同学',:e,:pw,'student','20260001')",
         {"e": "student@lumina.edu", "pw": pw_hash}, "学生 student@lumina.edu")
+    # 未选课学生（越权/权限校验专用：直播加入 403、课程权限等）
+    ensure("SELECT id FROM users WHERE email=:e", {"e": "nouser@lumina.edu"},
+        "INSERT IGNORE INTO users (id,name,email,password_hash,role) VALUES (:id,'未选课学生',:e,:pw,'student')",
+        {"e": "nouser@lumina.edu", "pw": pw_hash}, "未选课学生 nouser@lumina.edu（越权测试）")
 
     # ── 2. 课程 ──
     course_id = ensure("SELECT id FROM courses WHERE code='CS101'", {},

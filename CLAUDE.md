@@ -90,6 +90,27 @@ export YUQUE_TOKEN="your_token"
 python scripts/yuque-sync.py
 ```
 
+### Test Accounts（测试账号 / Demo）
+
+本地联调、冒烟与前端开发使用的演示账号（由 `部署/scripts/seed_demo.py` 种子生成，幂等可重复运行；默认密码 `Demo@2026`，可用 `--demo-password xxxx` 覆盖）：
+
+| 角色 | 账号 | 默认密码 | 说明 |
+|------|------|----------|------|
+| 管理员 | `admin@lumina.edu` | `Demo@2026` | 系统管理员：模型池管理、绕过课程权限控制 |
+| 教师 | `teacher@lumina.edu` | `Demo@2026` | 授课教师（工号 `T20260001`）：建课程/直播、点名、发答题、批阅 |
+| 学生 | `student@lumina.edu` | `Demo@2026` | 已选课学生（学号 `20260001`）：加入直播、举手、作答 |
+| 未选课学生 | `nouser@lumina.edu` | `Demo@2026` | **未选任何课程**，用于越权测试（直播加入 403、课程权限校验） |
+
+> ⚠️ 仅演示/联调使用，生产环境必须更换。上层应用连本机 MySQL 时用 `root/root`（见环境变量说明）。
+
+运行前端体验直播：
+```bash
+# 后端（需先起 MySQL）
+cd 服务/lumina-app && uvicorn app.main:app --port 8080 --host 127.0.0.1
+# 前端 dev（已配置 5173 → 127.0.0.1:8080 代理）
+cd 服务/web-frontend && npm run dev   # 打开 http://localhost:5173
+```
+
 ## Design System
 
 ### Color Palette
