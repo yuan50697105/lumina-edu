@@ -3,7 +3,7 @@
 > 自动生成：`python 部署/scripts/events_catalog.py`（阶段三 3.2 埋点数据验证依据）
 
 ## 事件命名规范
-`namespace.action`（点分小写）；允许命名空间：ai, announcement, assignment, auth, chapter, chat, conversation, course, element, enrollment, gateway, grade, live, model, page, provider, session, submission, system, user
+`namespace.action`（点分小写）；允许命名空间：ai, announcement, assignment, auth, chapter, chat, collab, conversation, course, element, enrollment, gateway, grade, live, model, page, provider, session, submission, system, user
 
 ## 全量事件清单
 
@@ -39,6 +39,20 @@
 | `auth.logout` | 前端 | web-frontend/src/components/Layout.tsx |
 | `chapter.created` | 后端 | instrumentation.py, modules/course/instrumentation.py |
 | `chapter.view` | 前端/后端 | instrumentation.py, modules/course/instrumentation.py, mobile-app/src/pages/CourseDetail.tsx |
+| `collab.card_create` | 前端 | web-frontend/src/pages/GroupDetail.tsx |
+| `collab.card_move` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
+| `collab.column_add` | 前端 | web-frontend/src/pages/GroupDetail.tsx |
+| `collab.file_download` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
+| `collab.file_upload` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
+| `collab.group_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Groups.tsx |
+| `collab.group_join` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx, web-frontend/src/pages/Groups.tsx |
+| `collab.group_leave` | 后端 | instrumentation.py |
+| `collab.group_list` | 前端 | web-frontend/src/pages/Groups.tsx |
+| `collab.group_view` | 前端 | web-frontend/src/pages/GroupDetail.tsx |
+| `collab.project_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
+| `collab.project_open` | 前端 | web-frontend/src/pages/GroupDetail.tsx |
+| `collab.reply_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
+| `collab.topic_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
 | `course.created` | 后端 | instrumentation.py, modules/course/instrumentation.py |
 | `course.drop` | 后端 | instrumentation.py, modules/course/instrumentation.py |
 | `course.enroll` | 前端/后端 | instrumentation.py, modules/course/instrumentation.py, mobile-app/src/pages/CourseDetail.tsx |
@@ -84,6 +98,19 @@
 - `auth.login_fail`
 - `auth.logout`
 - `chapter.view`
+- `collab.card_create`
+- `collab.card_move`
+- `collab.column_add`
+- `collab.file_download`
+- `collab.file_upload`
+- `collab.group_create`
+- `collab.group_join`
+- `collab.group_list`
+- `collab.group_view`
+- `collab.project_create`
+- `collab.project_open`
+- `collab.reply_create`
+- `collab.topic_create`
 - `course.enroll`
 - `course.unenroll`
 - `course.view`
@@ -121,6 +148,7 @@
 - `assignment.updated`
 - `assignment.view`
 - `chapter.created`
+- `collab.group_leave`
 - `course.created`
 - `course.drop`
 - `course.updated`

@@ -258,6 +258,21 @@ CREATE TABLE live_rooms (
 ;
 
 
+CREATE TABLE project_groups (
+	id CHAR(36) NOT NULL, 
+	course_id CHAR(36) NOT NULL, 
+	name VARCHAR(100) NOT NULL, 
+	description TEXT, 
+	leader_id CHAR(36) NOT NULL, 
+	created_by CHAR(36) NOT NULL, 
+	created_at DATETIME NOT NULL DEFAULT now(), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE CASCADE
+)
+
+;
+
+
 CREATE TABLE sessions (
 	id CHAR(36) NOT NULL, 
 	user_id CHAR(36) NOT NULL, 
@@ -290,6 +305,33 @@ CREATE TABLE ai_call_logs (
 	created_at DATETIME, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(model_id) REFERENCES ai_models (id)
+)
+
+;
+
+
+CREATE TABLE discussion_topics (
+	id CHAR(36) NOT NULL, 
+	group_id CHAR(36) NOT NULL, 
+	author_id CHAR(36) NOT NULL, 
+	title VARCHAR(200) NOT NULL, 
+	content TEXT, 
+	created_at DATETIME NOT NULL DEFAULT now(), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(group_id) REFERENCES project_groups (id) ON DELETE CASCADE
+)
+
+;
+
+
+CREATE TABLE group_members (
+	id CHAR(36) NOT NULL, 
+	group_id CHAR(36) NOT NULL, 
+	user_id CHAR(36) NOT NULL, 
+	joined_at DATETIME NOT NULL DEFAULT now(), 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_group_member UNIQUE (group_id, user_id), 
+	FOREIGN KEY(group_id) REFERENCES project_groups (id) ON DELETE CASCADE
 )
 
 ;
@@ -345,6 +387,42 @@ CREATE TABLE live_quizzes (
 ;
 
 
+CREATE TABLE projects (
+	id CHAR(36) NOT NULL, 
+	group_id CHAR(36) NOT NULL, 
+	course_id CHAR(36) NOT NULL, 
+	title VARCHAR(200) NOT NULL, 
+	description TEXT, 
+	status VARCHAR(20), 
+	deadline DATETIME, 
+	created_by CHAR(36) NOT NULL, 
+	created_at DATETIME NOT NULL DEFAULT now(), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(group_id) REFERENCES project_groups (id) ON DELETE CASCADE, 
+	FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE CASCADE
+)
+
+;
+
+
+CREATE TABLE shared_files (
+	id CHAR(36) NOT NULL, 
+	group_id CHAR(36) NOT NULL, 
+	course_id CHAR(36) NOT NULL, 
+	uploader_id CHAR(36) NOT NULL, 
+	filename VARCHAR(255) NOT NULL, 
+	stored_path VARCHAR(500), 
+	size INTEGER, 
+	content_type VARCHAR(100), 
+	created_at DATETIME NOT NULL DEFAULT now(), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(group_id) REFERENCES project_groups (id) ON DELETE CASCADE, 
+	FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE CASCADE
+)
+
+;
+
+
 CREATE TABLE submissions (
 	id CHAR(36) NOT NULL, 
 	assignment_id CHAR(36) NOT NULL, 
@@ -356,6 +434,19 @@ CREATE TABLE submissions (
 	late BOOL, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(assignment_id) REFERENCES assignments (id) ON DELETE CASCADE
+)
+
+;
+
+
+CREATE TABLE discussion_replies (
+	id CHAR(36) NOT NULL, 
+	topic_id CHAR(36) NOT NULL, 
+	author_id CHAR(36) NOT NULL, 
+	content TEXT NOT NULL, 
+	created_at DATETIME NOT NULL DEFAULT now(), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(topic_id) REFERENCES discussion_topics (id) ON DELETE CASCADE
 )
 
 ;
@@ -381,6 +472,18 @@ CREATE TABLE grades (
 ;
 
 
+CREATE TABLE kanban_columns (
+	id CHAR(36) NOT NULL, 
+	project_id CHAR(36) NOT NULL, 
+	title VARCHAR(50) NOT NULL, 
+	order_num INTEGER, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(project_id) REFERENCES projects (id) ON DELETE CASCADE
+)
+
+;
+
+
 CREATE TABLE live_quiz_answers (
 	id CHAR(36) NOT NULL, 
 	quiz_id CHAR(36) NOT NULL, 
@@ -390,6 +493,22 @@ CREATE TABLE live_quiz_answers (
 	PRIMARY KEY (id), 
 	CONSTRAINT uq_quiz_answer UNIQUE (quiz_id, user_id), 
 	FOREIGN KEY(quiz_id) REFERENCES live_quizzes (id) ON DELETE CASCADE
+)
+
+;
+
+
+CREATE TABLE kanban_cards (
+	id CHAR(36) NOT NULL, 
+	column_id CHAR(36) NOT NULL, 
+	title VARCHAR(200) NOT NULL, 
+	description TEXT, 
+	assignee_id CHAR(36), 
+	order_num INTEGER, 
+	due_date DATETIME, 
+	created_at DATETIME NOT NULL DEFAULT now(), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(column_id) REFERENCES kanban_columns (id) ON DELETE CASCADE
 )
 
 ;

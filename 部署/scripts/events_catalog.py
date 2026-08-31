@@ -28,7 +28,7 @@ ALLOW_NS = {
     "page", "element", "auth", "user", "course", "chapter", "assignment",
     "submission", "grade", "ai", "chat", "announcement", "enrollment",
     "provider", "model", "gateway", "conversation", "session", "system",
-    "live",
+    "live", "collab",
 }
 
 
