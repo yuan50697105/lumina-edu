@@ -1,16 +1,18 @@
 openapi: 3.1.0
 info:
   title: Lumina 墨光 · API
-  version: 1.0.0
+  version: 1.5.0
   description: |
-    Lumina（墨光）教育应用 RESTful API，覆盖用户、课程、作业、成绩、直播、AI 等模块。
+    Lumina（墨光）教育应用 RESTful API，覆盖用户、课程、作业、成绩、直播、协作、AI 等模块。
 
     ## 特性
     - JWT 双令牌认证（Access Token 15min + Refresh Token 7d）
     - Cursor-based 分页
     - RFC 7807 错误格式
     - SSE 流式响应（AI 接口）
-    - WebSocket（直播聊天）
+    - 直播课堂：REST + after_id 轮询（聊天/举手/答题/点名）· HLS 流媒体（LIVE_STREAM_* 可插拔，未接入返回 mock://）
+    - 小组协作：课程小组 / 成员 / 项目 / 看板拖拽 / 共享文件 / 组内讨论（D-02）
+    - 账户补全：自助注册（POST /auth/register）+ 消息通知中心（/notifications/my · D-03）
 
   contact:
     name: Lumina Team
@@ -39,6 +41,10 @@ tags:
     description: 成绩模块
   - name: live
     description: 直播模块
+  - name: collab
+    description: 协作模块（小组/项目/看板/文件/讨论）
+  - name: notif
+    description: 消息通知中心（D-03）
   - name: ai
     description: AI 能力模块
 
@@ -146,6 +152,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: 自助注册（D-03）
+      description: 注册学生/教师账号，成功即自动登录返回令牌；邮箱/学号冲突返回 409
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: 注册成功，返回令牌
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  data:
+                    $ref: '#/components/schemas/TokenResponse'
+        '409':
+          description: 邮箱或学号已存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 参数校验失败（角色非法 / 密码过短）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ═══════ USERS ═══════
   /users/me:
@@ -658,136 +702,350 @@ paths:
                         type: integer
                         example: 15
 
-  # ═══════ LIVE ═══════
-  /live:
+  # ═══════ LIVE（D-01 · REST 轮询 · 16 端点）═══════
+  /live/rooms:
     post:
       tags: [live]
-      summary: 创建直播
-      description: 教师创建直播课程
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LiveCreateRequest'
-      responses:
-        '201':
-          description: 创建成功
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    example: 0
-                  data:
-                    $ref: '#/components/schemas/LiveSession'
-
-  /live/{id}:
-    get:
-      tags: [live]
-      summary: 直播详情
-      parameters:
-        - $ref: '#/components/parameters/LiveId'
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    example: 0
-                  data:
-                    $ref: '#/components/schemas/LiveSession'
-
-  /live/{id}/join:
-    post:
-      tags: [live]
-      summary: 加入直播
-      description: 获取 RTC 和聊天 WebSocket 连接信息
-      parameters:
-        - $ref: '#/components/parameters/LiveId'
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    example: 0
-                  data:
-                    type: object
-                    properties:
-                      rtc_url:
-                        type: string
-                        format: uri
-                        example: "wss://rtc.lumina.edu/room/..."
-                      token:
-                        type: string
-                      room_id:
-                        type: string
-                      chat_ws_url:
-                        type: string
-                        format: uri
-
-  /live/{id}/recording:
-    post:
-      tags: [live]
-      summary: 开始/停止录制
-      parameters:
-        - $ref: '#/components/parameters/LiveId'
+      summary: 创建直播房间（教师）
+      description: 为已授权课程创建直播房间，返回 room_id；未配置媒体服务器时 stream_url 为 mock:// 占位
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [action]
+              required: [course_id, title]
               properties:
-                action:
+                course_id:
                   type: string
-                  enum: [start, stop]
+                  format: uuid
+                  example: c001
+                title:
+                  type: string
+                  example: 第12讲 · 不定积分
       responses:
-        '200':
-          description: 操作成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
+        '201':
+          description: 创建成功
 
-  /live/{id}/replay:
+  /live/rooms/{room_id}:
     get:
       tags: [live]
-      summary: 获取回放地址
+      summary: 直播房间详情
+      description: 返回状态（scheduled / live / ended）、在线数、stream_url
       parameters:
-        - $ref: '#/components/parameters/LiveId'
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+
+  /live/rooms/{room_id}/start:
+    post:
+      tags: [live]
+      summary: 开播（教师）
+      description: status → live；返回 stream_url（HLS <code>/media/{key}/index.m3u8</code> 或 CDN 直链，未接入为 mock://）
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+
+  /live/rooms/{room_id}/end:
+    post:
+      tags: [live]
+      summary: 结束直播（教师）
+      description: status → ended
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+
+  /live/rooms/{room_id}/join:
+    post:
+      tags: [live]
+      summary: 加入直播
+      description: 仅已选课学生可加入（未选课 403）；在线数 +1
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+
+  /live/rooms/{room_id}/leave:
+    post:
+      tags: [live]
+      summary: 离开直播
+      description: 在线数 -1
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: 成功
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                    example: 0
-                  data:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /live/rooms/{room_id}/raise:
+    put:
+      tags: [live]
+      summary: 举手 / 取消举手
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [active]
+              properties:
+                active:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /live/rooms/{room_id}/raises:
+    get:
+      tags: [live]
+      summary: 举手队列（教师）
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 队列列表
+
+  /live/rooms/{room_id}/messages:
+    post:
+      tags: [live]
+      summary: 发送消息（聊天 / 系统）
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                msg_type:
+                  type: string
+                  enum: [chat, system]
+                  default: chat
+                content:
+                  type: string
+      responses:
+        '201':
+          description: 消息已发送
+    get:
+      tags: [live]
+      summary: 增量拉取消息
+      description: 前端 2.5s 轮询；after_id 之后的新消息
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: after_id
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: 消息列表（倒序）
+
+  /live/rooms/{room_id}/call:
+    post:
+      tags: [live]
+      summary: 随机点名（教师）
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  nullable: true
+                  description: 为空则随机
+      responses:
+        '200':
+          description: 返回被点学生 user_id
+
+  /live/rooms/{room_id}/call/respond:
+    post:
+      tags: [live]
+      summary: 应答点名（学生）
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /live/rooms/{room_id}/quizzes:
+    post:
+      tags: [live]
+      summary: 发起答题（教师）
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question, options]
+              properties:
+                question:
+                  type: string
+                options:
+                  type: array
+                  items:
                     type: object
                     properties:
-                      replay_url:
+                      key:
                         type: string
-                        format: uri
-                      duration:
-                        type: integer
-                        description: 回放时长（秒）
+                      text:
+                        type: string
+                answer:
+                  type: string
+                  description: 正确答案（可空）
+      responses:
+        '201':
+          description: 已发题
+
+  /live/rooms/{room_id}/quizzes/{quiz_id}/answer:
+    post:
+      tags: [live]
+      summary: 作答（学生）
+      description: 一题一次，重复提交覆盖改答
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: quiz_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [choice]
+              properties:
+                choice:
+                  type: string
+                  example: A
+      responses:
+        '200':
+          description: 已作答
+
+  /live/rooms/{room_id}/quizzes/{quiz_id}/close:
+    post:
+      tags: [live]
+      summary: 关闭答题（教师）
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: quiz_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 已关闭
+
+  /live/rooms/{room_id}/quizzes/{quiz_id}/result:
+    get:
+      tags: [live]
+      summary: 答题统计（教师）
+      description: 返回 total / 各选项分布 / 正确率
+      parameters:
+        - name: room_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: quiz_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 统计结果
 
   # ═══════ AI ═══════
   /ai/chat:
@@ -1009,6 +1267,671 @@ paths:
                           format: date-time
                   pagination:
                     $ref: '#/components/schemas/Pagination'
+
+  # ═══════ MEDIA（HLS 流媒体反代 · 开发演示专用）═══════
+  /media/{path}:
+    get:
+      tags: [live]
+      summary: HLS 流媒体同源反代
+      description: |
+        将前端播放请求转发到媒体服务器（LIVE_STREAM_BASE），附加 cookieCheck=1 放行 mediamtx 校验。
+        仅在开发/演示开启（LIVE_STREAM_PROXY=true）；生产由网关/CDN 代劳，此端点不启用。
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+            example: roomdemo/index.m3u8
+      responses:
+        '200':
+          description: HLS 分片 / m3u8 内容
+        '503':
+          description: 媒体服务器未配置
+
+  # ═══════ COLLAB（小组协作 · D-02）═══════
+  # 小组 / 成员 / 项目 / 看板 / 共享文件 / 组内讨论（27 endpoints）
+  /groups/me:
+    get:
+      tags: [collab]
+      summary: 我的小组
+      description: 学生视角，返回我加入的所有小组（含课程名 / 组长 / 成员数）
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CollabGroup'
+
+  /courses/{course_id}/groups:
+    get:
+      tags: [collab]
+      summary: 课程小组列表
+      description: 授课教师 / 管理员 / 已选课学生可见
+      parameters:
+        - name: course_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CollabGroup'
+        '403':
+          description: 未选课 / 无权限
+    post:
+      tags: [collab]
+      summary: 创建小组
+      description: 仅授课教师 / 管理员；创建者自动成为组长
+      parameters:
+        - name: course_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollabGroupCreate'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabGroup'
+
+  /groups/{group_id}:
+    get:
+      tags: [collab]
+      summary: 小组详情
+      description: 成员 / 项目数 / is_member；组内成员与教师可见
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabGroup'
+    patch:
+      tags: [collab]
+      summary: 更新小组
+      description: 改名 / 说明 / 换组长（leader_id）；组长或授课教师
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollabGroupUpdate'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabGroup'
+    delete:
+      tags: [collab]
+      summary: 删除小组
+      description: 授课教师 / 管理员；级联清理成员 / 项目 / 文件 / 讨论
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /groups/{group_id}/members:
+    post:
+      tags: [collab]
+      summary: 加入小组
+      description: 已选课学生可加入；重复加入 409、未选课 403
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: 加入成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabGroup'
+        '403':
+          description: 未选课
+        '409':
+          description: 已是成员 / 已满员
+
+  /groups/{group_id}/members/{user_id}:
+    delete:
+      tags: [collab]
+      summary: 移出成员
+      description: 组长 / 授课教师；可移出自己的成员（退出）
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /groups/{group_id}/projects:
+    get:
+      tags: [collab]
+      summary: 小组项目列表
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CollabProject'
+    post:
+      tags: [collab]
+      summary: 创建项目
+      description: 组内成员 / 授课教师；含 deadline
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollabProjectCreate'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabProject'
+
+  /projects/{project_id}:
+    get:
+      tags: [collab]
+      summary: 项目详情
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabProject'
+    patch:
+      tags: [collab]
+      summary: 更新项目
+      description: title / status（not_started|in_progress|done）/ deadline
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollabProjectUpdate'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabProject'
+    delete:
+      tags: [collab]
+      summary: 删除项目
+      description: 组长 / 授课教师
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /projects/{project_id}/board:
+    get:
+      tags: [collab]
+      summary: 项目看板
+      description: 列 + 卡片聚合（columns[].cards）
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabBoard'
+
+  /projects/{project_id}/columns:
+    post:
+      tags: [collab]
+      summary: 新建看板列
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollabColumnCreate'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabColumn'
+
+  /columns/{column_id}:
+    patch:
+      tags: [collab]
+      summary: 更新列
+      description: 改名 / order_num 重排
+      parameters:
+        - name: column_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollabColumnUpdate'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabColumn'
+    delete:
+      tags: [collab]
+      summary: 删除列
+      description: 卡片级联删除
+      parameters:
+        - name: column_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /columns/{column_id}/cards:
+    post:
+      tags: [collab]
+      summary: 新建任务卡片
+      description: assignee_id（可选）/ due_date（可选）
+      parameters:
+        - name: column_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollabCardCreate'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabCard'
+
+  /cards/{card_id}:
+    patch:
+      tags: [collab]
+      summary: 更新卡片
+      description: 拖拽换列（column_id）+ order_num 重排；改标题 / assignee / due_date
+      parameters:
+        - name: card_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollabCardUpdate'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabCard'
+    delete:
+      tags: [collab]
+      summary: 删除卡片
+      parameters:
+        - name: card_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /groups/{group_id}/files:
+    get:
+      tags: [collab]
+      summary: 共享文件列表
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CollabFile'
+    post:
+      tags: [collab]
+      summary: 上传文件
+      description: multipart/form-data · file + description；落盘 uploads/collab，文件本体缺失时为 mock 占位
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                description:
+                  type: string
+      responses:
+        '201':
+          description: 上传成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabFile'
+
+  /files/{file_id}/download:
+    get:
+      tags: [collab]
+      summary: 下载文件
+      description: FileResponse 原文流；文件缺失时返回 mock 占位字节
+      parameters:
+        - name: file_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 文件内容
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+  /groups/{group_id}/topics:
+    get:
+      tags: [collab]
+      summary: 讨论主题列表
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CollabTopic'
+    post:
+      tags: [collab]
+      summary: 发表主题
+      parameters:
+        - name: group_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollabTopicCreate'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabTopic'
+
+  /topics/{topic_id}:
+    get:
+      tags: [collab]
+      summary: 主题详情
+      description: 含回复列表 / reply_count
+      parameters:
+        - name: topic_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabTopic'
+
+  /topics/{topic_id}/replies:
+    post:
+      tags: [collab]
+      summary: 回复主题
+      parameters:
+        - name: topic_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollabReplyIn'
+      responses:
+        '201':
+          description: 回复成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollabReply'
+
+  # ═══════ NOTIFICATIONS（D-03）═══════
+  /notifications/my:
+    get:
+      tags: [notif]
+      summary: 我的通知列表
+      description: 仅本人可见；支持 limit / unread_only 过滤
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: unread_only
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: 通知列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationOut'
+
+  /notifications/my/unread-count:
+    get:
+      tags: [notif]
+      summary: 未读数统计（顶栏铃铛）
+      responses:
+        '200':
+          description: 未读数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCountOut'
+
+  /notifications/my/{notification_id}/read:
+    post:
+      tags: [notif]
+      summary: 单条已读
+      description: 非本人通知返回 404
+      parameters:
+        - name: notification_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 已标记已读
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /notifications/my/read-all:
+    post:
+      tags: [notif]
+      summary: 全部已读（幂等）
+      responses:
+        '200':
+          description: 全部已读
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 
 # ─── 组件 ───
 components:
@@ -1690,3 +2613,373 @@ components:
         confidence:
           type: number
           example: 0.92
+
+    # ─── 协作 Collab（D-02）───
+    CollabGroupMember:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "张三"
+        joined_at:
+          type: string
+          format: date-time
+    CollabGroup:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        course_id:
+          type: string
+          format: uuid
+        course_name:
+          type: string
+        name:
+          type: string
+          example: "第一组 · 数值分析"
+        description:
+          type: string
+        leader_id:
+          type: string
+          format: uuid
+        leader_name:
+          type: string
+        member_count:
+          type: integer
+        project_count:
+          type: integer
+        is_member:
+          type: boolean
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollabGroupMember'
+    CollabGroupCreate:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          example: "第二组"
+        description:
+          type: string
+    CollabGroupUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        leader_id:
+          type: string
+          format: uuid
+    CollabProject:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        group_id:
+          type: string
+          format: uuid
+        group_name:
+          type: string
+        title:
+          type: string
+          example: "数值分析小组作业"
+        description:
+          type: string
+        status:
+          type: string
+          enum: [not_started, in_progress, done]
+        deadline:
+          type: string
+          format: date
+        created_by:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+    CollabProjectCreate:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        deadline:
+          type: string
+          format: date
+    CollabProjectUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [not_started, in_progress, done]
+        deadline:
+          type: string
+          format: date
+    CollabColumn:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "待办"
+        order_num:
+          type: integer
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollabCard'
+    CollabColumnCreate:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          example: "进行中"
+    CollabColumnUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        order_num:
+          type: integer
+    CollabCard:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        column_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: "编写实验报告"
+        description:
+          type: string
+        assignee_id:
+          type: string
+          format: uuid
+        assignee_name:
+          type: string
+        due_date:
+          type: string
+          format: date
+        order_num:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+    CollabCardCreate:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        assignee_id:
+          type: string
+          format: uuid
+        due_date:
+          type: string
+          format: date
+    CollabCardUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        column_id:
+          type: string
+          format: uuid
+          description: 拖拽换列
+        assignee_id:
+          type: string
+          format: uuid
+        due_date:
+          type: string
+          format: date
+    CollabBoard:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollabColumn'
+    CollabFile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        group_id:
+          type: string
+          format: uuid
+        filename:
+          type: string
+          example: "开题报告.docx"
+        file_size:
+          type: integer
+        mime_type:
+          type: string
+          example: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        uploaded_by:
+          type: string
+          format: uuid
+        uploaded_by_name:
+          type: string
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    CollabTopic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        group_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: "分工安排"
+        content:
+          type: string
+        author_id:
+          type: string
+          format: uuid
+        author_name:
+          type: string
+        reply_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        replies:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollabReply'
+    CollabTopicCreate:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+    CollabReply:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        topic_id:
+          type: string
+          format: uuid
+        content:
+          type: string
+        author_id:
+          type: string
+          format: uuid
+        author_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    CollabReplyIn:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          description: 至少 8 位
+        student_id:
+          type: string
+          description: 学号/工号（可选）
+        role:
+          type: string
+          enum: [student, teacher]
+          default: student
+        device:
+          type: string
+          enum: [web, mobile, desktop]
+          default: web
+
+    NotificationOut:
+      type: object
+      required: [id, user_id, type, title, is_read, created_at]
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        type:
+          type: string
+          description: 通知类型（welcome / assignment_graded / live_call）
+        title:
+          type: string
+        content:
+          type: string
+          nullable: true
+        ref_type:
+          type: string
+          nullable: true
+          description: 关联对象类型（course / live_room / assignment）
+        ref_id:
+          type: string
+          nullable: true
+        is_read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    UnreadCountOut:
+      type: object
+      required: [unread_count]
+      properties:
+        unread_count:
+          type: integer

@@ -13,6 +13,7 @@ import Home from './src/pages/Home'
 import CourseDetail from './src/pages/CourseDetail'
 import AIChat from './src/pages/AIChat'
 import Grades from './src/pages/Grades'
+import LiveRoom from './src/pages/LiveRoom'
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
@@ -36,6 +37,7 @@ export default function App() {
           <Stack.Screen name="CourseDetail" component={CourseDetail} options={{ title: '课程详情' }} />
           <Stack.Screen name="AIChat" component={AIChat} options={{ title: 'AI 导师' }} />
           <Stack.Screen name="Grades" component={Grades} options={{ title: '我的成绩单' }} />
+          <Stack.Screen name="LiveRoom" component={LiveRoom} options={{ title: '直播课堂' }} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

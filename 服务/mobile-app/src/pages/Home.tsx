@@ -33,7 +33,7 @@ export default function Home({ navigation }: Props) {
     setRefreshing(true)
     try {
       if (onlyMine) {
-        const mine: Course[] = await get('/courses/me/enrolled').catch(() => [])
+        const mine = await get<Course[]>('/courses/me/enrolled').catch(() => [])
         setCourses(mine)
       } else {
         const resp = await get<CourseListResp>('/courses?limit=24')

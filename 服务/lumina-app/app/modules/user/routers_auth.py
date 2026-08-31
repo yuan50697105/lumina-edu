@@ -17,15 +17,18 @@ from app.instrumentation import (
     EVENT_LOGIN_FAIL,
     EVENT_LOGOUT,
     EVENT_PASSWORD_CHANGE,
+    EVENT_REGISTER,
     EVENT_TOKEN_REFRESH,
     Instrumentation,
 )
 from app.models import Session as SessionModel
 from app.models import User
+from app.notifications import notify
 from app.schemas import (
     ChangePasswordRequest,
     LoginRequest,
     RefreshRequest,
+    RegisterRequest,
     SuccessResponse,
     TokenResponse,
     UserOut,
@@ -39,6 +42,63 @@ from app.security import (
 )
 
 router = APIRouter(prefix="/auth", tags=["认证"])
+
+
+@router.post("/register", response_model=TokenResponse, status_code=201, summary="注册（学生/教师自助开户）")
+def register(
+    payload: RegisterRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """学生/教师自助注册并自动登录；管理员角色禁止自助开通"""
+    email = payload.email.strip().lower()
+    if db.query(User).filter(User.email == email).first():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="该邮箱已被注册")
+
+    student_id = payload.student_id.strip() if payload.student_id else None
+    if student_id:
+        if db.query(User).filter(User.student_id == student_id).first():
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="该学号/工号已被使用")
+
+    user = User(
+        name=payload.name.strip(),
+        email=email,
+        student_id=student_id,
+        password_hash=hash_password(payload.password),
+        role=payload.role,
+        department=payload.department,
+        grade=payload.grade,
+    )
+    db.add(user)
+    db.flush()  # 生成 user.id 供欢迎通知引用
+
+    # 最后登录时间 + 欢迎通知
+    from app.models import _now
+    user.last_login_at = _now()
+    notify(
+        db,
+        user.id,
+        "welcome",
+        "欢迎加入 Lumina 墨光 🎉",
+        content="完成选课后即可加入直播课堂与协作小组；课程公告与批阅结果也会出现在这里。",
+        ref_type="course",
+    )
+
+    # 自动登录：建会话（create_session 内 commit 将用户/通知/会话一并落库）
+    session = create_session(
+        db,
+        str(user.id),
+        create_refresh_token(str(user.id)),
+        device=payload.device,
+        ip=request.client.host if request.client else None,
+        user_agent=request.headers.get("user-agent"),
+    )
+    Instrumentation(db, request, str(user.id)).track(
+        EVENT_REGISTER,
+        role=payload.role,
+        session_id=str(session.id),
+    )
+    return _build_token_response(user)
 
 
 def _build_token_response(user: User) -> TokenResponse:

@@ -14,6 +14,7 @@ import sys
 import threading
 import time
 import urllib.request
+from urllib.parse import urlparse, urlunparse
 
 _lock = threading.Lock()
 _lat: list[float] = []
@@ -57,6 +58,13 @@ def main() -> int:
     ap.add_argument("--token", default=None, help="Bearer token（压登录后接口）")
     ap.add_argument("--sorted", action="store_true", help="打印延迟排序分布")
     args = ap.parse_args()
+
+    # Windows 下 localhost 常走 IPv6/系统代理导致每次连接 ~2s：规范化为本机地址
+    _u = urlparse(args.base)
+    if _u.hostname in ("localhost", ""):
+        _netloc = "127.0.0.1" + (f":{_u.port}" if _u.port else "")
+        args.base = urlunparse((_u.scheme, _netloc, _u.path or "/", "", "", ""))
+        print(f"ℹ localhost → {args.base}（Windows localhost 解析慢）")
 
     per = max(1, args.total // args.concurrency)
     threads = [threading.Thread(target=worker, args=(args.base, args.endpoint, per, args.token)) for _ in range(args.concurrency)]

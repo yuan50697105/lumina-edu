@@ -396,7 +396,7 @@
     <tbody>
       <tr><td><b>目标市场</b></td><td>高等院校 · 本科生/研究生教学场景</td></tr>
       <tr><td><b>核心用户</b></td><td>学生（C 端）· 教师（B 端）· 管理员（运营端）</td></tr>
-      <tr><td><b>覆盖终端</b></td><td>移动端（iOS/Android）· Web 端（主流浏览器）· 桌面端（macOS/Windows/Linux）</td></tr>
+      <tr><td><b>覆盖终端</b></td><td>移动端（iOS/Android · 鸿蒙 HarmonyOS 演进评估中，见 WBS D-09）· Web 端（主流浏览器）· 桌面端（macOS/Windows/Linux）</td></tr>
       <tr><td><b>差异化</b></td><td>跨端一致性 · 荧光笔视觉签名 · 学情智能预警 · 直播教学一体化</td></tr>
       <tr><td><b>价值主张</b></td><td>「一个账号，六端一致；专注学习，回归教学」</td></tr>
     </tbody>
@@ -879,11 +879,15 @@
   </table>
 
   <h4 class="sub">其他基础设施</h4>
+  <div class="info note">
+    <div class="label">ℹ 规划中（单体 v1.2 未实现）</div>
+    以下 AI 基础设施服务于「AI 批阅/教材问答」增强场景，属于<b>演进路线规划</b>。当前单体 v1.2 的 AI 能力（对话/批阅/路由）已可用，向量检索、Agent 编排与知识库将在此地基之上按版本推进。
+  </div>
   <table>
     <thead><tr><th>技术</th><th>用途</th><th>选型</th></tr></thead>
     <tbody>
-      <tr><td><b>向量数据库</b></td><td>RAG 教材检索</td><td>Milvus 向量库（国产）</td></tr>
-      <tr><td><b>Agent 框架</b></td><td>Multi-Agent 编排</td><td>魔搭 AgentScope（阿里达摩院）</td></tr>
+      <tr><td><b>向量数据库</b></td><td>RAG 教材检索（规划中）</td><td>Milvus 向量库（国产，规划中）</td></tr>
+      <tr><td><b>Agent 框架</b></td><td>Multi-Agent 编排（规划中）</td><td>魔搭 AgentScope（阿里达摩院）</td></tr>
       <tr><td><b>协议</b></td><td>AI 工具调用</td><td>MCP（Model Context Protocol）</td></tr>
       <tr><td><b>内容审核</b></td><td>学术不端检测</td><td>知网 AIGC 检测 / 知网 AMLC</td></tr>
     </tbody>
@@ -1013,6 +1017,7 @@
       <tr><td><b>合规</b></td><td>数据保护</td><td>符合《个人信息保护法》· 学生数据脱敏</td></tr>
       <tr><td><b>兼容性</b></td><td>移动端 · 手机</td><td>iOS 15+ (iPhone) · Android 10+ · 屏幕 ≤ 480px</td></tr>
       <tr><td><b>兼容性</b></td><td>移动端 · 平板</td><td>iPadOS 15+ · Android Tablet · 屏幕 768-1024px · <b style="color:var(--ai);">自适应双模式</b></td></tr>
+      <tr><td><b>兼容性</b></td><td>移动端 · 鸿蒙</td><td>HarmonyOS NEXT · <b style="color:var(--ai);">演进评估中（WBS D-09）</b> · 三路线：原生 ArkTS 独立客户端 / RNOH / uni-app</td></tr>
       <tr><td><b>兼容性</b></td><td>Web 端</td><td>Chrome 90+ · Firefox 88+ · Safari 14+ · Edge 90+</td></tr>
       <tr><td><b>兼容性</b></td><td>桌面端</td><td>macOS 11+ · Windows 10+ · Ubuntu 20.04+</td></tr>
       <tr><td><b>可访问性</b></td><td>WCAG</td><td>符合 WCAG 2.1 AA 标准</td></tr>
@@ -1083,10 +1088,10 @@
     <tbody>
       <tr><td><b>前端</b></td><td>React 18 + TypeScript · Vite</td><td>学生/教师 Web 端 · SPA 架构</td></tr>
       <tr><td><b>桌面端</b></td><td>Electron + React</td><td>复用 Web 代码 · 原生体验</td></tr>
-      <tr><td><b>移动端</b></td><td>React Native · 或 Flutter</td><td>iOS + Android 双端 · 共享代码</td></tr>
+      <tr><td><b>移动端</b></td><td>React Native · 或 Flutter</td><td>iOS + Android 双端 · 共享代码 · 鸿蒙走 RNOH 演进评估（D-09）</td></tr>
       <tr><td><b>自适应设计</b></td><td>响应式 + 自适应混合</td><td>手机 (≤480px) · 平板 (768-1024px) · 双模式布局切换</td></tr>
       <tr><td><b>后端</b></td><td>Python · FastAPI · SQLAlchemy 2.0</td><td>单体应用 + 模块化</td></tr>
-      <tr><td><b>数据库</b></td><td>PostgreSQL · Redis</td><td>关系型 + 缓存</td></tr>
+      <tr><td><b>数据库</b></td><td>MySQL 9.7 · Redis</td><td>关系型 + 缓存</td></tr>
       <tr><td><b>直播</b></td><td>WebRTC + CDN</td><td>低延迟直播</td></tr>
       <tr><td><b>存储</b></td><td>阿里云 OSS</td><td>课件/作业/视频存储</td></tr>
       <tr><td><b>消息</b></td><td>RabbitMQ</td><td>异步任务 · 通知分发</td></tr>

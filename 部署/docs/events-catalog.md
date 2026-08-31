@@ -3,7 +3,7 @@
 > 自动生成：`python 部署/scripts/events_catalog.py`（阶段三 3.2 埋点数据验证依据）
 
 ## 事件命名规范
-`namespace.action`（点分小写）；允许命名空间：ai, announcement, assignment, auth, chapter, chat, conversation, course, element, enrollment, gateway, grade, model, page, provider, session, submission, system, user
+`namespace.action`（点分小写）；允许命名空间：ai, announcement, assignment, auth, chapter, chat, collab, conversation, course, element, enrollment, gateway, grade, live, model, notif, page, provider, session, submission, system, user
 
 ## 全量事件清单
 
@@ -35,10 +35,24 @@
 | `assignment.updated` | 后端 | instrumentation.py, modules/assignment/instrumentation.py |
 | `assignment.view` | 后端 | instrumentation.py, modules/assignment/instrumentation.py |
 | `auth.login` | 前端 | mobile-app/src/pages/Login.tsx, web-frontend/src/pages/Login.tsx |
-| `auth.login_fail` | 前端 | mobile-app/src/pages/Login.tsx, web-frontend/src/pages/Login.tsx |
+| `auth.login_fail` | 前端 | mobile-app/src/pages/Login.tsx |
 | `auth.logout` | 前端 | web-frontend/src/components/Layout.tsx |
 | `chapter.created` | 后端 | instrumentation.py, modules/course/instrumentation.py |
 | `chapter.view` | 前端/后端 | instrumentation.py, modules/course/instrumentation.py, mobile-app/src/pages/CourseDetail.tsx |
+| `collab.card_create` | 前端 | web-frontend/src/pages/GroupDetail.tsx |
+| `collab.card_move` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
+| `collab.column_add` | 前端 | web-frontend/src/pages/GroupDetail.tsx |
+| `collab.file_download` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
+| `collab.file_upload` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
+| `collab.group_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Groups.tsx |
+| `collab.group_join` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx, web-frontend/src/pages/Groups.tsx |
+| `collab.group_leave` | 后端 | instrumentation.py |
+| `collab.group_list` | 前端 | web-frontend/src/pages/Groups.tsx |
+| `collab.group_view` | 前端 | web-frontend/src/pages/GroupDetail.tsx |
+| `collab.project_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
+| `collab.project_open` | 前端 | web-frontend/src/pages/GroupDetail.tsx |
+| `collab.reply_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
+| `collab.topic_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
 | `course.created` | 后端 | instrumentation.py, modules/course/instrumentation.py |
 | `course.drop` | 后端 | instrumentation.py, modules/course/instrumentation.py |
 | `course.enroll` | 前端/后端 | instrumentation.py, modules/course/instrumentation.py, mobile-app/src/pages/CourseDetail.tsx |
@@ -50,15 +64,31 @@
 | `grade.statistics` | 后端 | instrumentation.py, modules/grade/instrumentation.py |
 | `grade.updated` | 后端 | instrumentation.py, modules/grade/instrumentation.py |
 | `grade.view` | 前端/后端 | instrumentation.py, modules/grade/instrumentation.py, mobile-app/src/pages/Grades.tsx |
+| `live.call` | 后端 | instrumentation.py |
+| `live.call_respond` | 后端 | instrumentation.py |
+| `live.chat` | 后端 | instrumentation.py |
+| `live.join` | 后端 | instrumentation.py |
+| `live.leave` | 后端 | instrumentation.py |
+| `live.quiz_answer` | 后端 | instrumentation.py |
+| `live.quiz_close` | 后端 | instrumentation.py |
+| `live.quiz_start` | 后端 | instrumentation.py |
+| `live.raise_hand` | 后端 | instrumentation.py |
+| `live.room_create` | 前端/后端 | instrumentation.py, mobile-app/src/pages/CourseDetail.tsx, web-frontend/src/pages/CourseDetail.tsx |
+| `live.room_end` | 后端 | instrumentation.py |
+| `live.room_start` | 后端 | instrumentation.py |
+| `live.room_view` | 前端 | mobile-app/src/pages/CourseDetail.tsx, mobile-app/src/pages/LiveRoom.tsx, web-frontend/src/pages/LiveRoom.tsx |
 | `model.register` | 前端 | web-frontend/src/pages/AdminModels.tsx |
 | `model.toggle` | 前端 | web-frontend/src/pages/AdminModels.tsx |
+| `notif.read` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Dashboard.tsx |
+| `notif.read_all` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Dashboard.tsx |
+| `notif.view` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Dashboard.tsx |
 | `page.view` | 前端 | mobile-app/src/utils/tracker.ts, web-frontend/src/components/Layout.tsx |
 | `user.login` | 后端 | instrumentation.py |
 | `user.login_fail` | 后端 | instrumentation.py |
 | `user.logout` | 前端/后端 | instrumentation.py, mobile-app/src/pages/Home.tsx |
 | `user.password_change` | 后端 | instrumentation.py |
 | `user.profile_update` | 后端 | instrumentation.py |
-| `user.register` | 后端 | instrumentation.py |
+| `user.register` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Login.tsx |
 | `user.token_refresh` | 后端 | instrumentation.py |
 | `user.view` | 后端 | instrumentation.py |
 
@@ -71,18 +101,84 @@
 - `auth.login_fail`
 - `auth.logout`
 - `chapter.view`
+- `collab.card_create`
+- `collab.card_move`
+- `collab.column_add`
+- `collab.file_download`
+- `collab.file_upload`
+- `collab.group_create`
+- `collab.group_join`
+- `collab.group_list`
+- `collab.group_view`
+- `collab.project_create`
+- `collab.project_open`
+- `collab.reply_create`
+- `collab.topic_create`
 - `course.enroll`
 - `course.unenroll`
 - `course.view`
 - `element.click`
 - `grade.view`
+- `live.room_create`
+- `live.room_view`
 - `model.register`
 - `model.toggle`
+- `notif.read`
+- `notif.read_all`
+- `notif.view`
 - `page.view`
 - `user.logout`
+- `user.register`
 
 ## 后端埋点常量（Instrumentation）
 
+- `ai.call`
+- `ai.call_recorded`
+- `ai.chat_done`
+- `ai.chat_error`
+- `ai.chat_start`
+- `ai.conversation_delete`
+- `ai.conversation_list`
+- `ai.conversation_view`
+- `ai.grade_done`
+- `ai.grade_error`
+- `ai.grade_start`
+- `ai.model_registered`
+- `ai.model_updated`
+- `ai.models_view`
+- `ai.route`
+- `ai.usage_view`
+- `announcement.created`
+- `assignment.created`
+- `assignment.graded`
+- `assignment.submitted`
+- `assignment.updated`
+- `assignment.view`
+- `chapter.created`
+- `collab.group_leave`
+- `course.created`
+- `course.drop`
+- `course.updated`
+- `grade.recorded`
+- `grade.statistics`
+- `grade.updated`
+- `live.call`
+- `live.call_respond`
+- `live.chat`
+- `live.join`
+- `live.leave`
+- `live.quiz_answer`
+- `live.quiz_close`
+- `live.quiz_start`
+- `live.raise_hand`
+- `live.room_end`
+- `live.room_start`
+- `user.login`
+- `user.login_fail`
+- `user.password_change`
+- `user.profile_update`
+- `user.token_refresh`
+- `user.view`
 
 ## 前端页面视图覆盖（trackPageView 参数）
 
@@ -90,3 +186,4 @@
 - `course_detail`
 - `grades`
 - `home`
+- `live_room`

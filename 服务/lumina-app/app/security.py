@@ -5,23 +5,25 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from app.config import settings
 
-# bcrypt 密码哈希
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# ─── 密码哈希 ───
+# ─── 密码哈希（bcrypt 直连）───
+# 说明：passlib 1.7.4 无法读取 bcrypt>=4.1 的版本元数据（__about__ 已移除），
+# 后端初始化失败；改用 bcrypt 库直连，哈希格式同为 $2b$，与旧库互兼容。
 def hash_password(password: str) -> str:
     """生成密码哈希"""
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode("utf-8")[:72], bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
     """验证密码"""
-    return pwd_context.verify(plain, hashed)
+    try:
+        return bcrypt.checkpw(plain.encode("utf-8")[:72], hashed.encode("utf-8"))
+    except (ValueError, TypeError):
+        return False
 
 
 # ─── JWT Token ───

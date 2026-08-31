@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 测试用例文档 v1.0</title>
+<title>Lumina 墨光 · 测试用例文档 v1.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -111,7 +111,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Test Cases</small></div>
     </div>
-    <div class="doc-type">Test Cases · v1.0</div>
+    <div class="doc-type">Test Cases · v1.4</div>
     <h1>
       <span class="hl">测试</span>用例<br/>
       <em>文档</em>
@@ -125,11 +125,11 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.0 · 初始发布</span>
+      <span class="value">v1.4 · 单测执行 138</span>
     </div>
     <div class="row">
       <span class="label">测试框架</span>
-      <span class="value">Jest · Cypress · k6</span>
+      <span class="value">pytest · FastAPI · TestClient</span>
     </div>
     <div class="row">
       <span class="label">覆盖率目标</span>
@@ -144,11 +144,16 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">8</div><div class="lbl">测试模块</div></div>
-  <div class="stat"><div class="val hl">156</div><div class="lbl">测试用例</div></div>
-  <div class="stat"><div class="val">42</div><div class="lbl">API 测试</div></div>
+  <div class="stat"><div class="val hl">10</div><div class="lbl">测试模块</div></div>
+  <div class="stat"><div class="val hl">138</div><div class="lbl">测试用例</div></div>
+  <div class="stat"><div class="val">29</div><div class="lbl">协作+通知单测</div></div>
   <div class="stat"><div class="val">80%</div><div class="lbl">覆盖率</div></div>
   <div class="stat"><div class="val">3</div><div class="lbl">性能场景</div></div>
+</div>
+
+<div class="info note" style="margin:-40px 0 56px;">
+  <div class="label">统计口径 · 单体 v1.4</div>
+  138 个 pytest 用例全部通过（D-02 协作新增 16 个：表结构 / UNIQUE / schema / OpenAPI 注册；D-03 通知新增 13 个：<code>test_notif.py</code> 表/索引/角色/序列化/OpenAPI）。含集成 / 契约用例待环境（运行器 <code>--include-api</code> 启用）；协作冒烟 21/21 通过（<code>smoke_collab.py</code>），通知冒烟 12/12 通过（<code>smoke_notif.py</code>，含注册 / 欢迎通知 / 已读 / 越权 404 / 重复邮箱 409）。
 </div>
 
 <!-- ============ TOC ============ -->
@@ -179,11 +184,11 @@
   <table>
     <thead><tr><th>层级</th><th>类型</th><th>数量</th><th>工具</th><th>执行时间</th></tr></thead>
     <tbody>
-      <tr><td><b>① 单元测试</b></td><td>函数/方法级别</td><td>~800</td><td>Jest · Go testing</td><td>&lt; 30s</td></tr>
-      <tr><td><b>② 集成测试</b></td><td>模块间交互</td><td>~200</td><td>Jest · Supertest</td><td>~2 min</td></tr>
-      <tr><td><b>③ API 测试</b></td><td>接口契约</td><td>42</td><td>Postman · Newman</td><td>~5 min</td></tr>
-      <tr><td><b>④ E2E 测试</b></td><td>用户流程</td><td>~30</td><td>Cypress</td><td>~15 min</td></tr>
-      <tr><td><b>⑤ 性能测试</b></td><td>压力/负载</td><td>3 场景</td><td>k6 · Locust</td><td>~30 min</td></tr>
+      <tr><td><b>① 单元测试</b></td><td>函数/方法级别（security · models · queries · live · collab · notif · logging_json · adapters · media_proxy · openapi 10 个测试文件）</td><td>138</td><td>pytest</td><td>&lt; 30s</td></tr>
+      <tr><td><b>② 集成测试</b></td><td>模块间交互</td><td>100+（需 MySQL，未就绪自动跳过）</td><td>pytest · --include-api</td><td>~2 min</td></tr>
+      <tr><td><b>③ API 测试</b></td><td>接口契约</td><td>77 端点 / 41 前端调用</td><td>api_contract_check.py</td><td>~5 min</td></tr>
+      <tr><td><b>④ E2E 测试</b></td><td>用户流程</td><td>smoke_test.py 15 步 + smoke_collab.py 21 步</td><td>smoke_test.py · smoke_collab.py</td><td>~15 min</td></tr>
+      <tr><td><b>⑤ 性能测试</b></td><td>压力/负载</td><td>3 场景</td><td>load_test.py</td><td>~30 min</td></tr>
     </tbody>
   </table>
 
@@ -221,7 +226,7 @@
 <section class="section" id="s2">
   <div class="section-header">
     <h2>02 · 用户模块测试 <em>Users</em></h2>
-    <div class="num-tag">18 cases</div>
+    <div class="num-tag">20 cases</div>
   </div>
 
   <div class="test-case">
@@ -293,6 +298,44 @@
     </ol>
     <p><b>预期结果</b>：返回当前用户信息</p>
     <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-USER-005</span>
+      <span class="test-title">自助注册 · 成功与冲突（D-03）</span>
+      <span class="test-priority"><span class="tag p1">P1</span></span>
+    </div>
+    <p><b>前置条件</b>：邮箱 / 学号未占用</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>POST /auth/register</code>，提交 name / email / password / role=student</li>
+      <li>检查响应状态码 201，返回令牌（注册即登录）</li>
+      <li>查询我的通知应有 1 条「欢迎加入 Lumina 墨光」（notif 写入）</li>
+      <li>用相同邮箱再次注册，断言 409 <code>EMAIL_EXISTS</code></li>
+      <li>提交非法角色 / 短密码，断言 422</li>
+    </ol>
+    <p><b>预期结果</b>：注册成功且自动登录 · 冲突与参数非法被拒绝</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span>（<code>smoke_notif.py</code> 注册步骤 + <code>test_notif.py</code> 角色校验）</p>
+  </div>
+
+  <div class="test-case">
+    <div class="test-header">
+      <span class="test-id">TC-NOTIF-001</span>
+      <span class="test-title">消息通知中心 · 未读 / 已读 / 全部已读（D-03）</span>
+      <span class="test-priority"><span class="tag p1">P1</span></span>
+    </div>
+    <p><b>前置条件</b>：存在至少一条未读通知（如注册欢迎 / 批阅完成 / 直播点名）</p>
+    <p><b>测试步骤</b>：</p>
+    <ol>
+      <li>调用 <code>GET /notifications/my/unread-count</code>，未读数 ≥ 1</li>
+      <li>调用 <code>GET /notifications/my</code> 获取列表，验证含 type / title / ref_type / is_read</li>
+      <li>调用 <code>POST /notifications/my/{id}/read</code> 单条已读，未读数 -1</li>
+      <li>调用 <code>POST /notifications/my/read-all</code>，未读归零 · 重复调用幂等</li>
+      <li>用他人身份访问该通知，断言 404（越权不可见）</li>
+    </ol>
+    <p><b>预期结果</b>：仅本人可见 · 已读状态正确 · 越权 404</p>
+    <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span>（<code>test_notif.py</code> 13 用例 + <code>smoke_notif.py</code> 12 步）</p>
   </div>
 </section>
 
@@ -396,7 +439,7 @@
       <li>上传文件 + 文字答案</li>
       <li>检查响应状态码 200</li>
       <li>验证提交记录创建成功</li>
-      <li>验证文件存储到 MinIO</li>
+      <li>验证文件存储到本地临时上传目录（<code>uploads/</code>，生产接对象存储规划中）</li>
     </ol>
     <p><b>预期结果</b>：提交成功 · 文件存储正确</p>
     <p><b>自动化</b>：<span class="tag pass">✓ 已覆盖</span></p>
@@ -468,7 +511,12 @@
 <section class="section" id="s6">
   <div class="section-header">
     <h2>06 · 直播模块测试 <em>Live</em></h2>
-    <div class="num-tag">20 cases</div>
+    <div class="num-tag">20 cases · 已落地（以自动化为准）</div>
+  </div>
+
+  <div class="info note">
+    <div class="label">D-01 已落地（单体 v1.3）</div>
+    直播课堂已随 <b>D-01</b> 实现为 <code>live</code> 业务模块（第 10 个模块 · REST 16 端点 · <code>after_id</code> 轮询 · HLS 流媒体可插拔）。下方 TC-LIVE-xxx 用例基于规划期端点 / WebSocket 编写，真实行为以自动化单测 <code>tests/test_live.py</code>（19 用例）+ 冒烟 S16-S24（10 步）为准；用例步骤将逐步对齐新端点。
   </div>
 
   <div class="test-case">
@@ -593,19 +641,19 @@
 <section class="section" id="s8">
   <div class="section-header">
     <h2>08 · 性能与压力测试 <em>Performance</em></h2>
-    <div class="num-tag">k6 · Locust</div>
+    <div class="num-tag">load_test.py</div>
   </div>
 
   <h3 class="sub">8.1 性能指标</h3>
   <table>
     <thead><tr><th>指标</th><th>目标</th><th>测量方式</th></tr></thead>
     <tbody>
-      <tr><td><b>响应时间 P50</b></td><td>&lt; 100ms</td><td>k6</td></tr>
-      <tr><td><b>响应时间 P95</b></td><td>&lt; 300ms</td><td>k6</td></tr>
-      <tr><td><b>响应时间 P99</b></td><td>&lt; 500ms</td><td>k6</td></tr>
-      <tr><td><b>错误率</b></td><td>&lt; 0.1%</td><td>k6</td></tr>
-      <tr><td><b>吞吐量</b></td><td>&gt; 1000 QPS</td><td>k6</td></tr>
-      <tr><td><b>并发用户</b></td><td>500</td><td>Locust</td></tr>
+      <tr><td><b>响应时间 P50</b></td><td>&lt; 100ms</td><td>load_test.py</td></tr>
+      <tr><td><b>响应时间 P95</b></td><td>&lt; 300ms</td><td>load_test.py</td></tr>
+      <tr><td><b>响应时间 P99</b></td><td>&lt; 500ms</td><td>load_test.py</td></tr>
+      <tr><td><b>错误率</b></td><td>&lt; 0.1%</td><td>load_test.py</td></tr>
+      <tr><td><b>吞吐量</b></td><td>&gt; 1000 QPS</td><td>load_test.py</td></tr>
+      <tr><td><b>并发用户</b></td><td>500</td><td>load_test.py</td></tr>
     </tbody>
   </table>
 
@@ -618,26 +666,12 @@
     </div>
     <p><b>场景描述</b>：模拟 500 并发用户查询课程列表</p>
     <p><b>测试脚本</b>：</p>
-    <pre><span class="comment">// k6 脚本</span>
-<span class="keyword">import</span> http <span class="keyword">from</span> <span class="string">'k6/http'</span>;
-<span class="keyword">import</span> { check, sleep } <span class="keyword">from</span> <span class="string">'k6'</span>;
+    <pre><span class="comment"># load_test.py · 轻量压测（线程并发 · 无第三方依赖）</span>
+<span class="keyword">python</span> 部署/scripts/load_test.py \
+  --base http://localhost --concurrency <span class="number">500</span> \
+  --total <span class="number">2000</span> --endpoint /api/v1/courses
 
-<span class="keyword">export const</span> options = {
-  stages: [
-    { duration: <span class="string">'1m'</span>, target: <span class="number">100</span> },
-    { duration: <span class="string">'3m'</span>, target: <span class="number">500</span> },
-    { duration: <span class="string">'1m'</span>, target: <span class="number">0</span> },
-  ],
-};
-
-<span class="keyword">export default function</span> () {
-  <span class="keyword">const</span> res = http.get(<span class="string">'https://api-staging.lumina.edu/api/v1/courses'</span>);
-  check(res, {
-    <span class="string">'status is 200'</span>: (r) => r.status === <span class="number">200</span>,
-    <span class="string">'response time &lt; 500ms'</span>: (r) => r.timings.duration &lt; <span class="number">500</span>,
-  });
-  sleep(<span class="number">1</span>);
-}</pre>
+<span class="comment"># 输出：吞吐 / RPS / P99（基线 P99 &lt; 500ms · 错误率 &lt; 0.1%）</span></pre>
     <p><b>预期结果</b>：P99 &lt; 500ms · 错误率 &lt; 0.1%</p>
   </div>
 
@@ -664,12 +698,15 @@
   <table>
     <thead><tr><th>模块</th><th>单元测试</th><th>集成测试</th><th>API 测试</th><th>E2E</th><th>总覆盖率</th></tr></thead>
     <tbody>
-      <tr><td><b>用户模块</b></td><td>92%</td><td>85%</td><td>100%</td><td>80%</td><td><b>89%</b></td></tr>
-      <tr><td><b>课程模块</b></td><td>88%</td><td>82%</td><td>100%</td><td>75%</td><td><b>86%</b></td></tr>
-      <tr><td><b>作业模块</b></td><td>90%</td><td>80%</td><td>100%</td><td>70%</td><td><b>85%</b></td></tr>
-      <tr><td><b>成绩模块</b></td><td>95%</td><td>88%</td><td>100%</td><td>85%</td><td><b>92%</b></td></tr>
-      <tr><td><b>直播模块</b></td><td>85%</td><td>78%</td><td>100%</td><td>60%</td><td><b>81%</b></td></tr>
-      <tr><td><b>AI 模块</b></td><td>82%</td><td>75%</td><td>100%</td><td>65%</td><td><b>80%</b></td></tr>
+      <tr><td><b>用户模块 · user</b></td><td>92%</td><td>85%</td><td>100%</td><td>80%</td><td><b>89%</b></td></tr>
+      <tr><td><b>课程模块 · course</b></td><td>88%</td><td>82%</td><td>100%</td><td>75%</td><td><b>86%</b></td></tr>
+      <tr><td><b>作业模块 · assignment</b></td><td>90%</td><td>80%</td><td>100%</td><td>70%</td><td><b>85%</b></td></tr>
+      <tr><td><b>成绩模块 · grade</b></td><td>95%</td><td>88%</td><td>100%</td><td>85%</td><td><b>92%</b></td></tr>
+      <tr><td><b>AI 网关 · ai_gateway</b></td><td>85%</td><td>80%</td><td>100%</td><td>75%</td><td><b>84%</b></td></tr>
+      <tr><td><b>AI 对话 · ai_chat</b></td><td>82%</td><td>75%</td><td>100%</td><td>70%</td><td><b>80%</b></td></tr>
+      <tr><td><b>AI 批阅 · ai_grade</b></td><td>80%</td><td>76%</td><td>100%</td><td>65%</td><td><b>79%</b></td></tr>
+      <tr><td><b>数据分析 · analytics</b></td><td>78%</td><td>72%</td><td>100%</td><td>60%</td><td><b>76%</b></td></tr>
+      <tr><td><b>日志 · logs</b></td><td>88%</td><td>82%</td><td>100%</td><td>75%</td><td><b>85%</b></td></tr>
     </tbody>
   </table>
 
@@ -692,10 +729,11 @@
     needs: unit-test
     runs-on: ubuntu-latest
     <span class="keyword">services</span>:
-      <span class="key">postgres</span>:
-        image: postgres:16
+      <span class="key">mysql</span>:
+        image: mysql:9.7
         env:
-          <span class="key">POSTGRES_DB</span>: lumina_test
+          <span class="key">MYSQL_ROOT_PASSWORD</span>: test
+          <span class="key">MYSQL_DATABASE</span>: lumina_test
     <span class="keyword">steps</span>:
     - <span class="key">name</span>: <span class="string">Run Integration Tests</span>
       <span class="key">run</span>: make test-integration
@@ -721,7 +759,7 @@
     <tbody>
       <tr><td><b>单元测试</b></td><td>全部通过 · 覆盖率 ≥ 80%</td><td>开发</td></tr>
       <tr><td><b>集成测试</b></td><td>全部通过</td><td>开发</td></tr>
-      <tr><td><b>API 测试</b></td><td>42 个端点 100% 覆盖</td><td>QA</td></tr>
+      <tr><td><b>API 测试</b></td><td>60 个端点 100% 覆盖</td><td>QA</td></tr>
       <tr><td><b>E2E 测试</b></td><td>核心流程全部通过</td><td>QA</td></tr>
       <tr><td><b>性能测试</b></td><td>P99 &lt; 500ms · 无内存泄漏</td><td>SRE</td></tr>
       <tr><td><b>安全扫描</b></td><td>无高危漏洞</td><td>安全</td></tr>
@@ -755,7 +793,7 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Test Cases</div>
-  <div>v1.0 · 156 用例 · 8 模块 · 80% 覆盖率</div>
+  <div>v1.4 · 138 用例 · 12 模块 · 2026-08-31</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">QA-LUMINA-2026-001</div>
 </footer>
 

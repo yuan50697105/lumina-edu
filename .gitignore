@@ -63,3 +63,18 @@ scripts/yuque-config.local.json
 部署/backups/
 部署/ssl/
 部署/.env
+
+# 直播演示流运行时产物（mediamtx 二进制 / 证书 / 日志 / 录制 / 静态分片，不入库）
+部署/stream/mediamtx/mediamtx.exe
+部署/stream/mediamtx/*.key
+部署/stream/mediamtx/*.crt
+部署/stream/mediamtx/*.log
+部署/stream/mediamtx/recordings/
+部署/stream/hls/
+
+# Claude Code 本地产物（worktrees / 计划等，不入库）
+.claude/
+.gstack/
+
+# Runtime uploads（协作小组共享文件本地存储）
+服务/lumina-app/uploads/

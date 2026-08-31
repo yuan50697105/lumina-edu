@@ -30,8 +30,8 @@ if [ ! -f "config/nginx/conf.d/lumina.conf" ]; then
     exit 1
 fi
 
-if [ ! -f "config/postgresql/init.sql" ]; then
-    echo -e "${RED}✗ 缺少 PostgreSQL 初始化脚本${NC}"
+if [ ! -f "config/mysql/init.sql" ]; then
+    echo -e "${RED}✗ 缺少 MySQL 初始化脚本${NC}"
     exit 1
 fi
 
@@ -43,12 +43,12 @@ docker-compose up -d
 echo -e "${GREEN}▶ 等待服务就绪...${NC}"
 sleep 5
 
-# 检查 PostgreSQL
-echo -e "${GREEN}▶ 检查 PostgreSQL...${NC}"
-if docker-compose ps postgres | grep -q "healthy"; then
-    echo -e "${GREEN}  ✅ PostgreSQL 就绪${NC}"
+# 检查 MySQL
+echo -e "${GREEN}▶ 检查 MySQL...${NC}"
+if docker-compose ps mysql | grep -q "healthy"; then
+    echo -e "${GREEN}  ✅ MySQL 就绪${NC}"
 else
-    echo -e "${YELLOW}  ⏳ PostgreSQL 启动中，请稍候...${NC}"
+    echo -e "${YELLOW}  ⏳ MySQL 启动中，请稍候...${NC}"
 fi
 
 # 检查 Redis
@@ -57,14 +57,6 @@ if docker-compose ps redis | grep -q "healthy"; then
     echo -e "${GREEN}  ✅ Redis 就绪${NC}"
 else
     echo -e "${YELLOW}  ⏳ Redis 启动中，请稍候...${NC}"
-fi
-
-# 检查 MinIO
-echo -e "${GREEN}▶ 检查 MinIO...${NC}"
-if docker-compose ps minio | grep -q "healthy"; then
-    echo -e "${GREEN}  ✅ MinIO 就绪${NC}"
-else
-    echo -e "${YELLOW}  ⏳ MinIO 启动中，请稍候...${NC}"
 fi
 
 # 检查 Nginx
@@ -81,8 +73,7 @@ echo -e "${GREEN}═════════════════════
 echo -e "${GREEN}  ✨ 所有服务已启动！${NC}"
 echo -e "─────────────────────────────────────────────────"
 echo -e "  📄 原型页面：  http://localhost:80"
-echo -e "  📦 MinIO 控制台：http://localhost:9001"
-echo -e "  📧 PostgreSQL：  localhost:5432"
+echo -e "  🗄 MySQL：       localhost:3306"
 echo -e "  🔄 Redis：       localhost:6379"
 echo -e "─────────────────────────────────────────────────"
 echo -e "  查看状态：  ./scripts/status.sh"

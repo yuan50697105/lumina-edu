@@ -29,25 +29,18 @@ echo -e ""
 # ─── 服务健康检查 ───
 echo -e "${CYAN}▶ 服务健康检查：${NC}"
 
-# PostgreSQL
-if curl -s http://localhost:5432 >/dev/null 2>&1; then
-    echo -e "  ${GREEN}✅ PostgreSQL: 运行中${NC}"
+# MySQL
+if (echo > /dev/tcp/localhost/3306) 2>/dev/null; then
+    echo -e "  ${GREEN}✅ MySQL: 运行中${NC}"
 else
-    echo -e "  ${RED}✗ PostgreSQL: 未就绪${NC}"
+    echo -e "  ${RED}✗ MySQL: 未就绪${NC}"
 fi
 
-# Redis
-if curl -s http://localhost:6379 >/dev/null 2>&1; then
+# Redis（单体未消费，仅基础设施）
+if (echo > /dev/tcp/localhost/6379) 2>/dev/null; then
     echo -e "  ${GREEN}✅ Redis: 运行中${NC}"
 else
     echo -e "  ${RED}✗ Redis: 未就绪${NC}"
-fi
-
-# MinIO
-if curl -s http://localhost:9000/minio/health/live >/dev/null 2>&1; then
-    echo -e "  ${GREEN}✅ MinIO: 运行中${NC}"
-else
-    echo -e "  ${RED}✗ MinIO: 未就绪${NC}"
 fi
 
 # Nginx

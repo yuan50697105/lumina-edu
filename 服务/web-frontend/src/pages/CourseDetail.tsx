@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { del, get, post } from '../api/client'
-import type { Chapter, Course } from '../api/types'
+import type { Chapter, Course, LiveRoom as LiveRoomItem } from '../api/types'
+import { useAuthStore } from '../store/auth'
 import { track } from '../utils/tracker'
+
+const LIVE_STATUS: Record<string, string> = { scheduled: '未开始', live: '直播中', ended: '已结束' }
 
 export default function CourseDetail() {
   const { id = '' } = useParams()
+  const navigate = useNavigate()
+  const user = useAuthStore((s) => s.user)
   const [course, setCourse] = useState<Course | null>(null)
   const [chapters, setChapters] = useState<Chapter[]>([])
+  const [liveRooms, setLiveRooms] = useState<LiveRoomItem[]>([])
   const [enrolled, setEnrolled] = useState(false)
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState<string | null>(null)
@@ -30,6 +36,12 @@ export default function CourseDetail() {
     })()
   }, [id])
 
+  useEffect(() => {
+    get<LiveRoomItem[]>(`/courses/${id}/live/rooms`)
+      .then((r) => setLiveRooms(r ?? []))
+      .catch(() => setLiveRooms([]))
+  }, [id])
+
   async function toggleEnroll() {
     try {
       if (enrolled) {
@@ -44,6 +56,19 @@ export default function CourseDetail() {
       alert((e as Error).message)
     }
   }
+
+  async function createLive() {
+    const title = window.prompt('直播标题（留空自动使用课程名）') ?? ''
+    try {
+      const r = await post<LiveRoomItem>(`/live/rooms`, { course_id: id, title: title.trim() || undefined })
+      track('live.room_create', { course_id: id })
+      navigate(`/live/${r.id}`)
+    } catch (e) {
+      alert((e as Error).message)
+    }
+  }
+
+  const isTeacher = !!course && !!user && (user.role === 'admin' || course.teacher?.id === user.id)
 
   if (loading) return <div className="muted">加载中…</div>
   if (!course) return <div className="error">课程不存在</div>
@@ -62,6 +87,40 @@ export default function CourseDetail() {
         </div>
         <button className={`btn ${enrolled ? 'ghost' : 'primary'}`} onClick={toggleEnroll} data-track="enroll-toggle">
           {enrolled ? '退课' : '选课'}
+        </button>
+      </div>
+
+      <h2 className="section-title">
+        直播课堂（{liveRooms.length}）
+        {isTeacher && (
+          <span className="section-actions">
+            <button className="btn primary tiny" onClick={() => void createLive()} data-track="live-create">
+              ＋ 创建直播
+            </button>
+          </span>
+        )}
+      </h2>
+      <div className="live-room-list">
+        {liveRooms.map((r) => (
+          <div key={r.id} className="live-room-card" onClick={() => navigate(`/live/${r.id}`)} data-track="live-open">
+            <span className="course-code">{r.course_title ?? '直播'}</span>
+            <b>{r.title}</b>
+            <span className={`pill ${r.status === 'live' ? 'ok' : ''}`}>{LIVE_STATUS[r.status]}</span>
+            <span className="muted">
+              在线 {r.online_count ?? 0} · 累计 {r.viewer_count ?? 0} 人次
+              {r.status === 'live' && (r.stream_url?.startsWith('http') || r.stream_url?.startsWith('/media')) && ' · 有推流'}
+            </span>
+          </div>
+        ))}
+        {liveRooms.length === 0 && <p className="muted">暂无直播安排。</p>}
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 18 }}>
+        <h2 className="section-title" style={{ marginBottom: 0 }}>
+          协作小组
+        </h2>
+        <button className="btn ghost tiny" onClick={() => navigate(`/groups?course=${id}`)} data-track="collab-open">
+          进入协作 →
         </button>
       </div>
 

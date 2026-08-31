@@ -8,7 +8,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
         // SSE 流式：关闭缓冲
         configure: (proxy) => {
@@ -16,6 +16,11 @@ export default defineConfig({
             ;(_res as any).setHeader('X-Accel-Buffering', 'no')
           })
         },
+      },
+      // 直播 HLS 同源反代（后端 /media → mediamtx）
+      '/media': {
+        target: 'http://127.0.0.1:8080',
+        changeOrigin: true,
       },
     },
   },

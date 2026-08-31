@@ -1,6 +1,7 @@
 # ============================================
 # Lumina 墨光 · 单体应用入口（合并 9 微服务）
 # ============================================
+import asyncio
 import logging
 import time
 import os
@@ -24,8 +25,12 @@ from app.modules.grade import routers as grade_routers
 from app.modules.ai_gateway import routers as ai_gateway_routers
 from app.modules.ai_chat import routers as ai_chat_routers
 from app.modules.ai_grade import routers as ai_grade_routers
+from app.modules.live import routers as live_routers
+from app.modules.collab import routers as collab_routers
+from app.media_proxy import router as media_router
 from app.modules.analytics import routers as analytics_routers
 from app.modules.logs import routers as logs_routers
+from app.modules.notif import routers as notif_routers
 
 install_json_logging()
 logger = logging.getLogger("lumina.app")
@@ -39,6 +44,12 @@ async def lifespan(app: FastAPI):
     if os.getenv("APP_ENV", "development") == "development":
         Base.metadata.create_all(bind=engine)
         logger.info("数据库表已创建（development 模式）")
+    # 旧库迁移：AI 网关表结构补齐（endpoint_base / api_style），幂等可重复
+    try:
+        from app.modules.ai_gateway.migrations import migrate_schema
+        migrate_schema()
+    except Exception as exc:
+        logger.warning("AI 网关表结构迁移跳过: %s", exc)
     yield
 
 
@@ -63,21 +74,22 @@ async def api_logging_middleware(request: Request, call_next):
     t0 = time.perf_counter()
     response = await call_next(request)
     duration_ms = int((time.perf_counter() - t0) * 1000)
-    try:
-        db = SessionLocal()
+# 后台线程写日志，避免同步 DB 写入阻塞事件循环（高并发下曾将吞吐拖至 ~5 req/s）
+    method, path, status_code = request.method, request.url.path, response.status_code
+
+    def _persist_log():
         try:
+            db = SessionLocal()
             db.add(models.APILog(
-                method=request.method, path=request.url.path,
-                status_code=response.status_code, duration_ms=duration_ms,
+                method=method, path=path,
+                status_code=status_code, duration_ms=duration_ms,
             ))
             db.commit()
-        except Exception as exc:
-            db.rollback()
-            logger.warning("API 日志写入失败: %s", exc)
-        finally:
             db.close()
-    except Exception as exc:
-        logger.warning("API 日志会话创建失败: %s", exc)
+        except Exception as exc:
+            logger.warning("API 日志写入失败: %s", exc)
+
+    asyncio.get_running_loop().create_task(asyncio.to_thread(_persist_log))
     return response
 
 
@@ -120,10 +132,18 @@ app.include_router(ai_gateway_routers.router, prefix="/api/v1")
 app.include_router(ai_chat_routers.router, prefix="/api/v1")
 # AI 批阅
 app.include_router(ai_grade_routers.router, prefix="/api/v1")
+# 直播（V1.1 · D-01）
+app.include_router(live_routers.router, prefix="/api/v1")
+app.include_router(live_routers.course_router, prefix="/api/v1")
+app.include_router(collab_routers.router, prefix="/api/v1")
+# HLS 媒体反代（开发演示同源代理，见 app/media_proxy.py）
+app.include_router(media_router)
 # 埋点
 app.include_router(analytics_routers.router, prefix="/api/v1")
 # 日志
 app.include_router(logs_routers.router, prefix="/api/v1")
+# 消息通知（D-03）
+app.include_router(notif_routers.router, prefix="/api/v1")
 
 
 @app.exception_handler(Exception)

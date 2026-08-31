@@ -1,11 +1,12 @@
 # ============================================
 # Lumina 墨光 · 统一 Pydantic Schemas（合并 9 微服务）
 # ============================================
+import uuid
 from datetime import datetime
 from decimal import Decimal
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class SuccessResponse(BaseModel):
@@ -66,6 +67,9 @@ class AssignmentOut(BaseModel):
     course_title: Optional[str] = None
     submission_count: Optional[int] = None
     my_status: Optional[str] = None  # not_submitted | submitted | graded
+
+    class Config:
+        from_attributes = True
 
 
 # ─── 提交 ───
@@ -188,6 +192,11 @@ class CourseCreate(BaseModel):
     semester: str = Field(..., max_length=20, description="学期，如 2026-1")
     schedule: Optional[list[dict[str, Any]]] = None
 
+class TeacherBrief(BaseModel):
+    id: uuid.UUID
+    name: Optional[str] = None
+    avatar_url: Optional[str] = None
+
 class CourseOut(BaseModel):
     id: uuid.UUID
     code: str
@@ -224,7 +233,7 @@ class EnrollmentOut(BaseModel):
         from_attributes = True
 
 class EventBatch(BaseModel):
-    events: list[EventIn] = Field(..., min_length=1, max_length=100)
+    events: list["EventIn"] = Field(..., min_length=1, max_length=100)
 
 
 # ─── 统计查询 ───
@@ -268,6 +277,9 @@ class GradeOut(BaseModel):
     confidence: Optional[Decimal]
     graded_at: datetime
 
+    class Config:
+        from_attributes = True
+
 
 # ─── 批阅 ───
 
@@ -289,13 +301,16 @@ class GradeRecordOut(BaseModel):
     grade_letter: Optional[str] = None
     recorded_at: datetime
 
+    class Config:
+        from_attributes = True
+
 
 # ─── 学生成绩单 ───
 
 class GradeRequest(BaseModel):
     assignment_id: uuid.UUID
     submission_id: uuid.UUID
-    rubric: Optional[list[RubricItem]] = None       # 缺省取作业 rubric
+    rubric: Optional[list["RubricItem"]] = None       # 缺省取作业 rubric
     file_urls: Optional[list[str]] = None           # 附件（PDF/图片，仅供上下文展示）
     model_name: Optional[str] = Field(None, max_length=50)  # 指定模型，缺省智能路由(grade)
     max_tokens: int = Field(2048, ge=512, le=8192)
@@ -306,10 +321,10 @@ class GradeRequest(BaseModel):
 
 class GradeResult(BaseModel):
     code: int = 0
-    data: GradeResultData
+    data: "GradeResultData"
 
 class GradeResultData(BaseModel):
-    scores: list[ScoreItem]
+    scores: list["ScoreItem"]
     total: int
     feedback: str
     model: str
@@ -324,7 +339,7 @@ class GradeStats(BaseModel):
     distribution: dict[str, int] = {}            # A/B/C/D/F 人数
 
 class LogQueryOut(BaseModel):
-    records: list[LogRecordOut]
+    records: list["LogRecordOut"]
     total: int
     offset: int
     limit: int
@@ -346,7 +361,7 @@ class LogSummaryOut(BaseModel):
     error_rate: float
     avg_duration_ms: float
     max_duration_ms: Optional[int]
-    top_paths: list[TopPath]
+    top_paths: list["TopPath"]
 
 class LoginRequest(BaseModel):
     username: str = Field(..., description="学号/工号或邮箱")
@@ -521,17 +536,15 @@ class SubmissionOut(BaseModel):
     graded: bool = False
     grade: Optional["GradeOut"] = None
 
-class TeacherBrief(BaseModel):
-    id: uuid.UUID
-    name: Optional[str] = None
-    avatar_url: Optional[str] = None
+    class Config:
+        from_attributes = True
 
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     expires_in: int
     token_type: str = "Bearer"
-    user: UserOut
+    user: "UserOut"
 
 class TopPath(BaseModel):
     path: str
@@ -583,3 +596,302 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     avatar_url: Optional[str] = None
     bio: Optional[str] = None
+
+
+# ─── 直播 Live（V1.1 · D-01 · WBS-P 阶段 D）───
+
+class LiveRoomCreate(BaseModel):
+    """创建直播房间（教师）"""
+    course_id: uuid.UUID
+    title: Optional[str] = None      # 缺省用课程名 + 日期
+
+class LiveRoomOut(BaseModel):
+    id: uuid.UUID
+    course_id: uuid.UUID
+    course_title: Optional[str] = None
+    teacher_id: uuid.UUID
+    teacher_name: Optional[str] = None
+    title: str
+    status: str                      # scheduled | live | ended
+    stream_url: Optional[str] = None # HLS 播放地址（start 后由适配层注入；未接媒体服务器为 mock:// 占位）
+    viewer_count: Optional[int] = 0  # 累计人次
+    online_count: Optional[int] = 0  # 当前在线
+    active_call: Optional[dict] = None
+    started_at: Optional[datetime] = None
+    ended_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+class LiveRaiseRequest(BaseModel):
+    """举手 / 取消举手"""
+    active: bool = True
+
+class LiveRaiseOut(BaseModel):
+    """举手队列成员"""
+    id: uuid.UUID
+    user_id: uuid.UUID
+    name: Optional[str] = None
+    raised_at: Optional[datetime] = None
+
+class LiveMessageCreate(BaseModel):
+    """直播消息（聊天等）"""
+    msg_type: str = "chat"           # chat | system | call
+    content: str
+
+class LiveMessageOut(BaseModel):
+    id: int
+    room_id: uuid.UUID
+    user_id: Optional[uuid.UUID] = None
+    user_name: Optional[str] = None
+    role: Optional[str] = None
+    msg_type: str
+    content: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class LiveQuizCreate(BaseModel):
+    """发起答题（教师）"""
+    question: str
+    options: list[dict]              # [{"key":"A","text":"…"}, …]
+    answer: Optional[str] = None     # 可选正确答案
+
+class LiveQuizOut(BaseModel):
+    id: uuid.UUID
+    room_id: uuid.UUID
+    teacher_id: uuid.UUID
+    question: str
+    options: list
+    answer: Optional[str] = None
+    status: str
+    created_at: Optional[datetime] = None
+    closed_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+class LiveQuizAnswerIn(BaseModel):
+    """作答（学生）"""
+    choice: str
+
+class LiveQuizAnswerOut(BaseModel):
+    quiz_id: uuid.UUID
+    choice: str
+    submitted_at: datetime
+
+class LiveQuizResult(BaseModel):
+    """答题统计（教师）"""
+    quiz_id: uuid.UUID
+    question: str
+    total: int = 0
+    distribution: dict[str, int] = {}
+    correct_count: Optional[int] = None
+    correct_rate: Optional[float] = None
+
+class LiveCallIn(BaseModel):
+    """点名（教师；不传 user_id 则随机在线学生）"""
+    user_id: Optional[uuid.UUID] = None
+
+class LiveCallOut(BaseModel):
+    user_id: uuid.UUID
+    name: str
+    called_at: datetime
+
+
+# ─── 协作工具（V1.1 · D-02）───
+# 小组 / 成员 / 项目 / 看板（列·卡片）/ 共享文件 / 讨论（主题·回复）
+
+class GroupCreate(BaseModel):
+    """创建小组（教师）"""
+    name: str
+    description: Optional[str] = None
+    leader_id: Optional[uuid.UUID] = None   # 缺省 = 创建人
+
+class GroupUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    leader_id: Optional[uuid.UUID] = None
+
+class GroupMemberOut(BaseModel):
+    id: uuid.UUID
+    name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class GroupOut(BaseModel):
+    id: uuid.UUID
+    course_id: uuid.UUID
+    course_title: Optional[str] = None
+    name: str
+    description: Optional[str] = None
+    leader_id: uuid.UUID
+    leader_name: Optional[str] = None
+    member_count: int = 0
+    project_count: int = 0
+    created_at: datetime
+    members: list[GroupMemberOut] = []
+    is_member: bool = False
+
+    class Config:
+        from_attributes = True
+
+class ProjectCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    deadline: Optional[datetime] = None
+
+class ProjectUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    deadline: Optional[datetime] = None
+
+class ProjectOut(BaseModel):
+    id: uuid.UUID
+    group_id: uuid.UUID
+    course_id: uuid.UUID
+    title: str
+    description: Optional[str] = None
+    status: str = "not_started"
+    deadline: Optional[datetime] = None
+    created_by: uuid.UUID
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class CardCreate(BaseModel):
+    """新建卡片（任务卡）"""
+    title: str
+    description: Optional[str] = None
+    assignee_id: Optional[uuid.UUID] = None
+    due_date: Optional[datetime] = None
+
+class CardUpdate(BaseModel):
+    """更新卡片（含拖拽换列：column_id / order_num）"""
+    title: Optional[str] = None
+    description: Optional[str] = None
+    assignee_id: Optional[uuid.UUID] = None
+    order_num: Optional[int] = None
+    column_id: Optional[uuid.UUID] = None
+    due_date: Optional[datetime] = None
+
+class CardOut(BaseModel):
+    id: uuid.UUID
+    column_id: uuid.UUID
+    title: str
+    description: Optional[str] = None
+    assignee_id: Optional[uuid.UUID] = None
+    assignee_name: Optional[str] = None
+    order_num: int = 0
+    due_date: Optional[datetime] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ColumnCreate(BaseModel):
+    title: str
+
+class ColumnUpdate(BaseModel):
+    title: Optional[str] = None
+    order_num: Optional[int] = None
+
+class ColumnOut(BaseModel):
+    id: uuid.UUID
+    project_id: uuid.UUID
+    title: str
+    order_num: int = 0
+    cards: list[CardOut] = []
+
+    class Config:
+        from_attributes = True
+
+class BoardOut(BaseModel):
+    project_id: uuid.UUID
+    columns: list[ColumnOut] = []
+
+class FileOut(BaseModel):
+    id: uuid.UUID
+    group_id: uuid.UUID
+    filename: str
+    size: int = 0
+    content_type: str = ""
+    uploader_id: uuid.UUID
+    uploader_name: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class TopicCreate(BaseModel):
+    title: str
+    content: Optional[str] = None
+
+class ReplyIn(BaseModel):
+    content: str
+
+class ReplyOut(BaseModel):
+    id: uuid.UUID
+    topic_id: uuid.UUID
+    author_id: uuid.UUID
+    author_name: Optional[str] = None
+    content: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class TopicOut(BaseModel):
+    id: uuid.UUID
+    group_id: uuid.UUID
+    author_id: uuid.UUID
+    author_name: Optional[str] = None
+    title: str
+    content: Optional[str] = None
+    reply_count: int = 0
+    created_at: datetime
+    replies: list[ReplyOut] = []
+
+    class Config:
+        from_attributes = True
+
+
+# ─── 消息通知（V1.1 · D-03）───
+
+class NotificationOut(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    type: str
+    title: str
+    content: Optional[str] = None
+    ref_type: Optional[str] = None
+    ref_id: Optional[uuid.UUID] = None
+    is_read: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+    class Config:
+        from_attributes = True
+
+
+class UnreadCountOut(BaseModel):
+    unread_count: int
+
+
+# ─── 认证 · 注册（V1.1 · D-03）───
+
+class RegisterRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50, description="姓名")
+    email: EmailStr
+    password: str = Field(..., min_length=8, description="密码至少 8 位")
+    student_id: Optional[str] = Field(None, max_length=20, description="学号/工号（可选）")
+    role: str = Field("student", pattern="^(student|teacher)$", description="仅允许学生/教师自助注册")
+    department: Optional[str] = None
+    grade: Optional[str] = None
+    device: str = Field("web", pattern="^(web|mobile|desktop)$")

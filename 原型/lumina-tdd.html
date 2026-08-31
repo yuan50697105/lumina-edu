@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 技术设计文档 TDD v1.0</title>
+<title>Lumina 墨光 · 技术设计文档 TDD v1.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -151,7 +151,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Technical Design Document</small></div>
     </div>
-    <div class="doc-type">Technical Design Document · v1.0</div>
+    <div class="doc-type">Technical Design Document · v1.4</div>
     <h1>
       <span class="hl">技术设计</span><br/>
       文档 <em>TDD</em>
@@ -165,7 +165,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.0 · 初始发布</span>
+      <span class="value">v1.4 · 账户补全 D-03 落地 · 12 模块 · 82 端点 · 31 表</span>
     </div>
     <div class="row">
       <span class="label">作者</span>
@@ -173,7 +173,7 @@
     </div>
     <div class="row">
       <span class="label">发布日期</span>
-      <span class="value">2026-08-25</span>
+      <span class="value">2026-08-31</span>
     </div>
     <div class="row">
       <span class="label">关联文档</span>
@@ -250,6 +250,34 @@
           <td style="font-family:var(--f-mono); font-size:11px; font-weight:500;">2026-08-25</td>
           <td><b>架构团队</b></td>
           <td><b>TDD 完整发布 · 18 章节 · 含 AI 模块架构 · 国产模型集成方案 · 通过评审</b></td>
+          <td style="color:var(--growth); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</td>
+        </tr>
+        <tr style="background:var(--cobalt-soft);">
+          <td><span class="tag" style="background:var(--cobalt); color:#fff;">v1.1</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px; font-weight:500;">2026-08-31</td>
+          <td><b>Claude</b></td>
+          <td><b>单体架构对齐 · 架构图/部署/容灾/技术选型去除微服务组件 · 版本 v1.1</b></td>
+          <td style="color:var(--cobalt); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</td>
+        </tr>
+        <tr style="background:var(--growth-soft);">
+          <td><span class="tag" style="background:var(--growth); color:#fff;">v1.2</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px; font-weight:500;">2026-08-31</td>
+          <td><b>Claude</b></td>
+          <td><b>D-01 直播课堂落地 · 模块 10 · 端点 60 · 表 22 · HLS 流媒体适配（LIVE_STREAM_* / media 反代）· 数据库/API 章节同步</b></td>
+          <td style="color:var(--growth); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</td>
+        </tr>
+        <tr style="background:var(--growth-soft);">
+          <td><span class="tag" style="background:var(--growth); color:#fff;">v1.3</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px; font-weight:500;">2026-08-31</td>
+          <td><b>Claude</b></td>
+          <td><b>D-02 协作工具落地 · 模块 11 · 端点 77 · 表 30 · 小组/项目/看板/文件/讨论（REST）· 数据库/API 章节同步</b></td>
+          <td style="color:var(--growth); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</td>
+        </tr>
+        <tr style="background:var(--growth-soft);">
+          <td><span class="tag" style="background:var(--growth); color:#fff;">v1.4</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px; font-weight:500;">2026-08-31</td>
+          <td><b>Claude</b></td>
+          <td><b>D-03 账户补全落地 · 模块 12 · 端点 82 · 表 31 · 自助注册 + 消息通知中心（notif 模块 / notifications 表）· 相关章节同步</b></td>
           <td style="color:var(--growth); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</td>
         </tr>
       </tbody>
@@ -332,28 +360,27 @@
         <div style="display:flex; gap:8px; justify-content:center; margin-top:8px;">
           <div style="padding:6px 12px; background:#fff; border-radius:6px; font-size:11px;">CDN<br/><span style="font-size:9px; color:var(--inkwell-2);">阿里云 CDN</span></div>
           <div style="padding:6px 12px; background:#fff; border-radius:6px; font-size:11px;">WAF<br/><span style="font-size:9px; color:var(--inkwell-2);">Web 应用防火墙</span></div>
-          <div style="padding:6px 12px; background:#fff; border-radius:6px; font-size:11px;">API Gateway<br/><span style="font-size:9px; color:var(--inkwell-2);">Kong · 限流 · 鉴权</span></div>
-          <div style="padding:6px 12px; background:#fff; border-radius:6px; font-size:11px;">LB<br/><span style="font-size:9px; color:var(--inkwell-2);">Nginx · 负载均衡</span></div>
+          <div style="padding:6px 12px; background:#fff; border-radius:6px; font-size:11px;">Nginx<br/><span style="font-size:9px; color:var(--inkwell-2);">反代 · 限流 · TLS</span></div>
+          <div style="padding:6px 12px; background:#fff; border-radius:6px; font-size:11px;">WAF<br/><span style="font-size:9px; color:var(--inkwell-2);">Web 应用防火墙</span></div>
         </div>
       </div>
     </div>
-    <div class="arch-arrow">▼ 内部 gRPC / HTTP ▼</div>
+    <div class="arch-arrow">▼ 内部 HTTP / 模块调用 ▼</div>
     <div class="arch-row">
       <div class="arch-box growth">
-        <div class="title">业务服务层</div>
+        <div class="title">单体应用 · lumina-app</div>
         <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:8px;">
-          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">用户服务</div>
-          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">课程服务</div>
-          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">作业服务</div>
-          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">成绩服务</div>
-          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">直播服务</div>
-          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">协作服务</div>
-          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">通知服务</div>
-          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">审批服务</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">用户模块</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">课程模块</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">作业模块</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">成绩模块</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">AI 网关模块</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">日志模块</div>
+          <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">埋点模块</div>
         </div>
       </div>
       <div class="arch-box ai">
-        <div class="title">AI 服务层</div>
+        <div class="title">AI 模块</div>
         <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
           <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">🤖 AI 网关 · 路由</div>
           <div style="padding:5px 10px; background:#fff; border-radius:6px; font-size:10px;">📝 批阅 · 生成</div>
@@ -367,12 +394,10 @@
       <div class="arch-box inkwell">
         <div class="title">数据层 · Data</div>
         <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:8px;">
-          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">PostgreSQL<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">主从 · RDS</span></div>
+          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">MySQL 9.7<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">单实例 · 31 表</span></div>
           <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">Redis<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">缓存 · 会话</span></div>
-          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">Elasticsearch<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">搜索 · 日志</span></div>
-          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">OSS<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">对象存储</span></div>
-          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">Kafka<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">消息队列</span></div>
-          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">Milvus<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">向量库</span></div>
+          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">MySQL 全文<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">搜索（InnoDB）</span></div>
+          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">本地存储<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">uploads 卷</span></div>
         </div>
       </div>
     </div>
@@ -384,10 +409,11 @@
     <tbody>
       <tr><td><b>架构风格</b></td><td>单体应用（FastAPI + 模块化）</td><td>微服务 / Serverless</td><td>开发效率高，部署简单，适合快速验证</td></tr>
       <tr><td><b>前端框架</b></td><td>React 18 + TypeScript</td><td>Vue 3 / Svelte</td><td>生态成熟，招聘容易，跨端共享逻辑</td></tr>
-      <tr><b>移动端</b></td><td>React Native</td><td>Flutter / 原生</td><td>与 Web 共享 TS 代码，热更新</td></tr>
+      <tr><td><b>移动端</b></td><td>React Native</td><td>Flutter / 原生</td><td>与 Web 共享 TS 代码，热更新</td></tr>
+      <tr><td><b>鸿蒙覆盖</b></td><td>演进评估（V1.1 · 三路线，原生优先）</td><td>原生 ArkTS（DevEco）· RNOH · uni-app</td><td>校园信创诉求；**原生 ArkTS 独立客户端为首评估**（移动端仅 6 页面，REST/HLS 后端已就绪）；Expo 工程走 RNOH 需 bare 迁移 + 依赖替换（D-09）</td></tr>
       <tr><td><b>桌面端</b></td><td>Electron + React</td><td>Tauri / Qt</td><td>复用 Web 代码，离线能力强</td></tr>
       <tr><td><b>后端语言</b></td><td>Python · FastAPI</td><td>Go / Java / Node.js</td><td>Python AI 生态完善，FastAPI 高性能异步</td></tr>
-      <tr><td><b>数据库</b></td><td>PostgreSQL 16</td><td>MySQL 8</td><td>JSON 支持、全文搜索、扩展性</td></tr>
+      <tr><td><b>数据库</b></td><td>MySQL 9.7</td><td>PostgreSQL 16</td><td>生态成熟、运维简单、部署成本低；utf8mb4 与 JSON 支持完善</td></tr>
       <tr><td><b>AI 模型</b></td><td>国产模型池（通义/智谱/讯飞）</td><td>OpenAI / Claude</td><td>合规 · 成本 · 数据主权</td></tr>
     </tbody>
   </table>
@@ -476,23 +502,30 @@
   <h3 class="sub">5.1 单体应用模块划分</h3>
   <div class="info note">
     <div class="label">架构决策 · 快速验证优先</div>
-    采用 <b>Python FastAPI 单体应用 + 模块化目录结构</b>，9 个业务模块共享同一进程和数据库，通过 <code>app/modules/</code> 实现逻辑隔离。后续可按需拆分微服务。
+    采用 <b>Python FastAPI 单体应用 + 模块化目录结构</b>，12 个业务模块共享同一进程和数据库，通过 <code>app/modules/</code> 实现逻辑隔离。演进方向：未来可按需拆分微服务（当前 v1.4 保持单体）。
   </div>
   <table>
     <thead><tr><th>模块</th><th>职责</th><th>路由前缀</th><th>端点数</th></tr></thead>
     <tbody>
-      <tr><td><b>用户模块</b></td><td>注册/登录/RBAC/会话管理</td><td>/auth, /users</td><td>9</td></tr>
+      <tr><td><b>用户模块</b></td><td>登录/自助注册（D-03）/RBAC/会话管理</td><td>/auth, /users</td><td>10</td></tr>
       <tr><td><b>课程模块</b></td><td>课程 CRUD · 章节 · 选课</td><td>/courses</td><td>14</td></tr>
       <tr><td><b>作业模块</b></td><td>发布/提交/批阅</td><td>/assignments</td><td>8</td></tr>
       <tr><td><b>成绩模块</b></td><td>成绩录入 · GPA · 统计</td><td>/grades</td><td>5</td></tr>
+      <tr><td><b>直播模块</b></td><td>直播课堂 · 房间/举手/聊天/点名/答题</td><td>/live</td><td>16</td></tr>
+      <tr><td><b>协作模块</b></td><td>小组 · 项目 · 看板 · 共享文件 · 组内讨论</td><td>/groups · /projects · /columns · /cards · /files · /topics</td><td>27</td></tr>
+      <tr><td><b>通知模块</b></td><td>消息通知中心 · 已读/未读数/全部已读（D-03）</td><td>/notifications</td><td>4</td></tr>
       <tr><td><b>AI 网关</b></td><td>模型路由 · 供应商管理 · 用量统计</td><td>/ai</td><td>10</td></tr>
       <tr><td><b>AI 对话</b></td><td>苏格拉底导师 · 多轮对话 · SSE 流式</td><td>/ai</td><td>4</td></tr>
       <tr><td><b>AI 批阅</b></td><td>作业批阅 · 结构化评分</td><td>/ai</td><td>1</td></tr>
       <tr><td><b>埋点模块</b></td><td>事件采集 · 统计分析</td><td>/events</td><td>4</td></tr>
       <tr><td><b>日志模块</b></td><td>结构化日志 · 查询</td><td>/logs</td><td>2</td></tr>
-      <tr style="background:var(--ai-soft);"><td colspan="2"><b>合计</b></td><td>—</td><td><b>58</b></td></tr>
+      <tr style="background:var(--ai-soft);"><td colspan="2"><b>合计（唯一端点）</b></td><td>—</td><td><b>82</b></td></tr>
     </tbody>
   </table>
+  <div class="info note" style="margin-top:8px;">
+    <div class="label">口径说明</div>
+    上表端点数按 <code>api_contract_check.py</code>「唯一端点模板」口径核对（方法合并 · 路径去重），业务端点合计 <b>82</b> · 模块 <b>12</b>；三层契约 46 前端 ⊂ 82 后端 ⊂ Nginx。直播（D-01）为 <b>16</b> 个 REST 端点（聊天/举手队列走 <code>after_id</code> 增量，无 WebSocket），协作（D-02）为 <b>27</b> 个 REST 端点，通知（D-03）为 <b>4</b> 个 REST 端点，完整清单见 <b>lumina-api.html · 07 直播模块 / 08 协作模块 / 02·2.5 消息通知</b>。
+  </div>
 
   <h3 class="sub">5.2 模块通信</h3>
   <div class="flow">
@@ -502,7 +535,7 @@
     <div class="flow-arrow">→</div>
     <div class="flow-step">FastAPI 单体</div>
     <div class="flow-arrow">→</div>
-    <div class="flow-step">PostgreSQL</div>
+    <div class="flow-step">MySQL 9.7</div>
   </div>
   <table>
     <thead><tr><th>通信方式</th><th>场景</th><th>技术</th></tr></thead>
@@ -518,7 +551,7 @@
 <section class="section" id="s6">
   <div class="section-header">
     <h2>06 · 数据库设计 <em>Database</em></h2>
-    <div class="num-tag">PostgreSQL 16 · 分库分表</div>
+    <div class="num-tag">MySQL 9.7 · 单库模型</div>
   </div>
 
   <h3 class="sub">6.1 核心数据模型</h3>
@@ -601,8 +634,8 @@
       <tr><td rowspan="3"><b>作业</b></td><td><code>/assignments</code></td><td>POST</td><td>创建作业</td></tr>
       <tr><td><code>/assignments/{id}/submit</code></td><td>POST</td><td>提交作业</td></tr>
       <tr><td><code>/assignments/{id}/grade</code></td><td>POST</td><td>批阅（触发 AI 辅助）</td></tr>
-      <tr><td rowspan="2"><b>直播</b></td><td><code>/live/{id}/join</code></td><td>POST</td><td>加入直播间 · 返回 RTC 配置</td></tr>
-      <tr><td><code>/live/{id}/chat</code></td><td>WS</td><td>WebSocket 聊天通道</td></tr>
+      <tr><td rowspan="2"><b>直播</b></td><td><code>/live/rooms</code></td><td>POST</td><td>创建直播房间（教师）</td></tr>
+      <tr><td><code>/live/rooms/{room_id}/start</code></td><td>POST</td><td>开播 · 返回 status=live + stream_url（HLS / mock://）</td></tr>
       <tr style="background:var(--ai-soft);"><td rowspan="2"><b style="color:var(--ai);">AI</b></td><td style="color:var(--ai);"><code>/ai/chat</code></td><td>POST (SSE)</td><td style="color:var(--ai);">AI 对话 · 流式响应</td></tr>
       <tr style="background:var(--ai-soft);"><td style="color:var(--ai);"><code>/ai/grade</code></td><td>POST</td><td style="color:var(--ai);">AI 辅助批阅</td></tr>
     </tbody>
@@ -644,7 +677,7 @@
       <div class="arch-box ai" style="flex:2;">
         <div class="title">增强层 · RAG Pipeline</div>
         <div style="font-size:11px; line-height:1.6; margin-top:6px;">
-          向量检索 · Milvus<br/>
+          向量检索 · 规划中<br/>
           文档解析 · 分块 · 嵌入<br/>
           课程知识库 · 题库
         </div>
@@ -781,37 +814,37 @@
 <section class="section" id="s10">
   <div class="section-header">
     <h2>10 · 部署架构 <em>Deployment</em></h2>
-    <div class="num-tag">阿里云 · K8s · 多可用区</div>
+    <div class="num-tag">Docker Compose · 单机 · 可选主备</div>
   </div>
 
   <h3 class="sub">10.1 基础设施</h3>
   <div class="arch-diagram">
     <div class="arch-row">
       <div class="arch-box inkwell" style="flex:1;">
-        <div class="title">可用区 A</div>
+        <div class="title">生产主机</div>
         <div style="font-size:11px; line-height:1.8; margin-top:6px; text-align:left; padding:0 10px; color:var(--ricepaper);">
-          <div>• K8s Node ×3</div>
-          <div>• PostgreSQL 主</div>
-          <div>• Redis 主</div>
-          <div>• Kafka Broker ×1</div>
+          <div>• Nginx :80</div>
+          <div>• lumina-app ×N</div>
+          <div>• MySQL 9.7 主</div>
+          <div>• Redis 7</div>
         </div>
       </div>
       <div class="arch-box inkwell" style="flex:1;">
-        <div class="title">可用区 B</div>
+        <div class="title">灾备主机（可选）</div>
         <div style="font-size:11px; line-height:1.8; margin-top:6px; text-align:left; padding:0 10px; color:var(--ricepaper);">
-          <div>• K8s Node ×3</div>
-          <div>• PostgreSQL 从</div>
-          <div>• Redis 从</div>
-          <div>• Kafka Broker ×2</div>
+          <div>• MySQL 从（复制）</div>
+          <div>• 应用副本</div>
+          <div>• 每日备份恢复</div>
+          <div>• 只读降级</div>
         </div>
       </div>
       <div class="arch-box" style="flex:1; background:var(--correction-soft); border-color:var(--correction);">
-        <div class="title">灾备区（异地）</div>
+        <div class="title">备份区（异地）</div>
         <div style="font-size:11px; line-height:1.8; margin-top:6px; text-align:left; padding:0 10px;">
-          <div>• 数据异步复制</div>
-          <div>• OSS 跨区备份</div>
-          <div>• RPO ≤ 15 分钟</div>
-          <div>• RTO ≤ 1 小时</div>
+          <div>• mysqldump 全量 + binlog</div>
+          <div>• 云盘 / 备份机归档</div>
+          <div>• RPO ≤ 24h</div>
+          <div>• RTO ≤ 4h</div>
         </div>
       </div>
     </div>
@@ -837,9 +870,9 @@
   <table>
     <thead><tr><th>环境</th><th>用途</th><th>配置</th><th>部署方式</th></tr></thead>
     <tbody>
-      <tr><td><b>Dev</b></td><td>开发自测</td><td>最小配置 · 单副本</td><td>Git push 自动</td></tr>
+      <tr><td><b>Dev</b></td><td>开发自测</td><td>本机 MySQL + uvicorn · 单副本</td><td>Git push 自动</td></tr>
       <tr><td><b>Staging</b></td><td>集成测试 · QA</td><td>模拟生产 · 数据脱敏</td><td>合并到 main 触发</td></tr>
-      <tr><td><b>Production</b></td><td>正式环境</td><td>多副本 · 多可用区</td><td>手动审批 · 灰度发布</td></tr>
+      <tr><td><b>Production</b></td><td>正式环境</td><td>Compose 4 服务 · 可横向扩展</td><td>手动审批 · 灰度发布</td></tr>
     </tbody>
   </table>
 </section>
@@ -857,7 +890,7 @@
     <tbody>
       <tr><td><b>浏览器</b></td><td>HTTP Cache · Service Worker</td><td>静态 7d · API 1min</td><td>静态资源 · 课程列表</td></tr>
       <tr><td><b>CDN</b></td><td>阿里云 CDN</td><td>课件 24h</td><td>课件文件 · 图片 · 视频</td></tr>
-      <tr><td><b>网关</b></td><td>Kong 缓存插件</td><td>GET 30s</td><td>课程详情 · 公告</td></tr>
+      <tr><td><b>网关</b></td><td>Nginx proxy_cache</td><td>GET 30s</td><td>课程详情 · 公告</td></tr>
       <tr><td><b>应用</b></td><td>本地 LRU</td><td>10s</td><td>配置 · 用户信息</td></tr>
       <tr><td><b>Redis</b></td><td>分布式缓存</td><td>按业务 1min – 1h</td><td>会话 · 排行榜 · 热数据</td></tr>
     </tbody>
@@ -869,7 +902,7 @@
     <tbody>
       <tr><td><b>首页加载</b></td><td>≤ 1.5s（4G）</td><td>代码分割 · 懒加载 · 预渲染</td></tr>
       <tr><td><b>API P95</b></td><td>≤ 200ms</td><td>索引优化 · 读写分离 · 连接池</td></tr>
-      <tr><b>直播延迟</b></td><td>≤ 2s</td><td>WebRTC · SFU · 边缘节点</td></tr>
+      <tr><td><b>直播延迟</b></td><td>≤ 2s</td><td>HLS · CDN · 边缘节点</td></tr>
       <tr><td><b>AI 首 Token</b></td><td>≤ 3s</td><td>流式响应 · 模型预热 · 缓存</td></tr>
       <tr><td><b>并发能力</b></td><td>10,000 QPS</td><td>水平扩展 · 无状态 · 限流</td></tr>
     </tbody>
@@ -897,22 +930,22 @@
     </div>
     <div class="card">
       <h4>🔍 Tracing</h4>
-      <div class="sub">Jaeger · OpenTelemetry</div>
+      <div class="sub">request_id · api_logs</div>
       <div class="list">
-        <div>全链路追踪</div>
-        <div>跨服务调用可视化</div>
+        <div>全链路 request_id 关联</div>
+        <div>请求耗时分布</div>
         <div>慢请求分析</div>
-        <div>AI 推理链路</div>
+        <div>AI 推理调用统计</div>
       </div>
     </div>
     <div class="card">
       <h4>📝 Logging</h4>
-      <div class="sub">ELK Stack</div>
+      <div class="sub">JSONLines · /logs/query</div>
       <div class="list">
         <div>结构化 JSON 日志</div>
-        <div>TraceID 关联</div>
-        <div>审计日志独立存储</div>
-        <div>7 年归档 · 冷热分离</div>
+        <div>request_id 关联</div>
+        <div>全量 API 日志入库</div>
+        <div>审计日志 7 年归档</div>
       </div>
     </div>
   </div>
@@ -934,16 +967,16 @@
 <section class="section" id="s13">
   <div class="section-header">
     <h2>13 · 容灾与备份 <em>DR & Backup</em></h2>
-    <div class="num-tag">RPO ≤ 15min · RTO ≤ 1h</div>
+    <div class="num-tag">RPO ≤ 24h · RTO ≤ 4h</div>
   </div>
 
   <table>
     <thead><tr><th>数据类型</th><th>备份策略</th><th>保留周期</th><th>恢复目标</th></tr></thead>
     <tbody>
-      <tr><td><b>PostgreSQL</b></td><td>主从实时复制 + 每日全量</td><td>30 天</td><td>RPO ≈ 0 · RTO ≤ 15min</td></tr>
-      <tr><td><b>Redis</b></td><td>AOF 每秒 + RDB 每小时</td><td>7 天</td><td>RPO ≤ 1s · RTO ≤ 5min</td></tr>
-      <tr><td><b>OSS 文件</b></td><td>跨区异步复制</td><td>永久</td><td>RPO ≤ 15min</td></tr>
-      <tr><td><b>Kafka</b></td><td>3 副本 · 跨 AZ</td><td>7 天</td><td>零数据丢失</td></tr>
+      <tr><td><b>MySQL</b></td><td>mysqldump 每日全量 + binlog 增量</td><td>30 天</td><td>RPO ≤ 24h · RTO ≤ 1h</td></tr>
+      <tr><td><b>Redis</b></td><td>RDB 快照（容器卷）</td><td>7 天</td><td>RPO ≤ 6h · RTO ≤ 5min</td></tr>
+      <tr><td><b>上传文件</b></td><td>本地卷归档</td><td>30 天</td><td>RPO ≤ 24h</td></tr>
+      <tr><td><b>配置</b></td><td>.env + compose 随 Git 版本化</td><td>随 Git 历史</td><td>随时可重建</td></tr>
       <tr><td><b>审计日志</b></td><td>实时写入 + 冷归档</td><td>7 年</td><td>合规要求</td></tr>
     </tbody>
   </table>
@@ -963,22 +996,17 @@
       <tr><td>TypeScript</td><td>5.5</td><td>类型安全</td></tr>
       <tr><td>React Native</td><td>0.74</td><td>移动端</td></tr>
       <tr><td>Electron</td><td>31</td><td>桌面端</td></tr>
-      <tr><td rowspan="3"><b>后端</b></td><td>Go</td><td>1.22</td><td>业务服务</td></tr>
-      <tr><td>Python</td><td>3.12</td><td>AI 服务</td></tr>
-      <tr><td>gRPC</td><td>1.64</td><td>服务间通信</td></tr>
-      <tr><td rowspan="4"><b>数据</b></td><td>PostgreSQL</td><td>16</td><td>主数据库</td></tr>
+      <tr><td rowspan="2"><b>后端</b></td><td>Python · FastAPI</td><td>3.12 / 0.115</td><td>单体业务 + AI 服务</td></tr>
+      <tr><td>SQLAlchemy · Pydantic</td><td>2.0 / 2.x</td><td>ORM · Schema 校验</td></tr>
+      <tr><td rowspan="2"><b>数据</b></td><td>MySQL</td><td>9.7</td><td>主数据库（31 表）</td></tr>
       <tr><td>Redis</td><td>7.2</td><td>缓存 · 会话</td></tr>
-      <tr><td>Elasticsearch</td><td>8.14</td><td>搜索 · 日志</td></tr>
-      <tr><td>Milvus</td><td>2.4</td><td>向量数据库</td></tr>
-      <tr><td rowspan="3"><b>中间件</b></td><td>Kafka</td><td>3.7</td><td>消息队列</td></tr>
-      <tr><td>Kong</td><td>3.7</td><td>API 网关</td></tr>
-      <tr><td>Nginx</td><td>1.26</td><td>负载均衡</td></tr>
-      <tr><td rowspan="3"><b>基础设施</b></td><td>Kubernetes</td><td>1.30</td><td>容器编排</td></tr>
-      <tr><td>Docker</td><td>27</td><td>容器化</td></tr>
-      <tr><td>Terraform</td><td>1.9</td><td>IaC</td></tr>
-      <tr><td rowspan="3"><b>监控</b></td><td>Prometheus</td><td>2.53</td><td>指标采集</td></tr>
-      <tr><td>Grafana</td><td>11</td><td>可视化</td></tr>
-      <tr><td>Jaeger</td><td>1.58</td><td>链路追踪</td></tr>
+      <tr><td rowspan="2"><b>中间件</b></td><td>Nginx</td><td>1.26</td><td>反向代理 · 静态资源</td></tr>
+      <tr><td>JWT</td><td>—</td><td>认证授权</td></tr>
+      <tr><td rowspan="2"><b>基础设施</b></td><td>Docker Compose</td><td>2.x</td><td>容器编排（4 服务）</td></tr>
+      <tr><td>Alibaba Cloud</td><td>—</td><td>ECS · 云盘备份</td></tr>
+      <tr><td rowspan="3"><b>监控</b></td><td>monitor.sh / status.sh</td><td>部署/scripts</td><td>业务监控 · 健康检查</td></tr>
+      <tr><td>Prometheus + Grafana</td><td>2.53 / 11</td><td>指标采集 · 可视化</td></tr>
+      <tr><td>api_logs / event_tracking</td><td>—</td><td>请求日志 · 埋点（MySQL）</td></tr>
     </tbody>
   </table>
 </section>
@@ -1038,7 +1066,7 @@
         <td><span class="tag" style="background:var(--growth); color:#fff;">Phase 0</span></td>
         <td>2026-08</td>
         <td><b>原型设计 ✓ 已完成</b></td>
-        <td>33 原型 · PRD v1.3 · TDD v1.0</td>
+        <td>40 原型 · PRD v1.3 · TDD v1.4</td>
       </tr>
       <tr>
         <td><span class="tag p0">Phase 1</span></td>
@@ -1118,7 +1146,7 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · 技术设计文档</div>
-  <div>TDD v1.0 · 18 章节 · 2026-08-25</div>
+  <div>TDD v1.4 · 18 章节 · 2026-08-31</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">TDD-LUMINA-2026-001</div>
 </footer>
 

@@ -77,20 +77,32 @@ def main() -> int:
     gate([PROXY_CMD, str(SCRIPTS / "events_catalog.py"), "--check"], "3. 埋点事件目录校验")
 
     smoke_dry = ["--dry-run"]
-    envs = {**os.environ,
-            "LUMINA_TEACHER_EMAIL": "t@x.com", "LUMINA_TEACHER_PASSWORD": "x",
-            "LUMINA_STUDENT_EMAIL": "s@x.com", "LUMINA_STUDENT_PASSWORD": "x",
-            "LUMINA_ADMIN_EMAIL": "a@x.com", "LUMINA_ADMIN_PASSWORD": "x"}
-    gate([PROXY_CMD, str(SCRIPTS / "smoke_test.py"), *smoke_dry], "4. 冒烟结构自检(dry)", env=envs)
+    dry_envs = {**os.environ,
+                "LUMINA_TEACHER_EMAIL": "t@x.com", "LUMINA_TEACHER_PASSWORD": "x",
+                "LUMINA_STUDENT_EMAIL": "s@x.com", "LUMINA_STUDENT_PASSWORD": "x",
+                "LUMINA_ADMIN_EMAIL": "a@x.com", "LUMINA_ADMIN_PASSWORD": "x"}
+    gate([PROXY_CMD, str(SCRIPTS / "smoke_test.py"), *smoke_dry], "4. 冒烟结构自检(dry)", env=dry_envs)
 
     if args.live:
-        smoke_live = ["--base", args.base]
+        # Windows 下 localhost 每次连接 ~2s：冒烟/压测统一用 127.0.0.1
+        base_host = args.base.replace("localhost", "127.0.0.1") if "localhost" in args.base else args.base
+        if base_host != args.base:
+            print(f"ℹ base {args.base} → {base_host}（Windows localhost 解析慢）")
+        # live 冒烟需要真实账号：dry-run 的假值不能用于真实登录，
+        # 必须由环境变量提供（演示账号见 seed_demo.py：*@lumina.edu / Demo@2026）。
+        live_envs = dict(os.environ)
+        for k in ("LUMINA_TEACHER_EMAIL", "LUMINA_TEACHER_PASSWORD",
+                  "LUMINA_STUDENT_EMAIL", "LUMINA_STUDENT_PASSWORD",
+                  "LUMINA_ADMIN_EMAIL", "LUMINA_ADMIN_PASSWORD"):
+            if not live_envs.get(k):
+                print(f"⚠ 未设置 {k}（冒烟登录可能 401，演示账号默认 Demo@2026）")
+        smoke_live = ["--base", base_host]
         if args.ai:
             smoke_live.append("--ai")
-        gate([PROXY_CMD, str(SCRIPTS / "smoke_test.py"), *smoke_live], "5. 冒烟(live)", env=envs)
+        gate([PROXY_CMD, str(SCRIPTS / "smoke_test.py"), *smoke_live], "5. 冒烟(live)", env=live_envs)
         gate([PROXY_CMD, str(SCRIPTS / "run_tests.py"), "--include-api", "--python", PROXY_CMD],
              "6. 集成测试(含 skip)")
-        gate([PROXY_CMD, str(SCRIPTS / "load_test.py"), "--base", args.base, "--concurrency", "20", "--total", "200"],
+        gate([PROXY_CMD, str(SCRIPTS / "load_test.py"), "--base", base_host, "--concurrency", "20", "--total", "200"],
              "7. 性能压测(/health)")
 
     # ── 汇总 ──

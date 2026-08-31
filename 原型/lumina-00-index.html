@@ -255,7 +255,7 @@
       文档（PRD+TDD+API+DB+OPS+QA+UG+WBS+索引）
     </div>
     <div style="margin-top:14px; padding:6px 10px; background:var(--ricepaper-2); border:1px solid var(--line); border-radius:6px; font-family:var(--f-mono); font-size:10px; letter-spacing:0.05em;">
-      v1.3 · 2026-08-25
+      v1.4 · 2026-08-31
     </div>
   </div>
 </header>
@@ -352,14 +352,14 @@
 <section class="section">
   <div class="section-header">
     <h2>项目文档 <em>Documents</em></h2>
-    <div class="num-tag">PRD + TDD + API</div>
+    <div class="num-tag">10 份文档 · 含未实现内容落地 WBS</div>
   </div>
   <div class="section-desc">完整的产品、技术与接口文档体系，支撑设计、研发、运营协作。</div>
 
   <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:14px;">
     <a class="prd-card" href="lumina-prd.html" style="grid-column:auto;">
       <div>
-        <div class="tag">📋 PRD v1.3 · 2026-08-25</div>
+        <div class="tag">📋 PRD v1.4 · 2026-08-31</div>
         <h3>产品需求文档</h3>
         <div class="sub">3 类用户 · 6 设计表面 · 17 功能模块 · 140+ 界面 · 12 月路线图 · 国产 AI 模型 · 双模式适配</div>
         <div class="chips">
@@ -378,7 +378,7 @@
 
     <a class="prd-card" href="lumina-tdd.html" style="grid-column:auto; background:var(--inkwell);">
       <div>
-        <div class="tag" style="background:var(--cobalt); color:#fff;">📋 TDD v1.0 · 2026-08-25</div>
+        <div class="tag" style="background:var(--cobalt); color:#fff;">📋 TDD v1.4 · 2026-08-31</div>
         <h3>技术设计文档</h3>
         <div class="sub">系统架构 · 单体 FastAPI · 国产模型池 · 安全设计 · Docker 部署 · 性能优化 · 监控日志</div>
         <div class="chips">
@@ -396,79 +396,79 @@
 
     <a class="prd-card" href="lumina-api.html" style="grid-column:auto; background:var(--inkwell); border:1px solid var(--ai-soft);">
       <div>
-        <div class="tag" style="background:var(--ai); color:#fff;">📋 API v1.0 · 2026-08-25</div>
+        <div class="tag" style="background:var(--ai); color:#fff;">📋 API v1.5 · 2026-08-31</div>
         <h3>API 接口文档</h3>
-        <div class="sub">RESTful · OpenAPI 3.1 · JWT 认证 · 8 模块 · 42 接口 · WebSocket · 错误码 · SDK 示例</div>
+        <div class="sub">RESTful · OpenAPI 3.1 · JWT 认证 · 12 模块 · 82 端点 · SSE 流式 · 直播课堂 · 协作工具 · 通知中心 · 错误码 · SDK 示例</div>
         <div class="chips">
           <span class="chip">认证授权</span>
           <span class="chip">课程作业</span>
           <span class="chip">AI 对话</span>
-          <span class="chip">直播聊天</span>
+          <span class="chip">成绩日志</span>
         </div>
       </div>
       <div class="phases">
-        <div class="phase" style="background:var(--ai); color:#fff;">42 接口</div>
+        <div class="phase" style="background:var(--ai); color:#fff;">82 端点</div>
         <div class="phase" style="background:var(--ai-soft); color:var(--ai);">OpenAPI 3.1</div>
       </div>
     </a>
 
     <a class="prd-card" href="lumina-database.html" style="grid-column:auto; background:var(--inkwell); border:1px solid var(--growth-soft);">
       <div>
-        <div class="tag" style="background:var(--growth); color:#fff;">📋 DB v1.0 · 2026-08-25</div>
+        <div class="tag" style="background:var(--growth); color:#fff;">📋 DB v1.5 · 2026-08-31</div>
         <h3>数据库设计文档</h3>
-        <div class="sub">PostgreSQL 16 · Milvus 向量库 · 24 数据表 · ER 模型 · 分区策略 · 索引优化</div>
+        <div class="sub">MySQL 9.7 · 31 数据表 · ER 模型 · 分区策略 · 索引优化</div>
         <div class="chips">
           <span class="chip">ER 关系</span>
           <span class="chip">表结构</span>
-          <span class="chip">分库分表</span>
-          <span class="chip">向量检索</span>
+          <span class="chip">单库模型</span>
+          <span class="chip">索引优化</span>
         </div>
       </div>
       <div class="phases">
-        <div class="phase" style="background:var(--growth); color:#fff;">24 表</div>
-        <div class="phase" style="background:var(--growth-soft); color:var(--growth);">6 模块</div>
+        <div class="phase" style="background:var(--growth); color:#fff;">31 表</div>
+        <div class="phase" style="background:var(--growth-soft); color:var(--growth);">12 模块</div>
       </div>
     </a>
 
     <a class="prd-card" href="lumina-operations.html" style="grid-column:auto; background:var(--inkwell); border:1px solid var(--correction-soft);">
       <div>
-        <div class="tag" style="background:var(--correction); color:#fff;">📋 OPS v1.0 · 2026-08-25</div>
+        <div class="tag" style="background:var(--correction); color:#fff;">📋 OPS v1.4 · 2026-08-31</div>
         <h3>部署运维手册</h3>
-        <div class="sub">K8s 部署 · CI/CD 流水线 · 监控告警 · 故障排查 · 灾备恢复 · 安全合规</div>
+        <div class="sub">Docker Compose 部署 · CI/CD 流水线 · 监控告警 · 故障排查 · 灾备恢复 · 安全合规</div>
         <div class="chips">
-          <span class="chip">Kubernetes</span>
-          <span class="chip">Helm</span>
-          <span class="chip">Prometheus</span>
+          <span class="chip">Docker</span>
+          <span class="chip">Compose</span>
+          <span class="chip">MySQL</span>
           <span class="chip">Runbook</span>
         </div>
       </div>
       <div class="phases">
-        <div class="phase" style="background:var(--correction); color:#fff;">12 服务</div>
-        <div class="phase" style="background:var(--correction-soft); color:var(--correction);">99.9% SLA</div>
+        <div class="phase" style="background:var(--correction); color:#fff;">4 服务</div>
+        <div class="phase" style="background:var(--correction-soft); color:var(--correction);">99.5% SLA</div>
       </div>
     </a>
 
     <a class="prd-card" href="lumina-testcases.html" style="grid-column:auto; background:var(--inkwell); border:1px solid var(--highlighter-soft);">
       <div>
-        <div class="tag" style="background:var(--highlighter); color:var(--inkwell);">📋 QA v1.0 · 2026-08-25</div>
+        <div class="tag" style="background:var(--highlighter); color:var(--inkwell);">📋 QA v1.4 · 2026-08-31</div>
         <h3>测试用例文档</h3>
-        <div class="sub">功能测试 · 接口测试 · 性能测试 · 验收标准 · 自动化覆盖 · 80% 覆盖率</div>
+        <div class="sub">功能测试 · 接口测试 · 性能测试 · 验收标准 · 单测 138 用例 · pytest</div>
         <div class="chips">
-          <span class="chip">Jest</span>
-          <span class="chip">Cypress</span>
-          <span class="chip">k6</span>
-          <span class="chip">156 用例</span>
+          <span class="chip">pytest</span>
+          <span class="chip">冒烟</span>
+          <span class="chip">压测</span>
+          <span class="chip">138 用例</span>
         </div>
       </div>
       <div class="phases">
-        <div class="phase" style="background:var(--highlighter); color:var(--inkwell);">156 用例</div>
-        <div class="phase" style="background:var(--highlighter-soft); color:#8A6500;">8 模块</div>
+        <div class="phase" style="background:var(--highlighter); color:var(--inkwell);">138 用例</div>
+        <div class="phase" style="background:var(--highlighter-soft); color:#8A6500;">12 模块</div>
       </div>
     </a>
 
     <a class="prd-card" href="lumina-userguide.html" style="grid-column:auto; background:var(--inkwell); border:1px solid var(--ricepaper-2);">
       <div>
-        <div class="tag" style="background:var(--ricepaper-2); color:var(--inkwell);">📋 UG v1.0 · 2026-08-25</div>
+        <div class="tag" style="background:var(--ricepaper-2); color:var(--inkwell);">📋 UG v1.1 · 2026-08-31</div>
         <h3>用户手册</h3>
         <div class="sub">学生指南 · 教师指南 · 管理员指南 · AI 功能 · 直播协作 · 30+ FAQ · 最佳实践</div>
         <div class="chips">
@@ -486,9 +486,9 @@
 
     <a class="prd-card" href="lumina-launch-wbs.html" style="grid-column:auto; background:var(--inkwell); border:1px solid var(--ai-soft);">
       <div>
-        <div class="tag" style="background:var(--ai); color:#fff;">📋 WBS v1.0 · 2026-08-26</div>
+        <div class="tag" style="background:var(--ai); color:#fff;">📋 WBS v1.1 · 2026-08-26</div>
         <h3>上线工作分解结构</h3>
-        <div class="sub">12 周计划 · 4 阶段 · 48 任务包 · 6 里程碑 · 甘特图 · 资源计划 · 验收标准</div>
+        <div class="sub">10 周计划 · 4 阶段 · 48 任务包 · 6 里程碑 · 甘特图 · 资源计划 · 验收标准</div>
         <div class="chips">
           <span class="chip">基础设施</span>
           <span class="chip">开发实施</span>
@@ -497,8 +497,26 @@
         </div>
       </div>
       <div class="phases">
-        <div class="phase" style="background:var(--ai); color:#fff;">12 周</div>
+        <div class="phase" style="background:var(--ai); color:#fff;">10 周</div>
         <div class="phase" style="background:var(--ai-soft); color:var(--ai);">48 任务</div>
+      </div>
+    </a>
+
+    <a class="prd-card" href="lumina-wbs-pending.html" style="grid-column:auto; background:var(--inkwell); border:1px solid var(--correction-soft);">
+      <div>
+        <div class="tag" style="background:var(--correction); color:#fff;">📋 WBS-P v1.2 · 2026-08-31</div>
+        <h3>未实现内容落地 WBS</h3>
+        <div class="sub">M4 正式上线 · 收口认证 · V1.1 演进 · 33 任务包 · T0 相对周轴 · 资产映射</div>
+        <div class="chips">
+          <span class="chip">生产就绪</span>
+          <span class="chip">数据迁移</span>
+          <span class="chip">灰度全量</span>
+          <span class="chip">UAT 收口</span>
+        </div>
+      </div>
+      <div class="phases">
+        <div class="phase" style="background:var(--correction); color:#fff;">T0+8w</div>
+        <div class="phase" style="background:var(--correction-soft); color:var(--correction);">33 任务</div>
       </div>
     </a>
   </div>
@@ -683,8 +701,8 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span></div>
-  <div>教育 UI 设计系统 · 33 原型 · 9 文档 · 📱↔📲 双模式 · 🤖 国产模型</div>
-  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">v1.3 · 2026-08-25</div>
+  <div>教育 UI 设计系统 · 40 原型 · 10 文档 · 📱↔📲 双模式 · 🤖 国产模型</div>
+  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">v1.4 · 2026-08-31</div>
 </footer>
 
 </body>

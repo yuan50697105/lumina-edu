@@ -26,10 +26,9 @@ interface RequestOptions {
 
 export async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, headers = {}, auth = true, signal } = opts
-  const final: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...headers,
-  }
+  const isForm = typeof FormData !== 'undefined' && body instanceof FormData
+  const final: Record<string, string> = { ...headers }
+  if (!isForm) final['Content-Type'] = 'application/json'
   if (auth) {
     const token = useAuthStore.getState().token
     if (token) final.Authorization = `Bearer ${token}`
@@ -38,7 +37,7 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
   const resp = await fetch(`${BASE}${path}`, {
     method,
     headers: final,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body: body !== undefined ? (isForm ? (body as FormData) : JSON.stringify(body)) : undefined,
     signal,
   })
 
@@ -68,4 +67,8 @@ export const post = <T>(p: string, body?: unknown, o?: RequestOptions) =>
   request<T>(p, { ...o, method: 'POST', body })
 export const patch = <T>(p: string, body?: unknown, o?: RequestOptions) =>
   request<T>(p, { ...o, method: 'PATCH', body })
+export const put = <T>(p: string, body?: unknown, o?: RequestOptions) =>
+  request<T>(p, { ...o, method: 'PUT', body })
 export const del = <T>(p: string, o?: RequestOptions) => request<T>(p, { ...o, method: 'DELETE' })
+export const upload = <T>(p: string, fd: FormData, o?: RequestOptions) =>
+  request<T>(p, { ...o, method: 'POST', body: fd })

@@ -328,7 +328,13 @@ def enroll(
     Instrumentation(db, request, str(student.id)).track(
         EVENT_COURSE_ENROLL, course_id=str(course_id)
     )
-    return enrollment
+    return EnrollmentOut(
+        course_id=course.id,
+        role=enrollment.role or "student",
+        status=enrollment.status or "active",
+        enrolled_at=enrollment.enrolled_at,
+        course=_course_out(db, course),
+    )
 
 
 @router.delete("/{course_id}/enroll", response_model=SuccessResponse, summary="退课（学生）")

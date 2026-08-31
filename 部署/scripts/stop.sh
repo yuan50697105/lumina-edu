@@ -15,7 +15,7 @@ echo -e "${GREEN}▶ 停止所有服务...${NC}"
 docker-compose down
 
 # ─── 提示数据卷保留 ───
-echo -e "${YELLOW}ℹ 数据卷已保留（postgres_data / redis_data / minio_data）${NC}"
+echo -e "${YELLOW}ℹ 数据卷已保留（mysql_data / redis_data）${NC}"
 echo -e "${YELLOW}  如需完全清理： docker-compose down -v${NC}"
 
 echo -e "${GREEN}✅ 服务已停止${NC}"

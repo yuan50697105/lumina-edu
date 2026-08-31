@@ -151,3 +151,181 @@ export interface ConversationMessage {
   completion_tokens: number
   created_at: string
 }
+
+// ─── 直播课堂（D-01 · V1.1）───
+export type LiveRoomStatus = 'scheduled' | 'live' | 'ended'
+
+export interface LiveCallInfo {
+  user_id: string
+  name: string
+  called_at: string
+}
+
+export interface LiveRoom {
+  id: string
+  course_id: string
+  course_title?: string | null
+  teacher_id: string
+  teacher_name?: string | null
+  title: string
+  status: LiveRoomStatus
+  stream_url?: string | null
+  viewer_count?: number
+  online_count?: number
+  active_call?: LiveCallInfo | null
+  started_at?: string | null
+  ended_at?: string | null
+}
+
+export interface LiveMessage {
+  id: number
+  room_id: string
+  user_id?: string | null
+  user_name?: string | null
+  role?: string | null
+  msg_type: string // chat | system | call
+  content?: string | null
+  created_at: string
+}
+
+export interface LiveRaise {
+  id: string
+  user_id: string
+  name?: string | null
+  raised_at?: string | null
+}
+
+export interface LiveQuizOption {
+  key: string
+  text: string
+}
+
+export interface LiveQuiz {
+  id: string
+  room_id: string
+  teacher_id: string
+  question: string
+  options: LiveQuizOption[]
+  answer?: string | null
+  status: string
+  created_at?: string | null
+  closed_at?: string | null
+}
+
+export interface LiveQuizResult {
+  quiz_id: string
+  question: string
+  total: number
+  distribution: Record<string, number>
+  correct_count?: number | null
+  correct_rate?: number | null
+}
+
+// ─── 协作工具（V1.1 · D-02）───
+export interface GroupMember {
+  id: string
+  name: string
+}
+
+export interface Group {
+  id: string
+  course_id: string
+  course_title?: string | null
+  name: string
+  description?: string | null
+  leader_id: string
+  leader_name?: string | null
+  member_count: number
+  project_count: number
+  created_at: string
+  members: GroupMember[]
+  is_member: boolean
+}
+
+export type ProjectStatus = 'not_started' | 'in_progress' | 'done'
+
+export interface CollabProject {
+  id: string
+  group_id: string
+  course_id: string
+  title: string
+  description?: string | null
+  status: ProjectStatus
+  deadline?: string | null
+  created_by: string
+  created_at: string
+}
+
+export interface KanbanCard {
+  id: string
+  column_id: string
+  title: string
+  description?: string | null
+  assignee_id?: string | null
+  assignee_name?: string | null
+  order_num: number
+  due_date?: string | null
+  created_at: string
+}
+
+export interface KanbanColumn {
+  id: string
+  project_id: string
+  title: string
+  order_num: number
+  cards: KanbanCard[]
+}
+
+export interface Board {
+  project_id: string
+  columns: KanbanColumn[]
+}
+
+export interface SharedFile {
+  id: string
+  group_id: string
+  filename: string
+  size: number
+  content_type: string
+  uploader_id: string
+  uploader_name?: string | null
+  created_at: string
+}
+
+export interface Reply {
+  id: string
+  topic_id: string
+  author_id: string
+  author_name?: string | null
+  content: string
+  created_at: string
+}
+
+export interface Topic {
+  id: string
+  group_id: string
+  author_id: string
+  author_name?: string | null
+  title: string
+  content?: string | null
+  reply_count: number
+  created_at: string
+  replies?: Reply[]
+}
+
+// ─── 消息通知（D-03）───
+export interface NotificationItem {
+  id: string
+  user_id: string
+  type: string          // welcome | live_call | assignment_graded | course_announcement | system
+  title: string
+  content?: string | null
+  ref_type?: string | null
+  ref_id?: string | null
+  is_read: boolean
+  created_at: string
+}
+
+export interface UnreadCount {
+  unread_count: number
+}

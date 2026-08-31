@@ -14,8 +14,8 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 # ─── 服务检查 ───
-if ! docker-compose ps postgres | grep -q "running"; then
-    echo -e "${RED}✗ PostgreSQL 未运行，请先启动服务${NC}"
+if ! docker-compose ps mysql | grep -q "running"; then
+    echo -e "${RED}✗ MySQL 未运行，请先启动服务${NC}"
     exit 1
 fi
 
@@ -24,8 +24,14 @@ if [ -f ".env" ]; then
     export $(grep -v '^#' .env | xargs)
 fi
 
-DB_NAME=${POSTGRES_DB:-lumina}
-DB_USER=${POSTGRES_USER:-lumina}
+DB_NAME=${MYSQL_DATABASE:-lumina}
+DB_USER=${MYSQL_USER:-lumina}
+export MYSQL_PWD=${MYSQL_PASSWORD:-lumina_secure_password}
+
+# ─── MySQL 查询封装 ───
+mysqlq() {
+    docker-compose exec -T mysql mysql -u "$DB_USER" -D "$DB_NAME" -e "$1" 2>/dev/null
+}
 
 TYPE=${1:-all}
 
@@ -37,13 +43,13 @@ case $TYPE in
     # ─── API 请求统计 ───
     api|请求)
         echo -e "${GREEN}▶ 最近 1 小时 API 请求统计：${NC}"
-        docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "
-            SELECT method, path, count(*) AS requests,
+        mysqlq "
+            SELECT method, path, COUNT(*) AS requests,
                    ROUND(AVG(duration_ms)) AS avg_ms,
                    MAX(duration_ms) AS max_ms,
-                   count(*) FILTER (WHERE status_code >= 500) AS errors
+                   SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END) AS errors
             FROM api_logs
-            WHERE created_at > now() - interval '1 hour'
+            WHERE created_at > UTC_TIMESTAMP() - INTERVAL 1 HOUR
             GROUP BY method, path
             ORDER BY requests DESC
             LIMIT 20;"
@@ -52,11 +58,11 @@ case $TYPE in
     # ─── 埋点事件统计 ───
     event|埋点)
         echo -e "${GREEN}▶ 最近 24 小时用户行为事件：${NC}"
-        docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "
-            SELECT event_name, count(*) AS events,
-                   count(DISTINCT user_id) AS users
+        mysqlq "
+            SELECT event_name, COUNT(*) AS events,
+                   COUNT(DISTINCT user_id) AS users
             FROM event_tracking
-            WHERE created_at > now() - interval '24 hours'
+            WHERE created_at > UTC_TIMESTAMP() - INTERVAL 24 HOUR
             GROUP BY event_name
             ORDER BY events DESC
             LIMIT 30;"
@@ -65,9 +71,9 @@ case $TYPE in
     # ─── 用户活跃度 ───
     users|用户)
         echo -e "${GREEN}▶ 用户活跃度：${NC}"
-        docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "
-            SELECT role, count(*) AS total_users,
-                   count(*) FILTER (WHERE last_login_at > now() - interval '7 days') AS active_7d
+        mysqlq "
+            SELECT role, COUNT(*) AS total_users,
+                   SUM(CASE WHEN last_login_at > UTC_TIMESTAMP() - INTERVAL 7 DAY THEN 1 ELSE 0 END) AS active_7d
             FROM users
             GROUP BY role;"
         ;;
@@ -75,8 +81,8 @@ case $TYPE in
     # ─── AI 使用统计 ───
     ai)
         echo -e "${GREEN}▶ AI 使用统计：${NC}"
-        docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "
-            SELECT model, count(*) AS conversations,
+        mysqlq "
+            SELECT model, COUNT(*) AS conversations,
                    SUM(total_tokens) AS total_tokens,
                    ROUND(AVG(message_count)) AS avg_messages
             FROM ai_conversations
@@ -86,23 +92,24 @@ case $TYPE in
     # ─── 数据库大小 ───
     db|容量)
         echo -e "${GREEN}▶ 数据表大小：${NC}"
-        docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "
-            SELECT tablename, pg_size_pretty(pg_total_relation_size(tablename::text)) AS size
-            FROM pg_tables
-            WHERE schemaname = 'public'
-            ORDER BY pg_total_relation_size(tablename::text) DESC
+        mysqlq "
+            SELECT table_name,
+                   CONCAT(ROUND((data_length + index_length) / 1024 / 1024, 2), ' MB') AS size
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ORDER BY (data_length + index_length) DESC
             LIMIT 15;"
         ;;
 
     # ─── 错误日志 ───
     error|错误)
         echo -e "${GREEN}▶ 最近 24 小时错误：${NC}"
-        docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "
-            SELECT method, path, status_code, count(*) AS errors,
+        mysqlq "
+            SELECT method, path, status_code, COUNT(*) AS errors,
                    MAX(created_at) AS last_occurred
             FROM api_logs
             WHERE status_code >= 500
-              AND created_at > now() - interval '24 hours'
+              AND created_at > UTC_TIMESTAMP() - INTERVAL 24 HOUR
             GROUP BY method, path, status_code
             ORDER BY errors DESC
             LIMIT 20;"
@@ -110,9 +117,12 @@ case $TYPE in
 
     # ─── 全部 ───
     all|*)
-        echo -e "${GREEN}▶ 数据库大小：${NC}"
-        docker-compose exec -T postgres psql -U "$DB_USER" -d "$DB_NAME" -c "
-            SELECT tablename FROM pg_tables WHERE schemaname='public';" | head -20
+        echo -e "${GREEN}▶ 数据表清单：${NC}"
+        mysqlq "
+            SELECT table_name, table_rows
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            ORDER BY table_name;"
         echo -e ""
         echo -e "${YELLOW}  查看详细： ./scripts/monitor.sh [api|event|users|ai|db|error]${NC}"
         ;;

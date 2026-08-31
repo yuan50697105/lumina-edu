@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · API 接口文档 v1.0</title>
+<title>Lumina 墨光 · API 接口文档 v1.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -137,7 +137,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>API Reference</small></div>
     </div>
-    <div class="doc-type">API Reference · v1.0</div>
+    <div class="doc-type">API Reference · v1.5</div>
     <h1>
       <span class="hl">API</span> 接口<br/>
       <em>文档</em>
@@ -151,7 +151,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.0 · 初始发布</span>
+      <span class="value">v1.5 · 生产基准 · MySQL 9.7</span>
     </div>
     <div class="row">
       <span class="label">基础路径</span>
@@ -170,9 +170,10 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">8</div><div class="lbl">模块</div></div>
-  <div class="stat"><div class="val hl">42</div><div class="lbl">接口数</div></div>
-  <div class="stat"><div class="val">3</div><div class="lbl">WebSocket</div></div>
+  <div class="stat"><div class="val hl">12</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val hl">82</div><div class="lbl">接口数</div></div>
+  <div class="stat"><div class="val">31</div><div class="lbl">协作+通知端点</div></div>
+  <div class="stat"><div class="val">16</div><div class="lbl">直播端点</div></div>
   <div class="stat"><div class="val">JWT</div><div class="lbl">认证方式</div></div>
   <div class="stat"><div class="val">RFC 7807</div><div class="lbl">错误格式</div></div>
 </div>
@@ -188,10 +189,11 @@
     <a href="#s5"><span class="num">05</span>作业模块</a>
     <a href="#s6"><span class="num">06</span>成绩模块</a>
     <a href="#s7"><span class="num">07</span>直播模块</a>
-    <a href="#s8"><span class="num">08</span>AI 模块</a>
-    <a href="#s9"><span class="num">09</span>错误码</a>
-    <a href="#s10"><span class="num">10</span>限流策略</a>
-    <a href="#s11"><span class="num">11</span>SDK · 示例代码</a>
+    <a href="#s8"><span class="num">08</span>协作模块</a>
+    <a href="#s9"><span class="num">09</span>AI 模块</a>
+    <a href="#s10"><span class="num">10</span>错误码</a>
+    <a href="#s11"><span class="num">11</span>限流策略</a>
+    <a href="#s12"><span class="num">12</span>SDK · 示例代码</a>
   </div>
 </nav>
 
@@ -207,6 +209,13 @@
     <span class="label">Base URL</span>
     <span class="url">https://api.lumina.edu/api/v1</span>
     <a href="lumina-api-openapi.yaml" style="margin-left:auto; font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; padding:4px 10px; background:var(--ai); color:#fff; border-radius:6px; text-decoration:none;">OpenAPI 3.1 ↓</a>
+  </div>
+
+  <div class="info note">
+    <div class="label">单体架构 · 模块清单</div>
+    本接口文档对齐单体应用 <b>lumina-app</b>（FastAPI · 82 业务端点），共 <b>12</b> 个业务模块：
+    <code>user</code> · <code>course</code> · <code>assignment</code> · <code>grade</code> · <code>live</code> · <code>collab</code> · <code>ai_gateway</code> · <code>ai_chat</code> · <code>ai_grade</code> · <code>notif</code> · <code>analytics</code> · <code>logs</code>。<br/>
+    其中 <code>notif</code> 提供 <code>/notifications/my</code> 消息通知中心（D-03 新增，含已读/未读数/全部已读）；<code>analytics</code> 提供 <code>/events</code> 事件上报与统计，<code>logs</code> 提供 <code>/logs/query</code>、<code>/logs/summary</code> 日志检索（均限管理员）；AI 流式响应使用 SSE（<code>text/event-stream</code>）；直播模块（D-01）与协作模块（D-02）采用 REST + 轮询增量，无 WebSocket。
   </div>
 
   <table>
@@ -316,6 +325,101 @@
       <tr><td><b>admin</b></td><td>管理员</td><td>全局数据 · 系统配置 · 审批</td></tr>
     </tbody>
   </table>
+
+  <h3 class="sub">2.4 自助注册</h3>
+  <div class="info note">
+    <div class="label">注册即登录</div>
+    注册成功后自动登录并返回令牌（同登录响应）；邮箱 / 学号冲突返回 <b>409</b>（<code>EMAIL_EXISTS</code> / <code>STUDENT_ID_EXISTS</code>）。默认角色 <code>student</code>。<br/>
+    注册同时写入一条「欢迎加入 Lumina 墨光」系统通知（<code>notif</code> 模块）。
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/auth/register</span>
+      <span class="endpoint-desc">自助注册（D-03）</span>
+    </div>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"name"</span>: <span class="string">"林清"</span>,
+  <span class="key">"email"</span>: <span class="string">"linqing@lumina.edu"</span>,
+  <span class="key">"password"</span>: <span class="string">"Passw0rd!"</span>,     <span class="comment">// 至少 8 位</span>
+  <span class="key">"student_id"</span>: <span class="string">"20260001"</span>,      <span class="comment">// 可选</span>
+  <span class="key">"role"</span>: <span class="string">"student"</span>,              <span class="comment">// student(默认) | teacher</span>
+  <span class="key">"device"</span>: <span class="string">"web"</span>                <span class="comment">// web | mobile | desktop</span>
+}</pre>
+    <h4>响应 201 · 注册成功返回令牌</h4>
+    <pre>{
+  <span class="key">"code"</span>: <span class="number">0</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"access_token"</span>: <span class="string">"eyJhbGciOiJIUzI1NiIs..."</span>,
+    <span class="key">"refresh_token"</span>: <span class="string">"eyJhbGciOiJIUzI1NiIs..."</span>,
+    <span class="key">"expires_in"</span>: <span class="number">900</span>,
+    <span class="key">"token_type"</span>: <span class="string">"Bearer"</span>,
+    <span class="key">"user"</span>: { <span class="key">"id"</span>: <span class="string">"550e8400-..."</span>, <span class="key">"name"</span>: <span class="string">"林清"</span>, <span class="key">"role"</span>: <span class="string">"student"</span> }
+  }
+}</pre>
+  </div>
+
+  <h3 class="sub">2.5 消息通知 <em>Notif</em></h3>
+  <div class="info note">
+    <div class="label">通知触发场景</div>
+    注册欢迎 · 作业批阅完成（<code>assignment_graded</code>）· 直播点名（<code>live_call</code>）。支持 <code>ref_type</code>/<code>ref_id</code> 跳转关联对象（<b>course</b> / <b>live_room</b>）。仅本人可见，非本人访问返回 <b>404</b>。
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/notifications/my</span>
+      <span class="endpoint-desc">我的通知列表</span>
+    </div>
+    <h4>查询参数</h4>
+    <p><code>limit</code>（默认 20）· <code>unread_only</code>（true / false，只看未读）</p>
+    <h4>响应</h4>
+    <pre>[
+  {
+    <span class="key">"id"</span>: <span class="string">"550e8400-..."</span>,
+    <span class="key">"user_id"</span>: <span class="string">"550e8400-..."</span>,
+    <span class="key">"type"</span>: <span class="string">"assignment_graded"</span>,
+    <span class="key">"title"</span>: <span class="string">"✅ 《高数》批阅完成"</span>,
+    <span class="key">"content"</span>: <span class="string">"得分 85 分（满分 100）"</span>,
+    <span class="key">"ref_type"</span>: <span class="string">"assignment"</span>,
+    <span class="key">"ref_id"</span>: <span class="string">"550e8400-..."</span>,
+    <span class="key">"is_read"</span>: <span class="keyword">false</span>,
+    <span class="key">"created_at"</span>: <span class="string">"2026-08-31T09:41:00+08:00"</span>
+  }
+]</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/notifications/my/unread-count</span>
+      <span class="endpoint-desc">未读数（顶栏铃铛轮询）</span>
+    </div>
+    <h4>响应</h4>
+    <pre>{ <span class="key">"unread_count"</span>: <span class="number">2</span> }</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/notifications/my/{notification_id}/read</span>
+      <span class="endpoint-desc">单条已读</span>
+    </div>
+    <h4>响应</h4>
+    <pre>{ <span class="key">"success"</span>: <span class="keyword">true</span> }</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/notifications/my/read-all</span>
+      <span class="endpoint-desc">全部已读（幂等）</span>
+    </div>
+    <h4>响应</h4>
+    <pre>{ <span class="key">"success"</span>: <span class="keyword">true</span> }</pre>
+  </div>
 </section>
 
 <!-- ============ 03 · 用户 ============ -->
@@ -631,91 +735,284 @@
 <section class="section" id="s7">
   <div class="section-header">
     <h2>07 · 直播模块 <em>Live</em></h2>
-    <div class="num-tag">6 endpoints · 含 WebSocket</div>
+    <div class="num-tag">已发布（D-01）· 16 endpoints · 无 WebSocket</div>
   </div>
+
+  <div class="info note">
+    <div class="label">V1.1 · D-01 直播课堂已落地（REST 轮询替代规划 WebSocket）</div>
+    聊天 / 举手队列走 <code>after_id</code> 增量拉取，答题 / 点名端点直接返回全量结构；流媒体为可插拔适配层：配置 <code>LIVE_STREAM_BASE</code> 后 <code>stream_url</code> 返回 HLS（同源反代 <code>/media/{key}/index.m3u8</code> 或 CDN 直链），未接入时返回 <code>mock://</code> 占位。入会校验选课关系，未选课学生返回 <code>403</code>。
+  </div>
+
+  <h3 class="sub">7.1 房间与开播</h3>
 
   <div class="endpoint">
     <div class="endpoint-header">
       <span class="endpoint-method post">POST</span>
-      <span class="endpoint-path">/live</span>
-      <span class="endpoint-desc">创建直播（教师）</span>
+      <span class="endpoint-path">/live/rooms</span>
+      <span class="endpoint-desc">创建直播房间（教师）</span>
     </div>
     <h4>请求体</h4>
     <pre>{
   <span class="key">"course_id"</span>: <span class="string">"c001"</span>,
-  <span class="key">"title"</span>: <span class="string">"第12讲 · 不定积分"</span>,
-  <span class="key">"scheduled_at"</span>: <span class="string">"2026-09-01T10:00:00+08:00"</span>,
-  <span class="key">"enable_recording"</span>: <span class="keyword">true</span>,
-  <span class="key">"enable_chat"</span>: <span class="keyword">true</span>,
-  <span class="key">"enable_hand_raise"</span>: <span class="keyword">true</span>
+  <span class="key">"title"</span>: <span class="string">"第12讲 · 不定积分"</span>
 }</pre>
   </div>
 
   <div class="endpoint">
     <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/live/rooms/{room_id}</span>
+      <span class="endpoint-desc">直播房间详情（状态 / 在线数 / stream_url）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
       <span class="endpoint-method post">POST</span>
-      <span class="endpoint-path">/live/{id}/join</span>
-      <span class="endpoint-desc">加入直播</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/start</span>
+      <span class="endpoint-desc">开播（教师）</span>
     </div>
     <h4>响应</h4>
     <pre>{
-  <span class="key">"code"</span>: <span class="number">0</span>,
-  <span class="key">"data"</span>: {
-    <span class="key">"rtc_url"</span>: <span class="string">"wss://rtc.lumina.edu/room/..."</span>,
-    <span class="key">"token"</span>: <span class="string">"rtc_token_..."</span>,
-    <span class="key">"room_id"</span>: <span class="string">"room_abc123"</span>,
-    <span class="key">"chat_ws_url"</span>: <span class="string">"wss://chat.lumina.edu/room/..."</span>
-  }
+  <span class="key">"status"</span>: <span class="string">"live"</span>,
+  <span class="key">"stream_url"</span>: <span class="string">"/media/roomdemo/index.m3u8"</span>
 }</pre>
   </div>
 
   <div class="endpoint">
     <div class="endpoint-header">
-      <span class="endpoint-method ws">WS</span>
-      <span class="endpoint-path">wss://chat.lumina.edu/room/{room_id}</span>
-      <span class="endpoint-desc">直播聊天</span>
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/end</span>
+      <span class="endpoint-desc">结束直播（教师）· status → ended</span>
     </div>
-    <h4>消息格式</h4>
-    <pre><span class="comment">// 发送消息</span>
-{ <span class="key">"type"</span>: <span class="string">"chat"</span>, <span class="key">"content"</span>: <span class="string">"老师讲得清楚！"</span> }
+  </div>
 
-<span class="comment">// 举手</span>
-{ <span class="key">"type"</span>: <span class="string">"hand_raise"</span>, <span class="key">"action"</span>: <span class="string">"up"</span> }
+  <h3 class="sub">7.2 参与与举手</h3>
 
-<span class="comment">// 收到消息</span>
-{ <span class="key">"type"</span>: <span class="string">"chat"</span>, <span class="key">"user"</span>: <span class="string">"林清"</span>, <span class="key">"content"</span>: <span class="string">"..."</span>, <span class="key">"ts"</span>: <span class="number">1725000000</span> }</pre>
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/join</span>
+      <span class="endpoint-desc">加入直播（已选课学生，在线数 +1）</span>
+    </div>
+    <h4>响应</h4>
+    <pre>{
+  <span class="key">"online_count"</span>: <span class="number">3</span>,
+  <span class="key">"status"</span>: <span class="string">"live"</span>
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/leave</span>
+      <span class="endpoint-desc">离开直播（在线数 -1）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method put">PUT</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/raise</span>
+      <span class="endpoint-desc">举手 / 取消举手（body: <code>{"active": true}</code>）</span>
+    </div>
   </div>
 
   <div class="endpoint">
     <div class="endpoint-header">
       <span class="endpoint-method get">GET</span>
-      <span class="endpoint-path">/live/{id}</span>
-      <span class="endpoint-desc">直播详情</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/raises</span>
+      <span class="endpoint-desc">举手队列（教师）</span>
+    </div>
+  </div>
+
+  <h3 class="sub">7.3 聊天（after_id 增量）</h3>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/messages</span>
+      <span class="endpoint-desc">发送消息（chat / 系统）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/messages?after_id={id}&amp;limit=50</span>
+      <span class="endpoint-desc">增量拉取消息（前端 2.5s 轮询）</span>
+    </div>
+  </div>
+
+  <h3 class="sub">7.4 点名</h3>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/call</span>
+      <span class="endpoint-desc">随机点名（教师 · body: <code>{"user_id": null}</code> 随机 / 指定）</span>
     </div>
   </div>
 
   <div class="endpoint">
     <div class="endpoint-header">
       <span class="endpoint-method post">POST</span>
-      <span class="endpoint-path">/live/{id}/recording</span>
-      <span class="endpoint-desc">开始/停止录制</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/call/respond</span>
+      <span class="endpoint-desc">应答点名（学生）</span>
+    </div>
+  </div>
+
+  <h3 class="sub">7.5 答题闭环</h3>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/quizzes</span>
+      <span class="endpoint-desc">发起答题（教师 · question / options / answer）</span>
+    </div>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"question"</span>: <span class="string">"1+1=?"</span>,
+  <span class="key">"options"</span>: [{ <span class="key">"key"</span>: <span class="string">"A"</span>, <span class="key">"text"</span>: <span class="string">"2"</span> }],
+  <span class="key">"answer"</span>: <span class="string">"A"</span>
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/quizzes/{quiz_id}/answer</span>
+      <span class="endpoint-desc">作答（学生 · <code>{"choice": "A"}</code>）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/quizzes/{quiz_id}/close</span>
+      <span class="endpoint-desc">关闭答题（教师）</span>
     </div>
   </div>
 
   <div class="endpoint">
     <div class="endpoint-header">
       <span class="endpoint-method get">GET</span>
-      <span class="endpoint-path">/live/{id}/replay</span>
-      <span class="endpoint-desc">获取回放地址</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/quizzes/{quiz_id}/result</span>
+      <span class="endpoint-desc">答题统计（教师 · total / 选项分布）</span>
     </div>
   </div>
 </section>
 
-<!-- ============ 08 · AI ============ -->
+<!-- ============ 08 · 协作 ============ -->
 <section class="section" id="s8">
   <div class="section-header">
-    <h2>08 · AI 模块 <em>AI-Powered</em></h2>
-    <div class="num-tag">6 endpoints · 国产模型</div>
+    <h2>08 · 协作模块 <em>Collaboration</em></h2>
+    <div class="num-tag">27 endpoints · 小组 / 项目 / 看板 / 文件 / 讨论</div>
+  </div>
+
+  <div class="info note">
+    <div class="label">V1.1 · D-02 协作工具已落地（课程 → 小组树）</div>
+    关系：小组 <code>project_groups</code> → 成员 <code>group_members</code>（UNIQUE）→ 项目 <code>projects</code> → 看板列 <code>kanban_columns</code> / 卡片 <code>kanban_cards</code>（拖拽换列）→ 共享文件 <code>shared_files</code>（本地 uploads）→ 组内讨论 <code>discussion_topics</code> / <code>discussion_replies</code>。
+    权限：查看 = 授课教师 / 组长 / 组员；管理（增删改组、删项目、换组长）= 教师 / 组长；加入小组须已选课（未选课越权 403 / 重复加入 409）。
+  </div>
+
+  <h3 class="sub">8.1 小组 · Groups</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/me</span><span class="endpoint-desc">我的小组（学生视角，含课程名）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/courses/{course_id}/groups</span><span class="endpoint-desc">课程小组列表（选课学生/教师）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/courses/{course_id}/groups</span><span class="endpoint-desc">创建小组（授课教师/管理员）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/{group_id}</span><span class="endpoint-desc">小组详情（成员 / 项目数 / is_member）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method patch">PATCH</span><span class="endpoint-path">/groups/{group_id}</span><span class="endpoint-desc">更新小组（名前/说明/换组长，组长或教师）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/groups/{group_id}</span><span class="endpoint-desc">删除小组（教师，级联清理）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/groups/{group_id}/members</span><span class="endpoint-desc">加入小组（已选课学生）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/groups/{group_id}/members/{user_id}</span><span class="endpoint-desc">移出成员（组长/教师；可退自己）</span></div>
+  </div>
+
+  <h3 class="sub">8.2 项目 · Projects</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/{group_id}/projects</span><span class="endpoint-desc">小组项目列表</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/groups/{group_id}/projects</span><span class="endpoint-desc">创建项目（组成员/教师，含 deadline）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/projects/{project_id}</span><span class="endpoint-desc">项目详情</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method patch">PATCH</span><span class="endpoint-path">/projects/{project_id}</span><span class="endpoint-desc">更新项目（title/status/deadline）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/projects/{project_id}</span><span class="endpoint-desc">删除项目（组长/教师）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/projects/{project_id}/board</span><span class="endpoint-desc">项目看板（列 + 卡片聚合）</span></div>
+  </div>
+
+  <h3 class="sub">8.3 看板 · Kanban</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/projects/{project_id}/columns</span><span class="endpoint-desc">新建看板列</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method patch">PATCH</span><span class="endpoint-path">/columns/{column_id}</span><span class="endpoint-desc">改列名 / 重排</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/columns/{column_id}</span><span class="endpoint-desc">删除列（卡片级联）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/columns/{column_id}/cards</span><span class="endpoint-desc">新建任务卡片（assignee/due_date）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method patch">PATCH</span><span class="endpoint-path">/cards/{card_id}</span><span class="endpoint-desc">更新卡片（含拖拽换列 column_id + order_num）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/cards/{card_id}</span><span class="endpoint-desc">删除卡片</span></div>
+  </div>
+
+  <h3 class="sub">8.4 共享文件 · Files</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/{group_id}/files</span><span class="endpoint-desc">共享文件列表</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/groups/{group_id}/files</span><span class="endpoint-desc">上传文件（multipart，存本地 uploads）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/files/{file_id}/download</span><span class="endpoint-desc">下载文件（缺失时为 mock 占位）</span></div>
+  </div>
+
+  <h3 class="sub">8.5 组内讨论 · Discussion</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/{group_id}/topics</span><span class="endpoint-desc">讨论主题列表</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/groups/{group_id}/topics</span><span class="endpoint-desc">发表主题</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/topics/{topic_id}</span><span class="endpoint-desc">主题详情（含回复 / reply_count）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/topics/{topic_id}/replies</span><span class="endpoint-desc">回复主题</span></div>
+  </div>
+</section>
+
+<!-- ============ 09 · AI ============ -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <h2>09 · AI 模块 <em>AI-Powered</em></h2>
+    <div class="num-tag">6 endpoints · 覆盖 ai_gateway / ai_chat / ai_grade</div>
   </div>
 
   <div class="info ai-box" style="background:var(--ai-soft); border:1px solid var(--ai);">
@@ -813,10 +1110,10 @@
   </div>
 </section>
 
-<!-- ============ 09 · 错误码 ============ -->
-<section class="section" id="s9">
+<!-- ============ 10 · 错误码 ============ -->
+<section class="section" id="s10">
   <div class="section-header">
-    <h2>09 · 错误码 <em>Errors</em></h2>
+    <h2>10 · 错误码 <em>Errors</em></h2>
     <div class="num-tag">RFC 7807</div>
   </div>
 
@@ -851,10 +1148,10 @@
   </table>
 </section>
 
-<!-- ============ 10 · 限流 ============ -->
-<section class="section" id="s10">
+<!-- ============ 11 · 限流 ============ -->
+<section class="section" id="s11">
   <div class="section-header">
-    <h2>10 · 限流策略 <em>Rate Limit</em></h2>
+    <h2>11 · 限流策略 <em>Rate Limit</em></h2>
     <div class="num-tag">Token Bucket</div>
   </div>
 
@@ -874,10 +1171,10 @@
   </div>
 </section>
 
-<!-- ============ 11 · SDK ============ -->
-<section class="section" id="s11">
+<!-- ============ 12 · SDK ============ -->
+<section class="section" id="s12">
   <div class="section-header">
-    <h2>11 · SDK · 示例代码 <em>Examples</em></h2>
+    <h2>12 · SDK · 示例代码 <em>Examples</em></h2>
     <div class="num-tag">TypeScript · Python</div>
   </div>
 
@@ -943,7 +1240,7 @@ curl -X POST https://api.lumina.edu/api/v1/ai/chat \
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · API Reference</div>
-  <div>v1.0 · 8 模块 · 42 接口 · 2026-08-25</div>
+  <div>v1.5 · 12 模块 · 82 接口 · 2026-08-31 · 生产基准</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">API-LUMINA-2026-001</div>
 </footer>
 

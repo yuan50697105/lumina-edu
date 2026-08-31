@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Lumina (墨光) 教育应用 UI 设计系统 - 面向高校师生的跨端教学协作平台。本项目为纯设计原型 + 技术文档项目，不包含应用代码。
+Lumina (墨光) 教育应用 UI 设计系统 - 面向高校师生的跨端教学协作平台。本项目为设计原型 + 技术文档 + FastAPI 单体应用（`服务/lumina-app/`）。单体快照：82 RESTful 端点 · 12 模块 · 31 表（模块：user / course / assignment / grade / live / collab / notif / ai_gateway / ai_chat / ai_grade / analytics / logs）。
 
 ## Directory Structure
 
@@ -28,6 +28,24 @@ edu/
 │   ├── PC/         (7 files)   # 桌面端原型
 │   └── AI/         (3 files)   # AI 模块原型
 │
+├── 服务/                   # 单体应用 + 前端
+│   ├── lumina-app/             # ✅ 单体 FastAPI（12 模块 · 82 端点 · 31 表）
+│   │   ├── app/                # 应用代码（main.py / models.py / security.py ...）
+│   │   │   └── modules/        # 12 业务模块：user/course/assignment/grade/live/collab/notif/ai_gateway/ai_chat/ai_grade/analytics/logs
+│   │   ├── tests/              # 单元测试（138 passed）
+│   │   ├── requirements.txt    # Python 依赖
+│   │   └── Dockerfile          # API 容器镜像
+│   ├── web-frontend/           # Web 前端（React 18 + TS + Vite）
+│   └── mobile-app/             # 移动端前端（React Native / Expo）
+│
+├── 部署/                   # Docker 部署方案（环境搭建）
+│   ├── docker-compose.yml      # 服务编排（MySQL/Redis/lumina-app/Nginx）
+│   ├── .env.example            # 环境变量模板
+│   ├── config/                 # Nginx/MySQL 配置
+│   ├── scripts/                # 启停/备份/监控/契约核对脚本
+│   ├── docs/                   # UAT 验收清单 / events-catalog / 上线检查清单
+│   └── README.md               # 部署使用说明
+│
 └── scripts/                 # 工具脚本
     ├── yuque-sync.py           # 语雀同步工具
     └── README.md               # 脚本使用说明
@@ -45,6 +63,21 @@ open 原型/lumina-00-index.html
 chrome 原型/lumina-prd.html
 ```
 
+### Running the Monolith Application (单体应用)
+单体应用为 FastAPI，位于 `服务/lumina-app/`，启动命令：
+```bash
+# 进入单体应用目录
+cd 服务/lumina-app
+
+# 启动 API 服务（默认端口 8080）
+uvicorn app.main:app --port 8080
+```
+
+### Running Unit Tests (单元测试)
+```bash
+PYTHONIOENCODING=utf-8 服务/lumina-app/.venv/Scripts/python.exe -m pytest 服务/lumina-app/tests -q
+```
+
 ### Yuque Sync (语雀同步)
 ```bash
 # Install dependencies
@@ -56,6 +89,71 @@ export YUQUE_TOKEN="your_token"
 # Run sync
 python scripts/yuque-sync.py
 ```
+
+### Test Accounts（测试账号 / Demo）
+
+本地联调、冒烟与前端开发使用的演示账号（由 `部署/scripts/seed_demo.py` 种子生成，幂等可重复运行；默认密码 `Demo@2026`，可用 `--demo-password xxxx` 覆盖）：
+
+| 角色 | 账号 | 默认密码 | 说明 |
+|------|------|----------|------|
+| 管理员 | `admin@lumina.edu` | `Demo@2026` | 系统管理员：模型池管理、绕过课程权限控制 |
+| 教师 | `teacher@lumina.edu` | `Demo@2026` | 授课教师（工号 `T20260001`）：建课程/直播、点名、发答题、批阅 |
+| 学生 | `student@lumina.edu` | `Demo@2026` | 已选课学生（学号 `20260001`）：加入直播、举手、作答 |
+| 未选课学生 | `nouser@lumina.edu` | `Demo@2026` | **未选任何课程**，用于越权测试（直播加入 403、课程权限校验） |
+
+> ⚠️ 仅演示/联调使用，生产环境必须更换。上层应用连本机 MySQL 时用 `root/root`（见环境变量说明）。
+
+运行前端体验直播：
+```bash
+# 后端（需先起 MySQL）
+cd 服务/lumina-app && uvicorn app.main:app --port 8080 --host 127.0.0.1
+# 前端 dev（已配置 5173 → 127.0.0.1:8080 代理）
+cd 服务/web-frontend && npm run dev   # 打开 http://localhost:5173
+```
+
+### 🎥 直播演示流（开播真实画面，可选）
+
+未接媒体服务器时，开播返回 `mock://` 占位（无画面，仅课堂协作逻辑）。要「开播即有真实画面」，用本地 mediamtx 演示：
+
+```bash
+# ① 一键起流：MediaMTX + ffmpeg 推演示课堂画面（默认房间 key=roomdemo）
+部署/stream/start_demo_stream.bat          # 停止：stop_demo_stream.bat
+# ② 后端 .env 已配置（服务/lumina-app/.env，gitignored）：
+#    LIVE_STREAM_BASE=http://127.0.0.1:8888/live
+#    LIVE_STREAM_PROXY=true        # stream_url 走同源 /media 反代
+# ③ 教师登录 → 冒烟测试课程 → 「直播演示间（固定流 roomdemo）」→ 开播
+```
+- 任意房间推流：`部署/stream/start_demo_stream.bat <room的 stream_key>`
+- 详情见 `部署/stream/README.md`；生产接入见「运维手册」媒体反代说明
+
+### 📱 移动端直播演示（Expo）
+
+移动端（`服务/mobile-app/`，RN/Expo）直播页功能对齐 Web。本地连接后端：
+
+```bash
+# ① 后端（需先起 MySQL）；若手机真机访问，--host 0.0.0.0
+cd 服务/lumina-app && uvicorn app.main:app --port 8080 --host 0.0.0.0
+# ② 移动端 API 地址（电脑上回环仅模拟器可用）：
+#    iOS 模拟器 → http://127.0.0.1:8080（默认）
+#    Android 模拟器 → http://10.0.2.2:8080
+#    真机 → http://<电脑局域网IP>:8080
+#    修改：mobile-app/src/config.ts 的 API_BASE
+cd 服务/mobile-app && npm install && npx expo start
+```
+
+- 开播真实画面：先起 `部署/stream/start_demo_stream.bat`（HLS 同源 `/media` 反代已配），再进「直播演示间」开播
+- HLS 播放：`expo-video`（原生播放器）；仅房间 `status==='live'` 时拉流，`mock://` 为未接媒体服务器占位
+
+### 🆕 平台支持矩阵（含鸿蒙）
+
+| 端 | 现状 | 说明 |
+|----|------|------|
+| iOS / Android | ✅ 已实现 | `服务/mobile-app/`（React Native / Expo SDK 52） |
+| Web | ✅ 已实现 | `服务/web-frontend/`（React 18 + Vite） |
+| 桌面 | 🟡 原型 | `原型/PC/`（Electron 方案规划中，TDD §3.2） |
+| 鸿蒙 HarmonyOS | ⏳ 演进评估 | **Expo 官方不支持鸿蒙**；WBS D-09 三路线评估：原生 ArkTS／ArkUI 独立客户端（DevEco，移动端 6 页 · 推荐）· RNOH bare 迁移 · uni-app；不阻塞 M4 |
+
+> 详见 `原型/lumina-wbs-pending.html` v1.1 D-09 任务包。
 
 ## Design System
 
@@ -90,16 +188,18 @@ background: linear-gradient(
 项目包含 9 个核心文档，形成完整文档体系：
 
 1. **PRD** (产品需求) - 用户画像、功能模块、验收标准
-2. **TDD** (技术设计) - 架构、微服务、数据库、API 规范
-3. **API** (接口文档) - 42 个 RESTful 端点
+2. **TDD** (技术设计) - 架构、单体应用（12 模块）、数据库、API 规范
+3. **API** (接口文档) - 82 个 RESTful 端点
 4. **OpenAPI** (机器可读) - YAML 格式 API 规范
-5. **Database** (数据库) - 24 表、ER 模型、分区策略
-6. **Operations** (运维) - K8s 部署、监控告警、Runbook
-7. **Test Cases** (测试) - 156 用例、80% 覆盖率
+5. **Database** (数据库) - 31 表、ER 模型、分区策略
+6. **Operations** (运维) - Docker Compose 部署、监控告警、Runbook
+7. **Test Cases** (测试) - 138 用例、80% 覆盖率
 8. **User Guide** (用户手册) - 3 角色指南、FAQ
-9. **WBS** (上线计划) - 10 周轻量方案
+9. **WBS v1.1** (上线计划) - 10 周轻量方案
 
 所有文档使用统一的 Lumina 视觉风格，可直接在浏览器中打开查看。
+
+单体应用 `服务/lumina-app/` 快照：82 端点 · 12 模块 · 31 表 · 单元测试 138 通过。
 
 ## Platform Coverage
 

@@ -12,10 +12,10 @@ class Settings(BaseSettings):
     # 应用
     APP_NAME: str = "lumina-app"
     APP_ENV: str = "development"  # development / testing / production
-    APP_DEBUG: bool = True
+    APP_DEBUG: bool = False  # True 时 SQLAlchemy echo 全量 SQL 日志，拖慢高并发
 
     # 数据库
-    DATABASE_URL: str = "postgresql://lumina:lumina_secure_password@localhost:5432/lumina"
+    DATABASE_URL: str = "mysql+pymysql://lumina:lumina_secure_password@localhost:3306/lumina"
 
     # JWT
     JWT_SECRET_KEY: str = "change_me_jwt_secret_key"
@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     # AI 网关地址（单体内指向自身）
     AI_GATEWAY_URL: str = "http://localhost:8080"
 
-    # AI 供应商 API Key（不入库，由环境变量注入）
+# AI 供应商 API Key（不入库，由环境变量注入）
     QWEN_API_KEY: str = ""
     GLM_API_KEY: str = ""
     SPARK_API_KEY: str = ""
@@ -43,6 +43,19 @@ class Settings(BaseSettings):
     MOONSHOT_API_KEY: str = ""
     ANTHROPIC_API_KEY: str = ""
     GEMINI_API_KEY: str = ""
+
+    # 作业上传（路径与大小上限，见 assignment 模块）
+    UPLOAD_DIR: str = "uploads"
+    MAX_UPLOAD_MB: int = 20
+
+    # 直播流媒体地址前缀（HLS 适配层，如 http://127.0.0.1:8888/live）
+    # 输出布局 {base}/{stream_key}/index.m3u8（与 mediamtx / Nginx-HLS 一致）
+    # 留空时 /live/rooms/{id} 返回 mock:// 占位流地址，不阻塞课堂协作逻辑
+    LIVE_STREAM_BASE: str = ""
+
+    # 直播同源反代（开发/演示）：true 时 stream_url 返回 /media/... 相对代理地址，
+    # 由 lumina-app 转发到 LIVE_STREAM_BASE，规避跨域 CORS 与媒体服务器 cookie 校验
+    LIVE_STREAM_PROXY: bool = False
 
 
 settings = Settings()
