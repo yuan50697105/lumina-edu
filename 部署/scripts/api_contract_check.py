@@ -129,8 +129,9 @@ def _norm(path: str) -> str:
 
 
 # ─── 3. 提取前端调用 URL（泛型参数可选，如 get<Course> 与 patch( 均覆盖）───
+# 路径须以 / 开头，规避 params.get('course') 等 URLSearchParams 误报
 CALL = re.compile(
-    r"\b(get|post|patch|del)\b\s*(?:<[^>]*>)?\(\s*[`'\"]([^`'\"]+)[`'\"]"
+    r"\b(get|post|patch|del)\b\s*(?:<[^>]*>)?\(\s*[`'\"](\/[^`'\"]+)[`'\"]"
 )
 FETCH = re.compile(r"fetch\(\s*[`'\"]([^`'\"]+)[`'\"]")
 

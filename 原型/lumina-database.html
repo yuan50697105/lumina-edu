@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 数据库设计文档 v1.3</title>
+<title>Lumina 墨光 · 数据库设计文档 v1.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -120,7 +120,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Database Design</small></div>
     </div>
-    <div class="doc-type">Database Design · v1.3</div>
+    <div class="doc-type">Database Design · v1.4</div>
     <h1>
       <span class="hl">数据</span>库<br/>
       <em>设计文档</em>
@@ -134,7 +134,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.3 · MySQL 9.7 · 同步单体架构</span>
+      <span class="value">v1.4 · MySQL 9.7 · 30 表 · 11 模块</span>
     </div>
     <div class="row">
       <span class="label">数据库</span>
@@ -153,8 +153,8 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">22</div><div class="lbl">数据表</div></div>
-  <div class="stat"><div class="val hl">10</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val hl">30</div><div class="lbl">数据表</div></div>
+  <div class="stat"><div class="val hl">11</div><div class="lbl">模块</div></div>
   <div class="stat"><div class="val">3</div><div class="lbl">分区策略</div></div>
   <div class="stat"><div class="val">1</div><div class="lbl">数据库引擎</div></div>
   <div class="stat"><div class="val">14+</div><div class="lbl">索引策略</div></div>
@@ -170,10 +170,11 @@
     <a href="#s4"><span class="num">04</span>课程模块表结构</a>
     <a href="#s5"><span class="num">05</span>作业与成绩</a>
     <a href="#s6"><span class="num">06</span>直播模块</a>
-    <a href="#s7"><span class="num">07</span>AI 模块</a>
-    <a href="#s8"><span class="num">08</span>分区策略</a>
-    <a href="#s9"><span class="num">09</span>索引策略</a>
-    <a href="#s10"><span class="num">10</span>数据迁移</a>
+    <a href="#s7"><span class="num">07</span>协作模块</a>
+    <a href="#s8"><span class="num">08</span>AI 模块</a>
+    <a href="#s9"><span class="num">09</span>分区策略</a>
+    <a href="#s10"><span class="num">10</span>索引策略</a>
+    <a href="#s11"><span class="num">11</span>数据迁移</a>
   </div>
 </nav>
 
@@ -307,6 +308,29 @@
       <span class="er-rel">1 ── N</span>
       <span class="er-entity ai">ai_conversations</span>
     </div>
+    <div style="margin-bottom:16px;">
+      <span class="er-entity core">courses</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">project_groups</span>
+      <span class="er-rel">（小组 D-02）</span>
+    </div>
+    <div style="margin-bottom:16px;">
+      <span class="er-entity">project_groups</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">projects</span>
+    </div>
+    <div style="margin-bottom:16px;">
+      <span class="er-entity">project_groups</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">discussion_topics</span>
+    </div>
+    <div>
+      <span class="er-entity">projects</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">kanban_columns</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">kanban_cards</span>
+    </div>
   </div>
 
   <h3 class="sub">2.2 关系说明</h3>
@@ -320,6 +344,12 @@
       <tr><td>提交 → 成绩</td><td>1:1</td><td>—</td><td>每次提交对应一个成绩</td></tr>
       <tr><td>用户 → AI 对话</td><td>1:N</td><td>—</td><td>用户发起多个对话</td></tr>
       <tr><td>对话 → 消息</td><td>1:N</td><td>—</td><td>对话包含多条消息</td></tr>
+      <tr><td>课程 → 小组</td><td>1:N</td><td>—</td><td>课程下建若干协作小组（D-02）</td></tr>
+      <tr><td>小组 ↔ 用户</td><td>N:M</td><td><code>group_members</code></td><td>组员（组长为成员之一），<code>uq_group_member</code> 去重</td></tr>
+      <tr><td>小组 → 项目</td><td>1:N</td><td>—</td><td>每小组可建多个项目</td></tr>
+      <tr><td>项目 → 看板列 → 卡片</td><td>1:N → 1:N</td><td>—</td><td>列含 order_num，卡片可按列拖拽（column_id + order_num）</td></tr>
+      <tr><td>小组 → 共享文件</td><td>1:N</td><td>—</td><td>上传文件元数据存 <code>shared_files</code>，文件本体本地 uploads</td></tr>
+      <tr><td>小组 → 讨论主题 → 回复</td><td>1:N → 1:N</td><td>—</td><td>组内话题与回复</td></tr>
     </tbody>
   </table>
 </section>
@@ -600,7 +630,7 @@
     <div class="num-tag">5 tables · 已落地（D-01）</div>
   </div>
 
-  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：直播课堂（D-01）已落地为 5 张表：<code>live_rooms</code> / <code>live_attendees</code> / <code>live_messages</code> / <code>live_quizzes</code> / <code>live_quiz_answers</code>，纳入单体共享 MySQL 共 <b>22</b> 表。聊天/点名广播走 <code>live_messages</code>（<code>msg_type</code> 区分 chat / system / call），答案与负责人通过 <code>after_id</code> 游标增量拉取；入会校验选课关系，<code>live_attendees</code> 以 <code>(room_id, user_id)</code> 唯一约束去重。</p>
+  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：直播课堂（D-01）已落地为 5 张表：<code>live_rooms</code> / <code>live_attendees</code> / <code>live_messages</code> / <code>live_quizzes</code> / <code>live_quiz_answers</code>，纳入单体共享 MySQL 共 <b>30</b> 表（含 D-02 协作 8 张）。聊天/点名广播走 <code>live_messages</code>（<code>msg_type</code> 区分 chat / system / call），答案与负责人通过 <code>after_id</code> 游标增量拉取；入会校验选课关系，<code>live_attendees</code> 以 <code>(room_id, user_id)</code> 唯一约束去重。</p>
 
   <div class="table-card">
     <div class="table-header">
@@ -718,10 +748,185 @@
   </div>
 </section>
 
-<!-- ============ 07 · AI 模块 ============ -->
+<!-- ============ 07 · 协作模块 ============ -->
 <section class="section" id="s7">
   <div class="section-header">
-    <h2>07 · AI 模块 <em>AI-Powered</em></h2>
+    <h2>07 · 协作模块 <em>Collaboration</em></h2>
+    <div class="num-tag">8 tables · 已落地（D-02）</div>
+  </div>
+
+  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：小组协作（D-02）已落地为 8 张表：<code>project_groups</code> / <code>group_members</code> / <code>projects</code> / <code>kanban_columns</code> / <code>kanban_cards</code> / <code>shared_files</code> / <code>discussion_topics</code> / <code>discussion_replies</code>，全部挂在课程 → 小组树上（outer 以 <code>ondelete=CASCADE</code> 清理）。权限：查看 = 教师 / 组长 / 组员；管理 = 教师 / 组长。加入小组须已选课（未选课 403，重复加入由 <code>uq_group_member</code> 挡 409）。</p>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">project_groups</span>
+      <span class="table-desc">协作小组（所属课程）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>course_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>所属课程（级联删除）</td></tr>
+          <tr><td><code>name</code></td><td>VARCHAR(100)</td><td></td><td>小组名称</td></tr>
+          <tr><td><code>description</code></td><td>TEXT</td><td></td><td>小组说明</td></tr>
+          <tr><td><code>leader_id</code></td><td>UUID</td><td></td><td>组长（成员之一，可换）</td></tr>
+          <tr><td><code>created_by</code></td><td>UUID</td><td></td><td>创建者（教师）</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td></td><td>创建时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">group_members</span>
+      <span class="table-desc">小组成员（UNIQUE(group, user)）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>group_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> · <span class="tag idx">IDX</span></td><td>小组（级联删除）</td></tr>
+          <tr><td><code>user_id</code></td><td>UUID</td><td></td><td>成员用户</td></tr>
+          <tr><td><code>joined_at</code></td><td>TIMESTAMP</td><td></td><td>加入时间</td></tr>
+          <tr><td><code>·</code></td><td>UNIQUE(row)</td><td></td><td>(group_id, user_id) 唯一约束 uq_group_member</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">projects</span>
+      <span class="table-desc">小组内协作项目（含看板）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>group_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>所属小组</td></tr>
+          <tr><td><code>course_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>冗余课程（快速鉴权）</td></tr>
+          <tr><td><code>title</code></td><td>VARCHAR(200)</td><td></td><td>项目标题</td></tr>
+          <tr><td><code>description</code></td><td>TEXT</td><td></td><td>项目说明</td></tr>
+          <tr><td><code>status</code></td><td>VARCHAR(20)</td><td></td><td>not_started | in_progress | done</td></tr>
+          <tr><td><code>deadline</code></td><td>TIMESTAMP</td><td></td><td>截止时间（可空）</td></tr>
+          <tr><td><code>created_by</code></td><td>UUID</td><td></td><td>创建者</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td></td><td>创建时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">kanban_columns</span>
+      <span class="table-desc">看板列（属于项目）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>project_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> · <span class="tag idx">IDX</span></td><td>所属项目（级联删除）</td></tr>
+          <tr><td><code>title</code></td><td>VARCHAR(50)</td><td></td><td>列名（待办/进行中/完成）</td></tr>
+          <tr><td><code>order_num</code></td><td>INTEGER</td><td></td><td>列排序</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">kanban_cards</span>
+      <span class="table-desc">看板卡片（任务卡，可拖拽换列/排位）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>column_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> · <span class="tag idx">IDX</span></td><td>所在列（级联删除）</td></tr>
+          <tr><td><code>title</code></td><td>VARCHAR(200)</td><td></td><td>任务标题</td></tr>
+          <tr><td><code>description</code></td><td>TEXT</td><td></td><td>任务说明</td></tr>
+          <tr><td><code>assignee_id</code></td><td>UUID</td><td></td><td>负责人（可空）</td></tr>
+          <tr><td><code>order_num</code></td><td>INTEGER</td><td></td><td>列内排位（换列时重排）</td></tr>
+          <tr><td><code>due_date</code></td><td>TIMESTAMP</td><td></td><td>截止时间（可空）</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td></td><td>创建时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">shared_files</span>
+      <span class="table-desc">小组共享文件（本地 uploads 目录，V1.1 简化存储）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>group_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>所属小组</td></tr>
+          <tr><td><code>course_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>冗余课程</td></tr>
+          <tr><td><code>uploader_id</code></td><td>UUID</td><td></td><td>上传者</td></tr>
+          <tr><td><code>filename</code></td><td>VARCHAR(255)</td><td></td><td>原始文件名</td></tr>
+          <tr><td><code>stored_path</code></td><td>VARCHAR(500)</td><td></td><td>落盘相对路径（空 = mock 占位）</td></tr>
+          <tr><td><code>size</code></td><td>INTEGER</td><td></td><td>文件大小（字节）</td></tr>
+          <tr><td><code>content_type</code></td><td>VARCHAR(100)</td><td></td><td>MIME 类型</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td></td><td>上传时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">discussion_topics</span>
+      <span class="table-desc">组内讨论主题</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>group_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>所属小组</td></tr>
+          <tr><td><code>author_id</code></td><td>UUID</td><td></td><td>作者</td></tr>
+          <tr><td><code>title</code></td><td>VARCHAR(200)</td><td></td><td>主题标题</td></tr>
+          <tr><td><code>content</code></td><td>TEXT</td><td></td><td>主题内容</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td></td><td>创建时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">discussion_replies</span>
+      <span class="table-desc">讨论回复</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>topic_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>所属主题（级联删除）</td></tr>
+          <tr><td><code>author_id</code></td><td>UUID</td><td></td><td>作者</td></tr>
+          <tr><td><code>content</code></td><td>TEXT</td><td></td><td>回复内容</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td></td><td>回复时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 08 · AI 模块 ============ -->
+<section class="section" id="s8">
+  <div class="section-header">
+    <h2>08 · AI 模块 <em>AI-Powered</em></h2>
     <div class="num-tag">5 tables · 知识存 PG</div>
   </div>
 
@@ -859,10 +1064,10 @@
   </div>
 </section>
 
-<!-- ============ 08 · 分区 ============ -->
-<section class="section" id="s8">
+<!-- ============ 09 · 分区 ============ -->
+<section class="section" id="s9">
   <div class="section-header">
-    <h2>08 · 分区策略 <em>Partitioning</em></h2>
+    <h2>09 · 分区策略 <em>Partitioning</em></h2>
     <div class="num-tag">MySQL 原生分区</div>
   </div>
 
@@ -907,10 +1112,10 @@
   </table>
 </section>
 
-<!-- ============ 09 · 索引 ============ -->
-<section class="section" id="s9">
+<!-- ============ 10 · 索引 ============ -->
+<section class="section" id="s10">
   <div class="section-header">
-    <h2>09 · 索引策略 <em>Indexing</em></h2>
+    <h2>10 · 索引策略 <em>Indexing</em></h2>
     <div class="num-tag">Performance</div>
   </div>
 
@@ -969,10 +1174,10 @@
 <span class="keyword">GROUP BY</span> a.id;</pre>
 </section>
 
-<!-- ============ 10 · 迁移 ============ -->
-<section class="section" id="s10">
+<!-- ============ 11 · 迁移 ============ -->
+<section class="section" id="s11">
   <div class="section-header">
-    <h2>10 · 数据迁移 <em>Migration</em></h2>
+    <h2>11 · 数据迁移 <em>Migration</em></h2>
     <div class="num-tag">Version Control</div>
   </div>
 
@@ -1033,7 +1238,7 @@ alembic/
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Database Design</div>
-  <div>v1.3 · 22 表 · 10 模块 · MySQL 9.7</div>
+  <div>v1.4 · 30 表 · 11 模块 · MySQL 9.7</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">DB-LUMINA-2026-001</div>
 </footer>
 

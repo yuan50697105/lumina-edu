@@ -180,8 +180,8 @@
   <table>
     <thead><tr><th>维度</th><th>基线</th><th>未实现差距</th></tr></thead>
     <tbody>
-      <tr><td><b>功能</b></td><td>单体 60 端点 · 10 模块 · 22 表 · 冒烟 25/25 · 直播课堂已落地（D-01）</td><td>PRD P1 模块（题库/学情/协作等）未实现</td></tr>
-      <tr><td><b>测试</b></td><td>单测 109/0 · 契约三层一致（28 ⊂ 60 ⊂ Nginx） · 压测 365 req/s · p50 26ms</td><td>UAT 人工签字未完成 · AI 真批阅未跑真实模型</td></tr>
+      <tr><td><b>功能</b></td><td>单体 77 端点 · 11 模块 · 30 表 · 冒烟 25/25 + 协作 21/21 · 直播（D-01）与协作（D-02）已落地</td><td>PRD P1 模块（题库/学情等）未实现</td></tr>
+      <tr><td><b>测试</b></td><td>单测 125/0 · 契约三层一致（41 ⊂ 77 ⊂ Nginx） · 压测 365 req/s · p50 26ms</td><td>UAT 人工签字未完成 · AI 真批阅未跑真实模型</td></tr>
       <tr><td><b>部署</b></td><td>离线资产生产化（init.sql/seed 幂等/监控/文档 v1.2）</td><td>真实生产环境（MySQL + Docker + TLS + 域名）未就绪</td></tr>
       <tr><td><b>前端</b></td><td>Web 构建通过 · 埋点链路闭合</td><td>移动端 typecheck 待 RN 工具链 · 未真机冒烟</td></tr>
     </tbody>
@@ -203,7 +203,7 @@
       <tr><td rowspan="3"><b>环境前置</b></td><td>生产云资源 / 域名 / TLS</td><td><code>部署/docker-compose.yml</code> · <code>lumina.conf</code>（Nginx TLS 段）</td><td>云采购 + ICP 备案周期</td><td>A-01 / A-02</td></tr>
       <tr><td>生产 MySQL 9.7 / Redis</td><td><code>config/mysql/init.sql</code> · compose 4 服务 · <code>部署/scripts/*</code></td><td>服务器就绪</td><td>A-03 / A-04</td></tr>
       <tr><td>环境变量 / 安全基线</td><td><code>deploy/.env.example</code> · <code>status.sh</code> · <code>monitor.sh</code></td><td>密码/JWT/CORS 生产化</td><td>A-05 / A-06 / A-07</td></tr>
-      <tr><td rowspan="3"><b>数据迁移</b></td><td>历史数据迁移脚本</td><td><code>seed_demo.py</code>（幂等 ensure）· 22 表 DDL</td><td>旧系统数据源格式未知</td><td>B-01 / B-03</td></tr>
+      <tr><td rowspan="3"><b>数据迁移</b></td><td>历史数据迁移脚本</td><td><code>seed_demo.py</code>（幂等 ensure）· 30 表 DDL</td><td>旧系统数据源格式未知</td><td>B-01 / B-03</td></tr>
       <tr><td>迁移演练 / 回滚演练</td><td>上线检查清单「回滚方案」· <code>backup/restore</code> 脚本</td><td>测试库构造</td><td>B-04</td></tr>
       <tr><td>生产数据迁移 + 校验</td><td><code>init.sql</code>（19 DDL 实测）· 校验口径</td><td>迁移窗口 / 业务确认</td><td>B-05</td></tr>
       <tr><td rowspan="3"><b>上线执行</b></td><td>灰度方案 / 流量切分</td><td><code>lumina.conf</code>（正则路由 + 限流 zone）</td><td>Nginx 权重方案设计</td><td>B-06 / B-08</td></tr>
@@ -213,7 +213,7 @@
       <tr><td>AI 真批阅（真实模型）</td><td>ai-grade 模块（容错解析 / 置信度落库）· 网关适配器 3 套协议</td><td>外部模型 API key</td><td>C-02</td></tr>
       <tr><td>三角色培训 + 材料</td><td><code>lumina-userguide.html</code> v1.1 · <code>lumina-operations.html</code> v1.2</td><td>业务方排期</td><td>C-03 / C-04</td></tr>
       <tr><td><b>移动端</b></td><td>typecheck / 真机冒烟</td><td><code>服务/mobile-app/</code>（Expo SDK 52 骨架）</td><td>RN 工具链环境</td><td>C-05</td></tr>
-      <tr><td rowspan="3"><b>V1.1 演进</b></td><td>PRD P0/P1 功能缺口</td><td>单体 10 模块地基 · 原型 40 文件</td><td>M4 后迭代排期</td><td>D-01 ~ D-06</td></tr>
+      <tr><td rowspan="3"><b>V1.1 演进</b></td><td>PRD P0/P1 功能缺口</td><td>单体 11 模块地基 · 原型 40 文件 · D-01/D-02 已实施</td><td>M4 后迭代排期</td><td>D-03 ~ D-06</td></tr>
       <tr><td>AI 基础设施 / 规模运营</td><td>AI 网关可扩展（openai/anthropic/gemini）</td><td>模型成本 · 用户量阈值</td><td>D-06 ~ D-08</td></tr>
       <tr><td>平台覆盖 / 国产化</td><td>鸿蒙（HarmonyOS）适配评估</td><td>校园信创诉求 · 移动端 Expo RN 现状</td><td>D-09</td></tr>
     </tbody>
@@ -250,9 +250,9 @@
   <table>
     <thead><tr><th>编号</th><th>任务</th><th>负责人</th><th>工期</th><th>依赖</th><th>交付物</th><th>优先级</th></tr></thead>
     <tbody>
-      <tr><td><b>B-01</b></td><td>生产库建表与索引</td><td>DBA</td><td>0.5 天</td><td>A-03</td><td>执行 <code>init.sql</code> · 校验 22 表 + 2 索引</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>B-01</b></td><td>生产库建表与索引</td><td>DBA</td><td>0.5 天</td><td>A-03</td><td>执行 <code>init.sql</code> · 校验 30 表 + 2 索引</td><td><span class="tag critical">P0</span></td></tr>
       <tr><td><b>B-02</b></td><td>演示数据与账户初始化</td><td>DBA</td><td>0.5 天</td><td>B-01</td><td><code>seed_demo.py</code> 幂等注入（admin/teacher/student + 课程/作业/成绩）</td><td><span class="tag critical">P0</span></td></tr>
-      <tr><td><b>B-03</b></td><td>历史数据迁移方案开发</td><td>DBA</td><td>3 天</td><td>A-03</td><td>迁移脚本（旧系统→22 表）· 字段映射文档 · 校验脚本</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>B-03</b></td><td>历史数据迁移方案开发</td><td>DBA</td><td>3 天</td><td>A-03</td><td>迁移脚本（旧系统→30 表）· 字段映射文档 · 校验脚本</td><td><span class="tag critical">P0</span></td></tr>
       <tr><td><b>B-04</b></td><td>迁移演练与回滚演练</td><td>DBA</td><td>1 天</td><td>B-03</td><td>演练报告（含备份恢复验证）</td><td><span class="tag critical">P0</span></td></tr>
       <tr><td><b>B-05</b></td><td>生产数据迁移 + 校验</td><td>DBA</td><td>1 天</td><td>B-04</td><td>迁移完成 · 100% 行数 / 抽样字段校验</td><td><span class="tag critical">P0</span></td></tr>
       <tr><td><b>B-06</b></td><td>灰度方案与内测用户池</td><td>运维+业务</td><td>2 天</td><td>B-02</td><td>Nginx 权重切分（10%→50%→100%）· 内测师生名单确认</td><td><span class="tag critical">P0</span></td></tr>
@@ -286,7 +286,7 @@
     <thead><tr><th>编号</th><th>任务</th><th>对应 PRD</th><th>优先级</th><th>说明</th></tr></thead>
     <tbody>
       <tr><td><b>D-01</b></td><td>直播课堂（观看/举手/答题/聊天）</td><td>04 · P0</td><td><span class="tag done">✅ 已实施</span></td><td>REST + after_id 轮询 · 本地 mediamtx HLS 已接入（2026-08-31）；生产 CDN 选型待定</td></tr>
-      <tr><td><b>D-02</b></td><td>协作工具（小组/看板/文件/讨论）</td><td>05 · P1</td><td><span class="tag high">P1</span></td><td>复用课程/成员模型</td></tr>
+      <tr><td><b>D-02</b></td><td>协作工具（小组/看板/文件/讨论）</td><td>05 · P1</td><td><span class="tag done">✅ 已实施</span></td><td>collab 模块 27 端点 · 8 表（30 表）· Web 看板/讨论/共享文件（2026-08-31，冒烟 21/21）；移动端待鸿蒙评估（D-09）</td></tr>
       <tr><td><b>D-03</b></td><td>题库与考试（组卷/在线考试/评分）</td><td>07 · P1</td><td><span class="tag high">P1</span></td><td>可接 AI 组卷</td></tr>
       <tr><td><b>D-04</b></td><td>学情分析 + 学生档案</td><td>08 · 10 · P1</td><td><span class="tag high">P1</span></td><td>基于 analytics 模块扩展</td></tr>
       <tr><td><b>D-05</b></td><td>课程审批 + 系统设置 + 审计日志</td><td>14 · 16 · 17 · P1</td><td><span class="tag medium">P2</span></td><td>管理端补齐</td></tr>
@@ -493,7 +493,7 @@
   <table>
     <thead><tr><th>检查项</th><th>标准</th><th>验证方式</th><th>状态</th></tr></thead>
     <tbody>
-      <tr><td><b>功能完整性</b></td><td>核心 60 端点全部可用</td><td><code>smoke_test.py --live</code> 25/25</td><td>☐ 待上线执行</td></tr>
+      <tr><td><b>功能完整性</b></td><td>核心 77 端点全部可用</td><td><code>smoke_test.py --live</code> 25/25 + <code>smoke_collab.py</code> 21/21</td><td>☐ 待上线执行</td></tr>
       <tr><td><b>缺陷数</b></td><td>P0/P1 = 0</td><td>灰度监控 + 问题清单</td><td>☐ 待上线执行</td></tr>
       <tr><td><b>性能指标</b></td><td>P99 &lt; 500ms</td><td><code>load_test.py</code>（生产前置压测截图）</td><td>☐ 待上线执行</td></tr>
       <tr><td><b>数据迁移</b></td><td>100% 迁移 · 校验通过</td><td>行数 + 抽样字段比对</td><td>☐ 待上线执行</td></tr>
@@ -517,6 +517,7 @@
   <ul>
     <li>每个功能模块以 <b>PRD v1.3 对应验收标准</b>为准，DoD = 功能可用 + 单测回归全绿 + 埋点事件合规（<code>events_catalog.py</code>）</li>
     <li>直播（D-01）<b>已实施</b>（REST 16 端点 + 本地 HLS 已跑通）；剩余事项：生产流媒体/CDN 选型评审 + 移动端直播对齐 + 鸿蒙适配评估（D-09）</li>
+    <li>协作工具（D-02）<b>已实施</b>（collab 27 端点 · 8 表 · Web 看板/讨论/共享文件 · 冒烟 21/21，2026-08-31）</li>
     <li>AI 基础设施（D-06）按版本推进，RAG / Agent 编排与现有网关<code>/gateway/completions</code> 协议兼容</li>
   </ul>
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · API 接口文档 v1.3</title>
+<title>Lumina 墨光 · API 接口文档 v1.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -137,7 +137,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>API Reference</small></div>
     </div>
-    <div class="doc-type">API Reference · v1.3</div>
+    <div class="doc-type">API Reference · v1.4</div>
     <h1>
       <span class="hl">API</span> 接口<br/>
       <em>文档</em>
@@ -151,7 +151,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.3 · 生产基准 · MySQL 9.7</span>
+      <span class="value">v1.4 · 生产基准 · MySQL 9.7</span>
     </div>
     <div class="row">
       <span class="label">基础路径</span>
@@ -170,8 +170,9 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">10</div><div class="lbl">模块</div></div>
-  <div class="stat"><div class="val hl">60</div><div class="lbl">接口数</div></div>
+  <div class="stat"><div class="val hl">11</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val hl">77</div><div class="lbl">接口数</div></div>
+  <div class="stat"><div class="val">27</div><div class="lbl">协作端点</div></div>
   <div class="stat"><div class="val">16</div><div class="lbl">直播端点</div></div>
   <div class="stat"><div class="val">JWT</div><div class="lbl">认证方式</div></div>
   <div class="stat"><div class="val">RFC 7807</div><div class="lbl">错误格式</div></div>
@@ -188,10 +189,11 @@
     <a href="#s5"><span class="num">05</span>作业模块</a>
     <a href="#s6"><span class="num">06</span>成绩模块</a>
     <a href="#s7"><span class="num">07</span>直播模块</a>
-    <a href="#s8"><span class="num">08</span>AI 模块</a>
-    <a href="#s9"><span class="num">09</span>错误码</a>
-    <a href="#s10"><span class="num">10</span>限流策略</a>
-    <a href="#s11"><span class="num">11</span>SDK · 示例代码</a>
+    <a href="#s8"><span class="num">08</span>协作模块</a>
+    <a href="#s9"><span class="num">09</span>AI 模块</a>
+    <a href="#s10"><span class="num">10</span>错误码</a>
+    <a href="#s11"><span class="num">11</span>限流策略</a>
+    <a href="#s12"><span class="num">12</span>SDK · 示例代码</a>
   </div>
 </nav>
 
@@ -211,9 +213,9 @@
 
   <div class="info note">
     <div class="label">单体架构 · 模块清单</div>
-    本接口文档对齐单体应用 <b>lumina-app</b>（FastAPI · 60 业务端点），共 <b>10</b> 个业务模块：
-    <code>user</code> · <code>course</code> · <code>assignment</code> · <code>grade</code> · <code>live</code> · <code>ai_gateway</code> · <code>ai_chat</code> · <code>ai_grade</code> · <code>analytics</code> · <code>logs</code>。<br/>
-    其中 <code>analytics</code> 提供 <code>/events</code> 事件上报与统计，<code>logs</code> 提供 <code>/logs/query</code>、<code>/logs/summary</code> 日志检索（均限管理员）；AI 流式响应使用 SSE（<code>text/event-stream</code>）；直播模块（D-01）采用 REST + 轮询增量，无 WebSocket。
+    本接口文档对齐单体应用 <b>lumina-app</b>（FastAPI · 77 业务端点），共 <b>11</b> 个业务模块：
+    <code>user</code> · <code>course</code> · <code>assignment</code> · <code>grade</code> · <code>live</code> · <code>collab</code> · <code>ai_gateway</code> · <code>ai_chat</code> · <code>ai_grade</code> · <code>analytics</code> · <code>logs</code>。<br/>
+    其中 <code>analytics</code> 提供 <code>/events</code> 事件上报与统计，<code>logs</code> 提供 <code>/logs/query</code>、<code>/logs/summary</code> 日志检索（均限管理员）；AI 流式响应使用 SSE（<code>text/event-stream</code>）；直播模块（D-01）与协作模块（D-02）采用 REST + 轮询增量，无 WebSocket。
   </div>
 
   <table>
@@ -806,10 +808,115 @@
   </div>
 </section>
 
-<!-- ============ 08 · AI ============ -->
+<!-- ============ 08 · 协作 ============ -->
 <section class="section" id="s8">
   <div class="section-header">
-    <h2>08 · AI 模块 <em>AI-Powered</em></h2>
+    <h2>08 · 协作模块 <em>Collaboration</em></h2>
+    <div class="num-tag">27 endpoints · 小组 / 项目 / 看板 / 文件 / 讨论</div>
+  </div>
+
+  <div class="info note">
+    <div class="label">V1.1 · D-02 协作工具已落地（课程 → 小组树）</div>
+    关系：小组 <code>project_groups</code> → 成员 <code>group_members</code>（UNIQUE）→ 项目 <code>projects</code> → 看板列 <code>kanban_columns</code> / 卡片 <code>kanban_cards</code>（拖拽换列）→ 共享文件 <code>shared_files</code>（本地 uploads）→ 组内讨论 <code>discussion_topics</code> / <code>discussion_replies</code>。
+    权限：查看 = 授课教师 / 组长 / 组员；管理（增删改组、删项目、换组长）= 教师 / 组长；加入小组须已选课（未选课越权 403 / 重复加入 409）。
+  </div>
+
+  <h3 class="sub">8.1 小组 · Groups</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/me</span><span class="endpoint-desc">我的小组（学生视角，含课程名）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/courses/{course_id}/groups</span><span class="endpoint-desc">课程小组列表（选课学生/教师）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/courses/{course_id}/groups</span><span class="endpoint-desc">创建小组（授课教师/管理员）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/{group_id}</span><span class="endpoint-desc">小组详情（成员 / 项目数 / is_member）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method patch">PATCH</span><span class="endpoint-path">/groups/{group_id}</span><span class="endpoint-desc">更新小组（名前/说明/换组长，组长或教师）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/groups/{group_id}</span><span class="endpoint-desc">删除小组（教师，级联清理）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/groups/{group_id}/members</span><span class="endpoint-desc">加入小组（已选课学生）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/groups/{group_id}/members/{user_id}</span><span class="endpoint-desc">移出成员（组长/教师；可退自己）</span></div>
+  </div>
+
+  <h3 class="sub">8.2 项目 · Projects</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/{group_id}/projects</span><span class="endpoint-desc">小组项目列表</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/groups/{group_id}/projects</span><span class="endpoint-desc">创建项目（组成员/教师，含 deadline）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/projects/{project_id}</span><span class="endpoint-desc">项目详情</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method patch">PATCH</span><span class="endpoint-path">/projects/{project_id}</span><span class="endpoint-desc">更新项目（title/status/deadline）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/projects/{project_id}</span><span class="endpoint-desc">删除项目（组长/教师）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/projects/{project_id}/board</span><span class="endpoint-desc">项目看板（列 + 卡片聚合）</span></div>
+  </div>
+
+  <h3 class="sub">8.3 看板 · Kanban</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/projects/{project_id}/columns</span><span class="endpoint-desc">新建看板列</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method patch">PATCH</span><span class="endpoint-path">/columns/{column_id}</span><span class="endpoint-desc">改列名 / 重排</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/columns/{column_id}</span><span class="endpoint-desc">删除列（卡片级联）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/columns/{column_id}/cards</span><span class="endpoint-desc">新建任务卡片（assignee/due_date）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method patch">PATCH</span><span class="endpoint-path">/cards/{card_id}</span><span class="endpoint-desc">更新卡片（含拖拽换列 column_id + order_num）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/cards/{card_id}</span><span class="endpoint-desc">删除卡片</span></div>
+  </div>
+
+  <h3 class="sub">8.4 共享文件 · Files</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/{group_id}/files</span><span class="endpoint-desc">共享文件列表</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/groups/{group_id}/files</span><span class="endpoint-desc">上传文件（multipart，存本地 uploads）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/files/{file_id}/download</span><span class="endpoint-desc">下载文件（缺失时为 mock 占位）</span></div>
+  </div>
+
+  <h3 class="sub">8.5 组内讨论 · Discussion</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/{group_id}/topics</span><span class="endpoint-desc">讨论主题列表</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/groups/{group_id}/topics</span><span class="endpoint-desc">发表主题</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/topics/{topic_id}</span><span class="endpoint-desc">主题详情（含回复 / reply_count）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/topics/{topic_id}/replies</span><span class="endpoint-desc">回复主题</span></div>
+  </div>
+</section>
+
+<!-- ============ 09 · AI ============ -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <h2>09 · AI 模块 <em>AI-Powered</em></h2>
     <div class="num-tag">6 endpoints · 覆盖 ai_gateway / ai_chat / ai_grade</div>
   </div>
 
@@ -908,10 +1015,10 @@
   </div>
 </section>
 
-<!-- ============ 09 · 错误码 ============ -->
-<section class="section" id="s9">
+<!-- ============ 10 · 错误码 ============ -->
+<section class="section" id="s10">
   <div class="section-header">
-    <h2>09 · 错误码 <em>Errors</em></h2>
+    <h2>10 · 错误码 <em>Errors</em></h2>
     <div class="num-tag">RFC 7807</div>
   </div>
 
@@ -946,10 +1053,10 @@
   </table>
 </section>
 
-<!-- ============ 10 · 限流 ============ -->
-<section class="section" id="s10">
+<!-- ============ 11 · 限流 ============ -->
+<section class="section" id="s11">
   <div class="section-header">
-    <h2>10 · 限流策略 <em>Rate Limit</em></h2>
+    <h2>11 · 限流策略 <em>Rate Limit</em></h2>
     <div class="num-tag">Token Bucket</div>
   </div>
 
@@ -969,10 +1076,10 @@
   </div>
 </section>
 
-<!-- ============ 11 · SDK ============ -->
-<section class="section" id="s11">
+<!-- ============ 12 · SDK ============ -->
+<section class="section" id="s12">
   <div class="section-header">
-    <h2>11 · SDK · 示例代码 <em>Examples</em></h2>
+    <h2>12 · SDK · 示例代码 <em>Examples</em></h2>
     <div class="num-tag">TypeScript · Python</div>
   </div>
 
@@ -1038,7 +1145,7 @@ curl -X POST https://api.lumina.edu/api/v1/ai/chat \
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · API Reference</div>
-  <div>v1.3 · 10 模块 · 60 接口 · 2026-08-31 · 生产基准</div>
+  <div>v1.4 · 11 模块 · 77 接口 · 2026-08-31 · 生产基准</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">API-LUMINA-2026-001</div>
 </footer>
 
