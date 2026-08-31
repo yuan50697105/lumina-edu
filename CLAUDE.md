@@ -111,6 +111,21 @@ cd 服务/lumina-app && uvicorn app.main:app --port 8080 --host 127.0.0.1
 cd 服务/web-frontend && npm run dev   # 打开 http://localhost:5173
 ```
 
+### 🎥 直播演示流（开播真实画面，可选）
+
+未接媒体服务器时，开播返回 `mock://` 占位（无画面，仅课堂协作逻辑）。要「开播即有真实画面」，用本地 mediamtx 演示：
+
+```bash
+# ① 一键起流：MediaMTX + ffmpeg 推演示课堂画面（默认房间 key=roomdemo）
+部署/stream/start_demo_stream.bat          # 停止：stop_demo_stream.bat
+# ② 后端 .env 已配置（服务/lumina-app/.env，gitignored）：
+#    LIVE_STREAM_BASE=http://127.0.0.1:8888/live
+#    LIVE_STREAM_PROXY=true        # stream_url 走同源 /media 反代
+# ③ 教师登录 → 冒烟测试课程 → 「直播演示间（固定流 roomdemo）」→ 开播
+```
+- 任意房间推流：`部署/stream/start_demo_stream.bat <room的 stream_key>`
+- 详情见 `部署/stream/README.md`；生产接入见「运维手册」媒体反代说明
+
 ## Design System
 
 ### Color Palette
