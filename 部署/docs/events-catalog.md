@@ -3,7 +3,7 @@
 > 自动生成：`python 部署/scripts/events_catalog.py`（阶段三 3.2 埋点数据验证依据）
 
 ## 事件命名规范
-`namespace.action`（点分小写）；允许命名空间：ai, announcement, assignment, auth, chapter, chat, conversation, course, element, enrollment, gateway, grade, model, page, provider, session, submission, system, user
+`namespace.action`（点分小写）；允许命名空间：ai, announcement, assignment, auth, chapter, chat, conversation, course, element, enrollment, gateway, grade, live, model, page, provider, session, submission, system, user
 
 ## 全量事件清单
 
@@ -50,6 +50,19 @@
 | `grade.statistics` | 后端 | instrumentation.py, modules/grade/instrumentation.py |
 | `grade.updated` | 后端 | instrumentation.py, modules/grade/instrumentation.py |
 | `grade.view` | 前端/后端 | instrumentation.py, modules/grade/instrumentation.py, mobile-app/src/pages/Grades.tsx |
+| `live.call` | 后端 | instrumentation.py |
+| `live.call_respond` | 后端 | instrumentation.py |
+| `live.chat` | 后端 | instrumentation.py |
+| `live.join` | 后端 | instrumentation.py |
+| `live.leave` | 后端 | instrumentation.py |
+| `live.quiz_answer` | 后端 | instrumentation.py |
+| `live.quiz_close` | 后端 | instrumentation.py |
+| `live.quiz_start` | 后端 | instrumentation.py |
+| `live.raise_hand` | 后端 | instrumentation.py |
+| `live.room_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/CourseDetail.tsx |
+| `live.room_end` | 后端 | instrumentation.py |
+| `live.room_start` | 后端 | instrumentation.py |
+| `live.room_view` | 前端 | web-frontend/src/pages/LiveRoom.tsx |
 | `model.register` | 前端 | web-frontend/src/pages/AdminModels.tsx |
 | `model.toggle` | 前端 | web-frontend/src/pages/AdminModels.tsx |
 | `page.view` | 前端 | mobile-app/src/utils/tracker.ts, web-frontend/src/components/Layout.tsx |
@@ -76,6 +89,8 @@
 - `course.view`
 - `element.click`
 - `grade.view`
+- `live.room_create`
+- `live.room_view`
 - `model.register`
 - `model.toggle`
 - `page.view`

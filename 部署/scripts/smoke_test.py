@@ -5,10 +5,12 @@
 # --------------------------------------------
 # 全链路：登录 → 建课 → 章节 → 选课 → 发布作业 → 学生提交
 #       → 教师批阅 → 录入期末成绩 → 成绩单 → 埋点统计 → 日志查询
+#       → 直播课堂（建房间/开播/入会/举手/点名/聊谈/答题/结束 + 越权）
 #
 # 前置条件：compose 全部服务在线（MYSQL 有预置用户）。
 # 账号通过环境变量提供（缺省读取 LUMINA_*）：
 #   LUMINA_TEACHER_EMAIL/PASSWORD、LUMINA_STUDENT_EMAIL/PASSWORD、LUMINA_ADMIN_EMAIL/PASSWORD
+#   LUMINA_NOUSER_EMAIL/PASSWORD（可选：未选课学生越权断言，seed_demo 提供 nouser@lumina.edu）
 #
 # 用法：
 #   python 部署/scripts/smoke_test.py                      # 走 Nginx :80
@@ -220,6 +222,92 @@ def main() -> int:
     # ─── S15 管理员日志查询 ───
     ok_c, summ = api.call("GET", "/api/v1/logs/summary")
     log("S15 日志汇总(admin)", http_ok(ok_c), f"total={summ.get('total') if isinstance(summ, dict) else '?'}")
+
+    # ─── S16-S25 直播课堂（D-01 · V1.1）───
+    api.token = teacher_token
+    ok_c, room = api.call("POST", "/api/v1/live/rooms", {"course_id": str(course_id), "title": "冒烟直播间"})
+    room_id = (room or {}).get("id") if isinstance(room, dict) else None
+    log("S16 教师创建直播间", http_ok(ok_c) and bool(room_id), f"room_id={str(room_id)[:8]}…")
+
+    if room_id:
+        # 开播：返回 live + 可播放 stream_url（mock:// 或真实 HLS 皆视为就绪）
+        api.token = teacher_token
+        ok_c, started = api.call("POST", f"/api/v1/live/rooms/{room_id}/start")
+        st_stat = (started or {}).get("status") if isinstance(started, dict) else None
+        stream_url = (started or {}).get("stream_url") if isinstance(started, dict) else None
+        log("S17 教师开播(stream_url)", http_ok(ok_c) and st_stat == "live" and bool(stream_url),
+            f"status={st_stat} url={str(stream_url)[:44]}")
+
+        # 学生入会
+        api.token = student_token
+        ok_c, joined = api.call("POST", f"/api/v1/live/rooms/{room_id}/join")
+        online = (joined or {}).get("online_count") if isinstance(joined, dict) else None
+        log("S18 学生入会", http_ok(ok_c), f"online={online}")
+
+        # 未选课越权 403（可选：需 LUMINA_NOUSER_*，seed_demo 提供 nouser@lumina.edu）
+        no_user = os.getenv("LUMINA_NOUSER_EMAIL"), os.getenv("LUMINA_NOUSER_PASSWORD")
+        if any(x is None for x in no_user):
+            log("S19 未选课越权403", None, "未提供 LUMINA_NOUSER_EMAIL/PASSWORD，跳过")
+        else:
+            api.token = None
+            _, nb = api.call("POST", "/api/v1/auth/login",
+                             {"username": no_user[0], "password": no_user[1], "device": "web"})
+            if nb and nb.get("access_token"):
+                api.token = nb["access_token"]
+                ncode, _ = api.call("POST", f"/api/v1/live/rooms/{room_id}/join")
+                log("S19 未选课越权403", ncode == 403, f"期望403实际{ncode}")
+            else:
+                log("S19 未选课越权403", None, "nouser 登录失败，跳过")
+
+        # 学生举手 → 教师查看队列
+        api.token = student_token
+        ok_c, _ = api.call("PUT", f"/api/v1/live/rooms/{room_id}/raise", {"active": True})
+        api.token = teacher_token
+        ok_c2, raises = api.call("GET", f"/api/v1/live/rooms/{room_id}/raises")
+        n_raises = len(raises) if isinstance(raises, list) else -1
+        log("S20 举手/教师队列", http_ok(ok_c) and http_ok(ok_c2) and n_raises >= 1, f"队列数={n_raises}")
+
+        # 教师随机点名 → 学生应答
+        api.token = teacher_token
+        ok_c, call = api.call("POST", f"/api/v1/live/rooms/{room_id}/call", {"user_id": None})
+        called_uid = (call or {}).get("user_id") if isinstance(call, dict) else None
+        api.token = student_token
+        ok_c2, _ = api.call("POST", f"/api/v1/live/rooms/{room_id}/call/respond")
+        log("S21 随机点名/应答", http_ok(ok_c) and bool(called_uid) and http_ok(ok_c2),
+            f"被点={str(called_uid)[:8]}…")
+
+        # 聊天：教师发 → 学生增量拉取命中
+        api.token = teacher_token
+        ok_c, msg = api.call("POST", f"/api/v1/live/rooms/{room_id}/messages",
+                             {"msg_type": "chat", "content": "冒烟聊天"})
+        msg_id = (msg or {}).get("id") if isinstance(msg, dict) else None
+        api.token = student_token
+        ok_c2, msgs = api.call("GET", f"/api/v1/live/rooms/{room_id}/messages?after_id={max(0, (msg_id or 1) - 1)}&limit=50")
+        got = any((m or {}).get("content") == "冒烟聊天" for m in msgs) if isinstance(msgs, list) else False
+        log("S22 聊天/增量拉取", http_ok(ok_c) and http_ok(ok_c2) and got, f"msg_id={msg_id}")
+
+        # 答题闭环：发布 → 作答 → 关闭 → 统计
+        api.token = teacher_token
+        ok_c, quiz = api.call("POST", f"/api/v1/live/rooms/{room_id}/quizzes", {
+            "question": "1+1=?",
+            "options": [{"key": "A", "text": "2"}, {"key": "B", "text": "3"}],
+            "answer": "A",
+        })
+        quiz_id = (quiz or {}).get("id") if isinstance(quiz, dict) else None
+        api.token = student_token
+        ok_a, _ = api.call("POST", f"/api/v1/live/rooms/{room_id}/quizzes/{quiz_id}/answer", {"choice": "A"})
+        api.token = teacher_token
+        ok_b, _ = api.call("POST", f"/api/v1/live/rooms/{room_id}/quizzes/{quiz_id}/close")
+        ok_c3, res = api.call("GET", f"/api/v1/live/rooms/{room_id}/quizzes/{quiz_id}/result")
+        total = (res or {}).get("total") if isinstance(res, dict) else -1
+        log("S23 答题闭环(发布/作答/统计)", http_ok(ok_c) and ok_a and ok_b and http_ok(ok_c3) and total >= 1,
+            f"quiz={str(quiz_id)[:8]}… total={total}")
+
+        # 结束直播
+        api.token = teacher_token
+        ok_c, ended = api.call("POST", f"/api/v1/live/rooms/{room_id}/end")
+        en_stat = (ended or {}).get("status") if isinstance(ended, dict) else None
+        log("S24 结束直播", http_ok(ok_c) and en_stat == "ended", f"status={en_stat}")
 
     # ─── 汇总 ───
     print(f"\n{'=' * 56}\nPASS {pass_count}  |  FAIL {fail_count}  |  SKIP {skip_count}")

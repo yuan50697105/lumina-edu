@@ -67,26 +67,39 @@
 
 ---
 
-## 6. 埋点与日志
+## 6. 直播课堂（D-01）
 
 | # | 场景 | 通过条件 | 验证方式 |
 |---|------|----------|----------|
-| 6.1 | 前端埋点上报 | POST /events 202（含 page.view/auth.login 等）；events_catalog 52 事件命名合规 | smoke S14 + events_catalog |
-| 6.2 | 埋点统计 | GET /events/stats 客数 distinct_users ≥ 0 | smoke S14 |
-| 6.3 | 日志查询 | GET /logs/query（admin）：method/path/status/request_id 过滤有效 | smoke S15 + integration |
-| 6.4 | 日志统计 | GET /logs/summary：total/errors/error_rate/top_paths | smoke S15 |
-| 6.5 | 结构化 JSON 日志 | logs_service 安装 JsonFormatter：输出 JSONLines（中文/traceback/extra） | unit test_logs 16 条 |
+| 6.1 | 建房间 / 开播 | POST /live/rooms 201；POST start 200 → status=live 且 stream_url 非空（HLS / mock 占位均可） | smoke S16-17 |
+| 6.2 | 入会 / 权限 | 已选课学生 join 200 在线数 +1；未选课学生 join 403 | smoke S18-19 |
+| 6.3 | 举手 / 点名 | 学生 raise → 教师队列 ≥1；教师随机点名 → 学生应答 200 | smoke S20-21 |
+| 6.4 | 聊天 / 增量 | 教师发 chat → 学生 after_id 增量拉取命中 | smoke S22 |
+| 6.5 | 答题闭环 | 发布 → 学生作答 → 关闭 → 统计 total≥1 | smoke S23 |
+| 6.6 | 结束直播 | POST end → status=ended | smoke S24 |
 
 ---
 
-## 7. 跨端体验
+## 7. 埋点与日志
 
 | # | 场景 | 通过条件 | 验证方式 |
 |---|------|----------|----------|
-| 7.1 | Web 页面功能完整 | 登录/首页/课程详情/AI 对话/成绩单均可操作 | contract + smoke |
-| 7.2 | 移动端功能对齐 | 同上 5 页；埋点一致；API_BASE 模拟器/真机可配 | code review + README |
-| 7.3 | 契约一致性 | 13 前端调用 ⊂ 44 后端端点 ⊂ Nginx 路由（全闭环） | api_contract_check |
-| 7.4 | 单元测试基线 | 142 条通过，0 失败 | run_tests |
+| 7.1 | 前端埋点上报 | POST /events 202（含 page.view/auth.login 等）；events_catalog 65 事件命名合规 | smoke S14 + events_catalog |
+| 7.2 | 埋点统计 | GET /events/stats 客数 distinct_users ≥ 0 | smoke S14 |
+| 7.3 | 日志查询 | GET /logs/query（admin）：method/path/status/request_id 过滤有效 | smoke S15 + integration |
+| 7.4 | 日志统计 | GET /logs/summary：total/errors/error_rate/top_paths | smoke S15 |
+| 7.5 | 结构化 JSON 日志 | logs_service 安装 JsonFormatter：输出 JSONLines（中文/traceback/extra） | unit test_logs 16 条 |
+
+---
+
+## 8. 跨端体验
+
+| # | 场景 | 通过条件 | 验证方式 |
+|---|------|----------|----------|
+| 8.1 | Web 页面功能完整 | 登录/首页/课程详情/AI 对话/成绩单/直播课堂均可操作 | contract + smoke |
+| 8.2 | 移动端功能对齐 | 同上 6 页；埋点一致；API_BASE 模拟器/真机可配 | code review + README |
+| 8.3 | 契约一致性 | 13 前端调用 ⊂ 44 后端端点 ⊂ Nginx 路由（全闭环） | api_contract_check |
+| 8.4 | 单元测试基线 | 142 条通过，0 失败 | run_tests |
 
 ---
 
