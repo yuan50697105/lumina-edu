@@ -31,9 +31,14 @@ class Settings(BaseSettings):
     # AI 网关地址（单体内指向自身，微服务时指向 ai-gateway 服务）
     AI_GATEWAY_URL: str = "http://localhost:8080"
 
-    # 直播流媒体地址前缀（HLS 适配层：如 http://127.0.0.1:18080/live/）
+    # 直播流媒体地址前缀（HLS 适配层，如 http://127.0.0.1:8888/live）
+    # 输出布局 {base}/{stream_key}/index.m3u8（与 mediamtx / Nginx-HLS 一致）
     # 留空时 /live/rooms/{id} 返回 mock:// 占位流地址，不阻塞课堂协作逻辑
     LIVE_STREAM_BASE: str = ""
+
+    # 直播同源反代（开发/演示）：true 时 stream_url 返回 /media/... 相对代理地址，
+    # 由 lumina-app 转发到 LIVE_STREAM_BASE，规避跨域 CORS 与媒体服务器 cookie 校验
+    LIVE_STREAM_PROXY: bool = False
 
     class Config:
         env_file = ".env"

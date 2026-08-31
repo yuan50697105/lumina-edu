@@ -108,7 +108,7 @@ export default function CourseDetail() {
             <span className={`pill ${r.status === 'live' ? 'ok' : ''}`}>{LIVE_STATUS[r.status]}</span>
             <span className="muted">
               在线 {r.online_count ?? 0} · 累计 {r.viewer_count ?? 0} 人次
-              {r.status === 'live' && r.stream_url?.startsWith('http') && ' · 有推流'}
+              {r.status === 'live' && (r.stream_url?.startsWith('http') || r.stream_url?.startsWith('/media')) && ' · 有推流'}
             </span>
           </div>
         ))}

@@ -119,12 +119,20 @@ def _online_count(db: Session, room_id) -> int:
 
 
 def _stream_url(room: LiveRoom) -> str | None:
-    """流播放地址：配置了媒体服务器前缀则返回 HLS 地址，否则 mock:// 占位"""
+    """流播放地址：配置了媒体服务器前缀则返回 HLS 地址，否则 mock:// 占位
+
+    媒体服务器 HLS 输出约定为 {base}/{key}/index.m3u8（与 mediamtx / Nginx-HLS
+    目录布局一致，如 base=http://127.0.0.1:8888/live → live/roomxxx/index.m3u8）。
+    LIVE_STREAM_PROXY=true（开发/演示）时返回同源 /media/ 相对地址，由
+    app.media_proxy 转发到 base，规避跨域 CORS 与媒体服务器 cookie 校验。
+    """
     if room.status != "live":
         return None
     key = room.stream_key or str(room.id)
     if settings.LIVE_STREAM_BASE:
-        return f"{settings.LIVE_STREAM_BASE.rstrip('/')}/{key}.m3u8"
+        if settings.LIVE_STREAM_PROXY:
+            return f"/media/{key}/index.m3u8"
+        return f"{settings.LIVE_STREAM_BASE.rstrip('/')}/{key}/index.m3u8"
     return f"mock://live/{key}"
 
 

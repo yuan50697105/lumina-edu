@@ -481,17 +481,20 @@ function LivePlayer({ url, status, title }: { url?: string | null; status: strin
       setErr('')
       return
     }
-    if (/^https?:\/\//.test(url)) {
+    // 支持 http(s) 绝对地址与 /media 同源反代相对地址（开发演示 L1，见 media_proxy）
+    const isHlsUrl = /^https?:\/\//.test(url) || url.startsWith('/media')
+    if (isHlsUrl) {
+      const src = url.startsWith('/media') ? new URL(url, window.location.origin).href : url
       if (Hls.isSupported()) {
         const hls = new Hls()
-        hls.loadSource(url)
+        hls.loadSource(src)
         hls.attachMedia(v)
         hls.on(Hls.Events.ERROR, (_e, data) => {
           if (data.fatal) setErr('流加载失败（媒体服务器未接入或未推流）')
         })
         return () => hls.destroy()
       } else if (v.canPlayType('application/vnd.apple.mpegurl')) {
-        v.src = url
+        v.src = src
         return () => {
           v.removeAttribute('src')
         }
