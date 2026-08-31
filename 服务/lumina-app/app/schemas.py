@@ -1,11 +1,12 @@
 # ============================================
 # Lumina 墨光 · 统一 Pydantic Schemas（合并 9 微服务）
 # ============================================
+import uuid
 from datetime import datetime
 from decimal import Decimal
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class SuccessResponse(BaseModel):
