@@ -199,15 +199,15 @@
   <table>
     <thead><tr><th>组件</th><th>版本</th><th>用途</th><th>部署方式</th></tr></thead>
     <tbody>
-      <tr><td><b>lumina-app</b></td><td>v1.2</td><td>单体 FastAPI（44 端点 · 9 模块）</td><td>Docker 容器 · :8080</td></tr>
-      <tr><td><b>MySQL</b></td><td>9.7</td><td>主数据库（17 表）</td><td>容器 · 3306 · utf8mb4</td></tr>
+      <tr><td><b>lumina-app</b></td><td>v1.2</td><td>单体 FastAPI（60 端点 · 10 模块 · 直播课堂）</td><td>Docker 容器 · :8080</td></tr>
+      <tr><td><b>MySQL</b></td><td>9.7</td><td>主数据库（22 表）</td><td>容器 · 3306 · utf8mb4</td></tr>
       <tr><td><b>Redis</b></td><td>7.x</td><td>会话 · 缓存</td><td>容器 · 6379</td></tr>
       <tr><td><b>Nginx</b></td><td>1.9.x</td><td>反向代理 · 静态资源</td><td>容器 · :80</td></tr>
     </tbody>
   </table>
   <div class="info note">
     <div class="label">ℹ 架构说明</div>
-    单体架构：9 业务模块（user/course/assignment/grade/ai_gateway/ai_chat/ai_grade/analytics/logs）共享同一进程与数据库，不依赖消息队列/向量库/对象存储等微服务中间件。水平扩展通过 <code>--scale lumina-app=N</code> 实现；AI 对话存储于 MySQL，无外部服务。
+    单体架构：10 业务模块（user/course/assignment/grade/live/ai_gateway/ai_chat/ai_grade/analytics/logs）共享同一进程与数据库，不依赖消息队列/向量库/对象存储等微服务中间件。水平扩展通过 <code>--scale lumina-app=N</code> 实现；AI 对话存储于 MySQL，无外部服务。
   </div>
 </section>
 
@@ -222,7 +222,7 @@
   <div class="info note">
     <div class="label">ℹ 拓扑</div>
     <b>入口</b>：Nginx :80（静态资源 + 反代 <code>/api/*</code>）→ <b>lumina-app</b> :8080（单体 API）→ <b>MySQL</b> :3306（持久化）+ <b>Redis</b> :6379（会话缓存）。
-    <br/>4 服务由 <code>部署/docker-compose.yml</code> 一键编排，全部数据落 MySQL 库 <code>lumina</code>（17 表），无外部依赖。
+    <br/>4 服务由 <code>部署/docker-compose.yml</code> 一键编排，全部数据落 MySQL 库 <code>lumina</code>（22 表），无外部依赖。
   </div>
 
   <h3 class="sub">2.2 单体应用部署（Docker Compose）</h3>

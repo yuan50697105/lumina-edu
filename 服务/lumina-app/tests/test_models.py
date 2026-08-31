@@ -28,7 +28,7 @@ class TestTableDefinitions:
     """表定义测试"""
 
     def test_all_tables_exist(self, tables):
-        """所有 17 张表已定义"""
+        """所有 22 张表已定义"""
         expected = {
             "users", "sessions", "courses", "enrollments", "chapters",
             "announcements", "assignments", "submissions", "grade_records",

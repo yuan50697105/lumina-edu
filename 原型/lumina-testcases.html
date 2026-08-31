@@ -125,7 +125,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.2 · 单测基线 81</span>
+      <span class="value">v1.2 · 单测执行 109</span>
     </div>
     <div class="row">
       <span class="label">测试框架</span>
@@ -473,12 +473,12 @@
 <section class="section" id="s6">
   <div class="section-header">
     <h2>06 · 直播模块测试 <em>Live</em></h2>
-    <div class="num-tag">20 cases</div>
+    <div class="num-tag">20 cases · 已落地（以自动化为准）</div>
   </div>
 
-  <div class="info warn">
-    <div class="label">⚠️ 规划中</div>
-    直播模块在单体 v1.2 中未实现，对应 module 不在 9 个业务模块（user / course / assignment / grade / ai_gateway / ai_chat / ai_grade / analytics / logs）内；以下用例为规划用例，暂不纳入本轮 81 条执行范围。
+  <div class="info note">
+    <div class="label">D-01 已落地（单体 v1.3）</div>
+    直播课堂已随 <b>D-01</b> 实现为 <code>live</code> 业务模块（第 10 个模块 · REST 16 端点 · <code>after_id</code> 轮询 · HLS 流媒体可插拔）。下方 TC-LIVE-xxx 用例基于规划期端点 / WebSocket 编写，真实行为以自动化单测 <code>tests/test_live.py</code>（19 用例）+ 冒烟 S16-S24（10 步）为准；用例步骤将逐步对齐新端点。
   </div>
 
   <div class="test-case">
@@ -721,7 +721,7 @@
     <tbody>
       <tr><td><b>单元测试</b></td><td>全部通过 · 覆盖率 ≥ 80%</td><td>开发</td></tr>
       <tr><td><b>集成测试</b></td><td>全部通过</td><td>开发</td></tr>
-      <tr><td><b>API 测试</b></td><td>44 个端点 100% 覆盖</td><td>QA</td></tr>
+      <tr><td><b>API 测试</b></td><td>60 个端点 100% 覆盖</td><td>QA</td></tr>
       <tr><td><b>E2E 测试</b></td><td>核心流程全部通过</td><td>QA</td></tr>
       <tr><td><b>性能测试</b></td><td>P99 &lt; 500ms · 无内存泄漏</td><td>SRE</td></tr>
       <tr><td><b>安全扫描</b></td><td>无高危漏洞</td><td>安全</td></tr>
@@ -755,7 +755,7 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Test Cases</div>
-  <div>v1.2 · 81 用例 · 9 模块 · 2026-08-31</div>
+  <div>v1.2 · 81 用例 · 10 模块 · 2026-08-31</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">QA-LUMINA-2026-001</div>
 </footer>
 

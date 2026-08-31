@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 数据库设计文档 v1.2</title>
+<title>Lumina 墨光 · 数据库设计文档 v1.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -120,7 +120,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Database Design</small></div>
     </div>
-    <div class="doc-type">Database Design · v1.2</div>
+    <div class="doc-type">Database Design · v1.3</div>
     <h1>
       <span class="hl">数据</span>库<br/>
       <em>设计文档</em>
@@ -134,7 +134,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.2 · MySQL 9.7 · 同步单体架构</span>
+      <span class="value">v1.3 · MySQL 9.7 · 同步单体架构</span>
     </div>
     <div class="row">
       <span class="label">数据库</span>
@@ -153,8 +153,8 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">17</div><div class="lbl">数据表</div></div>
-  <div class="stat"><div class="val hl">9</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val hl">22</div><div class="lbl">数据表</div></div>
+  <div class="stat"><div class="val hl">10</div><div class="lbl">模块</div></div>
   <div class="stat"><div class="val">3</div><div class="lbl">分区策略</div></div>
   <div class="stat"><div class="val">1</div><div class="lbl">数据库引擎</div></div>
   <div class="stat"><div class="val">14+</div><div class="lbl">索引策略</div></div>
@@ -192,7 +192,7 @@
       <tr><td><b>本地 uploads/</b></td><td>临时上传目录（替代对象存储）</td><td>—</td><td>单体本地目录</td></tr>
     </tbody>
   </table>
-  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：单体架构仅依赖 MySQL 9.7 单库，业务 / AI / 日志数据统一落 MySQL（InnoDB · utf8mb4）；表由 <code>Base.metadata.create_all</code> 自动创建（development 模式），生产初始化脚本见 <code>部署/config/mysql/init.sql</code>。缓存 / 消息队列 / 对象存储等中间件已从单体移除。单体包含 9 个业务模块：user / course / assignment / grade / ai_gateway / ai_chat / ai_grade / analytics / logs。</p>
+  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：单体架构仅依赖 MySQL 9.7 单库，业务 / AI / 日志数据统一落 MySQL（InnoDB · utf8mb4）；表由 <code>Base.metadata.create_all</code> 自动创建（development 模式），生产初始化脚本见 <code>部署/config/mysql/init.sql</code>。缓存 / 消息队列 / 对象存储等中间件已从单体移除。单体包含 10 个业务模块：user / course / assignment / grade / live / ai_gateway / ai_chat / ai_grade / analytics / logs。</p>
 
   <h3 class="sub">1.2 数据规模预估</h3>
   <table>
@@ -597,15 +597,15 @@
 <section class="section" id="s6">
   <div class="section-header">
     <h2>06 · 直播模块 <em>Live</em></h2>
-    <div class="num-tag">2 tables · 规划中</div>
+    <div class="num-tag">5 tables · 已落地（D-01）</div>
   </div>
 
-  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：直播模块在单体化架构中尚未实现，<code>live_sessions</code> / <code>live_messages</code> 为规划中表结构，当前 17 表不包含直播模块。</p>
+  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：直播课堂（D-01）已落地为 5 张表：<code>live_rooms</code> / <code>live_attendees</code> / <code>live_messages</code> / <code>live_quizzes</code> / <code>live_quiz_answers</code>，纳入单体共享 MySQL 共 <b>22</b> 表。聊天/点名广播走 <code>live_messages</code>（<code>msg_type</code> 区分 chat / system / call），答案与负责人通过 <code>after_id</code> 游标增量拉取；入会校验选课关系，<code>live_attendees</code> 以 <code>(room_id, user_id)</code> 唯一约束去重。</p>
 
   <div class="table-card">
     <div class="table-header">
-      <span class="table-name">live_sessions</span>
-      <span class="table-desc">直播场次</span>
+      <span class="table-name">live_rooms</span>
+      <span class="table-desc">直播房间</span>
     </div>
     <div class="table-body">
       <table>
@@ -613,17 +613,38 @@
         <tbody>
           <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
           <tr><td><code>course_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>所属课程</td></tr>
-          <tr><td><code>teacher_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>开播教师</td></tr>
+          <tr><td><code>teacher_id</code></td><td>UUID</td><td></td><td>开播教师</td></tr>
           <tr><td><code>title</code></td><td>VARCHAR(200)</td><td></td><td>直播标题</td></tr>
-          <tr><td><code>scheduled_at</code></td><td>TIMESTAMPTZ</td><td></td><td>计划时间</td></tr>
-          <tr><td><code>started_at</code></td><td>TIMESTAMPTZ</td><td></td><td>开始时间</td></tr>
-          <tr><td><code>ended_at</code></td><td>TIMESTAMPTZ</td><td></td><td>结束时间</td></tr>
-          <tr><td><code>status</code></td><td>ENUM</td><td></td><td>scheduled | live | ended</td></tr>
-          <tr><td><code>enable_recording</code></td><td>BOOLEAN</td><td></td><td>开启录制</td></tr>
-          <tr><td><code>enable_chat</code></td><td>BOOLEAN</td><td></td><td>开启聊天</td></tr>
-          <tr><td><code>enable_hand_raise</code></td><td>BOOLEAN</td><td></td><td>开启举手</td></tr>
-          <tr><td><code>replay_url</code></td><td>VARCHAR(500)</td><td></td><td>回放地址</td></tr>
-          <tr><td><code>participant_count</code></td><td>INTEGER</td><td></td><td>参与人数</td></tr>
+          <tr><td><code>status</code></td><td>VARCHAR(20)</td><td></td><td>scheduled | live | ended</td></tr>
+          <tr><td><code>stream_key</code></td><td>VARCHAR(100)</td><td></td><td>推流唯一标识（媒体服务器 RTMP key）</td></tr>
+          <tr><td><code>viewer_count</code></td><td>INTEGER</td><td></td><td>累计加入人次</td></tr>
+          <tr><td><code>active_call</code></td><td>JSON</td><td></td><td>当前点名 {user_id, name, called_at}</td></tr>
+          <tr><td><code>started_at</code></td><td>TIMESTAMP</td><td></td><td>开播时间</td></tr>
+          <tr><td><code>ended_at</code></td><td>TIMESTAMP</td><td></td><td>结束时间</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td></td><td>创建时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">live_attendees</span>
+      <span class="table-desc">直播参与记录（含举手状态）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>room_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> · <span class="tag idx">IDX</span></td><td>直播房间</td></tr>
+          <tr><td><code>user_id</code></td><td>UUID</td><td></td><td>参与用户</td></tr>
+          <tr><td><code>role</code></td><td>VARCHAR(20)</td><td></td><td>teacher | student</td></tr>
+          <tr><td><code>joined_at</code></td><td>TIMESTAMP</td><td></td><td>加入时间</td></tr>
+          <tr><td><code>left_at</code></td><td>TIMESTAMP</td><td></td><td>离开时间</td></tr>
+          <tr><td><code>raise_hand</code></td><td>BOOLEAN</td><td></td><td>是否举手</td></tr>
+          <tr><td><code>raised_at</code></td><td>TIMESTAMP</td><td></td><td>举手时间</td></tr>
+          <tr><td><code>·</code></td><td>UNIQUE(row)</td><td></td><td>(room_id, user_id) 唯一约束 uq_live_attendee</td></tr>
         </tbody>
       </table>
     </div>
@@ -632,24 +653,67 @@
   <div class="table-card">
     <div class="table-header">
       <span class="table-name">live_messages</span>
-      <span class="table-desc">直播聊天记录</span>
+      <span class="table-desc">直播消息（聊天/点名/系统广播）</span>
     </div>
     <div class="table-body">
       <table>
         <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
         <tbody>
-          <tr><td><code>id</code></td><td>BIGSERIAL</td><td><span class="tag pk">PK</span></td><td>主键 · 自增</td></tr>
-          <tr><td><code>session_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>直播场次</td></tr>
-          <tr><td><code>user_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>发送者</td></tr>
-          <tr><td><code>type</code></td><td>ENUM</td><td></td><td>chat | hand_raise | system</td></tr>
+          <tr><td><code>id</code></td><td>BIGINT</td><td><span class="tag pk">PK</span> · 自增</td><td>主键（after_id 游标）</td></tr>
+          <tr><td><code>room_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> · <span class="tag idx">IDX</span></td><td>直播房间</td></tr>
+          <tr><td><code>user_id</code></td><td>UUID</td><td></td><td>发送者</td></tr>
+          <tr><td><code>msg_type</code></td><td>VARCHAR(20)</td><td></td><td>chat | system | call</td></tr>
           <tr><td><code>content</code></td><td>TEXT</td><td></td><td>消息内容</td></tr>
-          <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td><span class="tag idx">分区键</span></td><td>发送时间</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td><span class="tag idx">分区键</span></td><td>发送时间</td></tr>
         </tbody>
       </table>
       <pre><span class="comment">-- 分区：按月分区，便于冷热分离</span>
 <span class="keyword">CREATE TABLE</span> live_messages (
   ...
 ) <span class="keyword">PARTITION BY RANGE</span> (created_at);</pre>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">live_quizzes</span>
+      <span class="table-desc">直播答题</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>room_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>直播房间</td></tr>
+          <tr><td><code>teacher_id</code></td><td>UUID</td><td></td><td>出题教师</td></tr>
+          <tr><td><code>question</code></td><td>TEXT</td><td></td><td>题干</td></tr>
+          <tr><td><code>options</code></td><td>JSON</td><td></td><td>[{"key":"A","text":"…"}, …]</td></tr>
+          <tr><td><code>answer</code></td><td>VARCHAR(10)</td><td></td><td>正确答案（可空）</td></tr>
+          <tr><td><code>status</code></td><td>VARCHAR(20)</td><td></td><td>active | closed</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td></td><td>创建时间</td></tr>
+          <tr><td><code>closed_at</code></td><td>TIMESTAMP</td><td></td><td>关闭时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">live_quiz_answers</span>
+      <span class="table-desc">直播答题作答（一题一次，覆盖改答）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>quiz_id</code></td><td>UUID</td><td><span class="tag fk">FK</span></td><td>所属答题</td></tr>
+          <tr><td><code>user_id</code></td><td>UUID</td><td></td><td>作答学生</td></tr>
+          <tr><td><code>choice</code></td><td>VARCHAR(10)</td><td></td><td>选项 key</td></tr>
+          <tr><td><code>submitted_at</code></td><td>TIMESTAMP</td><td></td><td>提交时间</td></tr>
+          <tr><td><code>·</code></td><td>UNIQUE(row)</td><td></td><td>(quiz_id, user_id) 唯一约束 uq_quiz_answer</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
@@ -811,7 +875,7 @@
       <tr><td><b>submissions</b></td><td>submitted_at</td><td>RANGE 分区（时间）</td><td>滚动 12 月</td><td>10 万+/学期</td></tr>
       <tr><td><b>api_logs</b></td><td>created_at</td><td>RANGE 分区 · 冷热分离</td><td>热 3 月 + 冷归档</td><td>500 MB/日</td></tr>
       <tr><td><b>ai_conversations</b></td><td>created_at</td><td>RANGE 分区（时间）</td><td>滚动 12 月</td><td>50 万+会话</td></tr>
-      <tr><td><b>live_messages</b></td><td>created_at</td><td>RANGE 分区（时间）</td><td>滚动 12 月</td><td>规划中</td></tr>
+      <tr><td><b>live_messages</b></td><td>created_at</td><td>RANGE 分区（时间）</td><td>滚动 12 月</td><td>高并发聊天写入</td></tr>
     </tbody>
   </table>
 
@@ -969,7 +1033,7 @@ alembic/
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Database Design</div>
-  <div>v1.2 · 17 表 · 9 模块 · MySQL 9.7</div>
+  <div>v1.3 · 22 表 · 10 模块 · MySQL 9.7</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">DB-LUMINA-2026-001</div>
 </footer>
 

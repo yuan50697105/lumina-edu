@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 技术设计文档 TDD v1.1</title>
+<title>Lumina 墨光 · 技术设计文档 TDD v1.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -151,7 +151,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Technical Design Document</small></div>
     </div>
-    <div class="doc-type">Technical Design Document · v1.1</div>
+    <div class="doc-type">Technical Design Document · v1.2</div>
     <h1>
       <span class="hl">技术设计</span><br/>
       文档 <em>TDD</em>
@@ -165,7 +165,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.1 · 单体架构对齐</span>
+      <span class="value">v1.2 · 单体架构对齐 · 直播课堂落地</span>
     </div>
     <div class="row">
       <span class="label">作者</span>
@@ -173,7 +173,7 @@
     </div>
     <div class="row">
       <span class="label">发布日期</span>
-      <span class="value">2026-08-25</span>
+      <span class="value">2026-08-31</span>
     </div>
     <div class="row">
       <span class="label">关联文档</span>
@@ -258,6 +258,13 @@
           <td><b>Claude</b></td>
           <td><b>单体架构对齐 · 架构图/部署/容灾/技术选型去除微服务组件 · 版本 v1.1</b></td>
           <td style="color:var(--cobalt); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</td>
+        </tr>
+        <tr style="background:var(--growth-soft);">
+          <td><span class="tag" style="background:var(--growth); color:#fff;">v1.2</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px; font-weight:500;">2026-08-31</td>
+          <td><b>Claude</b></td>
+          <td><b>D-01 直播课堂落地 · 模块 10 · 端点 60 · 表 22 · HLS 流媒体适配（LIVE_STREAM_* / media 反代）· 数据库/API 章节同步</b></td>
+          <td style="color:var(--growth); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</td>
         </tr>
       </tbody>
     </table>
@@ -373,7 +380,7 @@
       <div class="arch-box inkwell">
         <div class="title">数据层 · Data</div>
         <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:8px;">
-          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">MySQL 9.7<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">单实例 · 17 表</span></div>
+          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">MySQL 9.7<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">单实例 · 22 表</span></div>
           <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">Redis<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">缓存 · 会话</span></div>
           <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">MySQL 全文<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">搜索（InnoDB）</span></div>
           <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">本地存储<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">uploads 卷</span></div>
@@ -388,7 +395,7 @@
     <tbody>
       <tr><td><b>架构风格</b></td><td>单体应用（FastAPI + 模块化）</td><td>微服务 / Serverless</td><td>开发效率高，部署简单，适合快速验证</td></tr>
       <tr><td><b>前端框架</b></td><td>React 18 + TypeScript</td><td>Vue 3 / Svelte</td><td>生态成熟，招聘容易，跨端共享逻辑</td></tr>
-      <tr><b>移动端</b></td><td>React Native</td><td>Flutter / 原生</td><td>与 Web 共享 TS 代码，热更新</td></tr>
+      <tr><td><b>移动端</b></td><td>React Native</td><td>Flutter / 原生</td><td>与 Web 共享 TS 代码，热更新</td></tr>
       <tr><td><b>桌面端</b></td><td>Electron + React</td><td>Tauri / Qt</td><td>复用 Web 代码，离线能力强</td></tr>
       <tr><td><b>后端语言</b></td><td>Python · FastAPI</td><td>Go / Java / Node.js</td><td>Python AI 生态完善，FastAPI 高性能异步</td></tr>
       <tr><td><b>数据库</b></td><td>MySQL 9.7</td><td>PostgreSQL 16</td><td>生态成熟、运维简单、部署成本低；utf8mb4 与 JSON 支持完善</td></tr>
@@ -480,7 +487,7 @@
   <h3 class="sub">5.1 单体应用模块划分</h3>
   <div class="info note">
     <div class="label">架构决策 · 快速验证优先</div>
-    采用 <b>Python FastAPI 单体应用 + 模块化目录结构</b>，9 个业务模块共享同一进程和数据库，通过 <code>app/modules/</code> 实现逻辑隔离。演进方向：未来可按需拆分微服务（当前 v1.2 保持单体）。
+    采用 <b>Python FastAPI 单体应用 + 模块化目录结构</b>，10 个业务模块共享同一进程和数据库，通过 <code>app/modules/</code> 实现逻辑隔离。演进方向：未来可按需拆分微服务（当前 v1.2 保持单体）。
   </div>
   <table>
     <thead><tr><th>模块</th><th>职责</th><th>路由前缀</th><th>端点数</th></tr></thead>
@@ -489,14 +496,19 @@
       <tr><td><b>课程模块</b></td><td>课程 CRUD · 章节 · 选课</td><td>/courses</td><td>14</td></tr>
       <tr><td><b>作业模块</b></td><td>发布/提交/批阅</td><td>/assignments</td><td>8</td></tr>
       <tr><td><b>成绩模块</b></td><td>成绩录入 · GPA · 统计</td><td>/grades</td><td>5</td></tr>
+      <tr><td><b>直播模块</b></td><td>直播课堂 · 房间/举手/聊天/点名/答题</td><td>/live</td><td>16</td></tr>
       <tr><td><b>AI 网关</b></td><td>模型路由 · 供应商管理 · 用量统计</td><td>/ai</td><td>10</td></tr>
       <tr><td><b>AI 对话</b></td><td>苏格拉底导师 · 多轮对话 · SSE 流式</td><td>/ai</td><td>4</td></tr>
       <tr><td><b>AI 批阅</b></td><td>作业批阅 · 结构化评分</td><td>/ai</td><td>1</td></tr>
       <tr><td><b>埋点模块</b></td><td>事件采集 · 统计分析</td><td>/events</td><td>4</td></tr>
       <tr><td><b>日志模块</b></td><td>结构化日志 · 查询</td><td>/logs</td><td>2</td></tr>
-      <tr style="background:var(--ai-soft);"><td colspan="2"><b>合计</b></td><td>—</td><td><b>58</b></td></tr>
+      <tr style="background:var(--ai-soft);"><td colspan="2"><b>合计（唯一端点）</b></td><td>—</td><td><b>60</b></td></tr>
     </tbody>
   </table>
+  <div class="info note" style="margin-top:8px;">
+    <div class="label">口径说明</div>
+    上表端点数按 <code>api_contract_check.py</code>「唯一端点模板」口径核对（方法合并 · 路径去重），业务端点合计 <b>60</b> · 模块 <b>10</b>；三层契约 28 前端 ⊂ 60 后端 ⊂ Nginx。直播（D-01）为 <b>16</b> 个 REST 端点（聊天/举手队列走 <code>after_id</code> 增量，无 WebSocket），完整清单见 <b>lumina-api.html · 07 直播模块</b>。
+  </div>
 
   <h3 class="sub">5.2 模块通信</h3>
   <div class="flow">
@@ -605,8 +617,8 @@
       <tr><td rowspan="3"><b>作业</b></td><td><code>/assignments</code></td><td>POST</td><td>创建作业</td></tr>
       <tr><td><code>/assignments/{id}/submit</code></td><td>POST</td><td>提交作业</td></tr>
       <tr><td><code>/assignments/{id}/grade</code></td><td>POST</td><td>批阅（触发 AI 辅助）</td></tr>
-      <tr><td rowspan="2"><b>直播</b></td><td><code>/live/{id}/join</code></td><td>POST</td><td>加入直播间 · 返回 RTC 配置</td></tr>
-      <tr><td><code>/live/{id}/chat</code></td><td>WS</td><td>WebSocket 聊天通道</td></tr>
+      <tr><td rowspan="2"><b>直播</b></td><td><code>/live/rooms</code></td><td>POST</td><td>创建直播房间（教师）</td></tr>
+      <tr><td><code>/live/rooms/{room_id}/start</code></td><td>POST</td><td>开播 · 返回 status=live + stream_url（HLS / mock://）</td></tr>
       <tr style="background:var(--ai-soft);"><td rowspan="2"><b style="color:var(--ai);">AI</b></td><td style="color:var(--ai);"><code>/ai/chat</code></td><td>POST (SSE)</td><td style="color:var(--ai);">AI 对话 · 流式响应</td></tr>
       <tr style="background:var(--ai-soft);"><td style="color:var(--ai);"><code>/ai/grade</code></td><td>POST</td><td style="color:var(--ai);">AI 辅助批阅</td></tr>
     </tbody>
@@ -873,7 +885,7 @@
     <tbody>
       <tr><td><b>首页加载</b></td><td>≤ 1.5s（4G）</td><td>代码分割 · 懒加载 · 预渲染</td></tr>
       <tr><td><b>API P95</b></td><td>≤ 200ms</td><td>索引优化 · 读写分离 · 连接池</td></tr>
-      <tr><b>直播延迟</b></td><td>≤ 2s</td><td>WebRTC · SFU · 边缘节点</td></tr>
+      <tr><td><b>直播延迟</b></td><td>≤ 2s</td><td>HLS · CDN · 边缘节点</td></tr>
       <tr><td><b>AI 首 Token</b></td><td>≤ 3s</td><td>流式响应 · 模型预热 · 缓存</td></tr>
       <tr><td><b>并发能力</b></td><td>10,000 QPS</td><td>水平扩展 · 无状态 · 限流</td></tr>
     </tbody>
@@ -969,7 +981,7 @@
       <tr><td>Electron</td><td>31</td><td>桌面端</td></tr>
       <tr><td rowspan="2"><b>后端</b></td><td>Python · FastAPI</td><td>3.12 / 0.115</td><td>单体业务 + AI 服务</td></tr>
       <tr><td>SQLAlchemy · Pydantic</td><td>2.0 / 2.x</td><td>ORM · Schema 校验</td></tr>
-      <tr><td rowspan="2"><b>数据</b></td><td>MySQL</td><td>9.7</td><td>主数据库（17 表）</td></tr>
+      <tr><td rowspan="2"><b>数据</b></td><td>MySQL</td><td>9.7</td><td>主数据库（22 表）</td></tr>
       <tr><td>Redis</td><td>7.2</td><td>缓存 · 会话</td></tr>
       <tr><td rowspan="2"><b>中间件</b></td><td>Nginx</td><td>1.26</td><td>反向代理 · 静态资源</td></tr>
       <tr><td>JWT</td><td>—</td><td>认证授权</td></tr>
@@ -1037,7 +1049,7 @@
         <td><span class="tag" style="background:var(--growth); color:#fff;">Phase 0</span></td>
         <td>2026-08</td>
         <td><b>原型设计 ✓ 已完成</b></td>
-        <td>33 原型 · PRD v1.3 · TDD v1.1</td>
+        <td>33 原型 · PRD v1.3 · TDD v1.2</td>
       </tr>
       <tr>
         <td><span class="tag p0">Phase 1</span></td>
@@ -1117,7 +1129,7 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · 技术设计文档</div>
-  <div>TDD v1.1 · 18 章节 · 2026-08-31</div>
+  <div>TDD v1.2 · 18 章节 · 2026-08-31</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">TDD-LUMINA-2026-001</div>
 </footer>
 

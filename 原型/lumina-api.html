@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · API 接口文档 v1.2</title>
+<title>Lumina 墨光 · API 接口文档 v1.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -137,7 +137,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>API Reference</small></div>
     </div>
-    <div class="doc-type">API Reference · v1.2</div>
+    <div class="doc-type">API Reference · v1.3</div>
     <h1>
       <span class="hl">API</span> 接口<br/>
       <em>文档</em>
@@ -151,7 +151,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.2 · 生产基准 · MySQL 9.7</span>
+      <span class="value">v1.3 · 生产基准 · MySQL 9.7</span>
     </div>
     <div class="row">
       <span class="label">基础路径</span>
@@ -170,9 +170,9 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">9</div><div class="lbl">模块</div></div>
-  <div class="stat"><div class="val hl">44</div><div class="lbl">接口数</div></div>
-  <div class="stat"><div class="val">3</div><div class="lbl">WebSocket · 规划中</div></div>
+  <div class="stat"><div class="val hl">10</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val hl">60</div><div class="lbl">接口数</div></div>
+  <div class="stat"><div class="val">16</div><div class="lbl">直播端点</div></div>
   <div class="stat"><div class="val">JWT</div><div class="lbl">认证方式</div></div>
   <div class="stat"><div class="val">RFC 7807</div><div class="lbl">错误格式</div></div>
 </div>
@@ -211,9 +211,9 @@
 
   <div class="info note">
     <div class="label">单体架构 · 模块清单</div>
-    本接口文档对齐单体应用 <b>lumina-app</b>（FastAPI · 44 业务端点），共 <b>9</b> 个业务模块：
-    <code>user</code> · <code>course</code> · <code>assignment</code> · <code>grade</code> · <code>ai_gateway</code> · <code>ai_chat</code> · <code>ai_grade</code> · <code>analytics</code> · <code>logs</code>。<br/>
-    其中 <code>analytics</code> 提供 <code>/events</code> 事件上报与统计，<code>logs</code> 提供 <code>/logs/query</code>、<code>/logs/summary</code> 日志检索（均限管理员）；AI 流式响应使用 SSE（<code>text/event-stream</code>），WebSocket 端点属规划中的直播模块，不在此 44 个接口内。
+    本接口文档对齐单体应用 <b>lumina-app</b>（FastAPI · 60 业务端点），共 <b>10</b> 个业务模块：
+    <code>user</code> · <code>course</code> · <code>assignment</code> · <code>grade</code> · <code>live</code> · <code>ai_gateway</code> · <code>ai_chat</code> · <code>ai_grade</code> · <code>analytics</code> · <code>logs</code>。<br/>
+    其中 <code>analytics</code> 提供 <code>/events</code> 事件上报与统计，<code>logs</code> 提供 <code>/logs/query</code>、<code>/logs/summary</code> 日志检索（均限管理员）；AI 流式响应使用 SSE（<code>text/event-stream</code>）；直播模块（D-01）采用 REST + 轮询增量，无 WebSocket。
   </div>
 
   <table>
@@ -638,87 +638,170 @@
 <section class="section" id="s7">
   <div class="section-header">
     <h2>07 · 直播模块 <em>Live</em></h2>
-    <div class="num-tag">⚠️ 规划中 · 6 endpoints · 含 WebSocket</div>
+    <div class="num-tag">已发布（D-01）· 16 endpoints · 无 WebSocket</div>
   </div>
 
-  <div class="info warn">
-    <div class="label">⚠️ 规划中（单体 v1.0 未实现）</div>
-    直播模块（含 3 个 WebSocket 端点，位于 <code>wss://chat.lumina.edu</code>）为<b>规划中</b>功能，单体应用 <b>lumina-app</b> v1.0 尚未实现，不计入已落地的 44 个接口。本章内容保留供规划参考。
+  <div class="info note">
+    <div class="label">V1.1 · D-01 直播课堂已落地（REST 轮询替代规划 WebSocket）</div>
+    聊天 / 举手队列走 <code>after_id</code> 增量拉取，答题 / 点名端点直接返回全量结构；流媒体为可插拔适配层：配置 <code>LIVE_STREAM_BASE</code> 后 <code>stream_url</code> 返回 HLS（同源反代 <code>/media/{key}/index.m3u8</code> 或 CDN 直链），未接入时返回 <code>mock://</code> 占位。入会校验选课关系，未选课学生返回 <code>403</code>。
   </div>
+
+  <h3 class="sub">7.1 房间与开播</h3>
 
   <div class="endpoint">
     <div class="endpoint-header">
       <span class="endpoint-method post">POST</span>
-      <span class="endpoint-path">/live</span>
-      <span class="endpoint-desc">创建直播（教师）</span>
+      <span class="endpoint-path">/live/rooms</span>
+      <span class="endpoint-desc">创建直播房间（教师）</span>
     </div>
     <h4>请求体</h4>
     <pre>{
   <span class="key">"course_id"</span>: <span class="string">"c001"</span>,
-  <span class="key">"title"</span>: <span class="string">"第12讲 · 不定积分"</span>,
-  <span class="key">"scheduled_at"</span>: <span class="string">"2026-09-01T10:00:00+08:00"</span>,
-  <span class="key">"enable_recording"</span>: <span class="keyword">true</span>,
-  <span class="key">"enable_chat"</span>: <span class="keyword">true</span>,
-  <span class="key">"enable_hand_raise"</span>: <span class="keyword">true</span>
+  <span class="key">"title"</span>: <span class="string">"第12讲 · 不定积分"</span>
 }</pre>
   </div>
 
   <div class="endpoint">
     <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/live/rooms/{room_id}</span>
+      <span class="endpoint-desc">直播房间详情（状态 / 在线数 / stream_url）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
       <span class="endpoint-method post">POST</span>
-      <span class="endpoint-path">/live/{id}/join</span>
-      <span class="endpoint-desc">加入直播</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/start</span>
+      <span class="endpoint-desc">开播（教师）</span>
     </div>
     <h4>响应</h4>
     <pre>{
-  <span class="key">"code"</span>: <span class="number">0</span>,
-  <span class="key">"data"</span>: {
-    <span class="key">"rtc_url"</span>: <span class="string">"wss://rtc.lumina.edu/room/..."</span>,
-    <span class="key">"token"</span>: <span class="string">"rtc_token_..."</span>,
-    <span class="key">"room_id"</span>: <span class="string">"room_abc123"</span>,
-    <span class="key">"chat_ws_url"</span>: <span class="string">"wss://chat.lumina.edu/room/..."</span>
-  }
+  <span class="key">"status"</span>: <span class="string">"live"</span>,
+  <span class="key">"stream_url"</span>: <span class="string">"/media/roomdemo/index.m3u8"</span>
 }</pre>
   </div>
 
   <div class="endpoint">
     <div class="endpoint-header">
-      <span class="endpoint-method ws">WS</span>
-      <span class="endpoint-path">wss://chat.lumina.edu/room/{room_id}</span>
-      <span class="endpoint-desc">直播聊天</span>
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/end</span>
+      <span class="endpoint-desc">结束直播（教师）· status → ended</span>
     </div>
-    <h4>消息格式</h4>
-    <pre><span class="comment">// 发送消息</span>
-{ <span class="key">"type"</span>: <span class="string">"chat"</span>, <span class="key">"content"</span>: <span class="string">"老师讲得清楚！"</span> }
+  </div>
 
-<span class="comment">// 举手</span>
-{ <span class="key">"type"</span>: <span class="string">"hand_raise"</span>, <span class="key">"action"</span>: <span class="string">"up"</span> }
+  <h3 class="sub">7.2 参与与举手</h3>
 
-<span class="comment">// 收到消息</span>
-{ <span class="key">"type"</span>: <span class="string">"chat"</span>, <span class="key">"user"</span>: <span class="string">"林清"</span>, <span class="key">"content"</span>: <span class="string">"..."</span>, <span class="key">"ts"</span>: <span class="number">1725000000</span> }</pre>
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/join</span>
+      <span class="endpoint-desc">加入直播（已选课学生，在线数 +1）</span>
+    </div>
+    <h4>响应</h4>
+    <pre>{
+  <span class="key">"online_count"</span>: <span class="number">3</span>,
+  <span class="key">"status"</span>: <span class="string">"live"</span>
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/leave</span>
+      <span class="endpoint-desc">离开直播（在线数 -1）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method put">PUT</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/raise</span>
+      <span class="endpoint-desc">举手 / 取消举手（body: <code>{"active": true}</code>）</span>
+    </div>
   </div>
 
   <div class="endpoint">
     <div class="endpoint-header">
       <span class="endpoint-method get">GET</span>
-      <span class="endpoint-path">/live/{id}</span>
-      <span class="endpoint-desc">直播详情</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/raises</span>
+      <span class="endpoint-desc">举手队列（教师）</span>
+    </div>
+  </div>
+
+  <h3 class="sub">7.3 聊天（after_id 增量）</h3>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/messages</span>
+      <span class="endpoint-desc">发送消息（chat / 系统）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/messages?after_id={id}&amp;limit=50</span>
+      <span class="endpoint-desc">增量拉取消息（前端 2.5s 轮询）</span>
+    </div>
+  </div>
+
+  <h3 class="sub">7.4 点名</h3>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/call</span>
+      <span class="endpoint-desc">随机点名（教师 · body: <code>{"user_id": null}</code> 随机 / 指定）</span>
     </div>
   </div>
 
   <div class="endpoint">
     <div class="endpoint-header">
       <span class="endpoint-method post">POST</span>
-      <span class="endpoint-path">/live/{id}/recording</span>
-      <span class="endpoint-desc">开始/停止录制</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/call/respond</span>
+      <span class="endpoint-desc">应答点名（学生）</span>
+    </div>
+  </div>
+
+  <h3 class="sub">7.5 答题闭环</h3>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/quizzes</span>
+      <span class="endpoint-desc">发起答题（教师 · question / options / answer）</span>
+    </div>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"question"</span>: <span class="string">"1+1=?"</span>,
+  <span class="key">"options"</span>: [{ <span class="key">"key"</span>: <span class="string">"A"</span>, <span class="key">"text"</span>: <span class="string">"2"</span> }],
+  <span class="key">"answer"</span>: <span class="string">"A"</span>
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/quizzes/{quiz_id}/answer</span>
+      <span class="endpoint-desc">作答（学生 · <code>{"choice": "A"}</code>）</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/quizzes/{quiz_id}/close</span>
+      <span class="endpoint-desc">关闭答题（教师）</span>
     </div>
   </div>
 
   <div class="endpoint">
     <div class="endpoint-header">
       <span class="endpoint-method get">GET</span>
-      <span class="endpoint-path">/live/{id}/replay</span>
-      <span class="endpoint-desc">获取回放地址</span>
+      <span class="endpoint-path">/live/rooms/{room_id}/quizzes/{quiz_id}/result</span>
+      <span class="endpoint-desc">答题统计（教师 · total / 选项分布）</span>
     </div>
   </div>
 </section>
@@ -955,7 +1038,7 @@ curl -X POST https://api.lumina.edu/api/v1/ai/chat \
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · API Reference</div>
-  <div>v1.2 · 9 模块 · 44 接口 · 2026-08-31 · 生产基准</div>
+  <div>v1.3 · 10 模块 · 60 接口 · 2026-08-31 · 生产基准</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">API-LUMINA-2026-001</div>
 </footer>
 

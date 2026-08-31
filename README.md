@@ -49,7 +49,7 @@ edu/
 │   └── README.md                     # 部署使用说明
 │
 ├── 服务/                             # 单体应用 + 前端
-│   ├── lumina-app/                   # ✅ 单体 FastAPI（9 模块 · 44 端点 · 17 表）
+│   ├── lumina-app/                   # ✅ 单体 FastAPI（10 模块 · 60 端点 · 22 表）
 │   ├── web-frontend/                 # ✅ Web 前端（React 18 + TS + Vite）
 │   └── mobile-app/                   # ✅ 移动端前端（React Native / Expo）
 │
@@ -69,10 +69,10 @@ edu/
 | **平台目录** | 5 个（phone/tablet/Web/PC/AI）|
 | **界面页面** | 160+ 个 |
 | **设计表面** | 6 个（学生/教师 × 移动/Web/桌面）|
-| **后端模块** | 9 个业务模块（用户/课程/作业/成绩/AI 网关·对话·批阅/埋点/日志）|
-| **文档** | PRD v1.3 + TDD v1.1 + API v1.2 + DB v1.2 + OPS v1.2 + QA v1.2 + UG v1.1 + WBS v1.1 + WBS-P v1.0 + 索引 |
-| **API 接口** | 44 个端点（9 模块 · JWT · SSE 流式）|
-| **数据表** | 17 张（单体应用）|
+| **后端模块** | 10 个业务模块（用户/课程/作业/成绩/直播/AI 网关·对话·批阅/埋点/日志）|
+| **文档** | PRD v1.3 + TDD v1.2 + API v1.3 + DB v1.3 + OPS v1.2 + QA v1.2 + UG v1.1 + WBS v1.1 + WBS-P v1.0 + 索引 |
+| **API 接口** | 60 个端点（10 模块 · JWT · SSE 流式 · 直播课堂）|
+| **数据表** | 22 张（单体应用）|
 
 ## 📖 文档体系
 
@@ -80,10 +80,10 @@ edu/
 |------|------|------|
 | 📋 **设计索引** | 原型导航入口，按平台分类 | `lumina-00-index.html` |
 | 📋 **PRD v1.3** | 产品需求文档，18 章 | `lumina-prd.html` |
-| 📋 **TDD v1.1** | 技术设计文档，18 章 | `lumina-tdd.html` |
-| 📋 **API v1.2** | API 接口文档，11 章 · 44 端点 | `lumina-api.html` |
+| 📋 **TDD v1.2** | 技术设计文档，18 章 | `lumina-tdd.html` |
+| 📋 **API v1.3** | API 接口文档，11 章 · 60 端点 | `lumina-api.html` |
 | 📋 **OpenAPI 3.1** | 机器可读 API 规范（YAML） | `lumina-api-openapi.yaml` |
-| 📋 **DB v1.2** | 数据库设计文档，10 章 · 17 表 | `lumina-database.html` |
+| 📋 **DB v1.3** | 数据库设计文档，10 章 · 22 表 | `lumina-database.html` |
 | 📋 **OPS v1.2** | 部署运维手册，10 章 | `lumina-operations.html` |
 | 📋 **QA v1.2** | 测试用例文档，10 章 · 81 用例 | `lumina-testcases.html` |
 | 📋 **UG v1.1** | 用户手册，10 章 · 3 角色 | `lumina-userguide.html` |
@@ -172,7 +172,7 @@ python scripts/yuque-sync.py
 
 ### 快速部署（单体应用 · 轻量方案）
 
-单体架构：9 个业务模块合并为 1 个 `lumina-app` API 容器，Docker Compose 一键部署，无需 K8s：
+单体架构：10 个业务模块合并为 1 个 `lumina-app` API 容器，Docker Compose 一键部署，无需 K8s：
 
 ```bash
 # 1. 进入部署目录
@@ -191,7 +191,7 @@ cp .env.example .env
 ./scripts/monitor.sh
 ```
 
-已编排服务：MySQL 9.7 · Redis · lumina-app 单体（:8080 · 9 模块 · 44 端点）· Nginx(80/443)
+已编排服务：MySQL 9.7 · Redis · lumina-app 单体（:8080 · 10 模块 · 60 端点）· Nginx(80/443)
 
 详见 `部署/README.md`
 
