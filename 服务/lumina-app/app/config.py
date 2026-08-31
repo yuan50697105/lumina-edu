@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     # 应用
     APP_NAME: str = "lumina-user-service"
     APP_ENV: str = "development"  # development / testing / production
-    APP_DEBUG: bool = True
+    APP_DEBUG: bool = False  # True 时 SQLAlchemy echo 全量 SQL 日志，拖慢高并发
 
     # 数据库
     DATABASE_URL: str = "mysql+pymysql://lumina:lumina_secure_password@localhost:3306/lumina"

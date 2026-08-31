@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     BigInteger, Boolean, Column, DateTime, Float, Integer, String, Text, Numeric,
-    JSON, ForeignKey, UniqueConstraint, Index
+    JSON, ForeignKey, UniqueConstraint, Index, func
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import CHAR, TypeDecorator
@@ -106,8 +106,8 @@ class User(Base):
     avatar_url = Column(String(500), nullable=True)
     bio = Column(Text, nullable=True)
     last_login_at = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
-    updated_at = Column(DateTime(timezone=True), default=_now, onupdate=_now)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
 
 class Session(Base):
     """登录会话表"""
@@ -138,7 +138,7 @@ class Course(Base):
     schedule = Column(JSON, nullable=True)
     students_count = Column(Integer, default=0)
     status = Column(String(20), default="draft")   # draft | published | archived
-    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
 
     enrollments = relationship("Enrollment", back_populates="course")
     chapters = relationship("Chapter", back_populates="course")
@@ -152,7 +152,7 @@ class Enrollment(Base):
     user_id = Column(GUID, nullable=False)
     course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     role = Column(String(20), default="student")  # student | teacher | ta
-    enrolled_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    enrolled_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
     status = Column(String(20), default="active")  # active | dropped | completed
 
     course = relationship("Course", back_populates="enrollments")
@@ -197,7 +197,7 @@ class Assignment(Base):
     rubric = Column(JSON, nullable=True)
     ai_model = Column(String(50), nullable=True)
     status = Column(String(20), default="draft")   # draft | published | closed
-    created_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
 
     submissions = relationship("Submission", back_populates="assignment")
 
@@ -211,7 +211,7 @@ class Submission(Base):
     file_urls = Column(JSON, nullable=True)
     text_answer = Column(Text, nullable=True)
     submission_note = Column(Text, nullable=True)
-    submitted_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    submitted_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
     late = Column(Boolean, default=False)
 
     assignment = relationship("Assignment", back_populates="submissions")
@@ -230,7 +230,7 @@ class Grade(Base):
     grader_id = Column(GUID, nullable=True)
     ai_model = Column(String(50), nullable=True)
     confidence = Column(Numeric(3, 2), nullable=True)
-    graded_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    graded_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
 
 class GradeRecord(Base):
     """学期成绩汇总（成绩单）"""
@@ -245,7 +245,7 @@ class GradeRecord(Base):
     semester = Column(String(20), nullable=False)
     final_score = Column(Numeric(5, 2), nullable=True)
     gpa_point = Column(Numeric(3, 2), nullable=True)
-    recorded_at = Column(DateTime(timezone=True), default=_now, nullable=False)
+    recorded_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
 
 class AIProvider(Base):
     """模型供应商（API Key 不入库，存 env）"""
@@ -317,7 +317,7 @@ class AIConversation(Base):
     message_count = Column(Integer, default=0)
     total_tokens = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), default=_now)
-    updated_at = Column(DateTime(timezone=True), default=_now, onupdate=_now)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
 
     messages = relationship("AIMessage", back_populates="conversation")
 

@@ -1,6 +1,7 @@
 # ============================================
 # Lumina 墨光 · 单体应用入口（合并 9 微服务）
 # ============================================
+import asyncio
 import logging
 import time
 import os
@@ -63,16 +64,22 @@ async def api_logging_middleware(request: Request, call_next):
     t0 = time.perf_counter()
     response = await call_next(request)
     duration_ms = int((time.perf_counter() - t0) * 1000)
-    try:
-        db = SessionLocal()
-        db.add(models.APILog(
-            method=request.method, path=request.url.path,
-            status_code=response.status_code, duration_ms=duration_ms,
-        ))
-        db.commit()
-        db.close()
-    except Exception as exc:
-        logger.warning("API 日志写入失败: %s", exc)
+    # 后台线程写日志，避免同步 DB 写入阻塞事件循环（高并发下曾将吞吐拖至 ~5 req/s）
+    method, path, status_code = request.method, request.url.path, response.status_code
+
+    def _persist_log():
+        try:
+            db = SessionLocal()
+            db.add(models.APILog(
+                method=method, path=path,
+                status_code=status_code, duration_ms=duration_ms,
+            ))
+            db.commit()
+            db.close()
+        except Exception as exc:
+            logger.warning("API 日志写入失败: %s", exc)
+
+    asyncio.get_running_loop().create_task(asyncio.to_thread(_persist_log))
     return response
 
 

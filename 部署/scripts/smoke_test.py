@@ -19,11 +19,17 @@ import argparse
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
 
 BASE_DEFAULT = "http://localhost"
 UA = "lumina-smoke-test"
+
+
+def http_ok(status: int) -> bool:
+    """HTTP 状态码 → 成功判定"""
+    return status in (200, 201, 202, 204)
 
 pass_count = fail_count = skip_count = 0
 results: list[tuple[str, bool, str]] = []    # (步骤, 通过?, 说明)
@@ -125,14 +131,20 @@ def main() -> int:
         print("❌ 任一角色登录失败，冒烟终止")
         return 1
 
-    # ─── S5 教师建课 ───
+    # ─── S5 教师建课（code 唯一化，保证重复运行不 409）───
     api.token = teacher_token
-    ok, course = api.call("POST", "/api/v1/courses", {
-        "code": "SMK201", "title": "冒烟测试课程", "semester": "2026-1",
+    ok_c, course = api.call("POST", "/api/v1/courses", {
+        "code": f"SMK{str(int(time.time()))[-8:]}", "title": "冒烟测试课程", "semester": "2026-1",
         "description": "WBS 2.12 端到端验证", "credits": 3,
     })
-    course_id = (course or {}).get("id")
-    log("S5 教师建课", ok and bool(course_id), f"course_id={str(course_id)[:8]}…")
+    course_id = (course or {}).get("id") if isinstance(course, dict) else None
+    log("S5 教师建课", http_ok(ok_c) and bool(course_id), f"course_id={str(course_id)[:8]}…")
+
+    # ─── S5b 发布课程（选课/发作业前置状态）───
+    api.token = teacher_token
+    ok_p, pub = api.call("PATCH", f"/api/v1/courses/{course_id}", {"status": "published"})
+    log("S5b 发布课程", http_ok(ok_p) and (pub or {}).get("status") == "published",
+        f"status={pub.get('status') if isinstance(pub, dict) else pub}")
 
     # ─── S6 新增章节 ───
     ok, ch = api.call("POST", f"/api/v1/courses/{course_id}/chapters", {"title": "冒烟章节", "content": "内容"})
@@ -141,27 +153,28 @@ def main() -> int:
 
     # ─── S7 学生选课 ───
     api.token = student_token
-    ok, en = api.call("POST", f"/api/v1/courses/{course_id}/enroll")
-    log("S7 学生选课", ok, f"{en}")
+    ok_c, en = api.call("POST", f"/api/v1/courses/{course_id}/enroll")
+    log("S7 学生选课", http_ok(ok_c), f"{en}")
 
     # ─── S8 教师发布作业 ───
     api.token = teacher_token
-    ok, asg = api.call("POST", f"/api/v1/courses/{course_id}/assignments", {
+    ok_c, asg = api.call("POST", f"/api/v1/courses/{course_id}/assignments", {
         "title": "冒烟作业", "description": "端到端提交", "max_score": 100, "ai_grading": False,
     })
-    asg_id = (asg or {}).get("id")
-    log("S8 教师发布作业", ok and bool(asg_id), f"assignment_id={str(asg_id)[:8]}…")
+    asg_id = (asg or {}).get("id") if isinstance(asg, dict) else None
+    log("S8 教师发布作业", http_ok(ok_c) and bool(asg_id), f"assignment_id={str(asg_id)[:8]}…")
 
     # ─── S9 学生提交作业 ───
     api.token = student_token
-    ok, sub = api.call("POST", f"/api/v1/assignments/{asg_id}/submit", {"text_answer": "这是我的冒烟答案。"})
-    sub_id = (sub or {}).get("id")
-    log("S9 学生提交作业", ok and bool(sub_id), f"submission_id={str(sub_id)[:8]}…")
+    ok_c, sub = api.call("POST", f"/api/v1/assignments/{asg_id}/submit", {"text_answer": "这是我的冒烟答案。"})
+    sub_id = (sub or {}).get("id") if isinstance(sub, dict) else None
+    log("S9 学生提交作业", http_ok(ok_c) and bool(sub_id), f"submission_id={str(sub_id)[:8]}…")
 
     # ─── S10 教师批阅作业 ───
     api.token = teacher_token
-    ok, gr = api.call("POST", f"/api/v1/assignments/{asg_id}/grade", {"total_score": 92, "feedback": "批阅通过"})
-    log("S10 教师批阅作业", ok, f"{gr.get('total_score') if isinstance(gr, dict) else gr}")
+    ok_c, gr = api.call("POST", f"/api/v1/assignments/{asg_id}/grade?submission_id={sub_id}",
+                        {"total_score": 92, "feedback": "批阅通过"})
+    log("S10 教师批阅作业", http_ok(ok_c), f"{gr.get('total_score') if isinstance(gr, dict) else gr}")
 
     # ─── S11 AI 批阅（可选）───
     if args.ai:
@@ -182,30 +195,30 @@ def main() -> int:
 
     # ─── S12 教师录入期末成绩（需学生 uid → 先查 /users/me）───
     api.token = student_token
-    ok, me = api.call("GET", "/api/v1/users/me")
-    stu_uid = (me or {}).get("id")
-    log("S12a 获取学生 uid(/users/me)", ok and bool(stu_uid), f"uid={str(stu_uid)[:8]}…")
+    ok_c, me = api.call("GET", "/api/v1/users/me")
+    stu_uid = (me or {}).get("id") if isinstance(me, dict) else None
+    log("S12a 获取学生 uid(/users/me)", http_ok(ok_c) and bool(stu_uid), f"uid={str(stu_uid)[:8]}…")
 
     api.token = teacher_token
-    ok, grd = api.call("POST", f"/api/v1/courses/{course_id}/grades", {
+    ok_c, grd = api.call("POST", f"/api/v1/courses/{course_id}/grades", {
         "student_id": str(stu_uid), "semester": "2026-1", "final_score": 88,
     })
-    log("S12 教师录入期末成绩", ok, f"{grd.get('final_score') if isinstance(grd, dict) else grd}")
+    log("S12 教师录入期末成绩", http_ok(ok_c), f"{grd.get('final_score') if isinstance(grd, dict) else grd}")
 
     # ─── S13 学生查成绩单 ───
     api.token = student_token
-    ok, sheet = api.call("GET", "/api/v1/grades/me")
-    n_courses = len((sheet or {}).get("courses", [])) if sheet else -1
-    log("S13 学生查成绩单", ok and n_courses >= 1, f"成绩单课程数={n_courses}")
+    ok_c, sheet = api.call("GET", "/api/v1/grades/me")
+    n_courses = len((sheet or {}).get("courses", [])) if isinstance(sheet, dict) else -1
+    log("S13 学生查成绩单", http_ok(ok_c) and n_courses >= 1, f"成绩单课程数={n_courses}")
 
     # ─── S14 管理员埋点统计 ───
     api.token = admin_token
-    ok, stats = api.call("GET", "/api/v1/events/stats")
-    log("S14 埋点统计(admin)", ok, f"{stats}")
+    ok_c, stats = api.call("GET", "/api/v1/events/stats")
+    log("S14 埋点统计(admin)", http_ok(ok_c), f"{stats}")
 
     # ─── S15 管理员日志查询 ───
-    ok, summ = api.call("GET", "/api/v1/logs/summary")
-    log("S15 日志汇总(admin)", ok, f"total={summ.get('total') if isinstance(summ, dict) else '?'}")
+    ok_c, summ = api.call("GET", "/api/v1/logs/summary")
+    log("S15 日志汇总(admin)", http_ok(ok_c), f"total={summ.get('total') if isinstance(summ, dict) else '?'}")
 
     # ─── 汇总 ───
     print(f"\n{'=' * 56}\nPASS {pass_count}  |  FAIL {fail_count}  |  SKIP {skip_count}")

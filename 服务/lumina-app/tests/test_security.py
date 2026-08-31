@@ -18,7 +18,7 @@ from app.security import (
 )
 
 
-# bcrypt/passlib 兼容性检查
+# bcrypt 哈希可用性检查
 try:
     _test_hash = hash_password("test")
     BCRYPT_WORKS = True
@@ -26,7 +26,7 @@ except (ValueError, Exception):
     BCRYPT_WORKS = False
 
 
-@pytest.mark.skipif(not BCRYPT_WORKS, reason="bcrypt/passlib 不兼容当前 Python 版本")
+@pytest.mark.skipif(not BCRYPT_WORKS, reason="bcrypt 库不可用（缺少 C 扩展）")
 class TestPasswordHash:
     """密码哈希测试"""
 

@@ -68,6 +68,9 @@ class AssignmentOut(BaseModel):
     submission_count: Optional[int] = None
     my_status: Optional[str] = None  # not_submitted | submitted | graded
 
+    class Config:
+        from_attributes = True
+
 
 # ─── 提交 ───
 
@@ -269,6 +272,9 @@ class GradeOut(BaseModel):
     confidence: Optional[Decimal]
     graded_at: datetime
 
+    class Config:
+        from_attributes = True
+
 
 # ─── 批阅 ───
 
@@ -289,6 +295,9 @@ class GradeRecordOut(BaseModel):
     gpa_point: Optional[Decimal]
     grade_letter: Optional[str] = None
     recorded_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
 # ─── 学生成绩单 ───
@@ -521,6 +530,9 @@ class SubmissionOut(BaseModel):
     # 批阅结果联查
     graded: bool = False
     grade: Optional["GradeOut"] = None
+
+    class Config:
+        from_attributes = True
 
 class TeacherBrief(BaseModel):
     id: uuid.UUID

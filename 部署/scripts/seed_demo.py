@@ -17,12 +17,8 @@ from sqlalchemy import create_engine, text
 
 
 def hash_password(plain: str) -> str:
-    try:
-        from passlib.hash import bcrypt
-        return bcrypt.hash(plain)
-    except ImportError:
-        import bcrypt as _b
-        return _b.hashpw(plain.encode("utf-8"), _b.gensalt()).decode("utf-8")
+    import bcrypt
+    return bcrypt.hashpw(plain.encode("utf-8")[:72], bcrypt.gensalt()).decode("utf-8")
 
 
 def main() -> int:
@@ -88,8 +84,8 @@ def main() -> int:
 
     # ── 4. 选课 ──
     seed("""
-        INSERT IGNORE INTO enrollments (id, student_id, course_id, status)
-        VALUES (:id, :sid, :cid, 'active')
+        INSERT IGNORE INTO enrollments (id, user_id, course_id, role, status, enrolled_at)
+        VALUES (:id, :sid, :cid, 'student', 'active', NOW())
     """, {"id": str(uuid.uuid4()), "sid": student_id, "cid": course_id},
         f"选课 {student_id[:8]}")
 
@@ -103,21 +99,21 @@ def main() -> int:
     # ── 6. 提交 ──
     submission_id = str(uuid.uuid4())
     seed("""
-        INSERT IGNORE INTO submissions (id, assignment_id, student_id, text_answer)
-        VALUES (:id, :aid, :sid, 'print("Hello Lumina")')
+        INSERT IGNORE INTO submissions (id, assignment_id, student_id, text_answer, submitted_at)
+        VALUES (:id, :aid, :sid, 'print("Hello Lumina")', NOW())
     """, {"id": submission_id, "aid": assignment_id, "sid": student_id},
         f"提交 {student_id[:8]}")
 
     # ── 7. 批阅 ──
     seed("""
-        INSERT IGNORE INTO grades (id, submission_id, total_score, feedback, graded_by)
-        VALUES (:id, :sid, 95, '优秀，逻辑清晰', 'teacher')
+        INSERT IGNORE INTO grades (id, submission_id, total_score, feedback, graded_by, graded_at)
+        VALUES (:id, :sid, 95, '优秀，逻辑清晰', 'teacher', NOW())
     """, {"id": str(uuid.uuid4()), "sid": submission_id}, "批阅 95 分")
 
     # ── 8. 期末成绩（幂等 upsert）──
     seed("""
-        INSERT INTO grade_records (id, student_id, course_id, semester, final_score, gpa_point)
-        VALUES (:id, :sid, :cid, '2026-1', 92, 4.0) AS new
+        INSERT INTO grade_records (id, student_id, course_id, semester, final_score, gpa_point, recorded_at)
+        VALUES (:id, :sid, :cid, '2026-1', 92, 4.0, NOW()) AS new
         ON DUPLICATE KEY UPDATE final_score = new.final_score, gpa_point = new.gpa_point
     """, {"id": str(uuid.uuid4()), "sid": student_id, "cid": course_id}, "期末成绩 92 (A)")
 
