@@ -13,7 +13,7 @@ Lumina（墨光）是一个完整的教育应用 UI 设计系统，覆盖学生�
 - ✅ **AI 原生**：集成国产大模型（通义千问、智谱 GLM、讯飞星火、豆包等）
 - ✅ **双层模型选择**：管理端配置模型池 + 用户端自主选择
 - ✅ **统一设计语言**：荧光笔签名效果、宣纸质感配色、跨端一致体验
-- ✅ **完整技术文档**：PRD v1.3 + TDD v1.0 + 设计索引
+- ✅ **完整技术文档**：PRD v1.3 + TDD v1.1 + 设计索引
 
 ## 📂 项目结构
 
@@ -25,7 +25,7 @@ edu/
 ├── 原型/                              # 设计原型 + 文档
 │   ├── lumina-00-index.html           # 📋 索引导航（入口）
 │   ├── lumina-prd.html                # 📋 产品需求文档 PRD v1.3
-│   ├── lumina-tdd.html                # 📋 技术设计文档 TDD v1.0
+│   ├── lumina-tdd.html                # 📋 技术设计文档 TDD v1.1
 │   ├── lumina-api.html                # 📋 API 接口文档 v1.0
 │   ├── lumina-api-openapi.yaml        # 📋 OpenAPI 3.1 规范
 │   ├── lumina-database.html           # 📋 数据库设计文档 v1.0
@@ -69,7 +69,7 @@ edu/
 | **界面页面** | 160+ 个 |
 | **设计表面** | 6 个（学生/教师 × 移动/Web/桌面）|
 | **后端模块** | 9 个业务模块（用户/课程/作业/成绩/AI 网关·对话·批阅/埋点/日志）|
-| **文档** | PRD v1.3 + TDD v1.0 + API v1.0 + DB v1.0 + OPS v1.0 + QA v1.0 + UG v1.0 + WBS v1.1 + 索引 |
+| **文档** | PRD v1.3 + TDD v1.1 + API v1.2 + DB v1.2 + OPS v1.2 + QA v1.1 + UG v1.1 + WBS v1.1 + 索引 |
 | **API 接口** | 44 个端点（9 模块 · JWT · SSE 流式）|
 | **数据表** | 17 张（单体应用）|
 
@@ -79,13 +79,13 @@ edu/
 |------|------|------|
 | 📋 **设计索引** | 原型导航入口，按平台分类 | `lumina-00-index.html` |
 | 📋 **PRD v1.3** | 产品需求文档，18 章 | `lumina-prd.html` |
-| 📋 **TDD v1.0** | 技术设计文档，18 章 | `lumina-tdd.html` |
-| 📋 **API v1.0** | API 接口文档，11 章 · 44 端点 | `lumina-api.html` |
+| 📋 **TDD v1.1** | 技术设计文档，18 章 | `lumina-tdd.html` |
+| 📋 **API v1.2** | API 接口文档，11 章 · 44 端点 | `lumina-api.html` |
 | 📋 **OpenAPI 3.1** | 机器可读 API 规范（YAML） | `lumina-api-openapi.yaml` |
-| 📋 **DB v1.0** | 数据库设计文档，10 章 · 24 表（单体实现 17 表）| `lumina-database.html` |
-| 📋 **OPS v1.0** | 部署运维手册，10 章 | `lumina-operations.html` |
-| 📋 **QA v1.0** | 测试用例文档，10 章 · 156 用例 | `lumina-testcases.html` |
-| 📋 **UG v1.0** | 用户手册，10 章 · 3 角色 | `lumina-userguide.html` |
+| 📋 **DB v1.2** | 数据库设计文档，10 章 · 17 表 | `lumina-database.html` |
+| 📋 **OPS v1.2** | 部署运维手册，10 章 | `lumina-operations.html` |
+| 📋 **QA v1.1** | 测试用例文档，10 章 · 76 用例 | `lumina-testcases.html` |
+| 📋 **UG v1.1** | 用户手册，10 章 · 3 角色 | `lumina-userguide.html` |
 | 📋 **WBS v1.1** | 上线工作分解结构，10 周轻量方案 | `lumina-launch-wbs.html` |
 
 ## 🎨 设计系统
@@ -216,7 +216,7 @@ cp .env.example .env
 | **v1.1** | 2026-08-25 | AI 模块新增，国产模型集成 |
 | **v1.2** | 2026-08-25 | 移动端双模式适配（手机+平板） |
 | **v1.3** | 2026-08-25 | 按平台目录重组，5 目录 33 文件 |
-| **TDD v1.0** | 2026-08-25 | 技术设计文档发布 |
+| **TDD v1.1** | 2026-08-31 | 单体架构对齐 · 去除微服务组件 |
 | **API v1.0** | 2026-08-25 | API 接口文档发布，42 端点 |
 | **OpenAPI 3.1** | 2026-08-25 | OpenAPI 规范文件，可生成 SDK/Mock |
 | **DB v1.0** | 2026-08-25 | 数据库设计文档发布，24 表 |

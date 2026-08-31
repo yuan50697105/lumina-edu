@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 部署运维手册 v1.0</title>
+<title>Lumina 墨光 · 部署运维手册 v1.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -111,12 +111,12 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Operations Runbook</small></div>
     </div>
-    <div class="doc-type">Operations Runbook · v1.0</div>
+    <div class="doc-type">Operations Runbook · v1.2</div>
     <h1>
       <span class="hl">部署</span>运维<br/>
       <em>手册</em>
     </h1>
-    <div class="subtitle">Kubernetes 部署 · 监控告警 · 故障排查 · 灾备恢复</div>
+    <div class="subtitle">Docker Compose 部署 · 监控告警 · 故障排查 · 灾备恢复</div>
   </div>
   <div class="meta">
     <div class="row">
@@ -125,15 +125,15 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.0 · 初始发布</span>
+      <span class="value">v1.2 · 单体化同步</span>
     </div>
     <div class="row">
       <span class="label">平台</span>
-      <span class="value">Kubernetes 1.28 · Helm 3</span>
+      <span class="value">Docker Compose · MySQL 9.7</span>
     </div>
     <div class="row">
       <span class="label">SLA</span>
-      <span class="value">99.9% · 月停机 &lt; 43 分钟</span>
+      <span class="value">99.5% · 月停机 &lt; 215 分钟</span>
     </div>
     <div class="row">
       <span class="label">状态</span>
@@ -156,7 +156,7 @@
   <h3>目录 · Table of Contents</h3>
   <div class="toc-grid">
     <a href="#s1"><span class="num">01</span>架构与基础设施</a>
-    <a href="#s2"><span class="num">02</span>Kubernetes 部署</a>
+    <a href="#s2"><span class="num">02</span>单体应用部署（Docker Compose）</a>
     <a href="#s3"><span class="num">03</span>CI/CD 流水线</a>
     <a href="#s4"><span class="num">04</span>监控与告警</a>
     <a href="#s5"><span class="num">05</span>日志与追踪</a>
@@ -172,27 +172,26 @@
 <section class="section" id="s1">
   <div class="section-header">
     <h2>01 · 架构与基础设施 <em>Infrastructure</em></h2>
-    <div class="num-tag">Cloud Native</div>
+    <div class="num-tag">单体 · Docker Compose</div>
   </div>
 
   <h3 class="sub">1.1 环境划分</h3>
   <table>
-    <thead><tr><th>环境</th><th>用途</th><th>K8s 版本</th><th>节点数</th><th>域名</th></tr></thead>
+    <thead><tr><th>环境</th><th>用途</th><th>基础设施</th><th>域名</th></tr></thead>
     <tbody>
-      <tr><td><b>Production</b></td><td>生产环境</td><td>1.28.x</td><td>12 节点</td><td>api.lumina.edu</td></tr>
-      <tr><td><b>Staging</b></td><td>预发布 · UAT</td><td>1.28.x</td><td>6 节点</td><td>api-staging.lumina.edu</td></tr>
-      <tr><td><b>Development</b></td><td>开发测试</td><td>1.28.x</td><td>3 节点</td><td>api-dev.lumina.edu</td></tr>
+      <tr><td><b>Production</b></td><td>生产环境</td><td>Docker Compose · 4 服务</td><td>api.lumina.edu</td></tr>
+      <tr><td><b>Staging</b></td><td>预发布 · UAT</td><td>Docker Compose · 4 服务</td><td>api-staging.lumina.edu</td></tr>
+      <tr><td><b>Development</b></td><td>开发测试</td><td>本机 MySQL + uvicorn</td><td>localhost:8080</td></tr>
     </tbody>
   </table>
 
-  <h3 class="sub">1.2 节点配置</h3>
+  <h3 class="sub">1.2 主机配置</h3>
   <table>
-    <thead><tr><th>角色</th><th>CPU</th><th>内存</th><th>存储</th><th>数量（生产）</th></tr></thead>
+    <thead><tr><th>角色</th><th>CPU</th><th>内存</th><th>存储</th><th>说明</th></tr></thead>
     <tbody>
-      <tr><td><b>Master</b></td><td>4 vCPU</td><td>16 GB</td><td>100 GB SSD</td><td>3</td></tr>
-      <tr><td><b>Worker · 通用</b></td><td>8 vCPU</td><td>32 GB</td><td>200 GB SSD</td><td>6</td></tr>
-      <tr><td><b>Worker · AI</b></td><td>16 vCPU</td><td>64 GB</td><td>500 GB SSD</td><td>2</td></tr>
-      <tr><td><b>Worker · 存储</b></td><td>4 vCPU</td><td>16 GB</td><td>2 TB HDD</td><td>1</td></tr>
+      <tr><td><b>生产</b></td><td>4 vCPU</td><td>16 GB</td><td>100 GB SSD</td><td>单机即可承载全量服务</td></tr>
+      <tr><td><b>预发布</b></td><td>2 vCPU</td><td>8 GB</td><td>50 GB SSD</td><td>验证与 UAT</td></tr>
+      <tr><td><b>备份/灾备</b></td><td>2 vCPU</td><td>8 GB</td><td>500 GB HDD</td><td>mysqldump 每日归档</td></tr>
     </tbody>
   </table>
 
@@ -200,40 +199,31 @@
   <table>
     <thead><tr><th>组件</th><th>版本</th><th>用途</th><th>部署方式</th></tr></thead>
     <tbody>
-      <tr><td><b>MySQL</b></td><td>9.7</td><td>主数据库</td><td>Operator · 主从</td></tr>
-      <tr><td><b>Redis</b></td><td>7.x</td><td>缓存 · 会话</td><td>Cluster · 6 节点</td></tr>
-      <tr><td><b>Kafka</b></td><td>3.x</td><td>消息队列</td><td>Strimzi Operator</td></tr>
-      <tr><td><b>Milvus</b></td><td>2.3.x</td><td>向量数据库</td><td>Helm Chart · 分布式</td></tr>
-      <tr><td><b>MinIO</b></td><td>最新版</td><td>对象存储</td><td>Helm Chart · 分布式</td></tr>
-      <tr><td><b>Nginx Ingress</b></td><td>1.9.x</td><td>入口网关</td><td>Helm Chart</td></tr>
-      <tr><td><b>Cert-Manager</b></td><td>1.13.x</td><td>TLS 证书</td><td>Helm Chart · Let's Encrypt</td></tr>
+      <tr><td><b>lumina-app</b></td><td>v1.2</td><td>单体 FastAPI（44 端点 · 9 模块）</td><td>Docker 容器 · :8080</td></tr>
+      <tr><td><b>MySQL</b></td><td>9.7</td><td>主数据库（17 表）</td><td>容器 · 3306 · utf8mb4</td></tr>
+      <tr><td><b>Redis</b></td><td>7.x</td><td>会话 · 缓存</td><td>容器 · 6379</td></tr>
+      <tr><td><b>Nginx</b></td><td>1.9.x</td><td>反向代理 · 静态资源</td><td>容器 · :80</td></tr>
     </tbody>
   </table>
+  <div class="info note">
+    <div class="label">ℹ 架构说明</div>
+    单体架构：9 业务模块（user/course/assignment/grade/ai_gateway/ai_chat/ai_grade/analytics/logs）共享同一进程与数据库，不依赖消息队列/向量库/对象存储等微服务中间件。水平扩展通过 <code>--scale lumina-app=N</code> 实现；AI 对话存储于 MySQL，无外部服务。
+  </div>
 </section>
 
-<!-- ============ 02 · K8s 部署 ============ -->
+<!-- ============ 02 · 单体部署 ============ -->
 <section class="section" id="s2">
   <div class="section-header">
-    <h2>02 · Kubernetes 部署 <em>Deployment</em></h2>
-    <div class="num-tag">Helm · Manifests</div>
+    <h2>02 · 单体应用部署 <em>Deployment</em></h2>
+    <div class="num-tag">Docker Compose</div>
   </div>
 
-  <h3 class="sub">2.1 命名空间</h3>
-  <pre><span class="comment"># 命名空间规划</span>
-<span class="keyword">apiVersion</span>: v1
-<span class="keyword">kind</span>: Namespace
-<span class="keyword">metadata</span>:
-  <span class="key">name</span>: <span class="string">lumina-prod</span>        <span class="comment"># 生产环境</span>
----
-<span class="keyword">apiVersion</span>: v1
-<span class="kind</span>: Namespace
-<span class="keyword">metadata</span>:
-  <span class="key">name</span>: <span class="string">lumina-staging</span>     <span class="comment"># 预发布</span>
----
-<span class="keyword">apiVersion</span>: v1
-<span class="kind</span>: Namespace
-<span class="keyword">metadata</span>:
-  <span class="key">name</span>: <span class="string">lumina-monitoring</span>  <span class="comment"># 监控栈</span></pre>
+  <h3 class="sub">2.1 部署架构</h3>
+  <div class="info note">
+    <div class="label">ℹ 拓扑</div>
+    <b>入口</b>：Nginx :80（静态资源 + 反代 <code>/api/*</code>）→ <b>lumina-app</b> :8080（单体 API）→ <b>MySQL</b> :3306（持久化）+ <b>Redis</b> :6379（会话缓存）。
+    <br/>4 服务由 <code>部署/docker-compose.yml</code> 一键编排，全部数据落 MySQL 库 <code>lumina</code>（17 表），无外部依赖。
+  </div>
 
   <h3 class="sub">2.2 单体应用部署（Docker Compose）</h3>
   <pre><span class="comment"># docker-compose.yml</span>
@@ -298,13 +288,10 @@ docker-compose ps
 docker-compose logs -f lumina-app
 
 <span class="comment"># 停止服务</span>
-docker-compose down</pre>
-  --set image.tag=1.0.0
+docker-compose down
 
-<span class="comment"># 批量部署所有服务</span>
-helm upgrade --install lumina-stack lumina/lumina-stack \
-  --namespace lumina-prod \
-  --values values-prod.yaml</pre>
+<span class="comment"># 数据持久化卷</span>
+docker volume ls | grep mysql_data</pre>
 </section>
 
 <!-- ============ 03 · CI/CD ============ -->
@@ -342,37 +329,24 @@ helm upgrade --install lumina-stack lumina/lumina-stack \
     <span class="keyword">steps</span>:
     - uses: actions/checkout@v4
 
-    - <span class="key">name</span>: <span class="string">Lint</span>
-      <span class="key">run</span>: make lint
-
     - <span class="key">name</span>: <span class="string">Unit Tests</span>
-      <span class="key">run</span>: make test
+      <span class="key">run</span>: |
+        cd 服务/lumina-app
+        python -m pytest tests -q
 
     - <span class="key">name</span>: <span class="string">Build Image</span>
       <span class="key">run</span>: |
-        docker build -t registry.lumina.edu/${{ github.event.repository.name }}:${{ github.sha }} .
-        docker push registry.lumina.edu/${{ github.event.repository.name }}:${{ github.sha }}
+        docker build -t registry.lumina.edu/lumina-app:latest 服务/lumina-app
+        docker push registry.lumina.edu/lumina-app:latest
 
-  <span class="key">deploy-staging</span>:
+  <span class="key">deploy</span>:
     needs: build-and-test
-    runs-on: ubuntu-latest
-    <span class="keyword">steps</span>:
-    - <span class="key">name</span>: <span class="string">Deploy to Staging</span>
-      <span class="key">run</span>: |
-        helm upgrade --install ${{ github.event.repository.name }} \
-          --namespace lumina-staging \
-          --set image.tag=${{ github.sha }}
-
-  <span class="key">deploy-production</span>:
-    needs: deploy-staging
     runs-on: ubuntu-latest
     <span class="keyword">environment</span>: production  <span class="comment"># 需要人工审批</span>
     <span class="keyword">steps</span>:
-    - <span class="key">name</span>: <span class="string">Deploy to Production</span>
+    - <span class="key">name</span>: <span class="string">Deploy to Server</span>
       <span class="key">run</span>: |
-        helm upgrade --install ${{ github.event.repository.name }} \
-          --namespace lumina-prod \
-          --set image.tag=${{ github.sha }}</pre>
+        ssh deploy@host "cd /opt/lumina && docker compose pull && docker compose up -d"</pre>
 </section>
 
 <!-- ============ 04 · 监控 ============ -->
@@ -386,11 +360,11 @@ helm upgrade --install lumina-stack lumina/lumina-stack \
   <table>
     <thead><tr><th>组件</th><th>用途</th><th>版本</th></tr></thead>
     <tbody>
-      <tr><td><b>Prometheus</b></td><td>指标采集 · 告警规则</td><td>2.48.x</td></tr>
-      <tr><td><b>Grafana</b></td><td>可视化面板</td><td>10.x</td></tr>
-      <tr><td><b>AlertManager</b></td><td>告警路由 · 通知</td><td>0.26.x</td></tr>
-      <tr><td><b>Loki</b></td><td>日志聚合</td><td>2.9.x</td></tr>
-      <tr><td><b>Tempo</b></td><td>分布式追踪</td><td>2.3.x</td></tr>
+      <tr><td><b>monitor.sh</b></td><td>业务/埋点查询（api_logs · event_tracking · users · ai）</td><td>部署/scripts</td></tr>
+      <tr><td><b>status.sh</b></td><td>服务健康检查（docker compose ps）</td><td>部署/scripts</td></tr>
+      <tr><td><b>Docker HEALTHCHECK</b></td><td>容器存活探针</td><td>compose 内置</td></tr>
+      <tr><td><b>Nginx limit_req</b></td><td>API 限流（独立 zone）</td><td>nginx.conf</td></tr>
+      <tr><td><b>Prometheus + Grafana</b></td><td>指标采集 · 可视化面板（可选增强）</td><td>2.48.x / 10.x</td></tr>
     </tbody>
   </table>
 
@@ -404,7 +378,8 @@ helm upgrade --install lumina-stack lumina/lumina-stack \
       <tr><td><code>cpu_usage_percent</code></td><td>Gauge</td><td>CPU 使用率</td><td>&lt; 80%</td></tr>
       <tr><td><code>memory_usage_bytes</code></td><td>Gauge</td><td>内存使用</td><td>&lt; 85%</td></tr>
       <tr><td><code>db_connections_active</code></td><td>Gauge</td><td>数据库连接数</td><td>&lt; 100</td></tr>
-      <tr><td><code>kafka_lag</code></td><td>Gauge</td><td>消息堆积</td><td>&lt; 1000</td></tr>
+      <tr><td><code>api_logs.5xx</code></td><td>业务表</td><td>5xx 错误数（monitor.sh error）</td><td>0</td></tr>
+      <tr><td><code>event_tracking.events</code></td><td>业务表</td><td>埋点事件数（monitor.sh event）</td><td>持续增长</td></tr>
     </tbody>
   </table>
 
@@ -414,12 +389,11 @@ helm upgrade --install lumina-stack lumina/lumina-stack \
     <tbody>
       <tr><td><b>HighErrorRate</b></td><td>5xx &gt; 5% / 5min</td><td><span class="tag critical">P1</span></td><td>电话 + 短信 + 钉钉</td></tr>
       <tr><td><b>HighLatency</b></td><td>P99 &gt; 1s / 5min</td><td><span class="tag warn">P2</span></td><td>钉钉 + 邮件</td></tr>
-      <tr><td><b>PodCrashLoop</b></td><td>Pod 重启 &gt; 3 / 10min</td><td><span class="tag critical">P1</span></td><td>电话 + 钉钉</td></tr>
+      <tr><td><b>ContainerRestart</b></td><td>lumina-app 重启 &gt; 3 / 10min</td><td><span class="tag critical">P1</span></td><td>电话 + 钉钉</td></tr>
       <tr><td><b>HighCPU</b></td><td>CPU &gt; 90% / 15min</td><td><span class="tag warn">P2</span></td><td>钉钉</td></tr>
       <tr><td><b>HighMemory</b></td><td>内存 &gt; 90% / 15min</td><td><span class="tag warn">P2</span></td><td>钉钉</td></tr>
       <tr><td><b>DiskSpaceLow</b></td><td>磁盘 &gt; 85%</td><td><span class="tag info">P3</span></td><td>邮件</td></tr>
       <tr><td><b>DatabaseDown</b></td><td>MySQL 不可达</td><td><span class="tag critical">P1</span></td><td>电话 + 短信</td></tr>
-      <tr><td><b>KafkaLag</b></td><td>堆积 &gt; 10000</td><td><span class="tag warn">P2</span></td><td>钉钉</td></tr>
     </tbody>
   </table>
 </section>
@@ -428,24 +402,23 @@ helm upgrade --install lumina-stack lumina/lumina-stack \
 <section class="section" id="s5">
   <div class="section-header">
     <h2>05 · 日志与追踪 <em>Logging</em></h2>
-    <div class="num-tag">EFK · Jaeger</div>
+    <div class="num-tag">JSONLines · api_logs</div>
   </div>
 
   <h3 class="sub">5.1 日志规范</h3>
-  <pre><span class="comment">// JSON 结构化日志</span>
+  <pre><span class="comment">// JSON 结构化日志（lumina-app logging_json.py）</span>
 {
-  <span class="key">"timestamp"</span>: <span class="string">"2026-08-25T10:30:00.000Z"</span>,
+  <span class="key">"ts"</span>: <span class="string">"2026-08-31T10:30:00.000Z"</span>,
   <span class="key">"level"</span>: <span class="string">"INFO"</span>,
-  <span class="key">"service"</span>: <span class="string">"lumina-app"</span>,
-  <span class="key">"trace_id"</span>: <span class="string">"abc123def456"</span>,
-  <span class="key">"span_id"</span>: <span class="string">"span789"</span>,
+  <span class="key">"logger"</span>: <span class="string">"app.main"</span>,
+  <span class="key">"request_id"</span>: <span class="string">"req_abc123"</span>,
   <span class="key">"user_id"</span>: <span class="string">"550e8400-..."</span>,
-  <span class="key">"method"</span>: <span class="string">"GET"</span>,
   <span class="key">"path"</span>: <span class="string">"/api/v1/users/me"</span>,
   <span class="key">"status"</span>: <span class="number">200</span>,
   <span class="key">"duration_ms"</span>: <span class="number">42</span>,
   <span class="key">"message"</span>: <span class="string">"Request completed"</span>
 }</pre>
+  <p>全量请求日志写入 <code>api_logs</code> 表（同库），支持 <code>GET /logs/query</code>（admin）检索与 <code>GET /logs/summary</code> 统计。</p>
 
   <h3 class="sub">5.2 日志级别</h3>
   <table>
@@ -467,8 +440,8 @@ helm upgrade --install lumina-stack lumina/lumina-stack \
   </div>
 
   <h3 class="sub">6.1 常用命令</h3>
-  <pre><span class="comment"># 查看 Pod 状态</span>
-kubectl get pods -n lumina-prod
+  <pre><span class="comment"># 查看服务状态</span>
+docker-compose ps
 
 <span class="comment"># 查看应用日志</span>
 docker-compose logs -f lumina-app
@@ -476,21 +449,21 @@ docker-compose logs -f lumina-app
 <span class="comment"># 进入容器调试</span>
 docker-compose exec lumina-app /bin/sh
 
-<span class="comment"># 查看服务 endpoints</span>
-kubectl get endpoints -n lumina-prod
+<span class="comment"># 查看健康检查</span>
+docker-compose ps --format "table {{.Name}}\t{{.Status}}"
 
-<span class="comment"># 查看 Ingress 配置</span>
-kubectl describe ingress lumina-api -n lumina-prod</pre>
+<span class="comment"># 业务监控（埋点/日志/错误）</span>
+bash 部署/scripts/monitor.sh all</pre>
 
   <h3 class="sub">6.2 常见问题</h3>
   <table>
     <thead><tr><th>现象</th><th>可能原因</th><th>排查步骤</th></tr></thead>
     <tbody>
-      <tr><td><b>Pod CrashLoopBackOff</b></td><td>启动失败 · OOM</td><td>检查日志 · 检查资源限制</td></tr>
-      <tr><td><b>502 Bad Gateway</b></td><td>Service 无 endpoints</td><td>检查 Pod 状态 · 检查 selector</td></tr>
-      <tr><td><b>请求超时</b></td><td>下游服务慢</td><td>检查追踪链路 · 检查数据库</td></tr>
-      <tr><td><b>数据库连接失败</b></td><td>密码错误 · 网络不通</td><td>检查 Secret · 检查 NetworkPolicy</td></tr>
-      <tr><td><b>Kafka 消息堆积</b></td><td>消费慢 · 消费者挂了</td><td>检查消费者 Pod · 检查 lag</td></tr>
+      <tr><td><b>容器反复重启</b></td><td>启动失败 · OOM · DB 未就绪</td><td>查看日志 · 确认 mysql 容器健康 · 调大内存限制</td></tr>
+      <tr><td><b>502 Bad Gateway</b></td><td>lumina-app 未启动 · 端口未监听</td><td>docker-compose ps · curl 127.0.0.1:8080/health</td></tr>
+      <tr><td><b>请求超时</b></td><td>AI 服务慢 · DB 连接池耗尽</td><td>检查 /logs/summary · 数据库连接数 · Nginx timeout</td></tr>
+      <tr><td><b>数据库连接失败</b></td><td>密码错误 · 网络不通 · 磁盘满</td><td>检查 .env 密码 · docker network · 磁盘空间</td></tr>
+      <tr><td><b>AI 对话不可用</b></td><td>模型池未配置 · 外部 Key 缺失</td><td>检查 /ai/models · 配置供应商 Key</td></tr>
     </tbody>
   </table>
 </section>
@@ -505,17 +478,17 @@ kubectl describe ingress lumina-api -n lumina-prod</pre>
   <div class="runbook">
     <div class="runbook-header">
       <span class="runbook-severity" style="background:var(--correction); color:#fff;">P1 · 严重</span>
-      <span class="runbook-title">数据库主从切换</span>
+      <span class="runbook-title">MySQL 数据恢复</span>
     </div>
-    <p><b>触发条件</b>：MySQL 主库不可达</p>
-    <p><b>影响</b>：所有写操作失败，读操作降级到从库</p>
+    <p><b>触发条件</b>：MySQL 容器损坏 / 数据卷异常 / 误删数据</p>
+    <p><b>影响</b>：全站读写失败</p>
     <p><b>操作步骤</b>：</p>
     <ol>
-      <li>确认主库状态：<code>mysqladmin -h mysql-primary ping</code></li>
-      <li>触发自动切换：<code>mysql -e "STOP REPLICA; RESET REPLICA ALL"</code>（半同步）</li>
-      <li>验证新主库：<code>mysqladmin -h mysql-replica-0 ping</code></li>
-      <li>检查应用连接恢复</li>
-      <li>修复原主库，重新加入集群</li>
+      <li>确认容器状态：<code>docker-compose ps mysql</code></li>
+      <li>从每日备份恢复：<code>docker-compose exec -T mysql sh -c 'exec mysql -ulumina -p"$MYSQL_PASSWORD" lumina' &lt; backup_YYYYMMDD.sql</code></li>
+      <li>验证表数据：<code>docker-compose exec mysql mysql -ulumina -e "SELECT COUNT(*) FROM users"</code></li>
+      <li>重启应用并检查 <code>/health</code> 恢复</li>
+      <li>记录事故报告，确认备份保留周期</li>
     </ol>
   </div>
 
@@ -562,10 +535,10 @@ kubectl describe ingress lumina-api -n lumina-prod</pre>
   <table>
     <thead><tr><th>数据类型</th><th>备份方式</th><th>频率</th><th>保留时间</th><th>存储位置</th></tr></thead>
     <tbody>
-      <tr><td><b>MySQL</b></td><td>mysqldump + binlog 归档</td><td>每日全量 + 实时增量</td><td>30 天</td><td>minio 备份桶</td></tr>
-      <tr><td><b>Redis</b></td><td>RDB 快照</td><td>每 6 小时</td><td>7 天</td><td>MinIO 备份桶</td></tr>
-      <tr><td><b>MinIO 文件</b></td><td>跨区域复制</td><td>实时</td><td>永久</td><td>异地灾备中心</td></tr>
-      <tr><td><b>etcd</b></td><td>etcdctl snapshot</td><td>每日</td><td>7 天</td><td>MinIO 备份桶</td></tr>
+      <tr><td><b>MySQL</b></td><td>mysqldump 全量 + binlog 增量</td><td>每日全量 + 实时增量</td><td>30 天</td><td>备份机 / 云盘</td></tr>
+      <tr><td><b>Redis</b></td><td>RDB 快照（容器卷）</td><td>每 6 小时</td><td>7 天</td><td>数据卷快照</td></tr>
+      <tr><td><b>上传文件</b></td><td>本地卷归档</td><td>每日</td><td>30 天</td><td>uploads 卷 → 备份机</td></tr>
+      <tr><td><b>环境配置</b></td><td>.env + docker-compose.yml 版本归档</td><td>随代码</td><td>随 Git 历史</td><td>Git 仓库</td></tr>
     </tbody>
   </table>
 
@@ -573,10 +546,10 @@ kubectl describe ingress lumina-api -n lumina-prod</pre>
   <table>
     <thead><tr><th>场景</th><th>RPO</th><th>RTO</th><th>说明</th></tr></thead>
     <tbody>
-      <tr><td><b>单节点故障</b></td><td>0</td><td>&lt; 1 分钟</td><td>K8s 自动调度</td></tr>
-      <tr><td><b>数据库主库故障</b></td><td>0</td><td>&lt; 5 分钟</td><td>主从自动切换</td></tr>
-      <tr><td><b>机房级故障</b></td><td>1 小时</td><td>&lt; 4 小时</td><td>异地灾备切换</td></tr>
-      <tr><td><b>数据误删</b></td><td>—</td><td>&lt; 1 小时</td><td>从备份恢复</td></tr>
+      <tr><td><b>单容器故障</b></td><td>0</td><td>&lt; 1 分钟</td><td>compose restart</td></tr>
+      <tr><td><b>MySQL 数据损坏</b></td><td>≤ 24 小时</td><td>&lt; 1 小时</td><td>从每日备份恢复</td></tr>
+      <tr><td><b>主机故障</b></td><td>≤ 24 小时</td><td>&lt; 4 小时</td><td>重建主机 + 备份恢复</td></tr>
+      <tr><td><b>数据误删</b></td><td>—</td><td>&lt; 1 小时</td><td>从备份恢复（binlog 可回放至误删前）</td></tr>
     </tbody>
   </table>
 
@@ -600,12 +573,12 @@ kubectl describe ingress lumina-api -n lumina-prod</pre>
   <table>
     <thead><tr><th>维度</th><th>措施</th><th>工具</th></tr></thead>
     <tbody>
-      <tr><td><b>网络隔离</b></td><td>NetworkPolicy · 命名空间隔离</td><td>Calico</td></tr>
-      <tr><td><b>密钥管理</b></td><td>Secret 加密 · 定期轮换</td><td>Vault / Sealed Secrets</td></tr>
-      <tr><td><b>镜像安全</b></td><td>漏洞扫描 · 签名验证</td><td>Trivy · Cosign</td></tr>
-      <tr><td><b>访问控制</b></td><td>RBAC · 最小权限</td><td>K8s RBAC</td></tr>
-      <tr><td><b>审计日志</b></td><td>所有操作可追溯</td><td>Auditd · Falco</td></tr>
-      <tr><td><b>TLS 加密</b></td><td>全链路 HTTPS</td><td>Cert-Manager</td></tr>
+      <tr><td><b>网络隔离</b></td><td>容器网络隔离 · 仅暴露 Nginx :80/443</td><td>Docker network · 云安全组</td></tr>
+      <tr><td><b>密钥管理</b></td><td>.env 环境变量 · 定期轮换 · 不入库</td><td>部署/.env（gitignore）</td></tr>
+      <tr><td><b>镜像安全</b></td><td>漏洞扫描 · 最小镜像</td><td>Trivy · python:3.12-slim</td></tr>
+      <tr><td><b>访问控制</b></td><td>角色权限（admin/teacher/student）· JWT</td><td>FastAPI 依赖注入</td></tr>
+      <tr><td><b>审计日志</b></td><td>全量 API 请求日志 + 管理操作审计</td><td>api_logs 表 · 日志模块</td></tr>
+      <tr><td><b>TLS 加密</b></td><td>Nginx 全链路 HTTPS（Let's Encrypt）</td><td>certbot</td></tr>
     </tbody>
   </table>
 
@@ -629,10 +602,10 @@ kubectl describe ingress lumina-api -n lumina-prod</pre>
   <table>
     <thead><tr><th>指标</th><th>当前</th><th>峰值</th><th>上限</th><th>利用率</th></tr></thead>
     <tbody>
-      <tr><td><b>CPU</b></td><td>48 vCPU</td><td>32 vCPU</td><td>96 vCPU</td><td>33%</td></tr>
-      <tr><td><b>内存</b></td><td>384 GB</td><td>240 GB</td><td>512 GB</td><td>47%</td></tr>
-      <tr><td><b>存储</b></td><td>5 TB</td><td>2 TB</td><td>10 TB</td><td>20%</td></tr>
-      <tr><td><b>网络带宽</b></td><td>1 Gbps</td><td>400 Mbps</td><td>2 Gbps</td><td>20%</td></tr>
+      <tr><td><b>CPU</b></td><td>1.5 vCPU</td><td>3 vCPU</td><td>4 vCPU</td><td>38%</td></tr>
+      <tr><td><b>内存</b></td><td>4 GB</td><td>9 GB</td><td>16 GB</td><td>56%</td></tr>
+      <tr><td><b>存储</b></td><td>10 GB</td><td>25 GB</td><td>100 GB</td><td>25%</td></tr>
+      <tr><td><b>网络带宽</b></td><td>50 Mbps</td><td>150 Mbps</td><td>1 Gbps</td><td>15%</td></tr>
     </tbody>
   </table>
 
@@ -640,10 +613,10 @@ kubectl describe ingress lumina-api -n lumina-prod</pre>
   <table>
     <thead><tr><th>资源</th><th>扩容阈值</th><th>扩容方式</th><th>预计耗时</th></tr></thead>
     <tbody>
-      <tr><td><b>CPU &gt; 70%</b></td><td>持续 15 分钟</td><td>水平扩容（增加 Pod）</td><td>~3 分钟</td></tr>
-      <tr><td><b>内存 &gt; 80%</b></td><td>持续 15 分钟</td><td>垂直扩容（增加资源限制）</td><td>~5 分钟</td></tr>
-      <tr><td><b>存储 &gt; 70%</b></td><td>—</td><td>扩容 PVC</td><td>~10 分钟</td></tr>
-      <tr><td><b>QPS &gt; 1000</b></td><td>—</td><td>增加节点</td><td>~15 分钟</td></tr>
+      <tr><td><b>CPU &gt; 70%</b></td><td>持续 15 分钟</td><td><code>docker compose up -d --scale lumina-app=N</code>（Nginx upstream 联动）</td><td>~2 分钟</td></tr>
+      <tr><td><b>内存 &gt; 80%</b></td><td>持续 15 分钟</td><td>提升容器内存限制 · 升级主机规格</td><td>~5 分钟</td></tr>
+      <tr><td><b>存储 &gt; 70%</b></td><td>—</td><td>扩容数据卷 / 主机磁盘</td><td>~10 分钟</td></tr>
+      <tr><td><b>QPS &gt; 1000</b></td><td>—</td><td>lumina-app 多实例 + Nginx 负载均衡</td><td>~10 分钟</td></tr>
     </tbody>
   </table>
 
@@ -651,18 +624,18 @@ kubectl describe ingress lumina-api -n lumina-prod</pre>
   <table>
     <thead><tr><th>项目</th><th>月成本（元）</th><th>说明</th></tr></thead>
     <tbody>
-      <tr><td><b>K8s 集群</b></td><td>~8,000</td><td>12 节点 · 包年优惠</td></tr>
-      <tr><td><b>对象存储</b></td><td>~500</td><td>MinIO · 3 TB</td></tr>
-      <tr><td><b>CDN 流量</b></td><td>~1,000</td><td>视频/文件分发</td></tr>
+      <tr><td><b>云主机</b></td><td>~600</td><td>4 vCPU / 16 GB · 包年优惠</td></tr>
+      <tr><td><b>云盘备份</b></td><td>~100</td><td>每日 mysqldump 归档</td></tr>
+      <tr><td><b>CDN 流量</b></td><td>~300</td><td>静态资源分发</td></tr>
       <tr><td><b>AI 模型调用</b></td><td>~3,000</td><td>按量付费</td></tr>
-      <tr><td><b>合计</b></td><td><b>~12,500</b></td><td>—</td></tr>
+      <tr><td><b>合计</b></td><td><b>~4,000</b></td><td>—</td></tr>
     </tbody>
   </table>
 </section>
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Operations Runbook</div>
-  <div>v1.1 · 单体 FastAPI · Docker Compose · 99.9% SLA</div>
+  <div>v1.2 · 单体 FastAPI · Docker Compose · 99.5% SLA</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">OPS-LUMINA-2026-001</div>
 </footer>
 
