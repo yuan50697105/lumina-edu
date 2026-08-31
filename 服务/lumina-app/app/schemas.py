@@ -698,3 +698,163 @@ class LiveCallOut(BaseModel):
     user_id: uuid.UUID
     name: str
     called_at: datetime
+
+
+# ─── 协作工具（V1.1 · D-02）───
+# 小组 / 成员 / 项目 / 看板（列·卡片）/ 共享文件 / 讨论（主题·回复）
+
+class GroupCreate(BaseModel):
+    """创建小组（教师）"""
+    name: str
+    description: Optional[str] = None
+    leader_id: Optional[uuid.UUID] = None   # 缺省 = 创建人
+
+class GroupUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    leader_id: Optional[uuid.UUID] = None
+
+class GroupMemberOut(BaseModel):
+    id: uuid.UUID
+    name: str
+
+    class Config:
+        from_attributes = True
+
+class GroupOut(BaseModel):
+    id: uuid.UUID
+    course_id: uuid.UUID
+    course_title: Optional[str] = None
+    name: str
+    description: Optional[str] = None
+    leader_id: uuid.UUID
+    leader_name: Optional[str] = None
+    member_count: int = 0
+    project_count: int = 0
+    created_at: datetime
+    members: list[GroupMemberOut] = []
+    is_member: bool = False
+
+    class Config:
+        from_attributes = True
+
+class ProjectCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    deadline: Optional[datetime] = None
+
+class ProjectUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    deadline: Optional[datetime] = None
+
+class ProjectOut(BaseModel):
+    id: uuid.UUID
+    group_id: uuid.UUID
+    course_id: uuid.UUID
+    title: str
+    description: Optional[str] = None
+    status: str = "not_started"
+    deadline: Optional[datetime] = None
+    created_by: uuid.UUID
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class CardCreate(BaseModel):
+    """新建卡片（任务卡）"""
+    title: str
+    description: Optional[str] = None
+    assignee_id: Optional[uuid.UUID] = None
+    due_date: Optional[datetime] = None
+
+class CardUpdate(BaseModel):
+    """更新卡片（含拖拽换列：column_id / order_num）"""
+    title: Optional[str] = None
+    description: Optional[str] = None
+    assignee_id: Optional[uuid.UUID] = None
+    order_num: Optional[int] = None
+    column_id: Optional[uuid.UUID] = None
+    due_date: Optional[datetime] = None
+
+class CardOut(BaseModel):
+    id: uuid.UUID
+    column_id: uuid.UUID
+    title: str
+    description: Optional[str] = None
+    assignee_id: Optional[uuid.UUID] = None
+    assignee_name: Optional[str] = None
+    order_num: int = 0
+    due_date: Optional[datetime] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ColumnCreate(BaseModel):
+    title: str
+
+class ColumnUpdate(BaseModel):
+    title: Optional[str] = None
+    order_num: Optional[int] = None
+
+class ColumnOut(BaseModel):
+    id: uuid.UUID
+    project_id: uuid.UUID
+    title: str
+    order_num: int = 0
+    cards: list[CardOut] = []
+
+    class Config:
+        from_attributes = True
+
+class BoardOut(BaseModel):
+    project_id: uuid.UUID
+    columns: list[ColumnOut] = []
+
+class FileOut(BaseModel):
+    id: uuid.UUID
+    group_id: uuid.UUID
+    filename: str
+    size: int = 0
+    content_type: str = ""
+    uploader_id: uuid.UUID
+    uploader_name: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class TopicCreate(BaseModel):
+    title: str
+    content: Optional[str] = None
+
+class ReplyIn(BaseModel):
+    content: str
+
+class ReplyOut(BaseModel):
+    id: uuid.UUID
+    topic_id: uuid.UUID
+    author_id: uuid.UUID
+    author_name: Optional[str] = None
+    content: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class TopicOut(BaseModel):
+    id: uuid.UUID
+    group_id: uuid.UUID
+    author_id: uuid.UUID
+    author_name: Optional[str] = None
+    title: str
+    content: Optional[str] = None
+    reply_count: int = 0
+    created_at: datetime
+    replies: list[ReplyOut] = []
+
+    class Config:
+        from_attributes = True

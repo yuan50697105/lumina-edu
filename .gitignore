@@ -75,3 +75,6 @@ scripts/yuque-config.local.json
 # Claude Code 本地产物（worktrees / 计划等，不入库）
 .claude/
 .gstack/
+
+# Runtime uploads（协作小组共享文件本地存储）
+服务/lumina-app/uploads/

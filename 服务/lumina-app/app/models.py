@@ -413,4 +413,109 @@ class LiveQuizAnswer(Base):
     submitted_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
 
 
+# ─── 协作工具（V1.1 · D-02 · WBS-P 阶段 D）───
+# 小组项目 / 看板 / 共享文件 / 组内讨论 —— 全部挂在课程（course）→ 小组（group）树上
+class ProjectGroup(Base):
+    """协作小组（所属课程）"""
+    __tablename__ = "project_groups"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+    leader_id = Column(GUID, nullable=False)          # 组长
+    created_by = Column(GUID, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
+class GroupMember(Base):
+    """小组成员（UNIQUE(group, user)）"""
+    __tablename__ = "group_members"
+    __table_args__ = (
+        UniqueConstraint("group_id", "user_id", name="uq_group_member"),
+    )
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    group_id = Column(GUID, ForeignKey("project_groups.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(GUID, nullable=False)
+    joined_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
+class CollabProject(Base):
+    """小组内的协作项目（含看板）"""
+    __tablename__ = "projects"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    group_id = Column(GUID, ForeignKey("project_groups.id", ondelete="CASCADE"), nullable=False)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    status = Column(String(20), default="not_started")  # not_started | in_progress | done
+    deadline = Column(DateTime(timezone=True), nullable=True)
+    created_by = Column(GUID, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
+class KanbanColumn(Base):
+    """看板列（属于项目）"""
+    __tablename__ = "kanban_columns"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    project_id = Column(GUID, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    title = Column(String(50), nullable=False)
+    order_num = Column(Integer, default=0)
+
+
+class KanbanCard(Base):
+    """看板卡片（任务卡，可拖拽换列/排位）"""
+    __tablename__ = "kanban_cards"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    column_id = Column(GUID, ForeignKey("kanban_columns.id", ondelete="CASCADE"), nullable=False)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    assignee_id = Column(GUID, nullable=True)
+    order_num = Column(Integer, default=0)
+    due_date = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
+class SharedFile(Base):
+    """小组共享文件（本地 uploads 目录，V1.1 简化存储）"""
+    __tablename__ = "shared_files"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    group_id = Column(GUID, ForeignKey("project_groups.id", ondelete="CASCADE"), nullable=False)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    uploader_id = Column(GUID, nullable=False)
+    filename = Column(String(255), nullable=False)
+    stored_path = Column(String(500), nullable=True)   # 空 = mock 占位
+    size = Column(Integer, default=0)
+    content_type = Column(String(100), default="application/octet-stream")
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
+class DiscussionTopic(Base):
+    """组内讨论主题"""
+    __tablename__ = "discussion_topics"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    group_id = Column(GUID, ForeignKey("project_groups.id", ondelete="CASCADE"), nullable=False)
+    author_id = Column(GUID, nullable=False)
+    title = Column(String(200), nullable=False)
+    content = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
+class DiscussionReply(Base):
+    """讨论回复"""
+    __tablename__ = "discussion_replies"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    topic_id = Column(GUID, ForeignKey("discussion_topics.id", ondelete="CASCADE"), nullable=False)
+    author_id = Column(GUID, nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
 # ─── 监控共享表 ───
