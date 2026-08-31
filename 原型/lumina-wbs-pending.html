@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · 未实现内容落地 WBS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding:56px 64px; max-width:1280px; margin:0 auto;}
+
+  .cover{padding:64px 0 56px; border-bottom:1px solid var(--line); margin-bottom:48px;}
+  .cover .brand{display:flex; align-items:center; gap:14px; margin-bottom:28px;}
+  .cover .brand .logo{width:56px; height:56px; border-radius:14px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:28px; font-weight:500; font-style:italic;}
+  .cover .brand .name{font-family:var(--f-display); font-size:20px; font-weight:500;}
+  .cover .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:4px;}
+  .cover .doc-type{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--cobalt); background:var(--cobalt-soft); padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:18px;}
+  .cover h1{font-family:var(--f-display); font-weight:300; font-size:66px; letter-spacing:-0.04em; line-height:1;}
+  .cover h1 em{font-style:italic; color:var(--correction);}
+  .cover h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .cover .subtitle{font-size:18px; color:var(--inkwell-2); margin-top:18px; font-weight:300;}
+  .cover .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:22px; line-height:2;}
+
+  .stats{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:48px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px;}
+  .stat{text-align:center; padding:6px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .val{font-family:var(--f-display); font-size:26px; font-weight:300;}
+  .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  .section{margin-bottom:56px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:22px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:34px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  h3.sub{font-family:var(--f-display); font-size:22px; font-weight:400; margin:28px 0 14px; letter-spacing:-0.01em;}
+  h3.sub em{font-style:italic; color:var(--cobalt);}
+
+  p{margin-bottom:12px; line-height:1.7;}
+  ul,ol{margin:0 0 16px 20px; line-height:1.8;}
+  li{margin-bottom:4px;}
+  b{font-weight:600;}
+  code{font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px; font-size:13px; border:1px solid var(--line);}
+
+  table{width:100%; border-collapse:collapse; margin:14px 0 22px; font-size:13px;}
+  th{background:var(--ricepaper); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-strong);}
+  td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  tr:hover td{background:rgba(250,246,236,0.5);}
+  .tag{display:inline-block; font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; padding:2px 7px; border-radius:4px;}
+  .tag.phase-a{background:var(--cobalt); color:#fff;}
+  .tag.phase-b{background:var(--correction); color:#fff;}
+  .tag.phase-c{background:var(--growth); color:#fff;}
+  .tag.phase-d{background:var(--ai); color:#fff;}
+  .tag.critical{background:var(--correction); color:#fff;}
+  .tag.high{background:var(--highlighter); color:var(--inkwell);}
+  .tag.medium{background:var(--cobalt-soft); color:var(--cobalt);}
+  .tag.low{background:var(--ricepaper-2); color:var(--inkwell-2);}
+  .tag.done{background:var(--growth-soft); color:var(--growth);}
+  .tag.ready{background:var(--ai-soft); color:var(--ai);}
+  .tag.pending{background:var(--correction-soft); color:var(--correction);}
+  .tag.blocked{background:var(--ricepaper-2); color:var(--inkwell-2);}
+
+  .info{padding:16px 20px; border-radius:10px; margin:16px 0 20px; font-size:13px; line-height:1.7;}
+  .info .label{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; font-weight:600;}
+  .info.note{background:var(--cobalt-soft); border:1px solid var(--cobalt);}
+  .info.warn{background:var(--highlighter-soft); border:1px solid var(--highlighter);}
+  .info.success{background:var(--growth-soft); border:1px solid var(--growth);}
+  .info.ai{background:var(--ai-soft); border:1px solid var(--ai);}
+  .info.risk{background:var(--correction-soft); border:1px solid var(--correction);}
+
+  .gantt{background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; margin:18px 0; overflow-x:auto;}
+  .gantt-row{display:grid; grid-template-columns:220px 1fr; gap:12px; padding:8px 0; border-bottom:1px dashed var(--line); align-items:center;}
+  .gantt-row:last-child{border-bottom:none;}
+  .gantt-label{font-size:13px; font-weight:500;}
+  .gantt-label.sub{padding-left:20px; font-weight:400; color:var(--inkwell-2);}
+  .gantt-bar-container{position:relative; height:24px; background:var(--ricepaper); border-radius:4px;}
+  .gantt-bar{position:absolute; height:100%; border-radius:4px; display:flex; align-items:center; padding:0 8px; font-family:var(--f-mono); font-size:10px; color:#fff; font-weight:600;}
+  .gantt-bar.phase-a{background:var(--cobalt);}
+  .gantt-bar.phase-b{background:var(--correction);}
+  .gantt-bar.phase-c{background:var(--growth);}
+  .gantt-bar.phase-d{background:var(--ai);}
+  .gantt-timeline{display:grid; grid-template-columns:repeat(12, 1fr); gap:0; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
+  .gantt-week{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-align:center;}
+
+  .milestone{display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin:18px 0;}
+  .ms-card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 20px; position:relative;}
+  .ms-card .ms-name{font-family:var(--f-display); font-size:20px; font-weight:400;}
+  .ms-card .ms-name em{font-style:italic; color:var(--cobalt);}
+  .ms-card .ms-window{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em; margin:6px 0 10px;}
+  .ms-card .criteria{font-size:12px; line-height:1.7; color:var(--inkwell-2);}
+  .ms-card .criteria span{display:block; padding-left:14px; position:relative;}
+  .ms-card .criteria span:before{content:"✓"; position:absolute; left:0; color:var(--growth); font-weight:700;}
+
+  footer{margin-top:56px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div>
+    <div class="brand">
+      <div class="logo">墨</div>
+      <div class="name">Lumina · 墨光<small>Pending Work WBS</small></div>
+    </div>
+    <div class="doc-type">Work Breakdown Structure · v1.0</div>
+    <h1>
+      <span class="hl">未实现内容</span>落地<br/>
+      <em>工作分解结构</em>
+    </h1>
+    <div class="subtitle">承接上线 WBS v1.1 · M4 正式上线 · 收口认证 · V1.1 演进 · 32 任务包</div>
+  </div>
+  <div class="meta">
+    文档编号：WBS-LUMINA-2026-002<br/>
+    版本号：v1.0 · 2026-08-31<br/>
+    时间轴：T0（生产环境就绪）起约 8 周 · 演进滚动<br/>
+    依据：上线 WBS v1.1 · 开发进度.md（M1-M3 达成）· PRD v1.3 · QA v1.2
+  </div>
+</header>
+
+<!-- ============ STATS ============ -->
+<div class="stats">
+  <div class="stat"><div class="val hl">4</div><div class="lbl">阶段</div></div>
+  <div class="stat"><div class="val hl">32</div><div class="lbl">任务包</div></div>
+  <div class="stat"><div class="val hl">3</div><div class="lbl">里程碑</div></div>
+  <div class="stat"><div class="val hl">T0+8w</div><div class="lbl">落地周期</div></div>
+</div>
+
+<!-- ============ 01 · 概览 ============ -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <h2>01 · 项目概览 <em>Overview</em></h2>
+    <div class="num-tag">Scope & Baseline</div>
+  </div>
+
+  <h3 class="sub">1.1 目的</h3>
+  <p>以 <code>lumina-launch-wbs.html</code> v1.1（10 周 · 4 阶段 · 48 任务包）为总计划，本文档盘清 <b>M1-M3 达成后所有未实现内容</b>，给出可直接执行的任务分解、资源、依赖、里程碑与验收标准，支撑<b> M4 正式上线</b>与<b> V1.1 演进</b>。</p>
+
+  <h3 class="sub">1.2 范围界定</h3>
+  <table>
+    <thead><tr><th>类别</th><th>包含</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td><b>M4 正式上线</b></td><td>生产环境就绪 · 数据迁移 · 灰度/全量发布 · 监控 1 周 · 问题修复</td><td><span class="tag pending">未执行</span></td></tr>
+      <tr><td><b>收口认证</b></td><td>UAT 人工签字 · AI 真批阅验收 · 三类角色培训 · 移动端收官</td><td><span class="tag pending">未执行</span></td></tr>
+      <tr><td><b>V1.1 演进</b></td><td>PRD P1 功能 · AI 基础设施 · 运营演进（规模化）</td><td><span class="tag pending">待排期</span></td></tr>
+      <tr><td><b>已完成（不重复规划）</b></td><td>阶段一~三（M1-M3）· 阶段四离线资产（init.sql/seed/检查清单/文档 v1.2 已生产化）</td><td><span class="tag done">已达成</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="info warn">
+    <div class="label">⏱ 时间轴约定</div>
+    <b>T0 = 生产环境就绪日</b>（云资源 + MySQL 9.7 + Docker 可验证）。本 WBS 全部时间为相对 T0 的工作日/周估算；D 阶段（V1.1）在 M4 达成后滚动迭代，与绝对日历解耦。
+  </div>
+
+  <h3 class="sub">1.3 前置条件（T0 定义）</h3>
+  <ul>
+    <li><b>云资源</b>：2-3 台云服务器申请完成 + 域名 ICP 备案/解析（上线检查清单 4.1-1.1）</li>
+    <li><b>数据库</b>：生产 MySQL 9.7 可连接（<code>部署/config/mysql/init.sql</code> 预备）</li>
+    <li><b>编排</b>：<code>docker compose up -d</code> 4 服务（mysql/redis/lumina-app/nginx）全绿（<code>部署/docker-compose.yml</code>）</li>
+    <li><b>安全</b>：TLS 证书在位 · <code>.env</code> 独立密钥 · CORS 生产域（<code>部署/.env.example</code> 模板）</li>
+  </ul>
+
+  <h3 class="sub">1.4 现状基线（M3 达成 · 2026-08-31 实测）</h3>
+  <table>
+    <thead><tr><th>维度</th><th>基线</th><th>未实现差距</th></tr></thead>
+    <tbody>
+      <tr><td><b>功能</b></td><td>单体 44 端点 · 9 模块 · 17 表 · 冒烟 16/16</td><td>PRD P0/P1 模块（直播/题库/学情/协作等）未实现</td></tr>
+      <tr><td><b>测试</b></td><td>单测 81/0 · 契约三层一致 · 压测 365 req/s · p50 26ms</td><td>UAT 人工签字未完成 · AI 真批阅未跑真实模型</td></tr>
+      <tr><td><b>部署</b></td><td>离线资产生产化（init.sql/seed 幂等/监控/文档 v1.2）</td><td>真实生产环境（MySQL + Docker + TLS + 域名）未就绪</td></tr>
+      <tr><td><b>前端</b></td><td>Web 构建通过 · 埋点链路闭合</td><td>移动端 typecheck 待 RN 工具链 · 未真机冒烟</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 02 · 现状盘点 ============ -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <h2>02 · 未实现内容盘点 <em>Inventory</em></h2>
+    <div class="num-tag">14 类差距 · 资产映射</div>
+  </div>
+
+  <p>以下矩阵将「未实现内容」逐项映射到<b>已有资产</b>与<b>阻碍因素</b>，是 WBS 详细分解（§03）的直接依据。</p>
+
+  <table>
+    <thead><tr><th style="width:120px;">领域</th><th>未实现内容</th><th>已有资产（可直接复用）</th><th>阻碍 / 依赖</th><th>WBS</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="3"><b>环境前置</b></td><td>生产云资源 / 域名 / TLS</td><td><code>部署/docker-compose.yml</code> · <code>lumina.conf</code>（Nginx TLS 段）</td><td>云采购 + ICP 备案周期</td><td>A-01 / A-02</td></tr>
+      <tr><td>生产 MySQL 9.7 / Redis</td><td><code>config/mysql/init.sql</code> · compose 4 服务 · <code>部署/scripts/*</code></td><td>服务器就绪</td><td>A-03 / A-04</td></tr>
+      <tr><td>环境变量 / 安全基线</td><td><code>deploy/.env.example</code> · <code>status.sh</code> · <code>monitor.sh</code></td><td>密码/JWT/CORS 生产化</td><td>A-05 / A-06 / A-07</td></tr>
+      <tr><td rowspan="3"><b>数据迁移</b></td><td>历史数据迁移脚本</td><td><code>seed_demo.py</code>（幂等 ensure）· 17 表 DDL</td><td>旧系统数据源格式未知</td><td>B-01 / B-03</td></tr>
+      <tr><td>迁移演练 / 回滚演练</td><td>上线检查清单「回滚方案」· <code>backup/restore</code> 脚本</td><td>测试库构造</td><td>B-04</td></tr>
+      <tr><td>生产数据迁移 + 校验</td><td><code>init.sql</code>（19 DDL 实测）· 校验口径</td><td>迁移窗口 / 业务确认</td><td>B-05</td></tr>
+      <tr><td rowspan="3"><b>上线执行</b></td><td>灰度方案 / 流量切分</td><td><code>lumina.conf</code>（正则路由 + 限流 zone）</td><td>Nginx 权重方案设计</td><td>B-06 / B-08</td></tr>
+      <tr><td>上线 Checklist 过堂</td><td><code>部署/docs/上线检查清单.md</code>（4.1-4.7 + 签字区）</td><td>逐项人工确认</td><td>B-07</td></tr>
+      <tr><td>全量发布 / 监控 1 周</td><td><code>monitor.sh</code> · <code>events/stats</code> · <code>logs/summary</code> 埋点</td><td>运营值班</td><td>B-09 / B-10 / B-11</td></tr>
+      <tr><td rowspan="3"><b>收口认证</b></td><td>UAT 人工签字（阶段三 3.6）</td><td><code>部署/docs/UAT-验收清单.md</code>（7 张表签字区）</td><td>业务方（教师/学生代表）到场</td><td>C-01</td></tr>
+      <tr><td>AI 真批阅（真实模型）</td><td>ai-grade 模块（容错解析 / 置信度落库）· 网关适配器 3 套协议</td><td>外部模型 API key</td><td>C-02</td></tr>
+      <tr><td>三角色培训 + 材料</td><td><code>lumina-userguide.html</code> v1.1 · <code>lumina-operations.html</code> v1.2</td><td>业务方排期</td><td>C-03 / C-04</td></tr>
+      <tr><td><b>移动端</b></td><td>typecheck / 真机冒烟</td><td><code>服务/mobile-app/</code>（Expo SDK 52 骨架）</td><td>RN 工具链环境</td><td>C-05</td></tr>
+      <tr><td rowspan="2"><b>V1.1 演进</b></td><td>PRD P0/P1 功能缺口</td><td>单体 9 模块地基 · 原型 40 文件</td><td>M4 后迭代排期</td><td>D-01 ~ D-06</td></tr>
+      <tr><td>AI 基础设施 / 规模运营</td><td>AI 网关可扩展（openai/anthropic/gemini）</td><td>模型成本 · 用户量阈值</td><td>D-07 ~ D-09</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info note">
+    <div class="label">💡 设计原则</div>
+    所有任务<b>优先复用既有资产</b>（脚本 / 文档 / 镜像），仅在确认缺口时新增开发；每项任务的「交付物」列均给出对应资产路径，避免重复建设。
+  </div>
+</section>
+
+<!-- ============ 03 · WBS 详细分解 ============ -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <h2>03 · WBS 详解 <em>Detailed WBS</em></h2>
+    <div class="num-tag">A · B · C · D — 32 Work Packages</div>
+  </div>
+
+  <h3 class="sub">3.1 阶段 A：生产环境就绪 <em>· T0 前置 · 5-7 工作日</em></h3>
+  <table>
+    <thead><tr><th>编号</th><th>任务</th><th>负责人</th><th>工期</th><th>依赖</th><th>交付物</th><th>优先级</th></tr></thead>
+    <tbody>
+      <tr><td><b>A-01</b></td><td>云资源采购与域名备案</td><td>运维</td><td>3-5 工作日</td><td>—</td><td>2-3 台服务器 · 域名 ICP 备案 · DNS 解析</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>A-02</b></td><td>TLS 证书签发与 Nginx 安装</td><td>运维</td><td>1 天</td><td>A-01</td><td><code>ssl/fullchain.pem</code> + <code>privkey.pem</code> · 443 就绪</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>A-03</b></td><td>生产 MySQL 9.7 部署</td><td>DBA</td><td>1-2 天</td><td>A-01</td><td>数据卷（mysql_data）· utf8mb4 · 每日备份 + 保留策略</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>A-04</b></td><td>Redis 部署与缓存配置</td><td>运维</td><td>0.5 天</td><td>A-01</td><td>单机 Redis · compose 内网访问</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>A-05</b></td><td>Docker Compose 4 服务启动</td><td>运维</td><td>1 天</td><td>A-02/A-03/A-04</td><td><code>up -d</code> 全绿 · <code>/health</code> 200 · <code>status.sh</code> OK</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>A-06</b></td><td>环境变量与安全基线</td><td>运维+开发</td><td>1 天</td><td>A-05</td><td><code>.env</code> 独立密钥 · CORS 生产域 · <code>.gitignore</code> 排除 .env/ssl/backups</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>A-07</b></td><td>容器内回归基线</td><td>开发+QA</td><td>1 天</td><td>A-05</td><td>契约三层一致 · 单测 81 过 · 冒烟 dry-run 全绿</td><td><span class="tag high">P1</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">3.2 阶段 B：M4 上线执行 <em>· T0 起 2 周</em></h3>
+  <table>
+    <thead><tr><th>编号</th><th>任务</th><th>负责人</th><th>工期</th><th>依赖</th><th>交付物</th><th>优先级</th></tr></thead>
+    <tbody>
+      <tr><td><b>B-01</b></td><td>生产库建表与索引</td><td>DBA</td><td>0.5 天</td><td>A-03</td><td>执行 <code>init.sql</code> · 校验 17 表 + 2 索引</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>B-02</b></td><td>演示数据与账户初始化</td><td>DBA</td><td>0.5 天</td><td>B-01</td><td><code>seed_demo.py</code> 幂等注入（admin/teacher/student + 课程/作业/成绩）</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>B-03</b></td><td>历史数据迁移方案开发</td><td>DBA</td><td>3 天</td><td>A-03</td><td>迁移脚本（旧系统→17 表）· 字段映射文档 · 校验脚本</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>B-04</b></td><td>迁移演练与回滚演练</td><td>DBA</td><td>1 天</td><td>B-03</td><td>演练报告（含备份恢复验证）</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>B-05</b></td><td>生产数据迁移 + 校验</td><td>DBA</td><td>1 天</td><td>B-04</td><td>迁移完成 · 100% 行数 / 抽样字段校验</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>B-06</b></td><td>灰度方案与内测用户池</td><td>运维+业务</td><td>2 天</td><td>B-02</td><td>Nginx 权重切分（10%→50%→100%）· 内测师生名单确认</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>B-07</b></td><td>上线检查清单逐项过堂</td><td>项目经理</td><td>1 天</td><td>B-05/B-06</td><td><code>上线检查清单.md</code> 4.1-4.7 全打勾 · 签字区</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>B-08</b></td><td>灰度发布（10% · 稳定 2 天）</td><td>运维</td><td>2 天</td><td>B-07</td><td>灰度健康报告 · P0/P1 = 0</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>B-09</b></td><td>全量发布</td><td>运维</td><td>1 天</td><td>B-08</td><td>全量开放 · 24h 强化监控 · 上线公告/邮件</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>B-10</b></td><td>上线后监控（1 周）</td><td>运维+开发</td><td>7 天</td><td>B-09</td><td><code>monitor.sh</code> · <code>events/stats</code> · <code>logs/summary</code> · 稳定性报告</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>B-11</b></td><td>问题收集与修复</td><td>开发</td><td>7 天</td><td>B-09</td><td>P0/P1 = 0 · 问题清单闭环</td><td><span class="tag high">P1</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">3.3 阶段 C：收口认证 <em>· 与 B 交叠 · T0 起 2-3 周</em></h3>
+  <table>
+    <thead><tr><th>编号</th><th>任务</th><th>负责人</th><th>工期</th><th>依赖</th><th>交付物</th><th>优先级</th></tr></thead>
+    <tbody>
+      <tr><td><b>C-01</b></td><td>UAT 人工验收与签字</td><td>QA+业务方</td><td>2 天</td><td>生产态势稳定</td><td><code>UAT-验收清单.md</code> 7 张表签字 · 验收结论</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>C-02</b></td><td>AI 真批阅验收</td><td>AI+业务方</td><td>2 天</td><td>生产库 + 模型 key</td><td><code>/ai/grade</code> 真批 10 份 · 质量抽查 · 置信度落库核验</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>C-03</b></td><td>培训材料产出</td><td>产品</td><td>3 天</td><td>UG v1.1</td><td>管理员/教师/学生 PPT + 操作手册 + 引导卡</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>C-04</b></td><td>三类角色培训执行</td><td>产品</td><td>3 天</td><td>C-03</td><td>签到表 · 覆盖 ≥ 80% 目标用户</td><td><span class="tag critical">P0</span></td></tr>
+      <tr><td><b>C-05</b></td><td>移动端收官验证</td><td>前端</td><td>2 天</td><td>RN 工具链</td><td><code>npm run typecheck</code> 通过 · 模拟器冒烟 · API_BASE 真机配置验证</td><td><span class="tag high">P1</span></td></tr>
+      <tr><td><b>C-06</b></td><td>M4 里程碑评审会</td><td>全体</td><td>0.5 天</td><td>B-10/C-01..C-04</td><td>上线确认书 · 里程碑 M4 达成公告</td><td><span class="tag critical">P0</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">3.4 阶段 D：V1.1 演进 <em>· M4 后滚动 · 每 Sprint 2-3 周</em></h3>
+  <div class="info ai">
+    <div class="label">🔮 演进定位</div>
+    以下任务为非阻塞延展路线；按 PRD 优先级分批进入版本队列，每批以「PRD 验收标准 + 回归全绿」为 DoD。直播模块为 PRD P0 二期明确项。
+  </div>
+  <table>
+    <thead><tr><th>编号</th><th>任务</th><th>对应 PRD</th><th>优先级</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><b>D-01</b></td><td>直播课堂（观看/举手/答题/聊天）</td><td>04 · P0</td><td><span class="tag critical">P0</span></td><td>PRD 明确二期；需流媒体/CDN 选型</td></tr>
+      <tr><td><b>D-02</b></td><td>协作工具（小组/看板/文件/讨论）</td><td>05 · P1</td><td><span class="tag high">P1</span></td><td>复用课程/成员模型</td></tr>
+      <tr><td><b>D-03</b></td><td>题库与考试（组卷/在线考试/评分）</td><td>07 · P1</td><td><span class="tag high">P1</span></td><td>可接 AI 组卷</td></tr>
+      <tr><td><b>D-04</b></td><td>学情分析 + 学生档案</td><td>08 · 10 · P1</td><td><span class="tag high">P1</span></td><td>基于 analytics 模块扩展</td></tr>
+      <tr><td><b>D-05</b></td><td>课程审批 + 系统设置 + 审计日志</td><td>14 · 16 · 17 · P1</td><td><span class="tag medium">P2</span></td><td>管理端补齐</td></tr>
+      <tr><td><b>D-06</b></td><td>AI 基础设施：RAG 向量检索 / Agent 编排 / MCP / 内容审核</td><td>18-20 · 规划中</td><td><span class="tag high">P1</span></td><td>Milvus / AgentScope / 知网 AIGC</td></tr>
+      <tr><td><b>D-07</b></td><td>运营演进：独立监控 + CI/CD</td><td>—</td><td><span class="tag medium">P2</span></td><td>Prometheus + Grafana · GitHub Actions</td></tr>
+      <tr><td><b>D-08</b></td><td>规模演进：K8s 集群</td><td>—</td><td><span class="tag medium">P2</span></td><td>触发条件：用户量 > 5000</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info note">
+    <div class="label">🔗 资产映射速查</div>
+    阶段 A/B 全部执行入口与脚本位于 <code>部署/</code>（<code>docker-compose.yml</code> · <code>scripts/*.sh</code> · <code>config/mysql/init.sql</code>）；质量门禁复用 <code>部署/scripts/verify_phase3.py --live</code>；验收依据 <code>部署/docs/上线检查清单.md</code> 与 <code>部署/docs/UAT-验收清单.md</code>。
+  </div>
+</section>
+
+<!-- ============ 04 · 里程碑与甘特 ============ -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <h2>04 · 里程碑与甘特图 <em>Milestones</em></h2>
+    <div class="num-tag">T0+8 周 · 3 里程碑</div>
+  </div>
+
+  <div class="milestone">
+    <div class="ms-card">
+      <div class="ms-name">M4 <em>正式上线</em></div>
+      <div class="ms-window">T0 + 3 周达成</div>
+      <div class="criteria">
+        <span>生产 4 服务全绿 · <code>/health</code> 200</span>
+        <span>数据迁移 100% 校验通过</span>
+        <span>灰度 10% 稳定 2 天 · P0/P1 = 0</span>
+        <span>上线检查清单全打勾 + 签字</span>
+      </div>
+    </div>
+    <div class="ms-card">
+      <div class="ms-name">M4.1 <em>上线稳定</em></div>
+      <div class="ms-window">T0 + 5 周达成</div>
+      <div class="criteria">
+        <span>上线后监控 1 周 0 P0/P1</span>
+        <span>问题清单闭环 · 回归通过</span>
+        <span>埋点数据持续产出（events/stats）</span>
+      </div>
+    </div>
+    <div class="ms-card">
+      <div class="ms-name">M5 <em>收口认证</em></div>
+      <div class="ms-window">T0 + 6 周达成</div>
+      <div class="criteria">
+        <span>UAT 人工签字（业务方/运维/开发）</span>
+        <span>AI 真批阅验收通过</span>
+        <span>三类培训覆盖 ≥ 80% · 签到齐全</span>
+        <span>移动端 typecheck + 真机冒烟通过</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="gantt">
+    <div class="gantt-row">
+      <div class="gantt-label"><span class="tag phase-a">A</span> 环境就绪</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase-a" style="left:0%; width:16%;">T0 前置 1w</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">资源 · MySQL · 4 服务 · 基线</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase-a" style="left:0%; width:14%; opacity:0.75;">A-01..07</div>
+      </div>
+    </div>
+
+    <div class="gantt-row">
+      <div class="gantt-label"><span class="tag phase-b">B</span> 上线执行</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase-b" style="left:14%; width:25%;">T0→T+2w</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">迁移 · 灰度 · 全量</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase-b" style="left:16%; width:22%; opacity:0.75;">B-01..09</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">监控 1 周 · 修复</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase-b" style="left:38%; width:10%; opacity:0.5;">B-10..11</div>
+      </div>
+    </div>
+
+    <div class="gantt-row">
+      <div class="gantt-label"><span class="tag phase-c">C</span> 收口认证</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase-c" style="left:30%; width:28%;">T+2w→T+5w</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">UAT 签字 · AI 真批 · 培训</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase-c" style="left:32%; width:24%; opacity:0.75;">C-01..05</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">M4/M4.1/M5 评审</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar" style="left:38%; width:4%; background:var(--inkwell);"></div>
+        <div class="gantt-bar" style="left:52%; width:4%; background:var(--inkwell);"></div>
+        <div class="gantt-bar" style="left:60%; width:4%; background:var(--inkwell);"></div>
+      </div>
+    </div>
+
+    <div class="gantt-row">
+      <div class="gantt-label"><span class="tag phase-d">D</span> V1.1 演进</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase-d" style="left:60%; width:40%;">滚动迭代</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label sub">P1 功能 · AI 基础设施 · 运营</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar phase-d" style="left:62%; width:36%; opacity:0.75;">D-01..08</div>
+      </div>
+    </div>
+
+    <div class="gantt-timeline">
+      <div class="gantt-week">T0</div>
+      <div class="gantt-week">+1w</div>
+      <div class="gantt-week">+2w</div>
+      <div class="gantt-week">+3w</div>
+      <div class="gantt-week">+4w</div>
+      <div class="gantt-week">+5w</div>
+      <div class="gantt-week">+6w</div>
+      <div class="gantt-week">+7w</div>
+      <div class="gantt-week">+8w</div>
+      <div class="gantt-week">+9w</div>
+      <div class="gantt-week">+10w</div>
+      <div class="gantt-week">+11w+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 · 资源与责任 ============ -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <h2>05 · 资源与责任 <em>Resources</em></h2>
+    <div class="num-tag">精简团队 · 复用</div>
+  </div>
+
+  <h3 class="sub">5.1 团队配置（沿用精简团队 · 聚焦未实现内容）</h3>
+  <table>
+    <thead><tr><th>角色</th><th>人数</th><th>聚焦职责</th><th>投入窗口</th></tr></thead>
+    <tbody>
+      <tr><td><b>项目经理</b></td><td>1</td><td>上线大纲协调 · Checklist 过堂 · 里程碑评审</td><td>T0 → T+6w</td></tr>
+      <tr><td><b>运维工程师</b></td><td>1</td><td>云资源 / TLS / 4 服务部署 · 灰度切分 · 监控</td><td>T0 → T+6w</td></tr>
+      <tr><td><b>DBA</b></td><td>1</td><td>MySQL 部署 · 数据迁移与校验 · 备份恢复</td><td>T0 → T+2w</td></tr>
+      <tr><td><b>后端开发</b></td><td>2</td><td>回归基线 · 上线问题修复 · V1.1 迭代</td><td>T0 → 演进</td></tr>
+      <tr><td><b>前端开发</b></td><td>2</td><td>移动端收官 · V1.1 功能实现</td><td>C-05 + 演进</td></tr>
+      <tr><td><b>AI 工程师</b></td><td>1</td><td>AI 真批阅验收 · V1.1 AI 基础设施</td><td>C-02 + 演进</td></tr>
+      <tr><td><b>QA 工程师</b></td><td>1</td><td>容器内回归基线 · UAT 组织 · V1.1 测试</td><td>T0 → 演进</td></tr>
+      <tr><td><b>产品经理</b></td><td>1</td><td>培训材料与执行 · UAT 组织 · 演进需求排期</td><td>T0 → 演进</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">5.2 关键外部依赖</h3>
+  <table>
+    <thead><tr><th>依赖</th><th>责任方</th><th>前置任务</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>云资源 + ICP 备案</td><td>运维 / 采购</td><td>A-01</td><td>备案周期 1-3 周，是 T0 最大不确定项</td></tr>
+      <tr><td>TLS 证书</td><td>运维</td><td>A-01</td><td>国产云厂商免费证书 / Let's Encrypt</td></tr>
+      <tr><td>外部模型 API key</td><td>AI + 采购</td><td>C-02</td><td>8 家厂商任一；未配置时 AI 端点为 502（冒烟 SKIP）</td></tr>
+      <tr><td>业务方（教师/学生代表）</td><td>产品</td><td>C-01</td><td>UAT 签字 + 内测用户池确认</td></tr>
+      <tr><td>RN 工具链</td><td>前端</td><td>C-05</td><td>Node + Expo SDK 52；本机缺失需新装</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 06 · 风险 ============ -->
+<section class="section" id="s6">
+  <div class="section-header">
+    <h2>06 · 风险与应对 <em>Risks</em></h2>
+    <div class="num-tag">7 项重点</div>
+  </div>
+
+  <table>
+    <thead><tr><th>风险</th><th>概率</th><th>影响</th><th>应对措施</th></tr></thead>
+    <tbody>
+      <tr><td><b>ICP 备案 / 云资源延迟</b></td><td>中</td><td>高</td><td>备案与开发并行 · 预留 1 周 buffer · HTTP-only 预演环境先行</td></tr>
+      <tr><td><b>历史数据质量低 / 格式不匹配</b></td><td>中</td><td>高</td><td>先演练（B-04）· 字段映射评审 · 迁移失败回滚（备份恢复）</td></tr>
+      <tr><td><b>模型 key 未到位 → AI 功能不可用</b></td><td>中</td><td>中</td><td>AI 网关已按 502 归一不泄漏 · 冒烟 SKIP · 采购流程前置</td></tr>
+      <tr><td><b>灰度期 P0 缺陷</b></td><td>低</td><td>高</td><td>回滚方案就绪（compose down + 还原库）· 灰度用户池限定内测名单</td></tr>
+      <tr><td><b>培训覆盖率不足</b></td><td>中</td><td>中</td><td>分批线上 + 录屏回放 · 签到数字化 · 引导卡二维码</td></tr>
+      <tr><td><b>移动端 RN 工具链兼容</b></td><td>中</td><td>低</td><td>Expo Go 免编译验证 · 类型问题在 CI 拦截 · 优先级 P1</td></tr>
+      <tr><td><b>V1.1 范围蔓延</b></td><td>中</td><td>中</td><td>严格按 PRD 优先级排队 · 每 Sprint 固定 DoD · 变更走团队审核</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 07 · 验收 ============ -->
+<section class="section" id="s7">
+  <div class="section-header">
+    <h2>07 · 验收标准 <em>Go-Live Criteria</em></h2>
+    <div class="num-tag">M4 · M4.1 · M5 · V1.1</div>
+  </div>
+
+  <h3 class="sub">7.1 M4 上线验收</h3>
+  <table>
+    <thead><tr><th>检查项</th><th>标准</th><th>验证方式</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td><b>功能完整性</b></td><td>核心 44 端点全部可用</td><td><code>smoke_test.py --live</code> 16/16</td><td>☐ 待上线执行</td></tr>
+      <tr><td><b>缺陷数</b></td><td>P0/P1 = 0</td><td>灰度监控 + 问题清单</td><td>☐ 待上线执行</td></tr>
+      <tr><td><b>性能指标</b></td><td>P99 &lt; 500ms</td><td><code>load_test.py</code>（生产前置压测截图）</td><td>☐ 待上线执行</td></tr>
+      <tr><td><b>数据迁移</b></td><td>100% 迁移 · 校验通过</td><td>行数 + 抽样字段比对</td><td>☐ 待上线执行</td></tr>
+      <tr><td><b>安全基线</b></td><td>严格 .env · .gitignore · TLS 生效</td><td>清单巡检 + 443 访问</td><td>☐ 待上线执行</td></tr>
+      <tr><td><b>监控/日志</b></td><td><code>monitor.sh</code>·<code>events/stats</code>·<code>logs/summary</code> 产出正常</td><td>页面 + 接口验证</td><td>☐ 待上线执行</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">7.2 收口认证验收（M4.1 / M5）</h3>
+  <table>
+    <thead><tr><th>检查项</th><th>标准</th><th>验证方式</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td><b>UAT 签字</b></td><td>业务方（教师/学生代表）· 运维 · 开发四方签字</td><td><code>UAT-验收清单.md</code> 签字区</td><td>☐ 待执行</td></tr>
+      <tr><td><b>AI 真批阅</b></td><td>真实模型批阅 ≥ 10 份 · 抽查质量可接受</td><td><code>/ai/grade</code> + grades 表置信度</td><td>☐ 待执行</td></tr>
+      <tr><td><b>培训</b></td><td>覆盖 ≥ 80% 目标用户 · 签到齐全</td><td>签到表 / 录屏</td><td>☐ 待执行</td></tr>
+      <tr><td><b>移动端</b></td><td>typecheck 通过 · 模拟器/真机冒烟</td><td><code>npm run typecheck</code> + 冒烟</td><td>☐ 待执行</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub">7.3 V1.1 演进验收（D 阶段）</h3>
+  <ul>
+    <li>每个功能模块以 <b>PRD v1.3 对应验收标准</b>为准，DoD = 功能可用 + 单测回归全绿 + 埋点事件合规（<code>events_catalog.py</code>）</li>
+    <li>直播（D-01）触发条件：M4 稳定运行 ≥ 1 个月 + 流媒体选型评审通过</li>
+    <li>AI 基础设施（D-06）按版本推进，RAG / Agent 编排与现有网关<code>/gateway/completions</code> 协议兼容</li>
+  </ul>
+
+  <div class="info success">
+    <div class="label">✅ 上线决策</div>
+    M4: 全部检查项通过 + 技术/运维/业务方签字 → 正式上线推送。<br/>
+    M5: UAT 签字 + 培训覆盖达标 + AI 真批阅验收 → 项目收口，进入 V1.1 迭代轨道。
+  </div>
+</section>
+
+<footer>
+  <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Pending WBS</div>
+  <div>v1.0 · 承接 launch-wbs v1.1 · M1-M3 达成基线</div>
+  <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">WBS-LUMINA-2026-002</div>
+</footer>
+
+</body>
+</html>
