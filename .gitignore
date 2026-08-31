@@ -63,3 +63,6 @@ scripts/yuque-config.local.json
 部署/backups/
 部署/ssl/
 部署/.env
+
+# Claude Code 本地产物（worktrees / 计划等，不入库）
+.claude/
