@@ -596,3 +596,105 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     avatar_url: Optional[str] = None
     bio: Optional[str] = None
+
+
+# ─── 直播 Live（V1.1 · D-01 · WBS-P 阶段 D）───
+
+class LiveRoomCreate(BaseModel):
+    """创建直播房间（教师）"""
+    course_id: uuid.UUID
+    title: Optional[str] = None      # 缺省用课程名 + 日期
+
+class LiveRoomOut(BaseModel):
+    id: uuid.UUID
+    course_id: uuid.UUID
+    course_title: Optional[str] = None
+    teacher_id: uuid.UUID
+    teacher_name: Optional[str] = None
+    title: str
+    status: str                      # scheduled | live | ended
+    stream_url: Optional[str] = None # HLS 播放地址（start 后由适配层注入；未接媒体服务器为 mock:// 占位）
+    viewer_count: Optional[int] = 0  # 累计人次
+    online_count: Optional[int] = 0  # 当前在线
+    active_call: Optional[dict] = None
+    started_at: Optional[datetime] = None
+    ended_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+class LiveRaiseRequest(BaseModel):
+    """举手 / 取消举手"""
+    active: bool = True
+
+class LiveRaiseOut(BaseModel):
+    """举手队列成员"""
+    id: uuid.UUID
+    user_id: uuid.UUID
+    name: Optional[str] = None
+    raised_at: Optional[datetime] = None
+
+class LiveMessageCreate(BaseModel):
+    """直播消息（聊天等）"""
+    msg_type: str = "chat"           # chat | system | call
+    content: str
+
+class LiveMessageOut(BaseModel):
+    id: int
+    room_id: uuid.UUID
+    user_id: Optional[uuid.UUID] = None
+    user_name: Optional[str] = None
+    role: Optional[str] = None
+    msg_type: str
+    content: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class LiveQuizCreate(BaseModel):
+    """发起答题（教师）"""
+    question: str
+    options: list[dict]              # [{"key":"A","text":"…"}, …]
+    answer: Optional[str] = None     # 可选正确答案
+
+class LiveQuizOut(BaseModel):
+    id: uuid.UUID
+    room_id: uuid.UUID
+    teacher_id: uuid.UUID
+    question: str
+    options: list
+    answer: Optional[str] = None
+    status: str
+    created_at: Optional[datetime] = None
+    closed_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+class LiveQuizAnswerIn(BaseModel):
+    """作答（学生）"""
+    choice: str
+
+class LiveQuizAnswerOut(BaseModel):
+    quiz_id: uuid.UUID
+    choice: str
+    submitted_at: datetime
+
+class LiveQuizResult(BaseModel):
+    """答题统计（教师）"""
+    quiz_id: uuid.UUID
+    question: str
+    total: int = 0
+    distribution: dict[str, int] = {}
+    correct_count: Optional[int] = None
+    correct_rate: Optional[float] = None
+
+class LiveCallIn(BaseModel):
+    """点名（教师；不传 user_id 则随机在线学生）"""
+    user_id: Optional[uuid.UUID] = None
+
+class LiveCallOut(BaseModel):
+    user_id: uuid.UUID
+    name: str
+    called_at: datetime

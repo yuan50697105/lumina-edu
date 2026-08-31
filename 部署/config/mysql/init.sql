@@ -239,6 +239,25 @@ CREATE TABLE grade_records (
 ;
 
 
+CREATE TABLE live_rooms (
+	id CHAR(36) NOT NULL, 
+	course_id CHAR(36) NOT NULL, 
+	teacher_id CHAR(36) NOT NULL, 
+	title VARCHAR(200) NOT NULL, 
+	status VARCHAR(20), 
+	stream_key VARCHAR(100), 
+	viewer_count INTEGER, 
+	active_call JSON, 
+	started_at DATETIME, 
+	ended_at DATETIME, 
+	created_at DATETIME NOT NULL DEFAULT now(), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE CASCADE
+)
+
+;
+
+
 CREATE TABLE sessions (
 	id CHAR(36) NOT NULL, 
 	user_id CHAR(36) NOT NULL, 
@@ -276,6 +295,56 @@ CREATE TABLE ai_call_logs (
 ;
 
 
+CREATE TABLE live_attendees (
+	id CHAR(36) NOT NULL, 
+	room_id CHAR(36) NOT NULL, 
+	user_id CHAR(36) NOT NULL, 
+	`role` VARCHAR(20), 
+	joined_at DATETIME NOT NULL DEFAULT now(), 
+	left_at DATETIME, 
+	raise_hand BOOL, 
+	raised_at DATETIME, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_live_attendee UNIQUE (room_id, user_id), 
+	FOREIGN KEY(room_id) REFERENCES live_rooms (id) ON DELETE CASCADE
+)
+
+;
+
+
+CREATE TABLE live_messages (
+	id BIGINT NOT NULL AUTO_INCREMENT, 
+	room_id CHAR(36) NOT NULL, 
+	user_id CHAR(36), 
+	msg_type VARCHAR(20), 
+	content TEXT, 
+	created_at DATETIME NOT NULL DEFAULT now(), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(room_id) REFERENCES live_rooms (id) ON DELETE CASCADE
+)
+
+;
+
+CREATE INDEX ix_live_messages_room_id ON live_messages (room_id);
+
+
+CREATE TABLE live_quizzes (
+	id CHAR(36) NOT NULL, 
+	room_id CHAR(36) NOT NULL, 
+	teacher_id CHAR(36) NOT NULL, 
+	question TEXT NOT NULL, 
+	options JSON NOT NULL, 
+	answer VARCHAR(10), 
+	status VARCHAR(20), 
+	created_at DATETIME NOT NULL DEFAULT now(), 
+	closed_at DATETIME, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(room_id) REFERENCES live_rooms (id) ON DELETE CASCADE
+)
+
+;
+
+
 CREATE TABLE submissions (
 	id CHAR(36) NOT NULL, 
 	assignment_id CHAR(36) NOT NULL, 
@@ -307,6 +376,20 @@ CREATE TABLE grades (
 	PRIMARY KEY (id), 
 	UNIQUE (submission_id), 
 	FOREIGN KEY(submission_id) REFERENCES submissions (id) ON DELETE CASCADE
+)
+
+;
+
+
+CREATE TABLE live_quiz_answers (
+	id CHAR(36) NOT NULL, 
+	quiz_id CHAR(36) NOT NULL, 
+	user_id CHAR(36) NOT NULL, 
+	choice VARCHAR(10) NOT NULL, 
+	submitted_at DATETIME NOT NULL DEFAULT now(), 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_quiz_answer UNIQUE (quiz_id, user_id), 
+	FOREIGN KEY(quiz_id) REFERENCES live_quizzes (id) ON DELETE CASCADE
 )
 
 ;

@@ -35,12 +35,14 @@ class TestTableDefinitions:
             "api_logs", "event_tracking",
             "ai_call_logs", "ai_conversations", "ai_messages",
             "ai_models", "ai_providers", "grades",
+            "live_rooms", "live_attendees", "live_messages",
+            "live_quizzes", "live_quiz_answers",
         }
         assert expected.issubset(tables), f"缺少表: {expected - tables}"
 
     def test_table_count(self, tables):
-        """表数量为 17"""
-        assert len(tables) == 17
+        """表数量为 22（17 业务 + 5 直播 V1.1）"""
+        assert len(tables) == 22
 
 
 class TestUserModel:

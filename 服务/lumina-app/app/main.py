@@ -25,6 +25,7 @@ from app.modules.grade import routers as grade_routers
 from app.modules.ai_gateway import routers as ai_gateway_routers
 from app.modules.ai_chat import routers as ai_chat_routers
 from app.modules.ai_grade import routers as ai_grade_routers
+from app.modules.live import routers as live_routers
 from app.modules.analytics import routers as analytics_routers
 from app.modules.logs import routers as logs_routers
 
@@ -118,6 +119,9 @@ app.include_router(ai_gateway_routers.router, prefix="/api/v1")
 app.include_router(ai_chat_routers.router, prefix="/api/v1")
 # AI 批阅
 app.include_router(ai_grade_routers.router, prefix="/api/v1")
+# 直播（V1.1 · D-01）
+app.include_router(live_routers.router, prefix="/api/v1")
+app.include_router(live_routers.course_router, prefix="/api/v1")
 # 埋点
 app.include_router(analytics_routers.router, prefix="/api/v1")
 # 日志

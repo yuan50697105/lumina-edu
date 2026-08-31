@@ -340,4 +340,77 @@ class AIMessage(Base):
     conversation = relationship("AIConversation", back_populates="messages")
 
 
+# ─── 直播 Live（V1.1 · D-01 · WBS-P 阶段 D）───
+
+class LiveRoom(Base):
+    """直播房间"""
+    __tablename__ = "live_rooms"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    teacher_id = Column(GUID, nullable=False)
+    title = Column(String(200), nullable=False)
+    status = Column(String(20), default="scheduled")   # scheduled | live | ended
+    stream_key = Column(String(100), nullable=True)    # 推流唯一标识（媒体服务器/浏览器推流用）
+    viewer_count = Column(Integer, default=0)          # 累计加入人次
+    active_call = Column(JSON, nullable=True)          # 当前点名 {user_id,name,called_at}
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    ended_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+class LiveAttendee(Base):
+    """直播参与记录（含举手状态）"""
+    __tablename__ = "live_attendees"
+    __table_args__ = (
+        UniqueConstraint("room_id", "user_id", name="uq_live_attendee"),
+    )
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    room_id = Column(GUID, ForeignKey("live_rooms.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(GUID, nullable=False)
+    role = Column(String(20), default="student")       # teacher | student
+    joined_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    left_at = Column(DateTime(timezone=True), nullable=True)
+    raise_hand = Column(Boolean, default=False)
+    raised_at = Column(DateTime(timezone=True), nullable=True)
+
+class LiveMessage(Base):
+    """直播消息（聊天/点名/系统广播）"""
+    __tablename__ = "live_messages"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    room_id = Column(GUID, ForeignKey("live_rooms.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(GUID, nullable=True)
+    msg_type = Column(String(20), default="chat")      # chat | system | call
+    content = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+class LiveQuiz(Base):
+    """直播答题"""
+    __tablename__ = "live_quizzes"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    room_id = Column(GUID, ForeignKey("live_rooms.id", ondelete="CASCADE"), nullable=False)
+    teacher_id = Column(GUID, nullable=False)
+    question = Column(Text, nullable=False)
+    options = Column(JSON, nullable=False)             # [{"key":"A","text":"…"}, …]
+    answer = Column(String(10), nullable=True)         # 正确答案（教师设置，可选）
+    status = Column(String(20), default="active")      # active | closed
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    closed_at = Column(DateTime(timezone=True), nullable=True)
+
+class LiveQuizAnswer(Base):
+    """直播答题作答（一题一次，覆盖改答）"""
+    __tablename__ = "live_quiz_answers"
+    __table_args__ = (
+        UniqueConstraint("quiz_id", "user_id", name="uq_quiz_answer"),
+    )
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    quiz_id = Column(GUID, ForeignKey("live_quizzes.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(GUID, nullable=False)
+    choice = Column(String(10), nullable=False)
+    submitted_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
 # ─── 监控共享表 ───

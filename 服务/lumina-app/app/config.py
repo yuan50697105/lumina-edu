@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     # AI 网关地址（单体内指向自身，微服务时指向 ai-gateway 服务）
     AI_GATEWAY_URL: str = "http://localhost:8080"
 
+    # 直播流媒体地址前缀（HLS 适配层：如 http://127.0.0.1:18080/live/）
+    # 留空时 /live/rooms/{id} 返回 mock:// 占位流地址，不阻塞课堂协作逻辑
+    LIVE_STREAM_BASE: str = ""
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
