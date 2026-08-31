@@ -6,19 +6,19 @@
 
 ```
 ┌─────────────┐
-│   Nginx     │  HTTP/HTTPS · 静态原型 · API 代理
+│   Nginx     │  HTTP/HTTPS · 静态前端 · API 代理
 │  :80 / :443 │
 └──────┬──────┘
        │
 ┌──────▼────────────────────────────────────┐
-│       应用服务（未来）                      │
-│       /api/v1/*                           │
+│   Lumina App（FastAPI 单体 · :8080）          │
+│   /api/v1/* · 9 模块 · 44 端点                │
 └──────┬────────────────────────────────────┘
        │
-┌──────▼──────┐  ┌──────────┐  ┌────────────┐
-│ PostgreSQL  │  │  Redis   │  │   MinIO    │
-│   数据库    │  │  缓存     │  │  对象存储  │
-└─────────────┘  └──────────┘  └────────────┘
+┌──────▼──────┐  ┌──────────┐
+│ PostgreSQL  │  │  Redis   │
+│     数据库     │  │    缓存    │
+└─────────────┘  └──────────┘
 ```
 
 ## 🚀 快速开始
@@ -65,11 +65,10 @@ mkdir -p ssl
 
 | 服务 | 端口 | 说明 | 数据卷 |
 |------|------|------|--------|
-| PostgreSQL | 5432 | 数据库 | postgres_data |
-| Redis | 6379 | 缓存 | redis_data |
-| MinIO | 9000 | 对象存储 | minio_data |
-| MinIO Console | 9001 | 控制台 | — |
-| Nginx | 80/443 | 反向代理 | — |
+| PostgreSQL | 5432 | 数据库（库名 lumina） | pg_data |
+| Redis | 6379 | 缓存 + 会话 | redis_data |
+| lumina-app | 8080 | 单体 FastAPI · 9 模块 · 44 端点 | — |
+| Nginx | 80/443 | 反向代理 + 静态前端 | — |
 
 ## 📜 常用命令
 
@@ -131,7 +130,7 @@ python 部署/scripts/api_contract_check.py
 ```
 
 自动核验三层一致：
-前端调用 URL（`web-frontend/src`）⊂ 后端服务端点（9 个服务）⊂ Nginx 路由（`lumina.conf`），
+前端调用 URL（`web-frontend/src`）⊂ 单体应用端点（lumina-app）⊂ Nginx 路由（`lumina.conf`），
 并交叉检查 Nginx upstream 是否存在于 compose。当前基线：**13 前端调用 + 44 后端端点，全部闭环**。
 
 ### 2. 端到端冒烟（需服务在线）
@@ -143,7 +142,7 @@ export LUMINA_ADMIN_EMAIL=a@lumina.edu    LUMINA_ADMIN_PASSWORD=xxx
 
 # 走 Nginx :80
 python 部署/scripts/smoke_test.py
-# 直连用户服务（绕过网关排障）
+# 直连单体应用（绕过网关排障）
 python 部署/scripts/smoke_test.py --base http://localhost:8080 --ai
 # 离线自检流程/请求构造（不发 HTTP）
 python 部署/scripts/smoke_test.py --dry-run
@@ -161,7 +160,7 @@ python 部署/scripts/run_tests.py
 # 额外包含 *_api.py 集成测试（PG 未就绪时自动 skip）
 python 部署/scripts/run_tests.py --include-api
 # 指定解释器 / 跳过某服务
-python 部署/scripts/run_tests.py --python <venv>/Scripts/python.exe --exclude user-service
+python 部署/scripts/run_tests.py --python <venv>/Scripts/python.exe --exclude lumina-app
 ```
 
 ## 🔄 数据备份
@@ -184,7 +183,7 @@ python 部署/scripts/run_tests.py --python <venv>/Scripts/python.exe --exclude 
 |------|---------|---------|
 | **阶段 1** | 用户 > 2000 | 增加 Nginx 缓存 · 数据库读写分离 |
 | **阶段 2** | 用户 > 5000 | 引入 K8s · 自动化 CI/CD |
-| **阶段 3** | 用户 > 10000 | 微服务拆分 · 独立监控体系 |
+| **阶段 3** | 用户 > 10000 | 按模块拆分部署 · 独立监控体系 |
 
 ## 🔒 安全注意事项
 
