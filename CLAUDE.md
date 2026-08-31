@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Lumina (墨光) 教育应用 UI 设计系统 - 面向高校师生的跨端教学协作平台。本项目为纯设计原型 + 技术文档项目，不包含应用代码。
+Lumina (墨光) 教育应用 UI 设计系统 - 面向高校师生的跨端教学协作平台。本项目为设计原型 + 技术文档 + FastAPI 单体应用（`服务/lumina-app/`）。单体快照：44 RESTful 端点 · 9 模块 · 17 表（模块：user / course / assignment / grade / ai_gateway / ai_chat / ai_grade / analytics / logs）。
 
 ## Directory Structure
 
@@ -28,6 +28,24 @@ edu/
 │   ├── PC/         (7 files)   # 桌面端原型
 │   └── AI/         (3 files)   # AI 模块原型
 │
+├── 服务/                   # 单体应用 + 前端
+│   ├── lumina-app/             # ✅ 单体 FastAPI（9 模块 · 44 端点 · 17 表）
+│   │   ├── app/                # 应用代码（main.py / models.py / security.py ...）
+│   │   │   └── modules/        # 9 业务模块：user/course/assignment/grade/ai_gateway/ai_chat/ai_grade/analytics/logs
+│   │   ├── tests/              # 单元测试（76 passed · 4 skipped）
+│   │   ├── requirements.txt    # Python 依赖
+│   │   └── Dockerfile          # API 容器镜像
+│   ├── web-frontend/           # Web 前端（React 18 + TS + Vite）
+│   └── mobile-app/             # 移动端前端（React Native / Expo）
+│
+├── 部署/                   # Docker 部署方案（环境搭建）
+│   ├── docker-compose.yml      # 服务编排（PG/Redis/lumina-app/Nginx）
+│   ├── .env.example            # 环境变量模板
+│   ├── config/                 # Nginx/PostgreSQL 配置
+│   ├── scripts/                # 启停/备份/监控/契约核对脚本
+│   ├── docs/                   # UAT 验收清单 / events-catalog / 上线检查清单
+│   └── README.md               # 部署使用说明
+│
 └── scripts/                 # 工具脚本
     ├── yuque-sync.py           # 语雀同步工具
     └── README.md               # 脚本使用说明
@@ -43,6 +61,21 @@ open 原型/lumina-00-index.html
 
 # Or use any browser
 chrome 原型/lumina-prd.html
+```
+
+### Running the Monolith Application (单体应用)
+单体应用为 FastAPI，位于 `服务/lumina-app/`，启动命令：
+```bash
+# 进入单体应用目录
+cd 服务/lumina-app
+
+# 启动 API 服务（默认端口 8080）
+uvicorn app.main:app --port 8080
+```
+
+### Running Unit Tests (单元测试)
+```bash
+PYTHONIOENCODING=utf-8 服务/lumina-app/.venv/Scripts/python.exe -m pytest 服务/lumina-app/tests -q
 ```
 
 ### Yuque Sync (语雀同步)
@@ -90,16 +123,18 @@ background: linear-gradient(
 项目包含 9 个核心文档，形成完整文档体系：
 
 1. **PRD** (产品需求) - 用户画像、功能模块、验收标准
-2. **TDD** (技术设计) - 架构、微服务、数据库、API 规范
-3. **API** (接口文档) - 42 个 RESTful 端点
+2. **TDD** (技术设计) - 架构、单体应用（9 模块）、数据库、API 规范
+3. **API** (接口文档) - 44 个 RESTful 端点
 4. **OpenAPI** (机器可读) - YAML 格式 API 规范
-5. **Database** (数据库) - 24 表、ER 模型、分区策略
-6. **Operations** (运维) - K8s 部署、监控告警、Runbook
+5. **Database** (数据库) - 17 表、ER 模型、分区策略
+6. **Operations** (运维) - Docker Compose 部署、监控告警、Runbook
 7. **Test Cases** (测试) - 156 用例、80% 覆盖率
 8. **User Guide** (用户手册) - 3 角色指南、FAQ
-9. **WBS** (上线计划) - 10 周轻量方案
+9. **WBS v1.1** (上线计划) - 10 周轻量方案
 
 所有文档使用统一的 Lumina 视觉风格，可直接在浏览器中打开查看。
+
+单体应用 `服务/lumina-app/` 快照：44 端点 · 9 模块 · 17 表 · 单元测试 76 通过 4 跳过。
 
 ## Platform Coverage
 
