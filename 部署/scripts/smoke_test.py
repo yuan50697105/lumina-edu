@@ -179,7 +179,8 @@ def main() -> int:
     # ─── S11 AI 批阅（可选）───
     if args.ai:
         api.token = teacher_token
-        acode, ai = api.call("POST", "/api/v1/ai/grade", {"submission_id": str(sub_id), "model": None})
+        acode, ai = api.call("POST", "/api/v1/ai/grade",
+                             {"assignment_id": str(asg_id), "submission_id": str(sub_id), "model": None})
         if acode == 200:
             ok_val = True
             detail = f"{ai}"
