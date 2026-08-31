@@ -126,6 +126,24 @@ cd 服务/web-frontend && npm run dev   # 打开 http://localhost:5173
 - 任意房间推流：`部署/stream/start_demo_stream.bat <room的 stream_key>`
 - 详情见 `部署/stream/README.md`；生产接入见「运维手册」媒体反代说明
 
+### 📱 移动端直播演示（Expo）
+
+移动端（`服务/mobile-app/`，RN/Expo）直播页功能对齐 Web。本地连接后端：
+
+```bash
+# ① 后端（需先起 MySQL）；若手机真机访问，--host 0.0.0.0
+cd 服务/lumina-app && uvicorn app.main:app --port 8080 --host 0.0.0.0
+# ② 移动端 API 地址（电脑上回环仅模拟器可用）：
+#    iOS 模拟器 → http://127.0.0.1:8080（默认）
+#    Android 模拟器 → http://10.0.2.2:8080
+#    真机 → http://<电脑局域网IP>:8080
+#    修改：mobile-app/src/config.ts 的 API_BASE
+cd 服务/mobile-app && npm install && npx expo start
+```
+
+- 开播真实画面：先起 `部署/stream/start_demo_stream.bat`（HLS 同源 `/media` 反代已配），再进「直播演示间」开播
+- HLS 播放：`expo-video`（原生播放器）；仅房间 `status==='live'` 时拉流，`mock://` 为未接媒体服务器占位
+
 ## Design System
 
 ### Color Palette

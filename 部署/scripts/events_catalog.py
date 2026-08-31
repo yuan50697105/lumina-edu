@@ -83,7 +83,8 @@ def main() -> int:
 
     # 前端产生的业务事件（排除 SDK 自身调用）
     web_events = {n for n, src in events.items() if any("web" in s or "mobile" in s for s in src)}
-    backend_events = {n for n, src in events.items() if any(s.startswith(("user", "course", "assignment", "grade", "ai")) for s in src)}
+    # 后端埋点常量：非前端标记的事件即属后端（单体化后服务为 lumina-app，按 web:/mobile: 前缀反推）
+    backend_events = {n for n, src in events.items() if not any(("web:" in s or "mobile:" in s) for s in src)}
 
     lines = [
         "# Lumina 墨光 · 埋点事件目录",

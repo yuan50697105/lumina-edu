@@ -59,10 +59,10 @@
 | `live.quiz_close` | 后端 | instrumentation.py |
 | `live.quiz_start` | 后端 | instrumentation.py |
 | `live.raise_hand` | 后端 | instrumentation.py |
-| `live.room_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/CourseDetail.tsx |
+| `live.room_create` | 前端/后端 | instrumentation.py, mobile-app/src/pages/CourseDetail.tsx, web-frontend/src/pages/CourseDetail.tsx |
 | `live.room_end` | 后端 | instrumentation.py |
 | `live.room_start` | 后端 | instrumentation.py |
-| `live.room_view` | 前端 | web-frontend/src/pages/LiveRoom.tsx |
+| `live.room_view` | 前端 | mobile-app/src/pages/CourseDetail.tsx, mobile-app/src/pages/LiveRoom.tsx, web-frontend/src/pages/LiveRoom.tsx |
 | `model.register` | 前端 | web-frontend/src/pages/AdminModels.tsx |
 | `model.toggle` | 前端 | web-frontend/src/pages/AdminModels.tsx |
 | `page.view` | 前端 | mobile-app/src/utils/tracker.ts, web-frontend/src/components/Layout.tsx |
@@ -98,6 +98,53 @@
 
 ## 后端埋点常量（Instrumentation）
 
+- `ai.call`
+- `ai.call_recorded`
+- `ai.chat_done`
+- `ai.chat_error`
+- `ai.chat_start`
+- `ai.conversation_delete`
+- `ai.conversation_list`
+- `ai.conversation_view`
+- `ai.grade_done`
+- `ai.grade_error`
+- `ai.grade_start`
+- `ai.model_registered`
+- `ai.model_updated`
+- `ai.models_view`
+- `ai.route`
+- `ai.usage_view`
+- `announcement.created`
+- `assignment.created`
+- `assignment.graded`
+- `assignment.submitted`
+- `assignment.updated`
+- `assignment.view`
+- `chapter.created`
+- `course.created`
+- `course.drop`
+- `course.updated`
+- `grade.recorded`
+- `grade.statistics`
+- `grade.updated`
+- `live.call`
+- `live.call_respond`
+- `live.chat`
+- `live.join`
+- `live.leave`
+- `live.quiz_answer`
+- `live.quiz_close`
+- `live.quiz_start`
+- `live.raise_hand`
+- `live.room_end`
+- `live.room_start`
+- `user.login`
+- `user.login_fail`
+- `user.password_change`
+- `user.profile_update`
+- `user.register`
+- `user.token_refresh`
+- `user.view`
 
 ## 前端页面视图覆盖（trackPageView 参数）
 
@@ -105,3 +152,4 @@
 - `course_detail`
 - `grades`
 - `home`
+- `live_room`

@@ -5,4 +5,5 @@ export type RootStackParamList = {
   CourseDetail: { courseId: string }
   AIChat: { conversationId?: string }
   Grades: undefined
+  LiveRoom: { roomId: string }
 }

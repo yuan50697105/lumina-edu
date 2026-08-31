@@ -64,6 +64,8 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
 export const get = <T>(p: string, o?: RequestOptions) => request<T>(p, { ...o, method: 'GET' })
 export const post = <T>(p: string, body?: unknown, o?: RequestOptions) =>
   request<T>(p, { ...o, method: 'POST', body })
+export const put = <T>(p: string, body?: unknown, o?: RequestOptions) =>
+  request<T>(p, { ...o, method: 'PUT', body })
 export const patch = <T>(p: string, body?: unknown, o?: RequestOptions) =>
   request<T>(p, { ...o, method: 'PATCH', body })
 export const del = <T>(p: string, o?: RequestOptions) => request<T>(p, { ...o, method: 'DELETE' })
