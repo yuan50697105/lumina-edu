@@ -130,6 +130,12 @@ def main() -> int:
         ), {"gid": str(uuid.uuid4()), "sid": student_id, "cid": course_id})
         print("  ✅ 期末成绩 92 (A)")
 
+    # ── 9. 直播演示房间（固定流 roomdemo，配合 部署/stream 演示推流一键起流）──
+    ensure("SELECT id FROM live_rooms WHERE stream_key='roomdemo'", {},
+        "INSERT IGNORE INTO live_rooms (id,course_id,teacher_id,title,status,stream_key,viewer_count,created_at) "
+        "VALUES (:id,:cid,:tid,'直播演示间（固定流 roomdemo）','scheduled','roomdemo',0,NOW())",
+        {"cid": course_id, "tid": teacher_id}, "直播演示房间 roomdemo")
+
     conn.commit()
     conn.close()
     engine.dispose()
