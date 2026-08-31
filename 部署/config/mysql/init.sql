@@ -97,6 +97,24 @@ CREATE TABLE event_tracking (
 ;
 
 
+CREATE TABLE notifications (
+	id CHAR(36) NOT NULL, 
+	user_id CHAR(36) NOT NULL, 
+	type VARCHAR(50) NOT NULL, 
+	title VARCHAR(120) NOT NULL, 
+	content TEXT, 
+	ref_type VARCHAR(50), 
+	ref_id CHAR(36), 
+	is_read BOOL NOT NULL, 
+	created_at DATETIME NOT NULL DEFAULT now(), 
+	PRIMARY KEY (id)
+)
+
+;
+
+CREATE INDEX ix_notifications_user_id ON notifications (user_id);
+
+
 CREATE TABLE users (
 	id CHAR(36) NOT NULL, 
 	name VARCHAR(50) NOT NULL, 

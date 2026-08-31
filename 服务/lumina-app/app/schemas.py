@@ -858,3 +858,40 @@ class TopicOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ─── 消息通知（V1.1 · D-03）───
+
+class NotificationOut(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    type: str
+    title: str
+    content: Optional[str] = None
+    ref_type: Optional[str] = None
+    ref_id: Optional[uuid.UUID] = None
+    is_read: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+    class Config:
+        from_attributes = True
+
+
+class UnreadCountOut(BaseModel):
+    unread_count: int
+
+
+# ─── 认证 · 注册（V1.1 · D-03）───
+
+class RegisterRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50, description="姓名")
+    email: EmailStr
+    password: str = Field(..., min_length=8, description="密码至少 8 位")
+    student_id: Optional[str] = Field(None, max_length=20, description="学号/工号（可选）")
+    role: str = Field("student", pattern="^(student|teacher)$", description="仅允许学生/教师自助注册")
+    department: Optional[str] = None
+    grade: Optional[str] = None
+    device: str = Field("web", pattern="^(web|mobile|desktop)$")

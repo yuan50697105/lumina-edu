@@ -312,3 +312,20 @@ export interface Topic {
   created_at: string
   replies?: Reply[]
 }
+
+// ─── 消息通知（D-03）───
+export interface NotificationItem {
+  id: string
+  user_id: string
+  type: string          // welcome | live_call | assignment_graded | course_announcement | system
+  title: string
+  content?: string | null
+  ref_type?: string | null
+  ref_id?: string | null
+  is_read: boolean
+  created_at: string
+}
+
+export interface UnreadCount {
+  unread_count: number
+}

@@ -518,4 +518,20 @@ class DiscussionReply(Base):
     created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
 
 
+# ─── 消息通知（V1.1 · D-03 · WBS-P 阶段 D）───
+class Notification(Base):
+    """消息通知（欢迎引导 / 直播点名 / 作业批阅 / 公告等触发入栏）"""
+    __tablename__ = "notifications"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID, nullable=False, index=True)    # 接收者（无 FK，与 collab 成员同风格）
+    type = Column(String(50), nullable=False)             # welcome | live_call | assignment_graded | course_announcement | system
+    title = Column(String(120), nullable=False)
+    content = Column(Text, nullable=True)
+    ref_type = Column(String(50), nullable=True)          # 跳转引用：live_room / assignment / course / group
+    ref_id = Column(GUID, nullable=True)
+    is_read = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
 # ─── 监控共享表 ───

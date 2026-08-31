@@ -40,6 +40,7 @@ from app.models import (
     LiveRoom,
     UserBrief,
 )
+from app.notifications import notify
 from app.schemas import (
     LiveCallIn,
     LiveCallOut,
@@ -473,6 +474,16 @@ def random_call(
 
     now = _now()
     room.active_call = {"user_id": str(target.id), "name": target.name, "called_at": now.isoformat()}
+    # 点名入消息通知（D-03）
+    notify(
+        db,
+        target.id,
+        "live_call",
+        f"🎯 「{room.title}」点名你回答问题",
+        content="教师发起点名，请尽快回应。",
+        ref_type="live_room",
+        ref_id=room.id,
+    )
     db.commit()
     _broadcast(db, room.id, "call", json.dumps(room.active_call, ensure_ascii=False), user_id=user.id)
 

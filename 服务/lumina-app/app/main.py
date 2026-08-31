@@ -30,6 +30,7 @@ from app.modules.collab import routers as collab_routers
 from app.media_proxy import router as media_router
 from app.modules.analytics import routers as analytics_routers
 from app.modules.logs import routers as logs_routers
+from app.modules.notif import routers as notif_routers
 
 install_json_logging()
 logger = logging.getLogger("lumina.app")
@@ -131,6 +132,8 @@ app.include_router(media_router)
 app.include_router(analytics_routers.router, prefix="/api/v1")
 # 日志
 app.include_router(logs_routers.router, prefix="/api/v1")
+# 消息通知（D-03）
+app.include_router(notif_routers.router, prefix="/api/v1")
 
 
 @app.exception_handler(Exception)

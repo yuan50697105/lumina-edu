@@ -22,6 +22,7 @@ from app.instrumentation import (
     Instrumentation,
 )
 from app.models import Assignment, CourseBrief, Grade, Submission, UserBrief
+from app.notifications import notify
 from app.schemas import (
     AssignmentCreate,
     AssignmentOut,
@@ -380,6 +381,16 @@ def grade_submission(
             grader_id=user.id,
         )
         db.add(grade)
+    # 批阅结果入消息通知（D-03），随 grade 一并提交
+    notify(
+        db,
+        sub.student_id,
+        "assignment_graded",
+        f"✅ 《{a.title}》批阅完成",
+        content=f"得分 {payload.total_score} 分（满分 {a.max_score}），可查看批语。",
+        ref_type="assignment",
+        ref_id=assignment_id,
+    )
     db.commit()
     db.refresh(grade)
 

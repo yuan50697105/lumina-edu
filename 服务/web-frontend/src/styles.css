@@ -343,3 +343,45 @@ body {
   .live-layout { grid-template-columns: 1fr; }
   .live-chat { position: static; height: 440px; }
 }
+
+/* ─── 登录分段控件（D-03）─── */
+.seg {
+  display: flex; gap: 4px; background: var(--bg-soft, #f3efe3); padding: 4px;
+  border-radius: 10px; margin: 2px 0 14px;
+}
+.seg button {
+  flex: 1; border: 0; background: transparent; padding: 8px 0;
+  font-size: 14px; border-radius: 8px; cursor: pointer; color: #666; font-family: inherit;
+}
+.seg button.on { background: #fff; color: var(--ink); font-weight: 600; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12); }
+
+/* ─── 消息通知铃铛（D-03）─── */
+.notif { position: relative; }
+.notif-bell { position: relative; min-width: 34px; }
+.notif-badge {
+  position: absolute; top: -5px; right: -7px; min-width: 17px; height: 17px;
+  background: var(--danger, #e85d3a); color: #fff; border-radius: 9px;
+  font-size: 10px; font-weight: 700; line-height: 17px; text-align: center; padding: 0 4px;
+}
+.notif-panel {
+  position: absolute; right: 0; top: 38px; width: 320px; max-width: 86vw;
+  background: #fffdf5; border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18); z-index: 40; overflow: hidden;
+}
+.notif-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+  background: var(--bg-soft, #f7f3e7); font-size: 13px;
+}
+.link-like { border: 0; background: none; color: var(--primary, #3d46c9); cursor: pointer; font-size: 12px; }
+.notif-list { list-style: none; margin: 0; padding: 4px 0; max-height: 380px; overflow-y: auto; }
+.notif-list li {
+  padding: 10px 14px; border-bottom: 1px solid rgba(0, 0, 0, 0.06); cursor: pointer;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.notif-list li:hover { background: rgba(61, 70, 201, 0.05); }
+.notif-list li.unread { background: rgba(245, 184, 0, 0.1); }
+.notif-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+.notif-content { font-size: 12px; color: #666; }
+.notif-time { font-size: 11px; color: #999; }
+.notif-empty { padding: 14px; font-size: 13px; }

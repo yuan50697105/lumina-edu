@@ -3,7 +3,7 @@
 > 自动生成：`python 部署/scripts/events_catalog.py`（阶段三 3.2 埋点数据验证依据）
 
 ## 事件命名规范
-`namespace.action`（点分小写）；允许命名空间：ai, announcement, assignment, auth, chapter, chat, collab, conversation, course, element, enrollment, gateway, grade, live, model, page, provider, session, submission, system, user
+`namespace.action`（点分小写）；允许命名空间：ai, announcement, assignment, auth, chapter, chat, collab, conversation, course, element, enrollment, gateway, grade, live, model, notif, page, provider, session, submission, system, user
 
 ## 全量事件清单
 
@@ -35,7 +35,7 @@
 | `assignment.updated` | 后端 | instrumentation.py, modules/assignment/instrumentation.py |
 | `assignment.view` | 后端 | instrumentation.py, modules/assignment/instrumentation.py |
 | `auth.login` | 前端 | mobile-app/src/pages/Login.tsx, web-frontend/src/pages/Login.tsx |
-| `auth.login_fail` | 前端 | mobile-app/src/pages/Login.tsx, web-frontend/src/pages/Login.tsx |
+| `auth.login_fail` | 前端 | mobile-app/src/pages/Login.tsx |
 | `auth.logout` | 前端 | web-frontend/src/components/Layout.tsx |
 | `chapter.created` | 后端 | instrumentation.py, modules/course/instrumentation.py |
 | `chapter.view` | 前端/后端 | instrumentation.py, modules/course/instrumentation.py, mobile-app/src/pages/CourseDetail.tsx |
@@ -79,13 +79,16 @@
 | `live.room_view` | 前端 | mobile-app/src/pages/CourseDetail.tsx, mobile-app/src/pages/LiveRoom.tsx, web-frontend/src/pages/LiveRoom.tsx |
 | `model.register` | 前端 | web-frontend/src/pages/AdminModels.tsx |
 | `model.toggle` | 前端 | web-frontend/src/pages/AdminModels.tsx |
+| `notif.read` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Dashboard.tsx |
+| `notif.read_all` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Dashboard.tsx |
+| `notif.view` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Dashboard.tsx |
 | `page.view` | 前端 | mobile-app/src/utils/tracker.ts, web-frontend/src/components/Layout.tsx |
 | `user.login` | 后端 | instrumentation.py |
 | `user.login_fail` | 后端 | instrumentation.py |
 | `user.logout` | 前端/后端 | instrumentation.py, mobile-app/src/pages/Home.tsx |
 | `user.password_change` | 后端 | instrumentation.py |
 | `user.profile_update` | 后端 | instrumentation.py |
-| `user.register` | 后端 | instrumentation.py |
+| `user.register` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Login.tsx |
 | `user.token_refresh` | 后端 | instrumentation.py |
 | `user.view` | 后端 | instrumentation.py |
 
@@ -120,8 +123,12 @@
 - `live.room_view`
 - `model.register`
 - `model.toggle`
+- `notif.read`
+- `notif.read_all`
+- `notif.view`
 - `page.view`
 - `user.logout`
+- `user.register`
 
 ## 后端埋点常量（Instrumentation）
 
@@ -170,7 +177,6 @@
 - `user.login_fail`
 - `user.password_change`
 - `user.profile_update`
-- `user.register`
 - `user.token_refresh`
 - `user.view`
 
