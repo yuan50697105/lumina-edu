@@ -7,6 +7,7 @@ import CourseDetail from './pages/CourseDetail'
 import AIChat from './pages/AIChat'
 import Grades from './pages/Grades'
 import AdminModels from './pages/AdminModels'
+import LiveRoom from './pages/LiveRoom'
 import type { ReactNode } from 'react'
 
 function Protected({ children }: { children: ReactNode }) {
@@ -29,6 +30,7 @@ export default function App() {
       >
         <Route index element={<Dashboard />} />
         <Route path="courses/:id" element={<CourseDetail />} />
+        <Route path="live/:roomId" element={<LiveRoom />} />
         <Route path="ai" element={<AIChat />} />
         <Route path="grades" element={<Grades />} />
         <Route path="admin/models" element={<AdminModels />} />

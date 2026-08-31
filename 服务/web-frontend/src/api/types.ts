@@ -151,3 +151,72 @@ export interface ConversationMessage {
   completion_tokens: number
   created_at: string
 }
+
+// ─── 直播课堂（D-01 · V1.1）───
+export type LiveRoomStatus = 'scheduled' | 'live' | 'ended'
+
+export interface LiveCallInfo {
+  user_id: string
+  name: string
+  called_at: string
+}
+
+export interface LiveRoom {
+  id: string
+  course_id: string
+  course_title?: string | null
+  teacher_id: string
+  teacher_name?: string | null
+  title: string
+  status: LiveRoomStatus
+  stream_url?: string | null
+  viewer_count?: number
+  online_count?: number
+  active_call?: LiveCallInfo | null
+  started_at?: string | null
+  ended_at?: string | null
+}
+
+export interface LiveMessage {
+  id: number
+  room_id: string
+  user_id?: string | null
+  user_name?: string | null
+  role?: string | null
+  msg_type: string // chat | system | call
+  content?: string | null
+  created_at: string
+}
+
+export interface LiveRaise {
+  id: string
+  user_id: string
+  name?: string | null
+  raised_at?: string | null
+}
+
+export interface LiveQuizOption {
+  key: string
+  text: string
+}
+
+export interface LiveQuiz {
+  id: string
+  room_id: string
+  teacher_id: string
+  question: string
+  options: LiveQuizOption[]
+  answer?: string | null
+  status: string
+  created_at?: string | null
+  closed_at?: string | null
+}
+
+export interface LiveQuizResult {
+  quiz_id: string
+  question: string
+  total: number
+  distribution: Record<string, number>
+  correct_count?: number | null
+  correct_rate?: number | null
+}

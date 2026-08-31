@@ -522,7 +522,13 @@ def create_quiz(
     db.add(quiz)
     db.commit()
     db.refresh(quiz)
-    _broadcast(db, room.id, "system", f"📝 答题已发布：{payload.question}", user_id=user.id)
+    # 广播携 quiz 全量结构（question/options/quiz_id），前端轮询消息即可驱动答题面板，无需额外拉取端点
+    _broadcast(
+        db, room.id, "system",
+        json.dumps({"type": "quiz", "quiz_id": str(quiz.id), "question": quiz.question,
+                    "options": quiz.options, "status": "active"}, ensure_ascii=False),
+        user_id=user.id,
+    )
     Instrumentation(db, request, str(user.id)).track(
         EVENT_LIVE_QUIZ_START, course_id=str(room.course_id),
         properties={"room_id": str(room.id), "quiz_id": str(quiz.id)},
@@ -586,6 +592,12 @@ def close_quiz(
     quiz.closed_at = _now()
     db.commit()
     db.refresh(quiz)
+    _broadcast(
+        db, room.id, "system",
+        json.dumps({"type": "quiz", "quiz_id": str(quiz.id), "question": quiz.question,
+                    "status": "closed"}, ensure_ascii=False),
+        user_id=user.id,
+    )
     Instrumentation(db, request, str(user.id)).track(
         EVENT_LIVE_QUIZ_CLOSE, course_id=str(room.course_id),
         properties={"room_id": str(room.id), "quiz_id": str(quiz.id)},
