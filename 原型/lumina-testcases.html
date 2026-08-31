@@ -185,7 +185,7 @@
     <thead><tr><th>层级</th><th>类型</th><th>数量</th><th>工具</th><th>执行时间</th></tr></thead>
     <tbody>
       <tr><td><b>① 单元测试</b></td><td>函数/方法级别（security · models · queries · logging_json · adapters 5 个测试文件）</td><td>76</td><td>pytest</td><td>&lt; 30s</td></tr>
-      <tr><td><b>② 集成测试</b></td><td>模块间交互</td><td>100+（需 PostgreSQL，未就绪自动跳过）</td><td>pytest · --include-api</td><td>~2 min</td></tr>
+      <tr><td><b>② 集成测试</b></td><td>模块间交互</td><td>100+（需 MySQL，未就绪自动跳过）</td><td>pytest · --include-api</td><td>~2 min</td></tr>
       <tr><td><b>③ API 测试</b></td><td>接口契约</td><td>44</td><td>api_contract_check.py</td><td>~5 min</td></tr>
       <tr><td><b>④ E2E 测试</b></td><td>用户流程</td><td>15 步</td><td>smoke_test.py</td><td>~15 min</td></tr>
       <tr><td><b>⑤ 性能测试</b></td><td>压力/负载</td><td>3 场景</td><td>load_test.py</td><td>~30 min</td></tr>
@@ -691,10 +691,11 @@
     needs: unit-test
     runs-on: ubuntu-latest
     <span class="keyword">services</span>:
-      <span class="key">postgres</span>:
-        image: postgres:16
+      <span class="key">mysql</span>:
+        image: mysql:9.7
         env:
-          <span class="key">POSTGRES_DB</span>: lumina_test
+          <span class="key">MYSQL_ROOT_PASSWORD</span>: test
+          <span class="key">MYSQL_DATABASE</span>: lumina_test
     <span class="keyword">steps</span>:
     - <span class="key">name</span>: <span class="string">Run Integration Tests</span>
       <span class="key">run</span>: make test-integration

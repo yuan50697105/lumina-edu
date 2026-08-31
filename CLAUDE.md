@@ -39,9 +39,9 @@ edu/
 │   └── mobile-app/             # 移动端前端（React Native / Expo）
 │
 ├── 部署/                   # Docker 部署方案（环境搭建）
-│   ├── docker-compose.yml      # 服务编排（PG/Redis/lumina-app/Nginx）
+│   ├── docker-compose.yml      # 服务编排（MySQL/Redis/lumina-app/Nginx）
 │   ├── .env.example            # 环境变量模板
-│   ├── config/                 # Nginx/PostgreSQL 配置
+│   ├── config/                 # Nginx/MySQL 配置
 │   ├── scripts/                # 启停/备份/监控/契约核对脚本
 │   ├── docs/                   # UAT 验收清单 / events-catalog / 上线检查清单
 │   └── README.md               # 部署使用说明

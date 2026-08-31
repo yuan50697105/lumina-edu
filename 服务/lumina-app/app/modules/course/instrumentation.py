@@ -1,6 +1,6 @@
 # ============================================
 # Lumina 墨光 · 课程服务监控埋点
-# 与 user-service 相同的轻量方案：写入 PostgreSQL
+# 与 user-service 相同的轻量方案：写入 MySQL
 # event_tracking / api_logs 表为共享表
 # ============================================
 import json

@@ -43,7 +43,7 @@ edu/
 ├── 部署/                             # Docker 部署方案（环境搭建）
 │   ├── docker-compose.yml            # 服务编排（PG/Redis/单体应用/Nginx）
 │   ├── .env.example                  # 环境变量模板
-│   ├── config/                       # Nginx/PostgreSQL 配置
+│   ├── config/                       # Nginx/MySQL 配置
 │   ├── scripts/                      # 启停/备份/监控脚本
 │   └── README.md                     # 部署使用说明
 │
@@ -189,7 +189,7 @@ cp .env.example .env
 ./scripts/monitor.sh
 ```
 
-已编排服务：PostgreSQL · Redis · lumina-app 单体（:8080 · 9 模块 · 44 端点）· Nginx(80/443)
+已编排服务：MySQL 9.7 · Redis · lumina-app 单体（:8080 · 9 模块 · 44 端点）· Nginx(80/443)
 
 详见 `部署/README.md`
 

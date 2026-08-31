@@ -200,7 +200,7 @@
   <table>
     <thead><tr><th>组件</th><th>版本</th><th>用途</th><th>部署方式</th></tr></thead>
     <tbody>
-      <tr><td><b>PostgreSQL</b></td><td>16.x</td><td>主数据库</td><td>Operator · 主从</td></tr>
+      <tr><td><b>MySQL</b></td><td>9.7</td><td>主数据库</td><td>Operator · 主从</td></tr>
       <tr><td><b>Redis</b></td><td>7.x</td><td>缓存 · 会话</td><td>Cluster · 6 节点</td></tr>
       <tr><td><b>Kafka</b></td><td>3.x</td><td>消息队列</td><td>Strimzi Operator</td></tr>
       <tr><td><b>Milvus</b></td><td>2.3.x</td><td>向量数据库</td><td>Helm Chart · 分布式</td></tr>
@@ -238,16 +238,17 @@
   <h3 class="sub">2.2 单体应用部署（Docker Compose）</h3>
   <pre><span class="comment"># docker-compose.yml</span>
 <span class="keyword">services</span>:
-  <span class="key">postgres</span>:
-    <span class="key">image</span>: <span class="string">postgres:16-alpine</span>
+  <span class="key">mysql</span>:
+    <span class="key">image</span>: <span class="string">mysql:9.7</span>
     <span class="key">environment</span>:
-      <span class="key">POSTGRES_DB</span>: <span class="string">lumina</span>
-      <span class="key">POSTGRES_USER</span>: <span class="string">lumina</span>
-      <span class="key">POSTGRES_PASSWORD</span>: <span class="string">${POSTGRES_PASSWORD}</span>
+      <span class="key">MYSQL_ROOT_PASSWORD</span>: <span class="string">${MYSQL_ROOT_PASSWORD}</span>
+      <span class="key">MYSQL_DATABASE</span>: <span class="string">lumina</span>
+      <span class="key">MYSQL_USER</span>: <span class="string">lumina</span>
+      <span class="key">MYSQL_PASSWORD</span>: <span class="string">${MYSQL_PASSWORD}</span>
     <span class="key">volumes</span>:
-      - <span class="string">pg_data:/var/lib/postgresql/data</span>
+      - <span class="string">mysql_data:/var/lib/mysql</span>
     <span class="key">ports</span>:
-      - <span class="string">"5432:5432"</span>
+      - <span class="string">"3306:3306"</span>
 
   <span class="key">redis</span>:
     <span class="key">image</span>: <span class="string">redis:7-alpine</span>
@@ -257,12 +258,12 @@
   <span class="key">lumina-app</span>:
     <span class="key">build</span>: <span class="string">../服务/lumina-app</span>
     <span class="key">environment</span>:
-      <span class="key">DATABASE_URL</span>: <span class="string">postgresql://lumina:${POSTGRES_PASSWORD}@postgres:5432/lumina</span>
+      <span class="key">DATABASE_URL</span>: <span class="string">mysql+pymysql://lumina:${MYSQL_PASSWORD}@mysql:3306/lumina?charset=utf8mb4</span>
       <span class="key">JWT_SECRET_KEY</span>: <span class="string">${JWT_SECRET_KEY}</span>
     <span class="key">ports</span>:
       - <span class="string">"8080:8080"</span>
     <span class="key">depends_on</span>:
-      - <span class="string">postgres</span>
+      - <span class="string">mysql</span>
       - <span class="string">redis</span></pre>
 
   <h3 class="sub">2.3 Nginx 反向代理</h3>
@@ -417,7 +418,7 @@ helm upgrade --install lumina-stack lumina/lumina-stack \
       <tr><td><b>HighCPU</b></td><td>CPU &gt; 90% / 15min</td><td><span class="tag warn">P2</span></td><td>钉钉</td></tr>
       <tr><td><b>HighMemory</b></td><td>内存 &gt; 90% / 15min</td><td><span class="tag warn">P2</span></td><td>钉钉</td></tr>
       <tr><td><b>DiskSpaceLow</b></td><td>磁盘 &gt; 85%</td><td><span class="tag info">P3</span></td><td>邮件</td></tr>
-      <tr><td><b>DatabaseDown</b></td><td>PostgreSQL 不可达</td><td><span class="tag critical">P1</span></td><td>电话 + 短信</td></tr>
+      <tr><td><b>DatabaseDown</b></td><td>MySQL 不可达</td><td><span class="tag critical">P1</span></td><td>电话 + 短信</td></tr>
       <tr><td><b>KafkaLag</b></td><td>堆积 &gt; 10000</td><td><span class="tag warn">P2</span></td><td>钉钉</td></tr>
     </tbody>
   </table>
@@ -506,13 +507,13 @@ kubectl describe ingress lumina-api -n lumina-prod</pre>
       <span class="runbook-severity" style="background:var(--correction); color:#fff;">P1 · 严重</span>
       <span class="runbook-title">数据库主从切换</span>
     </div>
-    <p><b>触发条件</b>：PostgreSQL 主库不可达</p>
+    <p><b>触发条件</b>：MySQL 主库不可达</p>
     <p><b>影响</b>：所有写操作失败，读操作降级到从库</p>
     <p><b>操作步骤</b>：</p>
     <ol>
-      <li>确认主库状态：<code>kubectl exec postgres-primary -- pg_isready</code></li>
-      <li>触发自动切换：<code>kubectl exec postgres-primary -- patronictl switchover</code></li>
-      <li>验证新主库：<code>kubectl exec postgres-replica-0 -- pg_isready</code></li>
+      <li>确认主库状态：<code>mysqladmin -h mysql-primary ping</code></li>
+      <li>触发自动切换：<code>mysql -e "STOP REPLICA; RESET REPLICA ALL"</code>（半同步）</li>
+      <li>验证新主库：<code>mysqladmin -h mysql-replica-0 ping</code></li>
       <li>检查应用连接恢复</li>
       <li>修复原主库，重新加入集群</li>
     </ol>
@@ -561,7 +562,7 @@ kubectl describe ingress lumina-api -n lumina-prod</pre>
   <table>
     <thead><tr><th>数据类型</th><th>备份方式</th><th>频率</th><th>保留时间</th><th>存储位置</th></tr></thead>
     <tbody>
-      <tr><td><b>PostgreSQL</b></td><td>pg_dump + WAL 归档</td><td>每日全量 + 实时增量</td><td>30 天</td><td>MinIO 备份桶</td></tr>
+      <tr><td><b>MySQL</b></td><td>mysqldump + binlog 归档</td><td>每日全量 + 实时增量</td><td>30 天</td><td>minio 备份桶</td></tr>
       <tr><td><b>Redis</b></td><td>RDB 快照</td><td>每 6 小时</td><td>7 天</td><td>MinIO 备份桶</td></tr>
       <tr><td><b>MinIO 文件</b></td><td>跨区域复制</td><td>实时</td><td>永久</td><td>异地灾备中心</td></tr>
       <tr><td><b>etcd</b></td><td>etcdctl snapshot</td><td>每日</td><td>7 天</td><td>MinIO 备份桶</td></tr>

@@ -1,6 +1,6 @@
 # ============================================
 # Lumina 墨光 · 监控埋点模块
-# 轻量方案：埋点写入 PostgreSQL（api_logs / event_tracking）
+# 轻量方案：埋点写入 MySQL（api_logs / event_tracking）
 # 无需额外监控组件
 # ============================================
 import json

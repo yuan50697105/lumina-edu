@@ -6,7 +6,7 @@
 # 全链路：登录 → 建课 → 章节 → 选课 → 发布作业 → 学生提交
 #       → 教师批阅 → 录入期末成绩 → 成绩单 → 埋点统计 → 日志查询
 #
-# 前置条件：compose 全部服务在线（POSTGRES 有预置用户）。
+# 前置条件：compose 全部服务在线（MYSQL 有预置用户）。
 # 账号通过环境变量提供（缺省读取 LUMINA_*）：
 #   LUMINA_TEACHER_EMAIL/PASSWORD、LUMINA_STUDENT_EMAIL/PASSWORD、LUMINA_ADMIN_EMAIL/PASSWORD
 #

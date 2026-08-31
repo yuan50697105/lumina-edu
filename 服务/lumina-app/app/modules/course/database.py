@@ -1,6 +1,6 @@
 # ============================================
 # Lumina 墨光 · 课程服务数据库连接
-# 与 user-service 共享同一 PostgreSQL 库（轻量一期单库方案）
+# 与 user-service 共享同一 MySQL 库（轻量一期单库方案）
 # ============================================
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker

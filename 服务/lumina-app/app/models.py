@@ -8,10 +8,28 @@ from sqlalchemy import (
     BigInteger, Boolean, Column, DateTime, Float, Integer, String, Text, Numeric,
     JSON, ForeignKey, UniqueConstraint, Index
 )
-from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
+from sqlalchemy.types import CHAR, TypeDecorator
 
 from app.database import Base
+
+
+class GUID(TypeDecorator):
+    """跨数据库 UUID：MySQL 存 CHAR(36)（标准连字符格式），随时可迁移回 PostgreSQL
+    原生 text SQL 以 str(uuid) 绑参（36 位连字符）可直接匹配。"""
+    impl = CHAR(36)
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        return str(value) if value is not None else None
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        try:
+            return uuid.UUID(value)
+        except (ValueError, TypeError):
+            return value
 
 
 def _now():
@@ -28,7 +46,7 @@ class APILog(Base):
     path = Column(String(500), nullable=False)
     status_code = Column(Integer, nullable=True)
     duration_ms = Column(Integer, nullable=True)
-    user_id = Column(UUID(as_uuid=True), nullable=True)
+    user_id = Column(GUID, nullable=True)
     request_id = Column(String(100), nullable=True)
     error_message = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=_now)
@@ -39,9 +57,9 @@ class EventTracking(Base):
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     event_name = Column(String(100), nullable=False)
-    user_id = Column(UUID(as_uuid=True), nullable=True)
+    user_id = Column(GUID, nullable=True)
     session_id = Column(String(100), nullable=True)
-    course_id = Column(UUID(as_uuid=True), nullable=True)
+    course_id = Column(GUID, nullable=True)
     properties = Column(JSON, nullable=True)
     page_url = Column(String(500), nullable=True)
     user_agent = Column(Text, nullable=True)
@@ -52,7 +70,7 @@ class UserBrief(Base):
     """users 只读视图"""
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True)
+    id = Column(GUID, primary_key=True)
     name = Column(String(50), nullable=False)
     student_id = Column(String(20), nullable=True)
     avatar_url = Column(String(500), nullable=True)
@@ -62,9 +80,9 @@ class CourseBrief(Base):
     """courses 只读视图"""
     __tablename__ = "courses"
 
-    id = Column(UUID(as_uuid=True), primary_key=True)
+    id = Column(GUID, primary_key=True)
     title = Column(String(200), nullable=False)
-    teacher_id = Column(UUID(as_uuid=True), nullable=False)
+    teacher_id = Column(GUID, nullable=False)
     credits = Column(Numeric(3, 1), nullable=True)
     semester = Column(String(20), nullable=False)
     status = Column(String(20), default="draft")
@@ -77,7 +95,7 @@ class User(Base):
     __tablename__ = "users"
     __table_args__ = {"extend_existing": True}
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
     student_id = Column(String(20), unique=True, nullable=True)
     name = Column(String(50), nullable=False)
     email = Column(String(100), unique=True, nullable=False)
@@ -95,8 +113,8 @@ class Session(Base):
     """登录会话表"""
     __tablename__ = "sessions"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     refresh_token = Column(String(500), unique=True, nullable=False)
     device = Column(String(20), default="web")
     ip_address = Column(String(45), nullable=True)
@@ -109,11 +127,11 @@ class Course(Base):
     __tablename__ = "courses"
     __table_args__ = {"extend_existing": True}
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
     code = Column(String(20), unique=True, nullable=False)
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
-    teacher_id = Column(UUID(as_uuid=True), nullable=False)
+    teacher_id = Column(GUID, nullable=False)
     department = Column(String(100), nullable=True)
     credits = Column(Numeric(3, 1), nullable=True)
     semester = Column(String(20), nullable=False)
@@ -130,9 +148,9 @@ class Enrollment(Base):
     __tablename__ = "enrollments"
     __table_args__ = ({"comment": "选课记录，UNIQUE(user_id, course_id) 在外部索引保证"})
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), nullable=False)
-    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID, nullable=False)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     role = Column(String(20), default="student")  # student | teacher | ta
     enrolled_at = Column(DateTime(timezone=True), default=_now, nullable=False)
     status = Column(String(20), default="active")  # active | dropped | completed
@@ -143,8 +161,8 @@ class Chapter(Base):
     """章节"""
     __tablename__ = "chapters"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(200), nullable=False)
     content = Column(Text, nullable=True)
     order_num = Column(Integer, default=0)
@@ -157,9 +175,9 @@ class Announcement(Base):
     """课程公告"""
     __tablename__ = "announcements"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
-    author_id = Column(UUID(as_uuid=True), nullable=False)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    author_id = Column(GUID, nullable=False)
     title = Column(String(200), nullable=False)
     content = Column(Text, nullable=True)
     pinned = Column(Boolean, default=False)
@@ -169,8 +187,8 @@ class Assignment(Base):
     """作业"""
     __tablename__ = "assignments"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     due_at = Column(DateTime(timezone=True), nullable=True)
@@ -187,9 +205,9 @@ class Submission(Base):
     """作业提交"""
     __tablename__ = "submissions"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    assignment_id = Column(UUID(as_uuid=True), ForeignKey("assignments.id", ondelete="CASCADE"), nullable=False)
-    student_id = Column(UUID(as_uuid=True), nullable=False)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    assignment_id = Column(GUID, ForeignKey("assignments.id", ondelete="CASCADE"), nullable=False)
+    student_id = Column(GUID, nullable=False)
     file_urls = Column(JSON, nullable=True)
     text_answer = Column(Text, nullable=True)
     submission_note = Column(Text, nullable=True)
@@ -202,14 +220,14 @@ class Grade(Base):
     """作业成绩（批阅结果）"""
     __tablename__ = "grades"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    submission_id = Column(UUID(as_uuid=True), ForeignKey("submissions.id", ondelete="CASCADE"), nullable=False, unique=True)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    submission_id = Column(GUID, ForeignKey("submissions.id", ondelete="CASCADE"), nullable=False, unique=True)
     total_score = Column(Numeric(5, 2), nullable=True)
     grade_letter = Column(String(2), nullable=True)
     feedback = Column(Text, nullable=True)
     rubric_scores = Column(JSON, nullable=True)
     graded_by = Column(String(20), default="teacher")  # teacher | ai
-    grader_id = Column(UUID(as_uuid=True), nullable=True)
+    grader_id = Column(GUID, nullable=True)
     ai_model = Column(String(50), nullable=True)
     confidence = Column(Numeric(3, 2), nullable=True)
     graded_at = Column(DateTime(timezone=True), default=_now, nullable=False)
@@ -221,9 +239,9 @@ class GradeRecord(Base):
         UniqueConstraint("student_id", "course_id", "semester", name="uq_grade_record"),
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    student_id = Column(UUID(as_uuid=True), nullable=False)
-    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    student_id = Column(GUID, nullable=False)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     semester = Column(String(20), nullable=False)
     final_score = Column(Numeric(5, 2), nullable=True)
     gpa_point = Column(Numeric(3, 2), nullable=True)
@@ -233,7 +251,7 @@ class AIProvider(Base):
     """模型供应商（API Key 不入库，存 env）"""
     __tablename__ = "ai_providers"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
     name = Column(String(30), unique=True, nullable=False)     # qwen / glm / spark / doubao / anthropic / gemini
     display_name = Column(String(50), nullable=False)
     description = Column(String(200), nullable=True)
@@ -250,8 +268,8 @@ class AIModel(Base):
     """模型单"""
     __tablename__ = "ai_models"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    provider_id = Column(UUID(as_uuid=True), ForeignKey("ai_providers.id"), nullable=False)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    provider_id = Column(GUID, ForeignKey("ai_providers.id"), nullable=False)
     model_name = Column(String(50), unique=True, nullable=False)   # qwen-max / claude-3-5-sonnet / gemini-2.0-flash
     display_name = Column(String(50), nullable=False)              # 通义千问 Max
     task_types = Column(JSON, default=list)                        # ["chat","grade","generate","vl","speech"]
@@ -271,8 +289,8 @@ class AICallLog(Base):
     __tablename__ = "ai_call_logs"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    user_id = Column(UUID(as_uuid=True), nullable=True)
-    model_id = Column(UUID(as_uuid=True), ForeignKey("ai_models.id"), nullable=False)
+    user_id = Column(GUID, nullable=True)
+    model_id = Column(GUID, ForeignKey("ai_models.id"), nullable=False)
     model_name = Column(String(50), nullable=False)
     task_type = Column(String(20), nullable=False)           # chat/grade/generate/vl/speech
     prompt_tokens = Column(Integer, default=0)
@@ -290,12 +308,12 @@ class AIConversation(Base):
     """AI 对话会话（对齐 init.sql / lumina-database 文档）"""
     __tablename__ = "ai_conversations"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), nullable=False, index=True)   # 分片键
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID, nullable=False, index=True)   # 分片键
     title = Column(String(200), nullable=True)                          # 自动生成（首条消息截断）
     model = Column(String(50), nullable=True)                           # 实际使用模型 qwen-max
-    context_course_id = Column(UUID(as_uuid=True), nullable=True)       # 关联课程
-    context_chapter_id = Column(UUID(as_uuid=True), nullable=True)      # 关联章节
+    context_course_id = Column(GUID, nullable=True)       # 关联课程
+    context_chapter_id = Column(GUID, nullable=True)      # 关联章节
     message_count = Column(Integer, default=0)
     total_tokens = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), default=_now)
@@ -307,8 +325,8 @@ class AIMessage(Base):
     """AI 对话消息"""
     __tablename__ = "ai_messages"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    conversation_id = Column(UUID(as_uuid=True),
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    conversation_id = Column(GUID,
                              ForeignKey("ai_conversations.id", ondelete="CASCADE"),
                              nullable=False, index=True)
     role = Column(String(20), nullable=False)          # user / assistant / system

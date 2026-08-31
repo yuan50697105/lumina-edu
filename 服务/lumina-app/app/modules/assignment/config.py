@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     APP_DEBUG: bool = True
 
     # 数据库（共享库）
-    DATABASE_URL: str = "postgresql://lumina:lumina_secure_password@localhost:5432/lumina"
+    DATABASE_URL: str = "mysql+pymysql://lumina:lumina_secure_password@localhost:3306/lumina"
 
     # JWT（跨服务共享密钥）
     JWT_SECRET_KEY: str = "change_me_jwt_secret_key"

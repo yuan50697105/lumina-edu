@@ -6,6 +6,7 @@ passlib[bcrypt]==1.7.4
 # psycopg2-binary==2.9.10  # 暂时注释，Windows Python 3.14 编译问题
 pydantic-settings==2.7.1
 pydantic==2.10.4
+PyMySQL==1.1.1
 pytest-asyncio==0.24.0
 pytest==8.3.3
 python-jose[cryptography]==3.3.0

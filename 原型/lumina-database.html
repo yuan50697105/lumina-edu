@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 数据库设计文档 v1.1</title>
+<title>Lumina 墨光 · 数据库设计文档 v1.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -120,12 +120,12 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Database Design</small></div>
     </div>
-    <div class="doc-type">Database Design · v1.1</div>
+    <div class="doc-type">Database Design · v1.2</div>
     <h1>
       <span class="hl">数据</span>库<br/>
       <em>设计文档</em>
     </h1>
-    <div class="subtitle">PostgreSQL 16 · 单库模型 · ER 模型 · 索引策略 · 分区方案</div>
+    <div class="subtitle">MySQL 9.7 · 单库模型 · ER 模型 · 索引策略 · 分区方案</div>
   </div>
   <div class="meta">
     <div class="row">
@@ -134,11 +134,11 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.1 · 同步单体架构</span>
+      <span class="value">v1.2 · MySQL 9.7 · 同步单体架构</span>
     </div>
     <div class="row">
       <span class="label">数据库</span>
-      <span class="value">PostgreSQL 16（单库）</span>
+      <span class="value">MySQL 9.7（单库）</span>
     </div>
     <div class="row">
       <span class="label">向量检索</span>
@@ -188,19 +188,19 @@
   <table>
     <thead><tr><th>存储引擎</th><th>用途</th><th>版本</th><th>部署</th></tr></thead>
     <tbody>
-      <tr><td><b>PostgreSQL 16</b></td><td>数据主库 · 全部业务/AI 数据</td><td>16.x</td><td>单库 · 单体直连</td></tr>
+      <tr><td><b>MySQL 9.7</b></td><td>数据主库 · 全部业务/AI 数据</td><td>9.7</td><td>单库 · 单体直连</td></tr>
       <tr><td><b>本地 uploads/</b></td><td>临时上传目录（替代对象存储）</td><td>—</td><td>单体本地目录</td></tr>
     </tbody>
   </table>
-  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：单体架构仅依赖 PostgreSQL 单库，业务 / AI / 日志数据统一落 PG；表由 <code>Base.metadata.create_all</code> 自动创建（development 模式）。缓存 / 消息队列 / 对象存储等中间件已从单体移除。单体包含 9 个业务模块：user / course / assignment / grade / ai_gateway / ai_chat / ai_grade / analytics / logs。</p>
+  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：单体架构仅依赖 MySQL 9.7 单库，业务 / AI / 日志数据统一落 MySQL（InnoDB · utf8mb4）；表由 <code>Base.metadata.create_all</code> 自动创建（development 模式），生产初始化脚本见 <code>部署/config/mysql/init.sql</code>。缓存 / 消息队列 / 对象存储等中间件已从单体移除。单体包含 9 个业务模块：user / course / assignment / grade / ai_gateway / ai_chat / ai_grade / analytics / logs。</p>
 
   <h3 class="sub">1.2 数据规模预估</h3>
   <table>
     <thead><tr><th>数据类型</th><th>日增量</th><th>年增量</th><th>3 年预估</th><th>存储策略</th></tr></thead>
     <tbody>
-      <tr><td><b>业务数据</b></td><td>~ 50 MB</td><td>~ 18 GB</td><td>~ 55 GB</td><td>PostgreSQL</td></tr>
+      <tr><td><b>业务数据</b></td><td>~ 50 MB</td><td>~ 18 GB</td><td>~ 55 GB</td><td>MySQL</td></tr>
       <tr><td><b>文件/视频</b></td><td>~ 10 GB</td><td>~ 3.6 TB</td><td>~ 11 TB</td><td>本地 uploads/（后续可接对象存储）</td></tr>
-      <tr><td><b>AI 对话/批阅</b></td><td>~ 200 MB</td><td>~ 73 GB</td><td>~ 220 GB</td><td>PostgreSQL</td></tr>
+      <tr><td><b>AI 对话/批阅</b></td><td>~ 200 MB</td><td>~ 73 GB</td><td>~ 220 GB</td><td>MySQL</td></tr>
       <tr><td><b>审计日志</b></td><td>~ 500 MB</td><td>~ 180 GB</td><td>~ 540 GB</td><td>冷热分离（PG 分区）</td></tr>
     </tbody>
   </table>
@@ -799,11 +799,11 @@
 <section class="section" id="s8">
   <div class="section-header">
     <h2>08 · 分区策略 <em>Partitioning</em></h2>
-    <div class="num-tag">PostgreSQL 原生分区</div>
+    <div class="num-tag">MySQL 原生分区</div>
   </div>
 
   <h3 class="sub">8.1 分区策略</h3>
-  <p><b>说明</b>：采用 PostgreSQL 原生分区（LIST / RANGE / HASH），所有分区表仍落在同一数据库实例，分区对上层应用透明，无需任何分片中间件。</p>
+  <p><b>说明</b>：采用 MySQL 原生分区（RANGE / LIST / HASH / KEY），所有分区表仍落在同一实例，分区对上层应用透明，无需任何分片中间件。注意：MySQL 要求分区键必须包含在表的所有唯一键中。</p>
   <table>
     <thead><tr><th>数据表</th><th>分区键</th><th>策略</th><th>分区数</th><th>预计规模</th></tr></thead>
     <tbody>
@@ -836,9 +836,9 @@
   <table>
     <thead><tr><th>数据温度</th><th>存储位置</th><th>查询频率</th><th>保留策略</th></tr></thead>
     <tbody>
-      <tr><td><b>🔥 热数据</b></td><td>PostgreSQL SSD</td><td>高频 · 毫秒级</td><td>近 3 个月</td></tr>
-      <tr><td><b>🌤️ 温数据</b></td><td>PostgreSQL HDD</td><td>中频 · 秒级</td><td>3-12 个月</td></tr>
-      <tr><td><b>❄️ 冷数据</b></td><td>PostgreSQL 冷分区</td><td>低频 · 分钟级</td><td>> 12 个月</td></tr>
+      <tr><td><b>🔥 热数据</b></td><td>MySQL InnoDB SSD</td><td>高频 · 毫秒级</td><td>近 3 个月</td></tr>
+      <tr><td><b>🌤️ 温数据</b></td><td>MySQL InnoDB HDD</td><td>中频 · 秒级</td><td>3-12 个月</td></tr>
+      <tr><td><b>❄️ 冷数据</b></td><td>MySQL 归档表</td><td>低频 · 分钟级</td><td>> 12 个月</td></tr>
     </tbody>
   </table>
 </section>
@@ -918,7 +918,7 @@
     <tbody>
       <tr><td><b>Base.metadata.create_all</b></td><td>Schema 创建</td><td>development 模式启动自动建表（lifespan）</td></tr>
       <tr><td><b>Alembic（规划中）</b></td><td>Schema 迁移</td><td>生产版本化迁移 · 回滚支持</td></tr>
-      <tr><td><b>pg_repack</b></td><td>在线重组</td><td>无锁表重建 · 减少碎片</td></tr>
+      <tr><td><b>pt-online-schema-change</b></td><td>在线重组</td><td>无锁表重建 · 减少碎片（规划）</td></tr>
     </tbody>
   </table>
 
@@ -960,7 +960,7 @@ alembic/
     <div style="font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--growth); font-weight:600; margin-bottom:6px;">✅ 迁移原则</div>
     <ul style="margin:0; font-size:13px; line-height:1.8;">
       <li><b>向后兼容</b>：新字段必须有默认值或允许 NULL</li>
-      <li><b>零停机</b>：大表变更使用 <code>pg_repack</code> 或分批处理</li>
+      <li><b>零停机</b>：大表变更使用 <code>pt-online-schema-change</code> 或分批处理</li>
       <li><b>可回滚</b>：每个迁移配套 rollback SQL</li>
       <li><b>幂等</b>：迁移脚本可重复执行不报错</li>
     </ul>
@@ -969,7 +969,7 @@ alembic/
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Database Design</div>
-  <div>v1.1 · 17 表 · 9 模块 · PostgreSQL 16</div>
+  <div>v1.2 · 17 表 · 9 模块 · MySQL 9.7</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">DB-LUMINA-2026-001</div>
 </footer>
 

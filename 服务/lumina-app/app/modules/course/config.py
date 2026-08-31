@@ -12,8 +12,8 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"  # development / testing / production
     APP_DEBUG: bool = True
 
-    # 数据库（与 user-service 共享同一 PostgreSQL）
-    DATABASE_URL: str = "postgresql://lumina:lumina_secure_password@localhost:5432/lumina"
+    # 数据库（与 user-service 共享同一 MySQL）
+    DATABASE_URL: str = "mysql+pymysql://lumina:lumina_secure_password@localhost:3306/lumina"
 
     # JWT（与 user-service 共享密钥，用于跨服务鉴权）
     JWT_SECRET_KEY: str = "change_me_jwt_secret_key"
