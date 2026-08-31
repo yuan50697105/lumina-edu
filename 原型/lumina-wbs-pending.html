@@ -119,16 +119,16 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Pending Work WBS</small></div>
     </div>
-    <div class="doc-type">Work Breakdown Structure · v1.0</div>
+    <div class="doc-type">Work Breakdown Structure · v1.1</div>
     <h1>
       <span class="hl">未实现内容</span>落地<br/>
       <em>工作分解结构</em>
     </h1>
-    <div class="subtitle">承接上线 WBS v1.1 · M4 正式上线 · 收口认证 · V1.1 演进 · 32 任务包</div>
+    <div class="subtitle">承接上线 WBS v1.1 · M4 正式上线 · 收口认证 · V1.1 演进 · 33 任务包</div>
   </div>
   <div class="meta">
     文档编号：WBS-LUMINA-2026-002<br/>
-    版本号：v1.0 · 2026-08-31<br/>
+    版本号：v1.1 · 2026-08-31<br/>
     时间轴：T0（生产环境就绪）起约 8 周 · 演进滚动<br/>
     依据：上线 WBS v1.1 · 开发进度.md（M1-M3 达成）· PRD v1.3 · QA v1.2
   </div>
@@ -137,7 +137,7 @@
 <!-- ============ STATS ============ -->
 <div class="stats">
   <div class="stat"><div class="val hl">4</div><div class="lbl">阶段</div></div>
-  <div class="stat"><div class="val hl">32</div><div class="lbl">任务包</div></div>
+  <div class="stat"><div class="val hl">33</div><div class="lbl">任务包</div></div>
   <div class="stat"><div class="val hl">3</div><div class="lbl">里程碑</div></div>
   <div class="stat"><div class="val hl">T0+8w</div><div class="lbl">落地周期</div></div>
 </div>
@@ -213,8 +213,9 @@
       <tr><td>AI 真批阅（真实模型）</td><td>ai-grade 模块（容错解析 / 置信度落库）· 网关适配器 3 套协议</td><td>外部模型 API key</td><td>C-02</td></tr>
       <tr><td>三角色培训 + 材料</td><td><code>lumina-userguide.html</code> v1.1 · <code>lumina-operations.html</code> v1.2</td><td>业务方排期</td><td>C-03 / C-04</td></tr>
       <tr><td><b>移动端</b></td><td>typecheck / 真机冒烟</td><td><code>服务/mobile-app/</code>（Expo SDK 52 骨架）</td><td>RN 工具链环境</td><td>C-05</td></tr>
-      <tr><td rowspan="2"><b>V1.1 演进</b></td><td>PRD P0/P1 功能缺口</td><td>单体 10 模块地基 · 原型 40 文件</td><td>M4 后迭代排期</td><td>D-01 ~ D-06</td></tr>
-      <tr><td>AI 基础设施 / 规模运营</td><td>AI 网关可扩展（openai/anthropic/gemini）</td><td>模型成本 · 用户量阈值</td><td>D-07 ~ D-09</td></tr>
+      <tr><td rowspan="3"><b>V1.1 演进</b></td><td>PRD P0/P1 功能缺口</td><td>单体 10 模块地基 · 原型 40 文件</td><td>M4 后迭代排期</td><td>D-01 ~ D-06</td></tr>
+      <tr><td>AI 基础设施 / 规模运营</td><td>AI 网关可扩展（openai/anthropic/gemini）</td><td>模型成本 · 用户量阈值</td><td>D-06 ~ D-08</td></tr>
+      <tr><td>平台覆盖 / 国产化</td><td>鸿蒙（HarmonyOS）适配评估</td><td>校园信创诉求 · 移动端 Expo RN 现状</td><td>D-09</td></tr>
     </tbody>
   </table>
 
@@ -228,7 +229,7 @@
 <section class="section" id="s3">
   <div class="section-header">
     <h2>03 · WBS 详解 <em>Detailed WBS</em></h2>
-    <div class="num-tag">A · B · C · D — 32 Work Packages</div>
+    <div class="num-tag">A · B · C · D — 33 Work Packages</div>
   </div>
 
   <h3 class="sub">3.1 阶段 A：生产环境就绪 <em>· T0 前置 · 5-7 工作日</em></h3>
@@ -292,6 +293,7 @@
       <tr><td><b>D-06</b></td><td>AI 基础设施：RAG 向量检索 / Agent 编排 / MCP / 内容审核</td><td>18-20 · 规划中</td><td><span class="tag high">P1</span></td><td>Milvus / AgentScope / 知网 AIGC</td></tr>
       <tr><td><b>D-07</b></td><td>运营演进：独立监控 + CI/CD</td><td>—</td><td><span class="tag medium">P2</span></td><td>Prometheus + Grafana · GitHub Actions</td></tr>
       <tr><td><b>D-08</b></td><td>规模演进：K8s 集群</td><td>—</td><td><span class="tag medium">P2</span></td><td>触发条件：用户量 > 5000</td></tr>
+      <tr><td><b>D-09</b></td><td>鸿蒙（HarmonyOS）适配评估 + 移动端平台矩阵</td><td>—</td><td><span class="tag medium">P2</span></td><td><b>Expo 官方不支持鸿蒙</b>（现状移动端仅 iOS/Android）；评估 RNOH（bare RN 迁移）+ 依赖替换（expo-video / screens / async-storage 等）+ 鸿蒙真机验证；产出兼容矩阵结论，不阻塞 M4 · 校园信创诉求触发评审</td></tr>
     </tbody>
   </table>
 
@@ -403,7 +405,7 @@
     <div class="gantt-row">
       <div class="gantt-label sub">P1 功能 · AI 基础设施 · 运营</div>
       <div class="gantt-bar-container">
-        <div class="gantt-bar phase-d" style="left:62%; width:36%; opacity:0.75;">D-01..08</div>
+        <div class="gantt-bar phase-d" style="left:62%; width:36%; opacity:0.75;">D-01..09</div>
       </div>
     </div>
 
@@ -514,7 +516,7 @@
   <h3 class="sub">7.3 V1.1 演进验收（D 阶段）</h3>
   <ul>
     <li>每个功能模块以 <b>PRD v1.3 对应验收标准</b>为准，DoD = 功能可用 + 单测回归全绿 + 埋点事件合规（<code>events_catalog.py</code>）</li>
-    <li>直播（D-01）<b>已实施</b>（REST 16 端点 + 本地 HLS 已跑通）；剩余事项：生产流媒体/CDN 选型评审 + 移动端直播对齐</li>
+    <li>直播（D-01）<b>已实施</b>（REST 16 端点 + 本地 HLS 已跑通）；剩余事项：生产流媒体/CDN 选型评审 + 移动端直播对齐 + 鸿蒙适配评估（D-09）</li>
     <li>AI 基础设施（D-06）按版本推进，RAG / Agent 编排与现有网关<code>/gateway/completions</code> 协议兼容</li>
   </ul>
 
@@ -527,7 +529,7 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Pending WBS</div>
-  <div>v1.0 · 承接 launch-wbs v1.1 · M1-M3 达成基线</div>
+  <div>v1.1 · 承接 launch-wbs v1.1 · M1-M3 达成基线</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">WBS-LUMINA-2026-002</div>
 </footer>
 

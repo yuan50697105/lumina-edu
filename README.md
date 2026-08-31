@@ -33,7 +33,7 @@ edu/
 │   ├── lumina-testcases.html          # 📋 测试用例文档 v1.0
 │   ├── lumina-userguide.html          # 📋 用户手册 v1.0
 │   ├── lumina-launch-wbs.html         # 📋 上线 WBS v1.0
-│   ├── lumina-wbs-pending.html        # 📋 未实现内容落地 WBS v1.0
+│   ├── lumina-wbs-pending.html        # 📋 未实现内容落地 WBS v1.1
 │   │
 │   ├── APP/phone/      (8 文件)       # 📱 手机 APP 原型
 │   ├── APP/tablet/     (6 文件)       # 📲 平板 APP 原型
@@ -70,7 +70,7 @@ edu/
 | **界面页面** | 160+ 个 |
 | **设计表面** | 6 个（学生/教师 × 移动/Web/桌面）|
 | **后端模块** | 10 个业务模块（用户/课程/作业/成绩/直播/AI 网关·对话·批阅/埋点/日志）|
-| **文档** | PRD v1.3 + TDD v1.2 + API v1.3 + DB v1.3 + OPS v1.2 + QA v1.2 + UG v1.1 + WBS v1.1 + WBS-P v1.0 + 索引 |
+| **文档** | PRD v1.3 + TDD v1.2 + API v1.3 + DB v1.3 + OPS v1.2 + QA v1.2 + UG v1.1 + WBS v1.1 + WBS-P v1.1 + 索引 |
 | **API 接口** | 60 个端点（10 模块 · JWT · SSE 流式 · 直播课堂）|
 | **数据表** | 22 张（单体应用）|
 
@@ -88,7 +88,7 @@ edu/
 | 📋 **QA v1.2** | 测试用例文档，10 章 · 81 用例 | `lumina-testcases.html` |
 | 📋 **UG v1.1** | 用户手册，10 章 · 3 角色 | `lumina-userguide.html` |
 | 📋 **WBS v1.1** | 上线工作分解结构，10 周轻量方案 | `lumina-launch-wbs.html` |
-| 📋 **WBS-P v1.0** | 未实现内容落地 WBS：M4 上线 + 收口认证 + V1.1 演进 | `lumina-wbs-pending.html` |
+| 📋 **WBS-P v1.1** | 未实现内容落地 WBS：M4 上线 + 收口认证 + V1.1 演进 | `lumina-wbs-pending.html` |
 
 ## 🎨 设计系统
 
@@ -241,7 +241,7 @@ cp .env.example .env
 | **OPS v1.2** | 2026-08-31 | 运维手册重写为单体 Docker Compose 4 服务 |
 | **QA v1.2** | 2026-08-31 | 单测基线 81 用例（bcrypt 修复后 4 跳过转通过） |
 | **WBS v1.1** | 2026-08-26 | 上线计划轻量方案更新；阶段三/四执行资产就绪（本机 MySQL 实测；真实上线待 Docker 生产环境）|
-| **WBS-P v1.0** | 2026-08-31 | 未实现内容落地规划：M4 上线 + 收口认证 + V1.1 演进（32 任务包 · T0 相对周轴）|
+| **WBS-P v1.1** | 2026-08-31 | 未实现内容落地规划：M4 上线 + 收口认证 + V1.1 演进（33 任务包 · T0 相对周轴）|
 
 ## 📄 许可证
 

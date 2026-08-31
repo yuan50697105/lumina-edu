@@ -144,6 +144,17 @@ cd 服务/mobile-app && npm install && npx expo start
 - 开播真实画面：先起 `部署/stream/start_demo_stream.bat`（HLS 同源 `/media` 反代已配），再进「直播演示间」开播
 - HLS 播放：`expo-video`（原生播放器）；仅房间 `status==='live'` 时拉流，`mock://` 为未接媒体服务器占位
 
+### 🆕 平台支持矩阵（含鸿蒙）
+
+| 端 | 现状 | 说明 |
+|----|------|------|
+| iOS / Android | ✅ 已实现 | `服务/mobile-app/`（React Native / Expo SDK 52） |
+| Web | ✅ 已实现 | `服务/web-frontend/`（React 18 + Vite） |
+| 桌面 | 🟡 原型 | `原型/PC/`（Electron 方案规划中，TDD §3.2） |
+| 鸿蒙 HarmonyOS | ⏳ 演进评估 | **Expo 官方不支持鸿蒙**；WBS D-09 立项评估 RNOH（bare RN 迁移）+ 依赖替换，不阻塞 M4，校园信创诉求触发 |
+
+> 详见 `原型/lumina-wbs-pending.html` v1.1 D-09 任务包。
+
 ## Design System
 
 ### Color Palette
