@@ -220,3 +220,95 @@ export interface LiveQuizResult {
   correct_count?: number | null
   correct_rate?: number | null
 }
+
+// ─── 协作工具（V1.1 · D-02）───
+export interface GroupMember {
+  id: string
+  name: string
+}
+
+export interface Group {
+  id: string
+  course_id: string
+  course_title?: string | null
+  name: string
+  description?: string | null
+  leader_id: string
+  leader_name?: string | null
+  member_count: number
+  project_count: number
+  created_at: string
+  members: GroupMember[]
+  is_member: boolean
+}
+
+export type ProjectStatus = 'not_started' | 'in_progress' | 'done'
+
+export interface CollabProject {
+  id: string
+  group_id: string
+  course_id: string
+  title: string
+  description?: string | null
+  status: ProjectStatus
+  deadline?: string | null
+  created_by: string
+  created_at: string
+}
+
+export interface KanbanCard {
+  id: string
+  column_id: string
+  title: string
+  description?: string | null
+  assignee_id?: string | null
+  assignee_name?: string | null
+  order_num: number
+  due_date?: string | null
+  created_at: string
+}
+
+export interface KanbanColumn {
+  id: string
+  project_id: string
+  title: string
+  order_num: number
+  cards: KanbanCard[]
+}
+
+export interface Board {
+  project_id: string
+  columns: KanbanColumn[]
+}
+
+export interface SharedFile {
+  id: string
+  group_id: string
+  filename: string
+  size: number
+  content_type: string
+  uploader_id: string
+  uploader_name?: string | null
+  created_at: string
+}
+
+export interface Reply {
+  id: string
+  topic_id: string
+  author_id: string
+  author_name?: string | null
+  content: string
+  created_at: string
+}
+
+export interface Topic {
+  id: string
+  group_id: string
+  author_id: string
+  author_name?: string | null
+  title: string
+  content?: string | null
+  reply_count: number
+  created_at: string
+  replies?: Reply[]
+}

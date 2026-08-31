@@ -89,6 +89,13 @@ body {
 }
 .field textarea { resize: vertical; }
 
+/* 协作/通用裸输入控件（.field 外的 input/select/textarea） */
+.input {
+  border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px;
+  font-size: 14px; font-family: inherit; background: #fff; color: var(--ink);
+}
+.input:focus { outline: 2px solid var(--primary-soft); border-color: var(--primary); }
+
 .error { color: var(--warn); font-size: 14px; }
 .muted { color: var(--muted); font-size: 14px; }
 .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; }

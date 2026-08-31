@@ -716,7 +716,7 @@ class GroupUpdate(BaseModel):
 
 class GroupMemberOut(BaseModel):
     id: uuid.UUID
-    name: str
+    name: Optional[str] = None
 
     class Config:
         from_attributes = True

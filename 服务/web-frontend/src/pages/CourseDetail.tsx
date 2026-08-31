@@ -115,6 +115,15 @@ export default function CourseDetail() {
         {liveRooms.length === 0 && <p className="muted">暂无直播安排。</p>}
       </div>
 
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 18 }}>
+        <h2 className="section-title" style={{ marginBottom: 0 }}>
+          协作小组
+        </h2>
+        <button className="btn ghost tiny" onClick={() => navigate(`/groups?course=${id}`)} data-track="collab-open">
+          进入协作 →
+        </button>
+      </div>
+
       <h2 className="section-title">课程章节（{chapters.length}）</h2>
       <div className="chapter-list">
         {chapters.map((ch) => (

@@ -36,7 +36,14 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h1 className="page-title">首页</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 className="page-title" style={{ marginBottom: 0 }}>
+          首页
+        </h1>
+        <Link to="/groups" className="btn ghost tiny">
+          协作小组
+        </Link>
+      </div>
 
       <section>
         <h2 className="section-title">我的课程（{enrolled.length}）</h2>
