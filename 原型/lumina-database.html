@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 数据库设计文档 v1.5</title>
+<title>Lumina 墨光 · 数据库设计文档 v1.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -120,7 +120,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Database Design</small></div>
     </div>
-    <div class="doc-type">Database Design · v1.5</div>
+    <div class="doc-type">Database Design · v1.6</div>
     <h1>
       <span class="hl">数据</span>库<br/>
       <em>设计文档</em>
@@ -134,7 +134,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.5 · MySQL 9.7 · 31 表 · 12 模块</span>
+      <span class="value">v1.6 · MySQL 9.7 · 35 表 · 13 模块</span>
     </div>
     <div class="row">
       <span class="label">数据库</span>
@@ -153,8 +153,8 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">31</div><div class="lbl">数据表</div></div>
-  <div class="stat"><div class="val hl">12</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val hl">35</div><div class="lbl">数据表</div></div>
+  <div class="stat"><div class="val hl">13</div><div class="lbl">模块</div></div>
   <div class="stat"><div class="val">3</div><div class="lbl">分区策略</div></div>
   <div class="stat"><div class="val">1</div><div class="lbl">数据库引擎</div></div>
   <div class="stat"><div class="val">14+</div><div class="lbl">索引策略</div></div>
@@ -171,10 +171,11 @@
     <a href="#s5"><span class="num">05</span>作业与成绩</a>
     <a href="#s6"><span class="num">06</span>直播模块</a>
     <a href="#s7"><span class="num">07</span>协作模块</a>
-    <a href="#s8"><span class="num">08</span>AI 模块</a>
-    <a href="#s9"><span class="num">09</span>分区策略</a>
-    <a href="#s10"><span class="num">10</span>索引策略</a>
-    <a href="#s11"><span class="num">11</span>数据迁移</a>
+    <a href="#s8"><span class="num">08</span>题库与考试</a>
+    <a href="#s9"><span class="num">09</span>AI 模块</a>
+    <a href="#s10"><span class="num">10</span>分区策略</a>
+    <a href="#s11"><span class="num">11</span>索引策略</a>
+    <a href="#s12"><span class="num">12</span>数据迁移</a>
   </div>
 </nav>
 
@@ -193,7 +194,7 @@
       <tr><td><b>本地 uploads/</b></td><td>临时上传目录（替代对象存储）</td><td>—</td><td>单体本地目录</td></tr>
     </tbody>
   </table>
-  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：单体架构仅依赖 MySQL 9.7 单库，业务 / AI / 日志数据统一落 MySQL（InnoDB · utf8mb4）；表由 <code>Base.metadata.create_all</code> 自动创建（development 模式），生产初始化脚本见 <code>部署/config/mysql/init.sql</code>。缓存 / 消息队列 / 对象存储等中间件已从单体移除。单体包含 10 个业务模块：user / course / assignment / grade / live / ai_gateway / ai_chat / ai_grade / analytics / logs。</p>
+  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：单体架构仅依赖 MySQL 9.7 单库，业务 / AI / 日志数据统一落 MySQL（InnoDB · utf8mb4）；表由 <code>Base.metadata.create_all</code> 自动创建（development 模式），生产初始化脚本见 <code>部署/config/mysql/init.sql</code>。缓存 / 消息队列 / 对象存储等中间件已从单体移除。单体包含 13 个业务模块：user / course / assignment / grade / live / collab / notif / exam / ai_gateway / ai_chat / ai_grade / analytics / logs。</p>
 
   <h3 class="sub">1.2 数据规模预估</h3>
   <table>
@@ -331,6 +332,25 @@
       <span class="er-rel">1 ── N</span>
       <span class="er-entity">kanban_cards</span>
     </div>
+    <div style="margin-bottom:16px;">
+      <span class="er-entity core">courses</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">exam_questions</span>
+      <span class="er-rel">（题库 D-04）</span>
+    </div>
+    <div style="margin-bottom:16px;">
+      <span class="er-entity core">courses</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">exam_papers</span>
+      <span class="er-rel">（试卷 D-04）</span>
+    </div>
+    <div>
+      <span class="er-entity">exam_papers</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">exam_paper_questions</span>
+      <span class="er-rel">1 ── N</span>
+      <span class="er-entity">exam_attempts</span>
+    </div>
   </div>
 
   <h3 class="sub">2.2 关系说明</h3>
@@ -350,6 +370,8 @@
       <tr><td>项目 → 看板列 → 卡片</td><td>1:N → 1:N</td><td>—</td><td>列含 order_num，卡片可按列拖拽（column_id + order_num）</td></tr>
       <tr><td>小组 → 共享文件</td><td>1:N</td><td>—</td><td>上传文件元数据存 <code>shared_files</code>，文件本体本地 uploads</td></tr>
       <tr><td>小组 → 讨论主题 → 回复</td><td>1:N → 1:N</td><td>—</td><td>组内话题与回复</td></tr>
+      <tr><td>课程 → 题目 → 试卷 → 试题</td><td>1:N</td><td>—</td><td>题库 <code>exam_questions</code> 挂课程，试卷 <code>exam_papers</code> 挂课程，试卷-题目经 <code>exam_paper_questions</code>（order_num + 分值覆盖，<code>uq_paper_question</code> 去重，D-04）</td></tr>
+      <tr><td>试卷 → 答卷</td><td>1:N</td><td>—</td><td>学生每次试卷一份答卷 <code>exam_attempts</code>（<code>uq_exam_attempt</code>：每生每卷仅一份）</td></tr>
     </tbody>
   </table>
 </section>
@@ -951,10 +973,121 @@
   </div>
 </section>
 
-<!-- ============ 08 · AI 模块 ============ -->
+<!-- ============ 08 · 题库与考试 ============ -->
 <section class="section" id="s8">
   <div class="section-header">
-    <h2>08 · AI 模块 <em>AI-Powered</em></h2>
+    <h2>08 · 题库与考试 <em>Question Bank & Exams</em></h2>
+    <div class="num-tag">4 tables · D-04</div>
+  </div>
+
+  <h3 class="sub">8.1 模块概览</h3>
+  <p style="font-size:13px; color:var(--inkwell-2);"><b>D-04</b> 新增题库与考试模块 <code>exam</code>：课程题库 CRUD → 试卷编排（时序 + 时长 + 分值覆盖）→ 智能组卷 → 学生作答（自动评分客观题 / 人工评主观题）→ 统计。四张表实现「题库 / 试卷 / 试卷-题目 / 答卷」分层，均通过 <code>exam_questions.course_id</code>、<code>exam_papers.course_id</code> 收敛到课程。JSON 列（<code>options</code> / <code>answer</code> / <code>tags</code> / <code>answers</code>）由 <code>CAST(:x AS JSON)</code> 写入，与协作模块一致。</p>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">exam_questions</span>
+      <span class="table-desc">题目表（题库）</span>
+      <span style="margin-left:auto; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">idx: course / qtype / difficulty</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键（GUID CHAR(36)）</td></tr>
+          <tr><td><code>course_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> course</td><td>所属课程（级联删除）</td></tr>
+          <tr><td><code>chapter_id</code></td><td>UUID</td><td>FK chapter · NULL</td><td>关联章节（可选）</td></tr>
+          <tr><td><code>qtype</code></td><td>VARCHAR(20)</td><td><span class="tag nn">NOT NULL</span></td><td><code>single</code> / <code>multiple</code> / <code>true_false</code> / <code>short_answer</code></td></tr>
+          <tr><td><code>title</code></td><td>TEXT</td><td><span class="tag nn">NOT NULL</span></td><td>题干</td></tr>
+          <tr><td><code>options</code></td><td>JSON</td><td></td><td>客观题选项数组</td></tr>
+          <tr><td><code>answer</code></td><td>JSON</td><td></td><td>正确答案（主观题存参考答案文本）</td></tr>
+          <tr><td><code>score</code></td><td>INT</td><td>默认 5</td><td>题库默认分值</td></tr>
+          <tr><td><code>difficulty</code></td><td>VARCHAR(10)</td><td>默认 medium</td><td><code>easy</code> / <code>medium</code> / <code>hard</code></td></tr>
+          <tr><td><code>tags</code></td><td>JSON</td><td></td><td>标签数组（智能组卷过滤）</td></tr>
+          <tr><td><code>created_by</code></td><td>UUID</td><td></td><td>录入教师</td></tr>
+          <tr><td><code>created_at / updated_at</code></td><td>TIMESTAMP</td><td></td><td>创建 / 更新时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">exam_papers</span>
+      <span class="table-desc">试卷表</span>
+      <span style="margin-left:auto; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">idx: course / status</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>course_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> course</td><td>所属课程（级联删除）</td></tr>
+          <tr><td><code>title</code></td><td>VARCHAR(200)</td><td><span class="tag nn">NOT NULL</span></td><td>试卷标题</td></tr>
+          <tr><td><code>description</code></td><td>TEXT</td><td></td><td>考试说明</td></tr>
+          <tr><td><code>start_at / end_at</code></td><td>DATETIME</td><td>NULL</td><td>考试时间窗（NULL 不限）</td></tr>
+          <tr><td><code>duration_minutes</code></td><td>INT</td><td>默认 60</td><td>限时分钟数</td></tr>
+          <tr><td><code>total_score</code></td><td>INT</td><td></td><td>总分（由题目分值汇总）</td></tr>
+          <tr><td><code>status</code></td><td>VARCHAR(10)</td><td>默认 draft</td><td><code>draft</code> / <code>published</code> / <code>closed</code></td></tr>
+          <tr><td><code>created_by</code></td><td>UUID</td><td></td><td>命题教师</td></tr>
+          <tr><td><code>created_at / updated_at</code></td><td>TIMESTAMP</td><td></td><td>创建 / 更新时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">exam_paper_questions</span>
+      <span class="table-desc">试卷-题目关联（编排 + 分值覆盖）</span>
+      <span style="margin-left:auto; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">UNIQUE uq_paper_question</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>paper_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> paper（级联删除）</td><td>所属试卷</td></tr>
+          <tr><td><code>question_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> question</td><td>题目</td></tr>
+          <tr><td><code>order_num</code></td><td>INT</td><td></td><td>试卷内顺序</td></tr>
+          <tr><td><code>score</code></td><td>INT</td><td></td><td>本卷分值（覆盖题库默认）</td></tr>
+        </tbody>
+      </table>
+      <pre style="font-size:11px; margin-top:8px;"><span class="keyword">CREATE UNIQUE INDEX</span> uq_paper_question <span class="keyword">ON</span> exam_paper_questions(paper_id, question_id);</pre>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">exam_attempts</span>
+      <span class="table-desc">答卷表（一次考试一份）</span>
+      <span style="margin-left:auto; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">UNIQUE uq_exam_attempt</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>UUID</td><td><span class="tag pk">PK</span></td><td>主键</td></tr>
+          <tr><td><code>paper_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> paper（级联删除）</td><td>所属试卷</td></tr>
+          <tr><td><code>student_id</code></td><td>UUID</td><td><span class="tag fk">FK</span> users</td><td>作答学生</td></tr>
+          <tr><td><code>started_at</code></td><td>TIMESTAMP</td><td></td><td>开始时间</td></tr>
+          <tr><td><code>submitted_at</code></td><td>TIMESTAMP</td><td>NULL</td><td>提交时间（未提交为进行中）</td></tr>
+          <tr><td><code>status</code></td><td>VARCHAR(10)</td><td>默认 in_progress</td><td><code>in_progress</code> / <code>submitted</code></td></tr>
+          <tr><td><code>answers</code></td><td>JSON</td><td></td><td>作答明细（question_id / answer / correct / score / manual）</td></tr>
+          <tr><td><code>auto_score</code></td><td>INT</td><td>默认 0</td><td>客观题自动评分</td></tr>
+          <tr><td><code>manual_score</code></td><td>INT</td><td>默认 0</td><td>主观题人工评分</td></tr>
+          <tr><td><code>total_score</code></td><td>INT</td><td>默认 0</td><td>总分 = auto + manual</td></tr>
+          <tr><td><code>updated_at</code></td><td>TIMESTAMP</td><td></td><td>最后更新</td></tr>
+        </tbody>
+      </table>
+      <pre style="font-size:11px; margin-top:8px;"><span class="keyword">CREATE UNIQUE INDEX</span> uq_exam_attempt <span class="keyword">ON</span> exam_attempts(paper_id, student_id);</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 09 · AI 模块 ============ -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <h2>09 · AI 模块 <em>AI-Powered</em></h2>
     <div class="num-tag">5 tables · 知识存 PG</div>
   </div>
 
@@ -1092,10 +1225,10 @@
   </div>
 </section>
 
-<!-- ============ 09 · 分区 ============ -->
-<section class="section" id="s9">
+<!-- ============ 10 · 分区 ============ -->
+<section class="section" id="s10">
   <div class="section-header">
-    <h2>09 · 分区策略 <em>Partitioning</em></h2>
+    <h2>10 · 分区策略 <em>Partitioning</em></h2>
     <div class="num-tag">MySQL 原生分区</div>
   </div>
 
@@ -1140,10 +1273,10 @@
   </table>
 </section>
 
-<!-- ============ 10 · 索引 ============ -->
-<section class="section" id="s10">
+<!-- ============ 11 · 索引 ============ -->
+<section class="section" id="s11">
   <div class="section-header">
-    <h2>10 · 索引策略 <em>Indexing</em></h2>
+    <h2>11 · 索引策略 <em>Indexing</em></h2>
     <div class="num-tag">Performance</div>
   </div>
 
@@ -1202,10 +1335,10 @@
 <span class="keyword">GROUP BY</span> a.id;</pre>
 </section>
 
-<!-- ============ 11 · 迁移 ============ -->
-<section class="section" id="s11">
+<!-- ============ 12 · 迁移 ============ -->
+<section class="section" id="s12">
   <div class="section-header">
-    <h2>11 · 数据迁移 <em>Migration</em></h2>
+    <h2>12 · 数据迁移 <em>Migration</em></h2>
     <div class="num-tag">Version Control</div>
   </div>
 
@@ -1266,7 +1399,7 @@ alembic/
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Database Design</div>
-  <div>v1.5 · 31 表 · 12 模块 · MySQL 9.7</div>
+  <div>v1.6 · 35 表 · 13 模块 · MySQL 9.7</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">DB-LUMINA-2026-001</div>
 </footer>
 

@@ -49,7 +49,7 @@ edu/
 │   └── README.md                     # 部署使用说明
 │
 ├── 服务/                             # 单体应用 + 前端
-│   ├── lumina-app/                   # ✅ 单体 FastAPI（12 模块 · 82 端点 · 31 表）
+│   ├── lumina-app/                   # ✅ 单体 FastAPI（13 模块 · 98 端点 · 35 表）
 │   ├── web-frontend/                 # ✅ Web 前端（React 18 + TS + Vite）
 │   └── mobile-app/                   # ✅ 移动端前端（React Native / Expo）
 │
@@ -69,10 +69,10 @@ edu/
 | **平台目录** | 5 个（phone/tablet/Web/PC/AI）|
 | **界面页面** | 160+ 个 |
 | **设计表面** | 6 个（学生/教师 × 移动/Web/桌面）|
-| **后端模块** | 12 个业务模块（用户/课程/作业/成绩/直播/协作/通知/AI 网关·对话·批阅/埋点/日志）|
-| **文档** | PRD v1.3 + TDD v1.4 + API v1.5 + DB v1.5 + OPS v1.4 + QA v1.4 + UG v1.1 + WBS v1.1 + WBS-P v1.2 + 索引 |
-| **API 接口** | 82 个端点（12 模块 · JWT · SSE 流式 · 直播课堂 · 协作工具 · 通知中心）|
-| **数据表** | 31 张（单体应用）|
+| **后端模块** | 13 个业务模块（用户/课程/作业/成绩/直播/协作/通知/题库与考试/AI 网关·对话·批阅/埋点/日志）|
+| **文档** | PRD v1.3 + TDD v1.5 + API v1.6 + DB v1.6 + OPS v1.5 + QA v1.5 + UG v1.1 + WBS v1.1 + WBS-P v1.3 + 索引 |
+| **API 接口** | 98 个端点（13 模块 · JWT · SSE 流式 · 直播课堂 · 协作工具 · 通知中心 · 题库与考试）|
+| **数据表** | 35 张（单体应用）|
 
 ## 📖 文档体系
 
@@ -80,15 +80,15 @@ edu/
 |------|------|------|
 | 📋 **设计索引** | 原型导航入口，按平台分类 | `lumina-00-index.html` |
 | 📋 **PRD v1.3** | 产品需求文档，18 章 | `lumina-prd.html` |
-| 📋 **TDD v1.4** | 技术设计文档，18 章 | `lumina-tdd.html` |
-| 📋 **API v1.5** | API 接口文档，12 章 · 82 端点 | `lumina-api.html` |
-| 📋 **OpenAPI 3.1** | 机器可读 API 规范（YAML · 65 路径） | `lumina-api-openapi.yaml` |
-| 📋 **DB v1.5** | 数据库设计文档，11 章 · 31 表 | `lumina-database.html` |
-| 📋 **OPS v1.4** | 部署运维手册，10 章 | `lumina-operations.html` |
-| 📋 **QA v1.4** | 测试用例文档，10 章 · 138 用例 | `lumina-testcases.html` |
+| 📋 **TDD v1.5** | 技术设计文档，18 章 | `lumina-tdd.html` |
+| 📋 **API v1.6** | API 接口文档，13 章 · 98 端点 | `lumina-api.html` |
+| 📋 **OpenAPI 3.1** | 机器可读 API 规范（YAML · 81 路径） | `lumina-api-openapi.yaml` |
+| 📋 **DB v1.6** | 数据库设计文档，12 章 · 35 表 | `lumina-database.html` |
+| 📋 **OPS v1.5** | 部署运维手册，10 章 | `lumina-operations.html` |
+| 📋 **QA v1.5** | 测试用例文档，10 章 · 173 用例 | `lumina-testcases.html` |
 | 📋 **UG v1.1** | 用户手册，10 章 · 3 角色 | `lumina-userguide.html` |
 | 📋 **WBS v1.1** | 上线工作分解结构，10 周轻量方案 | `lumina-launch-wbs.html` |
-| 📋 **WBS-P v1.2** | 未实现内容落地 WBS：M4 上线 + 收口认证 + V1.1 演进 | `lumina-wbs-pending.html` |
+| 📋 **WBS-P v1.3** | 未实现内容落地 WBS：M4 上线 + 收口认证 + V1.1 演进 | `lumina-wbs-pending.html` |
 
 ## 🎨 设计系统
 
@@ -172,7 +172,7 @@ python scripts/yuque-sync.py
 
 ### 快速部署（单体应用 · 轻量方案）
 
-单体架构：11 个业务模块合并为 1 个 `lumina-app` API 容器，Docker Compose 一键部署，无需 K8s：
+单体架构：13 个业务模块合并为 1 个 `lumina-app` API 容器，Docker Compose 一键部署，无需 K8s：
 
 ```bash
 # 1. 进入部署目录
@@ -191,7 +191,7 @@ cp .env.example .env
 ./scripts/monitor.sh
 ```
 
-已编排服务：MySQL 9.7 · Redis · lumina-app 单体（:8080 · 12 模块 · 82 端点）· Nginx(80/443)
+已编排服务：MySQL 9.7 · Redis · lumina-app 单体（:8080 · 13 模块 · 98 端点）· Nginx(80/443)
 
 详见 `部署/README.md`
 
@@ -253,6 +253,12 @@ cp .env.example .env
 | **OPS v1.4** | 2026-08-31 | 账户补全快照 · 12 模块 · 31 表 |
 | **QA v1.4** | 2026-08-31 | 单测 138 用例（通知 +13 · 全部通过）· 注册/通知用例 TC-USER-005 / TC-NOTIF-001 |
 | **WBS-P v1.2** | 2026-08-31 | D-03 账户补全已实施 · 后续编号顺延 D-04~D-10 |
+| **TDD v1.5** | 2026-09-01 | 题库与考试同步（D-04）· 13 模块 · 98 端点 · 35 表 |
+| **API v1.6** | 2026-09-01 | 题库与考试章节（08 · 22 端点）· OpenAPI 81 paths · 102 ops · exam 12 schemas |
+| **DB v1.6** | 2026-09-01 | exam 4 表章节（08）· 35 表 · 13 模块 · 12 章结构（重编号） |
+| **OPS v1.5** | 2026-09-01 | 题库与考试快照 · 13 模块 · 35 表 |
+| **QA v1.5** | 2026-09-01 | 单测 173 用例（考试 +35 · 全部通过）· 考试冒烟 28/28（smoke_exam.py） |
+| **WBS-P v1.3** | 2026-09-01 | D-04 题库与考试已实施 · 后续 P0 缺口顺延 D-05~D-10 |
 
 ## 📄 许可证
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · API 接口文档 v1.5</title>
+<title>Lumina 墨光 · API 接口文档 v1.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -137,7 +137,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>API Reference</small></div>
     </div>
-    <div class="doc-type">API Reference · v1.5</div>
+    <div class="doc-type">API Reference · v1.6</div>
     <h1>
       <span class="hl">API</span> 接口<br/>
       <em>文档</em>
@@ -151,7 +151,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.5 · 生产基准 · MySQL 9.7</span>
+      <span class="value">v1.6 · 生产基准 · MySQL 9.7</span>
     </div>
     <div class="row">
       <span class="label">基础路径</span>
@@ -170,10 +170,10 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">12</div><div class="lbl">模块</div></div>
-  <div class="stat"><div class="val hl">82</div><div class="lbl">接口数</div></div>
+  <div class="stat"><div class="val hl">13</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val hl">98</div><div class="lbl">接口数</div></div>
   <div class="stat"><div class="val">31</div><div class="lbl">协作+通知端点</div></div>
-  <div class="stat"><div class="val">16</div><div class="lbl">直播端点</div></div>
+  <div class="stat"><div class="val">22</div><div class="lbl">考试端点</div></div>
   <div class="stat"><div class="val">JWT</div><div class="lbl">认证方式</div></div>
   <div class="stat"><div class="val">RFC 7807</div><div class="lbl">错误格式</div></div>
 </div>
@@ -189,11 +189,12 @@
     <a href="#s5"><span class="num">05</span>作业模块</a>
     <a href="#s6"><span class="num">06</span>成绩模块</a>
     <a href="#s7"><span class="num">07</span>直播模块</a>
-    <a href="#s8"><span class="num">08</span>协作模块</a>
-    <a href="#s9"><span class="num">09</span>AI 模块</a>
-    <a href="#s10"><span class="num">10</span>错误码</a>
-    <a href="#s11"><span class="num">11</span>限流策略</a>
-    <a href="#s12"><span class="num">12</span>SDK · 示例代码</a>
+    <a href="#s8"><span class="num">08</span>题库与考试</a>
+    <a href="#s9"><span class="num">09</span>协作模块</a>
+    <a href="#s10"><span class="num">10</span>AI 模块</a>
+    <a href="#s11"><span class="num">11</span>错误码</a>
+    <a href="#s12"><span class="num">12</span>限流策略</a>
+    <a href="#s13"><span class="num">13</span>SDK · 示例代码</a>
   </div>
 </nav>
 
@@ -903,10 +904,98 @@
   </div>
 </section>
 
-<!-- ============ 08 · 协作 ============ -->
+<!-- ============ 08 · 题库与考试 ============ -->
 <section class="section" id="s8">
   <div class="section-header">
-    <h2>08 · 协作模块 <em>Collaboration</em></h2>
+    <h2>08 · 题库与考试 <em>Exam</em></h2>
+    <div class="num-tag">22 endpoints · 题库 / 试卷（组卷）/ 在线考试 / 统计评分</div>
+  </div>
+
+  <div class="info note">
+    <div class="label">V1.1 · D-04 已落地（课程 → 题库 → 试卷 → 考试作答）</div>
+    关系：<code>exam_questions</code>（题型/难度/标签/客观题 options+answer）→ <code>exam_papers</code> → 组卷明细 <code>exam_paper_questions</code>（单题分值可覆盖）→ 作答 <code>exam_attempts</code>（每生每卷一次，客观题自动评分 + 主观题人工补分）。
+    权限：题库/试卷管理 = 授课教师/管理员；学生须已选课且卷已发布方可参加（未选课 403、未发布 403、重复提交 409）；试卷详情学生侧不返回答案。
+  </div>
+
+  <h3 class="sub">8.1 题库 · Questions</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/courses/{course_id}/questions</span><span class="endpoint-desc">课程题库列表（支持 qtype/difficulty/tag 过滤；教师含答案）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/courses/{course_id}/questions</span><span class="endpoint-desc">新建题目（教师；客观题须提供 options+answer，否则 422）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/questions/{question_id}</span><span class="endpoint-desc">题目详情（学生侧不含答案）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method patch">PATCH</span><span class="endpoint-path">/questions/{question_id}</span><span class="endpoint-desc">更新题目（教师）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/questions/{question_id}</span><span class="endpoint-desc">删除题目（教师；试卷关联一并移除）</span></div>
+  </div>
+
+  <h3 class="sub">8.2 试卷与组卷 · Papers</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/courses/{course_id}/papers</span><span class="endpoint-desc">课程试卷列表（学生仅已发布）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/courses/{course_id}/papers</span><span class="endpoint-desc">新建试卷（教师）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/papers/{paper_id}</span><span class="endpoint-desc">试卷详情（教师含答案；学生含 my_attempt 状态）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method patch">PATCH</span><span class="endpoint-path">/papers/{paper_id}</span><span class="endpoint-desc">更新试卷（教师）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/papers/{paper_id}</span><span class="endpoint-desc">删除试卷（教师；作答级联删除）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/papers/{paper_id}/questions</span><span class="endpoint-desc">试卷加题（教师；单题分值可覆盖，重复 409）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/papers/{paper_id}/questions/{pq_id}</span><span class="endpoint-desc">移除题目（教师）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/papers/{paper_id}/generate</span><span class="endpoint-desc">智能组卷（按难度/题型/标签从课程题库随机抽题追加，不重复）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/papers/{paper_id}/publish</span><span class="endpoint-desc">发布试卷（教师；空卷 400）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/papers/{paper_id}/close</span><span class="endpoint-desc">关闭试卷（教师）</span></div>
+  </div>
+
+  <h3 class="sub">8.3 在线考试 · Attempts</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/papers/{paper_id}/attempt/me</span><span class="endpoint-desc">我的考试状态（学生）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/papers/{paper_id}/start</span><span class="endpoint-desc">开始考试（学生；幂等返回进行中 attempt + 题目，已提交 409）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/papers/{paper_id}/submit</span><span class="endpoint-desc">提交作答（学生；客观题自动评分，主观题待人工）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/papers/{paper_id}/attempts</span><span class="endpoint-desc">提交记录列表（教师）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/attempts/{attempt_id}</span><span class="endpoint-desc">答卷详情（本人/教师）</span></div>
+  </div>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/attempts/{attempt_id}/manual-grade</span><span class="endpoint-desc">主观题人工评分（教师；客观题 400）</span></div>
+  </div>
+
+  <h3 class="sub">8.4 统计 · Stats</h3>
+  <div class="endpoint">
+    <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/papers/{paper_id}/stats</span><span class="endpoint-desc">考试统计（教师：提交数/平均分/最高最低 + 每题正确率/均分）</span></div>
+  </div>
+</section>
+
+<!-- ============ 09 · 协作 ============ -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <h2>09 · 协作模块 <em>Collaboration</em></h2>
     <div class="num-tag">27 endpoints · 小组 / 项目 / 看板 / 文件 / 讨论</div>
   </div>
 
@@ -916,7 +1005,7 @@
     权限：查看 = 授课教师 / 组长 / 组员；管理（增删改组、删项目、换组长）= 教师 / 组长；加入小组须已选课（未选课越权 403 / 重复加入 409）。
   </div>
 
-  <h3 class="sub">8.1 小组 · Groups</h3>
+  <h3 class="sub">9.1 小组 · Groups</h3>
   <div class="endpoint">
     <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/me</span><span class="endpoint-desc">我的小组（学生视角，含课程名）</span></div>
   </div>
@@ -942,7 +1031,7 @@
     <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/groups/{group_id}/members/{user_id}</span><span class="endpoint-desc">移出成员（组长/教师；可退自己）</span></div>
   </div>
 
-  <h3 class="sub">8.2 项目 · Projects</h3>
+  <h3 class="sub">9.2 项目 · Projects</h3>
   <div class="endpoint">
     <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/{group_id}/projects</span><span class="endpoint-desc">小组项目列表</span></div>
   </div>
@@ -962,7 +1051,7 @@
     <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/projects/{project_id}/board</span><span class="endpoint-desc">项目看板（列 + 卡片聚合）</span></div>
   </div>
 
-  <h3 class="sub">8.3 看板 · Kanban</h3>
+  <h3 class="sub">9.3 看板 · Kanban</h3>
   <div class="endpoint">
     <div class="endpoint-header"><span class="endpoint-method post">POST</span><span class="endpoint-path">/projects/{project_id}/columns</span><span class="endpoint-desc">新建看板列</span></div>
   </div>
@@ -982,7 +1071,7 @@
     <div class="endpoint-header"><span class="endpoint-method delete">DELETE</span><span class="endpoint-path">/cards/{card_id}</span><span class="endpoint-desc">删除卡片</span></div>
   </div>
 
-  <h3 class="sub">8.4 共享文件 · Files</h3>
+  <h3 class="sub">9.4 共享文件 · Files</h3>
   <div class="endpoint">
     <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/{group_id}/files</span><span class="endpoint-desc">共享文件列表</span></div>
   </div>
@@ -993,7 +1082,7 @@
     <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/files/{file_id}/download</span><span class="endpoint-desc">下载文件（缺失时为 mock 占位）</span></div>
   </div>
 
-  <h3 class="sub">8.5 组内讨论 · Discussion</h3>
+  <h3 class="sub">9.5 组内讨论 · Discussion</h3>
   <div class="endpoint">
     <div class="endpoint-header"><span class="endpoint-method get">GET</span><span class="endpoint-path">/groups/{group_id}/topics</span><span class="endpoint-desc">讨论主题列表</span></div>
   </div>
@@ -1008,10 +1097,10 @@
   </div>
 </section>
 
-<!-- ============ 09 · AI ============ -->
-<section class="section" id="s9">
+<!-- ============ 10 · AI ============ -->
+<section class="section" id="s10">
   <div class="section-header">
-    <h2>09 · AI 模块 <em>AI-Powered</em></h2>
+    <h2>10 · AI 模块 <em>AI-Powered</em></h2>
     <div class="num-tag">6 endpoints · 覆盖 ai_gateway / ai_chat / ai_grade</div>
   </div>
 
@@ -1110,10 +1199,10 @@
   </div>
 </section>
 
-<!-- ============ 10 · 错误码 ============ -->
-<section class="section" id="s10">
+<!-- ============ 11 · 错误码 ============ -->
+<section class="section" id="s11">
   <div class="section-header">
-    <h2>10 · 错误码 <em>Errors</em></h2>
+    <h2>11 · 错误码 <em>Errors</em></h2>
     <div class="num-tag">RFC 7807</div>
   </div>
 
@@ -1148,10 +1237,10 @@
   </table>
 </section>
 
-<!-- ============ 11 · 限流 ============ -->
-<section class="section" id="s11">
+<!-- ============ 12 · 限流 ============ -->
+<section class="section" id="s12">
   <div class="section-header">
-    <h2>11 · 限流策略 <em>Rate Limit</em></h2>
+    <h2>12 · 限流策略 <em>Rate Limit</em></h2>
     <div class="num-tag">Token Bucket</div>
   </div>
 
@@ -1171,10 +1260,10 @@
   </div>
 </section>
 
-<!-- ============ 12 · SDK ============ -->
-<section class="section" id="s12">
+<!-- ============ 13 · SDK ============ -->
+<section class="section" id="s13">
   <div class="section-header">
-    <h2>12 · SDK · 示例代码 <em>Examples</em></h2>
+    <h2>13 · SDK · 示例代码 <em>Examples</em></h2>
     <div class="num-tag">TypeScript · Python</div>
   </div>
 
@@ -1240,7 +1329,7 @@ curl -X POST https://api.lumina.edu/api/v1/ai/chat \
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · API Reference</div>
-  <div>v1.5 · 12 模块 · 82 接口 · 2026-08-31 · 生产基准</div>
+  <div>v1.6 · 13 模块 · 98 接口 · 2026-09-01 · 生产基准</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">API-LUMINA-2026-001</div>
 </footer>
 

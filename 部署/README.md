@@ -12,7 +12,7 @@
        │
 ┌──────▼────────────────────────────────────┐
 │   Lumina App（FastAPI 单体 · :8080）          │
-│   /api/v1/* · 12 模块 · 82 端点               │
+│   /api/v1/* · 13 模块 · 98 端点               │
 └──────┬────────────────────────────────────┘
        │
 ┌──────▼──────┐  ┌──────────┐
@@ -67,7 +67,7 @@ mkdir -p ssl
 |------|------|------|--------|
 | MySQL 9.7 | 3306 | 数据库（库名 lumina） | mysql_data |
 | Redis | 6379 | 缓存 + 会话 | redis_data |
-| lumina-app | 8080 | 单体 FastAPI · 12 模块 · 82 端点 | — |
+| lumina-app | 8080 | 单体 FastAPI · 13 模块 · 98 端点 | — |
 | Nginx | 80/443 | 反向代理 + 静态前端 | — |
 
 ## 📜 常用命令
@@ -131,7 +131,7 @@ python 部署/scripts/api_contract_check.py
 
 自动核验三层一致：
 前端调用 URL（`web-frontend/src`）⊂ 单体应用端点（lumina-app）⊂ Nginx 路由（`lumina.conf`），
-并交叉检查 Nginx upstream 是否存在于 compose。当前基线：**46 前端调用 + 82 后端端点，全部闭环**。
+并交叉检查 Nginx upstream 是否存在于 compose。当前基线：**60 前端调用 + 98 后端端点，全部闭环**。
 
 ### 2. 端到端冒烟（需服务在线）
 

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Lumina 墨光 · API
-  version: 1.5.0
+  version: 1.6.0
   description: |
     Lumina（墨光）教育应用 RESTful API，覆盖用户、课程、作业、成绩、直播、协作、AI 等模块。
 
@@ -13,6 +13,7 @@ info:
     - 直播课堂：REST + after_id 轮询（聊天/举手/答题/点名）· HLS 流媒体（LIVE_STREAM_* 可插拔，未接入返回 mock://）
     - 小组协作：课程小组 / 成员 / 项目 / 看板拖拽 / 共享文件 / 组内讨论（D-02）
     - 账户补全：自助注册（POST /auth/register）+ 消息通知中心（/notifications/my · D-03）
+    - 题库与考试：题库 CRUD / 试卷编排 / 智能组卷 / 自动评分 + 主观题人工评分 / 统计（D-04）
 
   contact:
     name: Lumina Team
@@ -45,6 +46,8 @@ tags:
     description: 协作模块（小组/项目/看板/文件/讨论）
   - name: notif
     description: 消息通知中心（D-03）
+  - name: exam
+    description: 题库与考试（D-04：题库/试卷/组卷/答卷/评分/统计）
   - name: ai
     description: AI 能力模块
 
@@ -1933,6 +1936,419 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
 
+  # ═══════ 题库与考试 EXAM（D-04）═══════
+  /courses/{course_id}/questions:
+    get:
+      tags: [exam]
+      summary: 课程题库列表
+      description: 支持 qtype/difficulty/tag 过滤；教师/管理员返回答案，学生不含答案
+      parameters:
+        - name: course_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: qtype
+          in: query
+          schema: { type: string, enum: [single, multiple, true_false, short_answer] }
+        - name: difficulty
+          in: query
+          schema: { type: string, enum: [easy, medium, hard] }
+        - name: tag
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: 题库列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/QuestionOut' }
+                  pagination: { $ref: '#/components/schemas/pagination' }
+    post:
+      tags: [exam]
+      summary: 新建题目（教师）
+      description: 客观题须提供 options+answer，否则 422
+      parameters:
+        - name: course_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/QuestionBody' }
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuestionOut' }
+        '422':
+          description: 客观题缺选项/答案
+  /questions/{question_id}:
+    get:
+      tags: [exam]
+      summary: 题目详情
+      parameters:
+        - name: question_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: 题目详情（学生侧不含答案）
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuestionOut' }
+    patch:
+      tags: [exam]
+      summary: 更新题目（教师）
+      parameters:
+        - name: question_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/QuestionBody' }
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuestionOut' }
+    delete:
+      tags: [exam]
+      summary: 删除题目（教师）
+      parameters:
+        - name: question_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SuccessResponse' }
+  /courses/{course_id}/papers:
+    get:
+      tags: [exam]
+      summary: 课程试卷列表
+      description: 学生仅已发布；含 my_attempt 状态
+      parameters:
+        - name: course_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: 试卷列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code: { type: integer, example: 0 }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/PaperOut' }
+                  pagination: { $ref: '#/components/schemas/pagination' }
+    post:
+      tags: [exam]
+      summary: 新建试卷（教师）
+      parameters:
+        - name: course_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaperBody' }
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaperOut' }
+  /papers/{paper_id}:
+    get:
+      tags: [exam]
+      summary: 试卷详情
+      description: 教师含 answer；学生不含且含 my_attempt
+      parameters:
+        - name: paper_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: 试卷详情
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaperOut' }
+    patch:
+      tags: [exam]
+      summary: 更新试卷（教师）
+      parameters:
+        - name: paper_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaperBody' }
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaperOut' }
+    delete:
+      tags: [exam]
+      summary: 删除试卷（教师，作答级联删除）
+      parameters:
+        - name: paper_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SuccessResponse' }
+  /papers/{paper_id}/questions:
+    post:
+      tags: [exam]
+      summary: 试卷加题（教师）
+      description: 单题分值可覆盖题库默认；重复 409
+      parameters:
+        - name: paper_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaperQuestionIn' }
+      responses:
+        '201':
+          description: 加入成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaperOut' }
+  /papers/{paper_id}/questions/{pq_id}:
+    delete:
+      tags: [exam]
+      summary: 移除题目（教师）
+      parameters:
+        - name: paper_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: pq_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: 移除成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SuccessResponse' }
+  /papers/{paper_id}/generate:
+    post:
+      tags: [exam]
+      summary: 智能组卷（教师）
+      description: 按难度/题型/标签从课程题库随机抽题追加（不重复已存在题目）
+      parameters:
+        - name: paper_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AutoGenerateIn' }
+      responses:
+        '200':
+          description: 组卷完成
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaperOut' }
+  /papers/{paper_id}/publish:
+    post:
+      tags: [exam]
+      summary: 发布试卷（教师）
+      description: 空卷（0 题）返回 400
+      parameters:
+        - name: paper_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: 发布成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaperOut' }
+  /papers/{paper_id}/close:
+    post:
+      tags: [exam]
+      summary: 关闭试卷（教师）
+      parameters:
+        - name: paper_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: 关闭成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaperOut' }
+  /papers/{paper_id}/attempt/me:
+    get:
+      tags: [exam]
+      summary: 我的考试状态（学生）
+      parameters:
+        - name: paper_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: 我的考试记录（无则 my_attempt=null）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  my_attempt:
+                    anyOf:
+                      - { $ref: '#/components/schemas/AttemptOut' }
+                      - { type: 'null' }
+  /papers/{paper_id}/start:
+    post:
+      tags: [exam]
+      summary: 开始考试（学生）
+      description: 幂等；进行中返回原 attempt；已提交 409；未发布/时间窗外/未选课 403
+      parameters:
+        - name: paper_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '201':
+          description: 开始成功（题目不含答案）
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StartOut' }
+  /papers/{paper_id}/submit:
+    post:
+      tags: [exam]
+      summary: 提交作答（学生 · 自动评分）
+      description: 客观题自动判分；主观题待教师人工评分；重复提交 409
+      parameters:
+        - name: paper_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SubmitIn' }
+      responses:
+        '200':
+          description: 提交成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AttemptOut' }
+  /papers/{paper_id}/attempts:
+    get:
+      tags: [exam]
+      summary: 提交记录列表（教师）
+      parameters:
+        - name: paper_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: 提交记录
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AttemptOut' }
+  /attempts/{attempt_id}:
+    get:
+      tags: [exam]
+      summary: 答卷详情（本人/教师）
+      parameters:
+        - name: attempt_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: 答卷详情
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AttemptOut' }
+  /attempts/{attempt_id}/manual-grade:
+    post:
+      tags: [exam]
+      summary: 主观题人工评分（教师）
+      parameters:
+        - name: attempt_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ManualGradeIn' }
+      responses:
+        '200':
+          description: 评分成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AttemptOut' }
+  /papers/{paper_id}/stats:
+    get:
+      tags: [exam]
+      summary: 考试统计（教师）
+      description: 提交数/平均分/最高最低 + 每题正确率与人工均分
+      parameters:
+        - name: paper_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: 统计
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatsOut' }
+
 # ─── 组件 ───
 components:
 
@@ -2983,3 +3399,320 @@ components:
       properties:
         unread_count:
           type: integer
+
+    # ═══════ 题库与考试 EXAM（D-04）═══════
+    QuestionBody:
+      type: object
+      required: [qtype, title]
+      properties:
+        qtype:
+          type: string
+          enum: [single, multiple, true_false, short_answer]
+        title:
+          type: string
+        options:
+          type: array
+          items: { type: string }
+          description: 客观题选项（single/multiple/true_false 必填）
+        answer:
+          type: array
+          items: { type: string }
+          description: 正确答案（short_answer 保存参考答案文本）
+        score:
+          type: number
+          default: 5
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+          default: medium
+        tags:
+          type: array
+          items: { type: string }
+        chapter_id:
+          type: string
+          format: uuid
+          nullable: true
+    QuestionOut:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/QuestionBody'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            course_id:
+              type: string
+              format: uuid
+            created_by:
+              type: string
+              format: uuid
+            created_by_name:
+              type: string
+            created_at:
+              type: string
+              format: date-time
+            answer_hidden:
+              type: boolean
+              description: 学生侧 answer 置空
+    PaperBody:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        duration_minutes:
+          type: integer
+          default: 60
+    PaperOut:
+      type: object
+      required: [id, course_id, title, total_score, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        course_id:
+          type: string
+          format: uuid
+        course_title:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        start_at:
+          type: string
+          format: date-time
+          nullable: true
+        end_at:
+          type: string
+          format: date-time
+          nullable: true
+        duration_minutes:
+          type: integer
+        total_score:
+          type: number
+        status:
+          type: string
+          enum: [draft, published, closed]
+        question_count:
+          type: integer
+        questions:
+          type: array
+          items: { $ref: '#/components/schemas/PaperQuestionOut' }
+        my_attempt:
+          type: object
+          description: 学生侧当前用户状态（in_progress/submitted），教师无
+          properties:
+            status:
+              type: string
+              enum: [in_progress, submitted]
+        created_at:
+          type: string
+          format: date-time
+    PaperQuestionIn:
+      type: object
+      required: [question_id]
+      properties:
+        question_id:
+          type: string
+          format: uuid
+        score:
+          type: number
+          description: 覆盖题库默认分值（可选）
+    PaperQuestionOut:
+      type: object
+      properties:
+        pq_id:
+          type: string
+          format: uuid
+        question_id:
+          type: string
+          format: uuid
+        order_num:
+          type: integer
+        score:
+          type: number
+        qtype:
+          type: string
+        title:
+          type: string
+        options:
+          type: array
+          items: { type: string }
+        answer:
+          type: array
+          items: { type: string }
+          description: 学生侧隐藏
+        difficulty:
+          type: string
+        tags:
+          type: array
+          items: { type: string }
+    AutoGenerateIn:
+      type: object
+      required: [count]
+      properties:
+        count:
+          type: integer
+          minimum: 1
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        qtype_filter:
+          type: string
+        tag:
+          type: string
+        score:
+          type: number
+          default: 5
+    StartOut:
+      type: object
+      required: [attempt_id, started_at, end_at, duration_minutes]
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+        started_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+          nullable: true
+        duration_minutes:
+          type: integer
+        questions:
+          type: array
+          items: { $ref: '#/components/schemas/PaperQuestionOut' }
+    SubmitIn:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            required: [question_id]
+            properties:
+              question_id:
+                type: string
+                format: uuid
+              answer:
+                type: array
+                items: { type: string }
+                description: 单选/判断单元素；多选多元素；主观题首元素为文本
+    ManualGradeIn:
+      type: object
+      required: [question_id, score]
+      properties:
+        question_id:
+          type: string
+          format: uuid
+        score:
+          type: number
+          minimum: 0
+    AttemptOut:
+      type: object
+      required: [id, paper_id, student_id, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        paper_id:
+          type: string
+          format: uuid
+        paper_title:
+          type: string
+        course_id:
+          type: string
+          format: uuid
+        student_id:
+          type: string
+          format: uuid
+        student_name:
+          type: string
+        status:
+          type: string
+          enum: [in_progress, submitted]
+        started_at:
+          type: string
+          format: date-time
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+        auto_score:
+          type: number
+        manual_score:
+          type: number
+        total_score:
+          type: number
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              question_id:
+                type: string
+                format: uuid
+              answer:
+                type: array
+                items: { type: string }
+              correct:
+                type: boolean
+                nullable: true
+                description: 主观题待评分时为 null
+              score:
+                type: number
+              manual:
+                type: boolean
+                default: false
+    StatsOut:
+      type: object
+      required: [submitted_count, average_score, highest_score, lowest_score]
+      properties:
+        paper_id:
+          type: string
+          format: uuid
+        submitted_count:
+          type: integer
+        average_score:
+          type: number
+        highest_score:
+          type: number
+        lowest_score:
+          type: number
+        question_stats:
+          type: array
+          items:
+            type: object
+            properties:
+              question_id:
+                type: string
+                format: uuid
+              title:
+                type: string
+              qtype:
+                type: string
+              score:
+                type: number
+              correct_count:
+                type: integer
+              submit_count:
+                type: integer
+              accuracy:
+                type: number
+                description: 客观题正确率
+              manual_average:
+                type: number
+                description: 主观题人工均分（未评分则按 0 计）

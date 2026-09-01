@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 技术设计文档 TDD v1.2</title>
+<title>Lumina 墨光 · 技术设计文档 TDD v1.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -151,7 +151,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Technical Design Document</small></div>
     </div>
-    <div class="doc-type">Technical Design Document · v1.4</div>
+    <div class="doc-type">Technical Design Document · v1.5</div>
     <h1>
       <span class="hl">技术设计</span><br/>
       文档 <em>TDD</em>
@@ -165,7 +165,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.4 · 账户补全 D-03 落地 · 12 模块 · 82 端点 · 31 表</span>
+      <span class="value">v1.5 · 题库与考试 D-04 落地 · 13 模块 · 98 端点 · 35 表</span>
     </div>
     <div class="row">
       <span class="label">作者</span>
@@ -189,7 +189,7 @@
 <!-- ============ STATS ============ -->
 <div class="stats">
   <div class="stat"><div class="val hl">6</div><div class="lbl">技术栈层</div></div>
-  <div class="stat"><div class="val hl">12</div><div class="lbl">核心服务</div></div>
+  <div class="stat"><div class="val hl">13</div><div class="lbl">核心服务</div></div>
   <div class="stat"><div class="val">8</div><div class="lbl">国产 AI 模型</div></div>
   <div class="stat"><div class="val">99.9%</div><div class="lbl">SLA 目标</div></div>
   <div class="stat"><div class="val">&lt;200ms</div><div class="lbl">API P95</div></div>
@@ -278,6 +278,13 @@
           <td style="font-family:var(--f-mono); font-size:11px; font-weight:500;">2026-08-31</td>
           <td><b>Claude</b></td>
           <td><b>D-03 账户补全落地 · 模块 12 · 端点 82 · 表 31 · 自助注册 + 消息通知中心（notif 模块 / notifications 表）· 相关章节同步</b></td>
+          <td style="color:var(--growth); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</td>
+        </tr>
+        <tr style="background:var(--growth-soft);">
+          <td><span class="tag" style="background:var(--growth); color:#fff;">v1.5</span></td>
+          <td style="font-family:var(--f-mono); font-size:11px; font-weight:500;">2026-09-01</td>
+          <td><b>Claude</b></td>
+          <td><b>D-04 题库与考试落地 · 模块 13 · 端点 98 · 表 35 · 题库/试卷/组卷/自动评分+主观人工评分/统计（exam 模块 / 4 张表）· 相关章节同步</b></td>
           <td style="color:var(--growth); font-family:var(--f-mono); font-size:10px; font-weight:600;">● 已发布</td>
         </tr>
       </tbody>
@@ -394,7 +401,7 @@
       <div class="arch-box inkwell">
         <div class="title">数据层 · Data</div>
         <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:8px;">
-          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">MySQL 9.7<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">单实例 · 31 表</span></div>
+          <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">MySQL 9.7<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">单实例 · 35 表</span></div>
           <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">Redis<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">缓存 · 会话</span></div>
           <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">MySQL 全文<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">搜索（InnoDB）</span></div>
           <div style="padding:5px 10px; background:rgba(250,246,236,0.1); border-radius:6px; font-size:10px; color:var(--ricepaper);">本地存储<br/><span style="font-size:8px; color:rgba(250,246,236,0.6);">uploads 卷</span></div>
@@ -502,7 +509,7 @@
   <h3 class="sub">5.1 单体应用模块划分</h3>
   <div class="info note">
     <div class="label">架构决策 · 快速验证优先</div>
-    采用 <b>Python FastAPI 单体应用 + 模块化目录结构</b>，12 个业务模块共享同一进程和数据库，通过 <code>app/modules/</code> 实现逻辑隔离。演进方向：未来可按需拆分微服务（当前 v1.4 保持单体）。
+    采用 <b>Python FastAPI 单体应用 + 模块化目录结构</b>，13 个业务模块共享同一进程和数据库，通过 <code>app/modules/</code> 实现逻辑隔离。演进方向：未来可按需拆分微服务（当前 v1.5 保持单体）。
   </div>
   <table>
     <thead><tr><th>模块</th><th>职责</th><th>路由前缀</th><th>端点数</th></tr></thead>
@@ -514,17 +521,18 @@
       <tr><td><b>直播模块</b></td><td>直播课堂 · 房间/举手/聊天/点名/答题</td><td>/live</td><td>16</td></tr>
       <tr><td><b>协作模块</b></td><td>小组 · 项目 · 看板 · 共享文件 · 组内讨论</td><td>/groups · /projects · /columns · /cards · /files · /topics</td><td>27</td></tr>
       <tr><td><b>通知模块</b></td><td>消息通知中心 · 已读/未读数/全部已读（D-03）</td><td>/notifications</td><td>4</td></tr>
+      <tr><td><b>题库与考试</b></td><td>题库 CRUD · 试卷编排 · 智能组卷 · 自动评分 + 主观人工评分 · 统计（D-04）</td><td>/courses/{id}/questions · /papers · /attempts</td><td>22</td></tr>
       <tr><td><b>AI 网关</b></td><td>模型路由 · 供应商管理 · 用量统计</td><td>/ai</td><td>10</td></tr>
       <tr><td><b>AI 对话</b></td><td>苏格拉底导师 · 多轮对话 · SSE 流式</td><td>/ai</td><td>4</td></tr>
       <tr><td><b>AI 批阅</b></td><td>作业批阅 · 结构化评分</td><td>/ai</td><td>1</td></tr>
       <tr><td><b>埋点模块</b></td><td>事件采集 · 统计分析</td><td>/events</td><td>4</td></tr>
       <tr><td><b>日志模块</b></td><td>结构化日志 · 查询</td><td>/logs</td><td>2</td></tr>
-      <tr style="background:var(--ai-soft);"><td colspan="2"><b>合计（唯一端点）</b></td><td>—</td><td><b>82</b></td></tr>
+      <tr style="background:var(--ai-soft);"><td colspan="2"><b>合计（唯一端点）</b></td><td>—</td><td><b>98</b></td></tr>
     </tbody>
   </table>
   <div class="info note" style="margin-top:8px;">
     <div class="label">口径说明</div>
-    上表端点数按 <code>api_contract_check.py</code>「唯一端点模板」口径核对（方法合并 · 路径去重），业务端点合计 <b>82</b> · 模块 <b>12</b>；三层契约 46 前端 ⊂ 82 后端 ⊂ Nginx。直播（D-01）为 <b>16</b> 个 REST 端点（聊天/举手队列走 <code>after_id</code> 增量，无 WebSocket），协作（D-02）为 <b>27</b> 个 REST 端点，通知（D-03）为 <b>4</b> 个 REST 端点，完整清单见 <b>lumina-api.html · 07 直播模块 / 08 协作模块 / 02·2.5 消息通知</b>。
+    上表端点数按 <code>api_contract_check.py</code>「唯一端点模板」口径核对（方法合并 · 路径去重），业务端点合计 <b>98</b> · 模块 <b>13</b>；三层契约 60 前端 ⊂ 98 后端 ⊂ Nginx。直播（D-01）为 <b>16</b> 个 REST 端点（聊天/举手队列走 <code>after_id</code> 增量，无 WebSocket），协作（D-02）为 <b>27</b> 个 REST 端点，通知（D-03）为 <b>4</b> 个 REST 端点，题库与考试（D-04）为 <b>22</b> 个 REST 端点，完整清单见 <b>lumina-api.html · 07 直播模块 / 08 协作模块 / 09 题库与考试 / 02·2.5 消息通知</b>。
   </div>
 
   <h3 class="sub">5.2 模块通信</h3>
@@ -998,7 +1006,7 @@
       <tr><td>Electron</td><td>31</td><td>桌面端</td></tr>
       <tr><td rowspan="2"><b>后端</b></td><td>Python · FastAPI</td><td>3.12 / 0.115</td><td>单体业务 + AI 服务</td></tr>
       <tr><td>SQLAlchemy · Pydantic</td><td>2.0 / 2.x</td><td>ORM · Schema 校验</td></tr>
-      <tr><td rowspan="2"><b>数据</b></td><td>MySQL</td><td>9.7</td><td>主数据库（31 表）</td></tr>
+      <tr><td rowspan="2"><b>数据</b></td><td>MySQL</td><td>9.7</td><td>主数据库（35 表）</td></tr>
       <tr><td>Redis</td><td>7.2</td><td>缓存 · 会话</td></tr>
       <tr><td rowspan="2"><b>中间件</b></td><td>Nginx</td><td>1.26</td><td>反向代理 · 静态资源</td></tr>
       <tr><td>JWT</td><td>—</td><td>认证授权</td></tr>
@@ -1066,7 +1074,7 @@
         <td><span class="tag" style="background:var(--growth); color:#fff;">Phase 0</span></td>
         <td>2026-08</td>
         <td><b>原型设计 ✓ 已完成</b></td>
-        <td>40 原型 · PRD v1.3 · TDD v1.4</td>
+        <td>40 原型 · PRD v1.3 · TDD v1.5</td>
       </tr>
       <tr>
         <td><span class="tag p0">Phase 1</span></td>
@@ -1146,7 +1154,7 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · 技术设计文档</div>
-  <div>TDD v1.4 · 18 章节 · 2026-08-31</div>
+  <div>TDD v1.5 · 18 章节 · 2026-09-01</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">TDD-LUMINA-2026-001</div>
 </footer>
 

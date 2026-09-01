@@ -1,8 +1,8 @@
 # Lumina 墨光 · UAT 验收清单（阶段三 3.6）
 
-> 本清单对齐 **PRD v1.3** 核心场景与 **testcases 156 用例**，作为业务方（UAT 签字）的逐项验收依据。
-> 自动化脚本：`部署/scripts/smoke_test.py`（全链路冒烟 · 含 S16-S24 直播 10 步）· `部署/scripts/run_tests.py`（109 单测）·
-> `部署/scripts/api_contract_check.py`（28→60→28 契约核对）· `部署/scripts/events_catalog.py`（65 事件目录）。
+> 本清单对齐 **PRD v1.3** 核心场景与 **testcases 173 用例**，作为业务方（UAT 签字）的逐项验收依据。
+> 自动化脚本：`部署/scripts/smoke_test.py`（全链路冒烟 · 含 S16-S24 直播 10 步）· `smoke_collab.py`（21 步）· `smoke_notif.py`（12 步）· `smoke_exam.py`（28 步）· `部署/scripts/run_tests.py`（173 单测）·
+> `部署/scripts/api_contract_check.py`（60→98→60 契约核对）· `部署/scripts/events_catalog.py`（97 事件目录）。
 
 ---
 

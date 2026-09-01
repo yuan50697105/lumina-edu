@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Lumina (墨光) 教育应用 UI 设计系统 - 面向高校师生的跨端教学协作平台。本项目为设计原型 + 技术文档 + FastAPI 单体应用（`服务/lumina-app/`）。单体快照：82 RESTful 端点 · 12 模块 · 31 表（模块：user / course / assignment / grade / live / collab / notif / ai_gateway / ai_chat / ai_grade / analytics / logs）。
+Lumina (墨光) 教育应用 UI 设计系统 - 面向高校师生的跨端教学协作平台。本项目为设计原型 + 技术文档 + FastAPI 单体应用（`服务/lumina-app/`）。单体快照：98 RESTful 端点 · 13 模块 · 35 表（模块：user / course / assignment / grade / live / collab / notif / exam / ai_gateway / ai_chat / ai_grade / analytics / logs）。
 
 ## Directory Structure
 
@@ -29,10 +29,10 @@ edu/
 │   └── AI/         (3 files)   # AI 模块原型
 │
 ├── 服务/                   # 单体应用 + 前端
-│   ├── lumina-app/             # ✅ 单体 FastAPI（12 模块 · 82 端点 · 31 表）
+│   ├── lumina-app/             # ✅ 单体 FastAPI（13 模块 · 98 端点 · 35 表）
 │   │   ├── app/                # 应用代码（main.py / models.py / security.py ...）
-│   │   │   └── modules/        # 12 业务模块：user/course/assignment/grade/live/collab/notif/ai_gateway/ai_chat/ai_grade/analytics/logs
-│   │   ├── tests/              # 单元测试（138 passed）
+│   │   │   └── modules/        # 13 业务模块：user/course/assignment/grade/live/collab/notif/exam/ai_gateway/ai_chat/ai_grade/analytics/logs
+│   │   ├── tests/              # 单元测试（173 passed）
 │   │   ├── requirements.txt    # Python 依赖
 │   │   └── Dockerfile          # API 容器镜像
 │   ├── web-frontend/           # Web 前端（React 18 + TS + Vite）
@@ -188,18 +188,18 @@ background: linear-gradient(
 项目包含 9 个核心文档，形成完整文档体系：
 
 1. **PRD** (产品需求) - 用户画像、功能模块、验收标准
-2. **TDD** (技术设计) - 架构、单体应用（12 模块）、数据库、API 规范
-3. **API** (接口文档) - 82 个 RESTful 端点
+2. **TDD** (技术设计) - 架构、单体应用（13 模块）、数据库、API 规范
+3. **API** (接口文档) - 98 个 RESTful 端点
 4. **OpenAPI** (机器可读) - YAML 格式 API 规范
-5. **Database** (数据库) - 31 表、ER 模型、分区策略
+5. **Database** (数据库) - 35 表、ER 模型、分区策略
 6. **Operations** (运维) - Docker Compose 部署、监控告警、Runbook
-7. **Test Cases** (测试) - 138 用例、80% 覆盖率
+7. **Test Cases** (测试) - 173 用例、80% 覆盖率
 8. **User Guide** (用户手册) - 3 角色指南、FAQ
 9. **WBS v1.1** (上线计划) - 10 周轻量方案
 
 所有文档使用统一的 Lumina 视觉风格，可直接在浏览器中打开查看。
 
-单体应用 `服务/lumina-app/` 快照：82 端点 · 12 模块 · 31 表 · 单元测试 138 通过。
+单体应用 `服务/lumina-app/` 快照：98 端点 · 13 模块 · 35 表 · 单元测试 173 通过。
 
 ## Platform Coverage
 

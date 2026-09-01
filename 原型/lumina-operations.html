@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 部署运维手册 v1.4</title>
+<title>Lumina 墨光 · 部署运维手册 v1.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -111,7 +111,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Operations Runbook</small></div>
     </div>
-    <div class="doc-type">Operations Runbook · v1.4</div>
+    <div class="doc-type">Operations Runbook · v1.5</div>
     <h1>
       <span class="hl">部署</span>运维<br/>
       <em>手册</em>
@@ -125,7 +125,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.4 · 账户补全 D-03 · 12 模块 · 31 表</span>
+      <span class="value">v1.5 · 题库与考试 D-04 · 13 模块 · 35 表</span>
     </div>
     <div class="row">
       <span class="label">平台</span>
@@ -199,15 +199,15 @@
   <table>
     <thead><tr><th>组件</th><th>版本</th><th>用途</th><th>部署方式</th></tr></thead>
     <tbody>
-      <tr><td><b>lumina-app</b></td><td>v1.4</td><td>单体 FastAPI（82 端点 · 12 模块 · 直播/协作/通知）</td><td>Docker 容器 · :8080</td></tr>
-      <tr><td><b>MySQL</b></td><td>9.7</td><td>主数据库（31 表）</td><td>容器 · 3306 · utf8mb4</td></tr>
+      <tr><td><b>lumina-app</b></td><td>v1.5</td><td>单体 FastAPI（98 端点 · 13 模块 · 直播/协作/通知/题库与考试）</td><td>Docker 容器 · :8080</td></tr>
+      <tr><td><b>MySQL</b></td><td>9.7</td><td>主数据库（35 表）</td><td>容器 · 3306 · utf8mb4</td></tr>
       <tr><td><b>Redis</b></td><td>7.x</td><td>会话 · 缓存</td><td>容器 · 6379</td></tr>
       <tr><td><b>Nginx</b></td><td>1.9.x</td><td>反向代理 · 静态资源</td><td>容器 · :80</td></tr>
     </tbody>
   </table>
   <div class="info note">
     <div class="label">ℹ 架构说明</div>
-    单体架构：12 业务模块（user/course/assignment/grade/live/collab/notif/ai_gateway/ai_chat/ai_grade/analytics/logs）共享同一进程与数据库，不依赖消息队列/向量库/对象存储等微服务中间件。水平扩展通过 <code>--scale lumina-app=N</code> 实现；AI 对话存储于 MySQL，无外部服务。
+    单体架构：13 业务模块（user/course/assignment/grade/live/collab/notif/exam/ai_gateway/ai_chat/ai_grade/analytics/logs）共享同一进程与数据库，不依赖消息队列/向量库/对象存储等微服务中间件。水平扩展通过 <code>--scale lumina-app=N</code> 实现；AI 对话存储于 MySQL，无外部服务。
   </div>
 </section>
 
@@ -222,7 +222,7 @@
   <div class="info note">
     <div class="label">ℹ 拓扑</div>
     <b>入口</b>：Nginx :80（静态资源 + 反代 <code>/api/*</code>）→ <b>lumina-app</b> :8080（单体 API）→ <b>MySQL</b> :3306（持久化）+ <b>Redis</b> :6379（会话缓存）。
-    <br/>4 服务由 <code>部署/docker-compose.yml</code> 一键编排，全部数据落 MySQL 库 <code>lumina</code>（31 表），无外部依赖。
+    <br/>4 服务由 <code>部署/docker-compose.yml</code> 一键编排，全部数据落 MySQL 库 <code>lumina</code>（35 表），无外部依赖。
   </div>
 
   <h3 class="sub">2.2 单体应用部署（Docker Compose）</h3>
@@ -635,7 +635,7 @@ bash 部署/scripts/monitor.sh all</pre>
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Operations Runbook</div>
-  <div>v1.4 · 单体 FastAPI · Docker Compose · 99.5% SLA</div>
+  <div>v1.5 · 单体 FastAPI · Docker Compose · 99.5% SLA</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">OPS-LUMINA-2026-001</div>
 </footer>
 
