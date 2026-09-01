@@ -10,6 +10,7 @@
 #   python 部署/scripts/seed_demo.py --demo-password xxxx
 # ============================================
 import argparse
+import json
 import os
 import sys
 import uuid
@@ -135,6 +136,55 @@ def main() -> int:
         "INSERT IGNORE INTO live_rooms (id,course_id,teacher_id,title,status,stream_key,viewer_count,created_at) "
         "VALUES (:id,:cid,:tid,'直播演示间（固定流 roomdemo）','scheduled','roomdemo',0,NOW())",
         {"cid": course_id, "tid": teacher_id}, "直播演示房间 roomdemo")
+
+    # ── 10. 题库与考试演示（D-04）：5 道题目 + 已发布试卷「期中练习」 ──
+    def ensure_question(qtype, title, options, answer, score, difficulty, tags):
+        sel = "SELECT id FROM exam_questions WHERE course_id=:cid AND qtype=:qt AND title=:t"
+        ins = ("INSERT IGNORE INTO exam_questions "
+               "(id,course_id,qtype,title,options,answer,score,difficulty,tags,created_by,created_at,updated_at) "
+               "VALUES (:id,:cid,:qt,:t,CAST(:opt AS JSON),CAST(:ans AS JSON),:score,:diff,CAST(:tags AS JSON),:tid,NOW(),NOW())")
+        return ensure(sel, {"cid": course_id, "qt": qtype, "t": title},
+                      ins,
+                      {"cid": course_id, "qt": qtype, "t": title,
+                       "opt": json.dumps(options, ensure_ascii=False) if options else None,
+                       "ans": json.dumps(answer, ensure_ascii=False) if answer else None,
+                       "score": score, "diff": difficulty,
+                       "tags": json.dumps(tags, ensure_ascii=False), "tid": teacher_id},
+                      f"题目「{title}」")
+
+    q1 = ensure_question("single", "Python 中单行注释的符号是？",
+                         [{"key": "A", "text": "#"}, {"key": "B", "text": "//"},
+                          {"key": "C", "text": "/* */"}, {"key": "D", "text": "--"}],
+                         ["A"], 5, "easy", ["基础"])
+    q2 = ensure_question("single", "下列哪项是 Python 的内置序列类型？",
+                         [{"key": "A", "text": "数组 array"}, {"key": "B", "text": "元组 tuple"},
+                          {"key": "C", "text": "指针 pointer"}, {"key": "D", "text": "结构体 struct"}],
+                         ["B"], 5, "easy", ["基础"])
+    q3 = ensure_question("multiple", "以下属于 Python 控制流关键字的有哪些？",
+                         [{"key": "A", "text": "if"}, {"key": "B", "text": "for"},
+                          {"key": "C", "text": "while"}, {"key": "D", "text": "switch"}],
+                         ["A", "B", "C"], 10, "medium", ["语法"])
+    q4 = ensure_question("true_false", "Python 中的列表（list）是可变的（mutable）。",
+                         [{"key": "T", "text": "正确"}, {"key": "F", "text": "错误"}],
+                         ["T"], 5, "easy", ["基础"])
+    q5 = ensure_question("short_answer", "请简述 Python 中列表与元组的区别。",
+                         None, None, 10, "medium", ["概念"])
+
+    paper_id = ensure("SELECT id FROM exam_papers WHERE course_id=:cid AND title='期中练习'",
+                      {"cid": course_id},
+                      "INSERT IGNORE INTO exam_papers (id,course_id,title,description,duration_minutes,total_score,status,created_by,created_at,updated_at) "
+                      "VALUES (:id,:cid,'期中练习','第一至三章的随堂练习',30,35,'published',:tid,NOW(),NOW())",
+                      {"cid": course_id, "tid": teacher_id}, "试卷 期中练习")
+
+    exam_items = [(q1, 0, 5), (q2, 1, 5), (q3, 2, 10), (q4, 3, 5), (q5, 4, 10)]
+    for qid, order, score in exam_items:
+        ensure(
+            "SELECT id FROM exam_paper_questions WHERE paper_id=:pid AND question_id=:qid",
+            {"pid": paper_id, "qid": qid},
+            "INSERT IGNORE INTO exam_paper_questions (id,paper_id,question_id,order_num,score) "
+            "VALUES (:id,:pid,:qid,:ord,:score)",
+            {"pid": paper_id, "qid": qid, "ord": order, "score": score},
+            f"试卷加入题目 order={order}")
 
     conn.commit()
     conn.close()

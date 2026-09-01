@@ -3,42 +3,42 @@
 > 自动生成：`python 部署/scripts/events_catalog.py`（阶段三 3.2 埋点数据验证依据）
 
 ## 事件命名规范
-`namespace.action`（点分小写）；允许命名空间：ai, announcement, assignment, auth, chapter, chat, collab, conversation, course, element, enrollment, gateway, grade, live, model, notif, page, provider, session, submission, system, user
+`namespace.action`（点分小写）；允许命名空间：ai, announcement, assignment, auth, chapter, chat, collab, conversation, course, element, enrollment, exam, gateway, grade, live, model, notif, page, provider, session, submission, system, user
 
 ## 全量事件清单
 
 | 事件 | 端 | 出现位置 |
 |------|----|---------|
 | `ai.call` | 后端 | modules/ai_gateway/routers.py |
-| `ai.call_recorded` | 后端 | instrumentation.py, modules/ai_gateway/instrumentation.py |
+| `ai.call_recorded` | 后端 | instrumentation.py |
 | `ai.chat.done` | 前端 | mobile-app/src/pages/AIChat.tsx, web-frontend/src/pages/AIChat.tsx |
 | `ai.chat.open` | 前端 | mobile-app/src/pages/CourseDetail.tsx |
 | `ai.chat.send` | 前端 | mobile-app/src/pages/AIChat.tsx, web-frontend/src/pages/AIChat.tsx |
-| `ai.chat_done` | 后端 | instrumentation.py, modules/ai_chat/instrumentation.py |
-| `ai.chat_error` | 后端 | instrumentation.py, modules/ai_chat/instrumentation.py |
-| `ai.chat_start` | 后端 | instrumentation.py, modules/ai_chat/instrumentation.py |
-| `ai.conversation_delete` | 后端 | instrumentation.py, modules/ai_chat/instrumentation.py |
-| `ai.conversation_list` | 后端 | instrumentation.py, modules/ai_chat/instrumentation.py |
-| `ai.conversation_view` | 后端 | instrumentation.py, modules/ai_chat/instrumentation.py |
-| `ai.grade_done` | 后端 | instrumentation.py, modules/ai_grade/instrumentation.py |
-| `ai.grade_error` | 后端 | instrumentation.py, modules/ai_grade/instrumentation.py |
-| `ai.grade_start` | 后端 | instrumentation.py, modules/ai_grade/instrumentation.py |
-| `ai.model_registered` | 后端 | instrumentation.py, modules/ai_gateway/instrumentation.py |
-| `ai.model_updated` | 后端 | instrumentation.py, modules/ai_gateway/instrumentation.py |
-| `ai.models_view` | 后端 | instrumentation.py, modules/ai_gateway/instrumentation.py |
-| `ai.route` | 后端 | instrumentation.py, modules/ai_gateway/instrumentation.py |
-| `ai.usage_view` | 后端 | instrumentation.py, modules/ai_gateway/instrumentation.py |
-| `announcement.created` | 后端 | instrumentation.py, modules/course/instrumentation.py |
-| `assignment.created` | 后端 | instrumentation.py, modules/assignment/instrumentation.py |
-| `assignment.graded` | 后端 | instrumentation.py, modules/assignment/instrumentation.py |
-| `assignment.submitted` | 后端 | instrumentation.py, modules/assignment/instrumentation.py |
-| `assignment.updated` | 后端 | instrumentation.py, modules/assignment/instrumentation.py |
-| `assignment.view` | 后端 | instrumentation.py, modules/assignment/instrumentation.py |
+| `ai.chat_done` | 后端 | instrumentation.py |
+| `ai.chat_error` | 后端 | instrumentation.py |
+| `ai.chat_start` | 后端 | instrumentation.py |
+| `ai.conversation_delete` | 后端 | instrumentation.py |
+| `ai.conversation_list` | 后端 | instrumentation.py |
+| `ai.conversation_view` | 后端 | instrumentation.py |
+| `ai.grade_done` | 后端 | instrumentation.py |
+| `ai.grade_error` | 后端 | instrumentation.py |
+| `ai.grade_start` | 后端 | instrumentation.py |
+| `ai.model_registered` | 后端 | instrumentation.py |
+| `ai.model_updated` | 后端 | instrumentation.py |
+| `ai.models_view` | 后端 | instrumentation.py |
+| `ai.route` | 后端 | instrumentation.py |
+| `ai.usage_view` | 后端 | instrumentation.py |
+| `announcement.created` | 后端 | instrumentation.py |
+| `assignment.created` | 后端 | instrumentation.py |
+| `assignment.graded` | 后端 | instrumentation.py |
+| `assignment.submitted` | 后端 | instrumentation.py |
+| `assignment.updated` | 后端 | instrumentation.py |
+| `assignment.view` | 后端 | instrumentation.py |
 | `auth.login` | 前端 | mobile-app/src/pages/Login.tsx, web-frontend/src/pages/Login.tsx |
 | `auth.login_fail` | 前端 | mobile-app/src/pages/Login.tsx |
 | `auth.logout` | 前端 | web-frontend/src/components/Layout.tsx |
-| `chapter.created` | 后端 | instrumentation.py, modules/course/instrumentation.py |
-| `chapter.view` | 前端/后端 | instrumentation.py, modules/course/instrumentation.py, mobile-app/src/pages/CourseDetail.tsx |
+| `chapter.created` | 后端 | instrumentation.py |
+| `chapter.view` | 前端/后端 | instrumentation.py, mobile-app/src/pages/CourseDetail.tsx |
 | `collab.card_create` | 前端 | web-frontend/src/pages/GroupDetail.tsx |
 | `collab.card_move` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
 | `collab.column_add` | 前端 | web-frontend/src/pages/GroupDetail.tsx |
@@ -53,17 +53,33 @@
 | `collab.project_open` | 前端 | web-frontend/src/pages/GroupDetail.tsx |
 | `collab.reply_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
 | `collab.topic_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/GroupDetail.tsx |
-| `course.created` | 后端 | instrumentation.py, modules/course/instrumentation.py |
-| `course.drop` | 后端 | instrumentation.py, modules/course/instrumentation.py |
-| `course.enroll` | 前端/后端 | instrumentation.py, modules/course/instrumentation.py, mobile-app/src/pages/CourseDetail.tsx |
+| `course.created` | 后端 | instrumentation.py |
+| `course.drop` | 后端 | instrumentation.py |
+| `course.enroll` | 前端/后端 | instrumentation.py, mobile-app/src/pages/CourseDetail.tsx, web-frontend/src/pages/CourseDetail.tsx |
 | `course.unenroll` | 前端 | mobile-app/src/pages/CourseDetail.tsx, web-frontend/src/pages/CourseDetail.tsx |
-| `course.updated` | 后端 | instrumentation.py, modules/course/instrumentation.py |
-| `course.view` | 前端/后端 | instrumentation.py, modules/course/instrumentation.py, mobile-app/src/pages/Home.tsx |
+| `course.updated` | 后端 | instrumentation.py |
+| `course.view` | 前端/后端 | instrumentation.py, mobile-app/src/pages/Home.tsx |
 | `element.click` | 前端 | mobile-app/src/utils/tracker.ts, web-frontend/src/utils/tracker.ts |
-| `grade.recorded` | 后端 | instrumentation.py, modules/grade/instrumentation.py |
-| `grade.statistics` | 后端 | instrumentation.py, modules/grade/instrumentation.py |
-| `grade.updated` | 后端 | instrumentation.py, modules/grade/instrumentation.py |
-| `grade.view` | 前端/后端 | instrumentation.py, modules/grade/instrumentation.py, mobile-app/src/pages/Grades.tsx |
+| `exam.attempt_list` | 后端 | instrumentation.py |
+| `exam.attempt_start` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Exam.tsx |
+| `exam.attempt_submit` | 前端/后端 | instrumentation.py, web-frontend/src/pages/ExamTaking.tsx |
+| `exam.attempt_view` | 前端/后端 | instrumentation.py, web-frontend/src/pages/ExamTaking.tsx |
+| `exam.manual_grade` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Exam.tsx |
+| `exam.paper_add_question` | 前端 | web-frontend/src/pages/Exam.tsx |
+| `exam.paper_close` | 后端 | instrumentation.py |
+| `exam.paper_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Exam.tsx |
+| `exam.paper_delete` | 后端 | instrumentation.py |
+| `exam.paper_generate` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Exam.tsx |
+| `exam.paper_publish` | 后端 | instrumentation.py |
+| `exam.paper_update` | 后端 | instrumentation.py |
+| `exam.paper_view` | 后端 | instrumentation.py |
+| `exam.question_create` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Exam.tsx |
+| `exam.question_delete` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Exam.tsx |
+| `exam.question_update` | 前端/后端 | instrumentation.py, web-frontend/src/pages/Exam.tsx |
+| `grade.recorded` | 后端 | instrumentation.py |
+| `grade.statistics` | 后端 | instrumentation.py |
+| `grade.updated` | 后端 | instrumentation.py |
+| `grade.view` | 前端/后端 | instrumentation.py, mobile-app/src/pages/Grades.tsx |
 | `live.call` | 后端 | instrumentation.py |
 | `live.call_respond` | 后端 | instrumentation.py |
 | `live.chat` | 后端 | instrumentation.py |
@@ -118,6 +134,16 @@
 - `course.unenroll`
 - `course.view`
 - `element.click`
+- `exam.attempt_start`
+- `exam.attempt_submit`
+- `exam.attempt_view`
+- `exam.manual_grade`
+- `exam.paper_add_question`
+- `exam.paper_create`
+- `exam.paper_generate`
+- `exam.question_create`
+- `exam.question_delete`
+- `exam.question_update`
 - `grade.view`
 - `live.room_create`
 - `live.room_view`
@@ -159,6 +185,12 @@
 - `course.created`
 - `course.drop`
 - `course.updated`
+- `exam.attempt_list`
+- `exam.paper_close`
+- `exam.paper_delete`
+- `exam.paper_publish`
+- `exam.paper_update`
+- `exam.paper_view`
 - `grade.recorded`
 - `grade.statistics`
 - `grade.updated`

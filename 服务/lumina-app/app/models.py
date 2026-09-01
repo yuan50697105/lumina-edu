@@ -534,4 +534,76 @@ class Notification(Base):
     created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
 
 
+# ─── 题库与考试（V1.1 · D-04 · WBS-P 阶段 D）───
+# 题库题目（课程归集） → 试卷（组卷明细） → 考试作答（每生每卷一次，自动评分）
+class ExamQuestion(Base):
+    """题库题目：题型 / 难度 / 标签 / 客观题 options+answer，主观题仅 title"""
+    __tablename__ = "exam_questions"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    chapter_id = Column(GUID, nullable=True)             # 关联章节（可空）
+    qtype = Column(String(20), default="single", nullable=False)  # single | multiple | true_false | short_answer
+    title = Column(Text, nullable=False)
+    options = Column(JSON, nullable=True)                # [{"key":"A","text":"…"}, …] 客观题
+    answer = Column(JSON, nullable=True)                 # 客观题选项数组 ["A"]；主观题为 null
+    score = Column(Integer, default=5, nullable=False)
+    difficulty = Column(String(10), default="medium", nullable=False)  # easy | medium | hard
+    tags = Column(JSON, nullable=True)
+    created_by = Column(GUID, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
+
+
+class ExamPaper(Base):
+    """试卷（组卷结果，题目经 exam_paper_questions 关联）"""
+    __tablename__ = "exam_papers"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    start_at = Column(DateTime(timezone=True), nullable=True)
+    end_at = Column(DateTime(timezone=True), nullable=True)
+    duration_minutes = Column(Integer, default=60, nullable=False)
+    total_score = Column(Integer, default=0, nullable=False)   # 随组卷自动累加
+    status = Column(String(20), default="draft", nullable=False)  # draft | published | closed
+    created_by = Column(GUID, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
+
+
+class ExamPaperQuestion(Base):
+    """试卷题目（组卷明细：单题分值可覆盖题库默认，排序）"""
+    __tablename__ = "exam_paper_questions"
+    __table_args__ = (
+        UniqueConstraint("paper_id", "question_id", name="uq_paper_question"),
+    )
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    paper_id = Column(GUID, ForeignKey("exam_papers.id", ondelete="CASCADE"), nullable=False)
+    question_id = Column(GUID, ForeignKey("exam_questions.id", ondelete="CASCADE"), nullable=False)
+    order_num = Column(Integer, default=0)
+    score = Column(Integer, default=5, nullable=False)
+
+
+class ExamAttempt(Base):
+    """考试作答（每生每卷一次；客观题提交自动评分，主观题等待教师人工补分）"""
+    __tablename__ = "exam_attempts"
+    __table_args__ = (
+        UniqueConstraint("paper_id", "student_id", name="uq_exam_attempt"),
+    )
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    paper_id = Column(GUID, ForeignKey("exam_papers.id", ondelete="CASCADE"), nullable=False)
+    student_id = Column(GUID, nullable=False)
+    started_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    submitted_at = Column(DateTime(timezone=True), nullable=True)
+    status = Column(String(20), default="in_progress", nullable=False)  # in_progress | submitted
+    answers = Column(JSON, nullable=True)    # [{question_id, answer, correct, manual_score}]
+    auto_score = Column(Integer, default=0, nullable=False)   # 客观题得分
+    manual_score = Column(Integer, default=0, nullable=False) # 主观题人工补分
+    total_score = Column(Integer, default=0, nullable=False)
+
+
 # ─── 监控共享表 ───

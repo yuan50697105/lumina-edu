@@ -124,6 +124,15 @@ export default function CourseDetail() {
         </button>
       </div>
 
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 18 }}>
+        <h2 className="section-title" style={{ marginBottom: 0 }}>
+          题库与考试
+        </h2>
+        <button className="btn ghost tiny" onClick={() => navigate(`/courses/${id}/exam`)} data-track="exam-open">
+          {isTeacher ? '管理题库 · 试卷 →' : '参加考试 →'}
+        </button>
+      </div>
+
       <h2 className="section-title">课程章节（{chapters.length}）</h2>
       <div className="chapter-list">
         {chapters.map((ch) => (

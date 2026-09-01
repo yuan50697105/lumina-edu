@@ -895,3 +895,152 @@ class RegisterRequest(BaseModel):
     department: Optional[str] = None
     grade: Optional[str] = None
     device: str = Field("web", pattern="^(web|mobile|desktop)$")
+
+
+# ─── 题库与考试（V1.1 · D-04）───
+# 题型：single 单选 / multiple 多选 / true_false 判断 / short_answer 简答
+class QuestionCreate(BaseModel):
+    qtype: str = Field("single", pattern="^(single|multiple|true_false|short_answer)$")
+    title: str = Field(..., description="题干")
+    options: Optional[list[dict[str, Any]]] = None   # 客观题 [{"key":"A","text":"…"}]
+    answer: Optional[list] = None                    # 客观题答案数组 ["A"]；主观题为空/None
+    score: int = Field(5, ge=1, le=100)
+    difficulty: str = Field("medium", pattern="^(easy|medium|hard)$")
+    tags: Optional[list[str]] = None
+    chapter_id: Optional[uuid.UUID] = None
+
+class QuestionUpdate(BaseModel):
+    qtype: Optional[str] = Field(None, pattern="^(single|multiple|true_false|short_answer)$")
+    title: Optional[str] = None
+    options: Optional[list[dict[str, Any]]] = None
+    answer: Optional[list] = None
+    score: Optional[int] = Field(None, ge=1, le=100)
+    difficulty: Optional[str] = Field(None, pattern="^(easy|medium|hard)$")
+    tags: Optional[list[str]] = None
+    chapter_id: Optional[uuid.UUID] = None
+
+class QuestionOut(BaseModel):
+    id: uuid.UUID
+    course_id: uuid.UUID
+    chapter_id: Optional[uuid.UUID] = None
+    qtype: str
+    title: str
+    options: Optional[list[dict]] = None
+    answer: Optional[list] = None                    # 仅教师/本人答卷场景可见
+    score: int
+    difficulty: str
+    tags: Optional[list] = None
+    created_by: uuid.UUID
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class PaperCreate(BaseModel):
+    title: str = Field(..., max_length=200)
+    description: Optional[str] = None
+    start_at: Optional[datetime] = None
+    end_at: Optional[datetime] = None
+    duration_minutes: int = Field(60, ge=5, le=480)
+
+class PaperUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    start_at: Optional[datetime] = None
+    end_at: Optional[datetime] = None
+    duration_minutes: Optional[int] = Field(None, ge=5, le=480)
+    status: Optional[str] = Field(None, pattern="^(draft|published|closed)$")
+
+class PaperQuestionIn(BaseModel):
+    """加题：指定题目（缺省分值用题目自身）"""
+    question_id: uuid.UUID
+    score: Optional[int] = Field(None, ge=1, le=100)
+
+class AutoGenerateIn(BaseModel):
+    """智能组卷条件（从课程题库按条件抽题）"""
+    count: int = Field(10, ge=1, le=100)
+    difficulty: Optional[str] = Field(None, pattern="^(easy|medium|hard)$")
+    qtype_filter: Optional[str] = Field(None, pattern="^(single|multiple|true_false|short_answer)$")
+    tag: Optional[str] = None
+    score: Optional[int] = Field(None, ge=1, le=100)   # 单题分值（缺省用题目自身）
+
+class PaperQuestionOut(BaseModel):
+    id: uuid.UUID            # exam_paper_questions.id
+    question_id: uuid.UUID
+    order_num: int
+    score: int
+    qtype: str
+    title: str
+    difficulty: str
+    options: Optional[list[dict]] = None
+    answer: Optional[list] = None   # 仅教师侧序列化填充
+
+    class Config:
+        from_attributes = True
+
+class PaperOut(BaseModel):
+    id: uuid.UUID
+    course_id: uuid.UUID
+    course_title: Optional[str] = None
+    title: str
+    description: Optional[str] = None
+    start_at: Optional[datetime] = None
+    end_at: Optional[datetime] = None
+    duration_minutes: int
+    total_score: int
+    status: str
+    created_by: uuid.UUID
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    question_count: int = 0
+    questions: list[PaperQuestionOut] = []     # 教师含 answer；学生剔除 answer
+    my_attempt: Optional[dict] = None          # 学生侧：我的考试记录摘要
+
+    class Config:
+        from_attributes = True
+
+class AttemptAnswerIn(BaseModel):
+    """单题作答：客观题 answer=[选项…]；主观题 answer=[{"text":"…"}]"""
+    question_id: uuid.UUID
+    answer: list = []
+
+class AttemptSubmitIn(BaseModel):
+    answers: list[AttemptAnswerIn]
+
+class ManualGradeIn(BaseModel):
+    """主观题人工补分"""
+    question_id: uuid.UUID
+    score: int = Field(..., ge=0, le=200)
+
+class AttemptOut(BaseModel):
+    id: uuid.UUID
+    paper_id: uuid.UUID
+    student_id: uuid.UUID
+    student_name: Optional[str] = None
+    started_at: datetime
+    submitted_at: Optional[datetime] = None
+    status: str                          # in_progress | submitted
+    auto_score: int
+    manual_score: int
+    total_score: int
+    answers: Optional[list[dict]] = None
+    paper_title: Optional[str] = None
+    question_count: int = 0
+
+    class Config:
+        from_attributes = True
+
+class PaperStatsOut(BaseModel):
+    paper_id: uuid.UUID
+    submitted_count: int
+    average_score: float
+    highest_score: int
+    lowest_score: int
+    question_stats: list[dict] = []      # [{question_id,title,qtype,correct_count,answered_count,accuracy}]
+
+class StartAttemptOut(BaseModel):
+    attempt_id: uuid.UUID
+    started_at: datetime
+    end_at: Optional[datetime] = None    # 提交截止（start + 时长 / 试卷截止早者）
+    duration_minutes: int
+    questions: list[PaperQuestionOut] = []   # 不含答案

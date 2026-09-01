@@ -329,3 +329,133 @@ export interface NotificationItem {
 export interface UnreadCount {
   unread_count: number
 }
+
+// ─── 题库与考试（D-04）───
+export type QuestionType = 'single' | 'multiple' | 'true_false' | 'short_answer'
+export type Difficulty = 'easy' | 'medium' | 'hard'
+
+export interface QuestionOption {
+  key: string
+  text: string
+}
+
+export interface ExamQuestion {
+  id: string
+  course_id: string
+  chapter_id?: string | null
+  qtype: QuestionType
+  title: string
+  options?: QuestionOption[] | null
+  answer?: string[] | null
+  score: number
+  difficulty: Difficulty
+  tags?: string[] | null
+  created_at: string
+}
+
+export interface ExamPaperQuestion {
+  id: string
+  question_id: string
+  order_num: number
+  score: number
+  qtype: QuestionType
+  title: string
+  difficulty: Difficulty
+  options?: QuestionOption[] | null
+  answer?: string[] | null
+}
+
+export interface MyAttemptSummary {
+  id: string
+  status: 'in_progress' | 'submitted'
+  auto_score: number
+  manual_score: number
+  total_score: number
+  started_at?: string | null
+  submitted_at?: string | null
+}
+
+export interface ExamPaper {
+  id: string
+  course_id: string
+  course_title?: string | null
+  title: string
+  description?: string | null
+  start_at?: string | null
+  end_at?: string | null
+  duration_minutes: number
+  total_score: number
+  status: 'draft' | 'published' | 'closed'
+  created_by: string
+  created_at: string
+  updated_at?: string | null
+  question_count: number
+  questions: ExamPaperQuestion[]
+  my_attempt?: MyAttemptSummary | null
+}
+
+export interface QuestionListResp {
+  code: number
+  data: ExamQuestion[]
+  pagination: { offset: number; limit: number; total: number; has_more: boolean }
+}
+
+export interface PaperListResp {
+  code: number
+  data: ExamPaper[]
+  pagination: { offset: number; limit: number; total: number; has_more: boolean }
+}
+
+export interface StartAttempt {
+  attempt_id: string
+  started_at: string
+  end_at?: string | null
+  duration_minutes: number
+  questions: ExamPaperQuestion[]
+}
+
+export type AnswerValue = string | { text: string }
+
+export interface ExamAttemptAnswer {
+  question_id: string
+  answer: AnswerValue[]
+  correct?: boolean | null
+  manual_score?: number | null
+  score?: number | null
+}
+
+export interface ExamAttempt {
+  id: string
+  paper_id: string
+  student_id: string
+  student_name?: string | null
+  started_at: string
+  submitted_at?: string | null
+  status: 'in_progress' | 'submitted'
+  auto_score: number
+  manual_score: number
+  total_score: number
+  answers?: ExamAttemptAnswer[] | null
+  paper_title?: string | null
+  question_count: number
+}
+
+export interface QuestionStat {
+  question_id: string
+  title: string
+  qtype: QuestionType
+  score: number
+  answered_count: number
+  correct_count: number
+  accuracy?: number | null
+  avg_manual_score?: number | null
+}
+
+export interface PaperStats {
+  paper_id: string
+  submitted_count: number
+  average_score: number
+  highest_score: number
+  lowest_score: number
+  question_stats: QuestionStat[]
+}

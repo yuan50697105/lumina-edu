@@ -241,6 +241,47 @@ CREATE TABLE enrollments (
 ;
 
 
+CREATE TABLE exam_papers (
+	id CHAR(36) NOT NULL, 
+	course_id CHAR(36) NOT NULL, 
+	title VARCHAR(200) NOT NULL, 
+	description TEXT, 
+	start_at DATETIME, 
+	end_at DATETIME, 
+	duration_minutes INTEGER NOT NULL, 
+	total_score INTEGER NOT NULL, 
+	status VARCHAR(20) NOT NULL, 
+	created_by CHAR(36) NOT NULL, 
+	created_at DATETIME NOT NULL DEFAULT now(), 
+	updated_at DATETIME DEFAULT now(), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE CASCADE
+)
+
+;
+
+
+CREATE TABLE exam_questions (
+	id CHAR(36) NOT NULL, 
+	course_id CHAR(36) NOT NULL, 
+	chapter_id CHAR(36), 
+	qtype VARCHAR(20) NOT NULL, 
+	title TEXT NOT NULL, 
+	options JSON, 
+	answer JSON, 
+	score INTEGER NOT NULL, 
+	difficulty VARCHAR(10) NOT NULL, 
+	tags JSON, 
+	created_by CHAR(36) NOT NULL, 
+	created_at DATETIME NOT NULL DEFAULT now(), 
+	updated_at DATETIME DEFAULT now(), 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(course_id) REFERENCES courses (id) ON DELETE CASCADE
+)
+
+;
+
+
 CREATE TABLE grade_records (
 	id CHAR(36) NOT NULL, 
 	student_id CHAR(36) NOT NULL, 
@@ -337,6 +378,40 @@ CREATE TABLE discussion_topics (
 	created_at DATETIME NOT NULL DEFAULT now(), 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(group_id) REFERENCES project_groups (id) ON DELETE CASCADE
+)
+
+;
+
+
+CREATE TABLE exam_attempts (
+	id CHAR(36) NOT NULL, 
+	paper_id CHAR(36) NOT NULL, 
+	student_id CHAR(36) NOT NULL, 
+	started_at DATETIME NOT NULL DEFAULT now(), 
+	submitted_at DATETIME, 
+	status VARCHAR(20) NOT NULL, 
+	answers JSON, 
+	auto_score INTEGER NOT NULL, 
+	manual_score INTEGER NOT NULL, 
+	total_score INTEGER NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_exam_attempt UNIQUE (paper_id, student_id), 
+	FOREIGN KEY(paper_id) REFERENCES exam_papers (id) ON DELETE CASCADE
+)
+
+;
+
+
+CREATE TABLE exam_paper_questions (
+	id CHAR(36) NOT NULL, 
+	paper_id CHAR(36) NOT NULL, 
+	question_id CHAR(36) NOT NULL, 
+	order_num INTEGER, 
+	score INTEGER NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_paper_question UNIQUE (paper_id, question_id), 
+	FOREIGN KEY(paper_id) REFERENCES exam_papers (id) ON DELETE CASCADE, 
+	FOREIGN KEY(question_id) REFERENCES exam_questions (id) ON DELETE CASCADE
 )
 
 ;

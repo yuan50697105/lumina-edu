@@ -31,6 +31,7 @@ from app.media_proxy import router as media_router
 from app.modules.analytics import routers as analytics_routers
 from app.modules.logs import routers as logs_routers
 from app.modules.notif import routers as notif_routers
+from app.modules.exam import routers as exam_routers
 
 install_json_logging()
 logger = logging.getLogger("lumina.app")
@@ -144,6 +145,8 @@ app.include_router(analytics_routers.router, prefix="/api/v1")
 app.include_router(logs_routers.router, prefix="/api/v1")
 # 消息通知（D-03）
 app.include_router(notif_routers.router, prefix="/api/v1")
+# 题库与考试（D-04）
+app.include_router(exam_routers.router, prefix="/api/v1")
 
 
 @app.exception_handler(Exception)

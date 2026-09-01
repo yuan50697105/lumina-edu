@@ -10,6 +10,8 @@ import AdminModels from './pages/AdminModels'
 import LiveRoom from './pages/LiveRoom'
 import Groups from './pages/Groups'
 import GroupDetail from './pages/GroupDetail'
+import Exam from './pages/Exam'
+import ExamTaking from './pages/ExamTaking'
 import type { ReactNode } from 'react'
 
 function Protected({ children }: { children: ReactNode }) {
@@ -35,6 +37,8 @@ export default function App() {
         <Route path="live/:roomId" element={<LiveRoom />} />
         <Route path="groups" element={<Groups />} />
         <Route path="groups/:id" element={<GroupDetail />} />
+        <Route path="courses/:id/exam" element={<Exam />} />
+        <Route path="exam/:paperId" element={<ExamTaking />} />
         <Route path="ai" element={<AIChat />} />
         <Route path="grades" element={<Grades />} />
         <Route path="admin/models" element={<AdminModels />} />
