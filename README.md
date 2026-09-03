@@ -38,11 +38,12 @@ edu/
 │   ├── lumina-video-system.html       # 📋 D-08 教学视频与录播回放需求 v1.0
 │   ├── lumina-harmony-os.html         # 📋 D-11 鸿蒙硬件平台与操作系统支持需求 v1.0
 │   │
-│   ├── APP/phone/      (8 文件)       # 📱 手机 APP 原型
+│   ├── APP/phone/      (9 文件)       # 📱 手机 APP 原型
 │   ├── APP/tablet/     (6 文件)       # 📲 平板 APP 原型
-│   ├── Web/            (7 文件)       # 🌐 浏览器端原型
+│   ├── Web/            (9 文件)       # 🌐 浏览器端原型
 │   ├── PC/             (7 文件)       # 🖥️ 桌面端原型
-│   └── AI/             (3 文件)       # 🤖 AI 模块原型
+│   ├── AI/             (3 文件)       # 🤖 AI 模块原型
+│   └── Harmony/        (1 文件)       # 📟 鸿蒙生态原型（D-11 六设备形态）
 │
 ├── 部署/                             # Docker 部署方案（环境搭建）
 │   ├── docker-compose.yml            # 服务编排（PG/Redis/单体应用/Nginx）
@@ -68,8 +69,8 @@ edu/
 
 | 维度 | 数据 |
 |------|------|
-| **原型文件** | 40 个 HTML |
-| **平台目录** | 5 个（phone/tablet/Web/PC/AI）|
+| **原型文件** | 49 个 HTML |
+| **平台目录** | 6 个（phone/tablet/Web/PC/AI/Harmony）|
 | **界面页面** | 160+ 个 |
 | **设计表面** | 6 个（学生/教师 × 移动/Web/桌面）|
 | **后端模块** | 16 个业务模块（user / course / assignment / grade / live / collab / notif / exam / ai_gateway / ai_chat / ai_grade / analytics / logs / tutoring / admin / settings）|

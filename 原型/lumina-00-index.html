@@ -115,6 +115,9 @@
   .dir-card.ai .icon{background:var(--ai-soft); color:var(--ai);}
   .dir-card.ai{border-color:var(--ai-soft);}
   .dir-card.ai:hover{border-color:var(--ai);}
+  .dir-card.harmony .icon{background:var(--inkwell); color:var(--highlighter);}
+  .dir-card.harmony{border-color:var(--ai-soft);}
+  .dir-card.harmony:hover{border-color:var(--ai);}
 
   /* ====== PRD CARD ====== */
   .prd-card{
@@ -237,22 +240,22 @@
       <div class="name">Lumina · 墨光<small>教育应用 UI 设计系统</small></div>
     </div>
     <h1>
-      五端 · <em>33</em> 张<br/>
+      六端 · <em>35</em> 张<br/>
       <span class="hl">教学界面</span>
     </h1>
   </div>
   <div class="meta">
     <div>
-      <span class="num"><em>5</em></span>
+      <span class="num"><em>6</em></span>
       平台目录
     </div>
     <div style="margin-top:14px;">
-      <span class="num"><em>33</em></span>
+      <span class="num"><em>35</em></span>
       HTML 文件
     </div>
     <div style="margin-top:14px;">
-      <span class="num"><em>12</em></span>
-      文档（PRD+TDD+API+DB+OPS+QA+UG+WBS+WBS-P+D06-REQ+D08-REQ+状态报告）
+      <span class="num"><em>14</em></span>
+      文档（PRD+TDD+API+DB+OPS+QA+UG+WBS+WBS-P+D06/D08/D11-REQ+状态报告+索引）
     </div>
     <div style="margin-top:14px; padding:6px 10px; background:var(--ricepaper-2); border:1px solid var(--line); border-radius:6px; font-family:var(--f-mono); font-size:10px; letter-spacing:0.05em;">
       v1.7 · 2026-09-03
@@ -262,18 +265,19 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">8</div><div class="lbl">📱 手机原型</div></div>
+  <div class="stat"><div class="val hl">9</div><div class="lbl">📱 手机原型</div></div>
   <div class="stat"><div class="val hl">6</div><div class="lbl">📲 平板原型</div></div>
-  <div class="stat"><div class="val">7</div><div class="lbl">🌐 Web 端</div></div>
+  <div class="stat"><div class="val">9</div><div class="lbl">🌐 Web 端</div></div>
   <div class="stat"><div class="val">7</div><div class="lbl">🖥️ 桌面端</div></div>
   <div class="stat"><div class="val" style="color:var(--ai);">3</div><div class="lbl">🤖 AI 模块</div></div>
+  <div class="stat"><div class="val" style="color:var(--ai);">1</div><div class="lbl">🌙 鸿蒙生态</div></div>
 </div>
 
 <!-- ============ DIRECTORY NAV ============ -->
 <section class="section">
   <div class="section-header">
     <h2>原型目录 <em>Directory</em></h2>
-    <div class="num-tag">5 directories · 33 files</div>
+    <div class="num-tag">6 directories · 35 files</div>
   </div>
   <div class="section-desc">原型按平台分目录存放，点击目录卡片浏览对应文件。</div>
 
@@ -281,7 +285,7 @@
     <a class="dir-card phone" href="APP/phone/">
       <div class="icon">📱</div>
       <h3>手机原型</h3>
-      <div class="count">APP/phone/ · 8 文件</div>
+      <div class="count">APP/phone/ · 9 文件</div>
       <div class="files">
         <span>03 学生移动</span>
         <span>06 教师移动</span>
@@ -310,7 +314,7 @@
     <a class="dir-card web" href="Web/">
       <div class="icon">🌐</div>
       <h3>浏览器端</h3>
-      <div class="count">Web/ · 7 文件</div>
+      <div class="count">Web/ · 9 文件</div>
       <div class="files">
         <span>04 学生 Web</span>
         <span>07 教师 Web</span>
@@ -343,6 +347,19 @@
         <span>18 AI 学生</span>
         <span>19 AI 教师</span>
         <span>20 AI 平台</span>
+      </div>
+    </a>
+
+    <a class="dir-card harmony" href="Harmony/lumina-01-harmony-overview.html">
+      <div class="icon">🌙</div>
+      <h3>鸿蒙生态</h3>
+      <div class="count">Harmony/ · 1 文件 · D-11 HarmonyOS NEXT</div>
+      <div class="files">
+        <span>01 六设备形态总览</span>
+        <span>手机/平板/PC</span>
+        <span>智慧屏/穿戴/车机</span>
+        <span>分布式流转</span>
+        <span>原子化卡片</span>
       </div>
     </a>
   </div>
@@ -671,6 +688,29 @@
   </div>
 </section>
 
+<!-- ============ VIDEO FEATURE PROTOTYPES ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>🎬 视频专题 <em>Video</em></h2>
+    <div class="num-tag">D-08 · 教学视频与录播回放 · Web 高保真</div>
+  </div>
+  <div class="ai-grid">
+    <a class="ai-card" href="Web/lumina-22-video-system.html">
+      <span class="size">80 KB</span>
+      <div class="tag">22 · 视频系统 · Web</div>
+      <h3>教学视频与录播回放</h3>
+      <div class="sub">视频管理台（表格/卡片）· 直播转录播剪辑工作台 · 播放器 + 时间戳笔记 + AI 字幕检索 · 统计报表 · 审核工作台</div>
+      <div class="chips">
+        <span class="chip">5 页面 Tab</span>
+        <span class="chip">分片上传</span>
+        <span class="chip">入出点剪辑</span>
+        <span class="chip">督学催看</span>
+        <span class="chip">内容审核</span>
+      </div>
+    </a>
+  </div>
+</section>
+
 <!-- ============ AI MODULES ============ -->
 <section class="section">
   <div class="section-header">
@@ -773,7 +813,7 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span></div>
-  <div>教育 UI 设计系统 · 40 原型 · 13 文档 · 📱↔📲 多端 · 🤖 国产模型 · 📟 鸿蒙 NEXT</div>
+  <div>教育 UI 设计系统 · 49 原型 · 14 文档 · 📱↔📲 多端 · 🤖 国产模型 · 📟 鸿蒙 NEXT</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">v1.7 · 2026-09-03</div>
 </footer>
 

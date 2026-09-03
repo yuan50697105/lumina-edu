@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<!--
+  Lumina · 22 · 教学视频与录播回放系统 · Web 原型
+  版本：v1.0 · 作者：Lumina · 日期：2026-09-03
+  对应需求：D-08 教学视频与录播回放系统（原型/lumina-video-system.html v1.0 · 5 表 · 20 端点）
+  页面：① 视频管理台（教师）② 录播管理（直播转录播 + 剪辑工作台）③ 播放器 + 笔记 + 检索（学生）
+        ④ 统计报表 ⑤ 审核工作台（管理员）
+  ⚖️ 合规：AI 字幕显式标注「AI 生成」；审核工作台提供侵权投诉入口；数据最小化展示。
+  技术：纯 HTML + CSS + 原生 JS · 单文件独立运行 · 数据全部 Mock · 响应式 1400 / 768 / 375。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina · 22 · 教学视频与录播回放 · Web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.5;}
+  body{padding:40px 48px 64px; max-width:1400px; margin:0 auto;}
+  .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 92%); padding:0 6px;}
+
+  /* ===== Page header ===== */
+  .page-header{display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding-bottom:24px; border-bottom:1px solid var(--line); margin-bottom:28px; flex-wrap:wrap;}
+  .page-header h1{font-family:var(--f-display); font-weight:380; font-size:42px; letter-spacing:-0.02em;}
+  .page-header h1 em{font-style:italic; color:var(--cobalt);}
+  .page-header .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.14em; text-align:right;}
+
+  /* ===== Tabs ===== */
+  .tabs{display:flex; gap:6px; position:sticky; top:0; z-index:50; background:var(--ricepaper); padding:10px 0 14px; border-bottom:1px solid var(--line); margin-bottom:28px; overflow-x:auto;}
+  .tab{
+    border:1px solid var(--line); background:#fff; border-radius:999px; padding:9px 18px; cursor:pointer;
+    font-size:13px; font-weight:500; color:var(--inkwell-2); white-space:nowrap; transition:all .18s;
+    display:flex; align-items:center; gap:7px;
+  }
+  .tab:hover{border-color:var(--line-strong);}
+  .tab.active{background:var(--inkwell); color:var(--ricepaper); border-color:var(--inkwell);}
+  .tab .role{font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; opacity:0.65;}
+  .page{display:none;}
+  .page.active{display:block; animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+
+  /* ===== Shared ===== */
+  .card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin-bottom:16px; box-shadow:var(--shadow);}
+  .card h4{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin-bottom:12px; font-weight:500;}
+  .sec-title{font-family:var(--f-display); font-size:22px; font-weight:380; margin-bottom:14px;}
+  .btn{
+    padding:8px 15px; border-radius:8px; font-size:12.5px; font-weight:500; cursor:pointer;
+    border:1px solid var(--line); background:#fff; color:var(--inkwell); display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--f-body); transition:all .15s;
+  }
+  .btn:hover{border-color:var(--line-strong);}
+  .btn.primary{background:var(--cobalt); color:#fff; border-color:var(--cobalt);}
+  .btn.primary:hover{background:#333CB0;}
+  .btn.ink{background:var(--inkwell); color:var(--ricepaper); border-color:var(--inkwell);}
+  .btn.danger{background:var(--correction); color:#fff; border-color:var(--correction);}
+  .btn.grow{background:var(--growth); color:#fff; border-color:var(--growth);}
+  .btn.sm{padding:4px 10px; font-size:11px; border-radius:6px;}
+  .btn:disabled{opacity:0.55; cursor:not-allowed;}
+  .pill{display:inline-flex; align-items:center; gap:5px; font-family:var(--f-mono); font-size:10px; padding:2px 9px; border-radius:999px; white-space:nowrap;}
+  .pill .dot{width:6px; height:6px; border-radius:50%; background:currentColor;}
+  .pill.pub{background:var(--growth-soft); color:var(--growth);}
+  .pill.trans{background:var(--highlighter-soft); color:#8A6800;}
+  .pill.rej{background:var(--correction-soft); color:var(--correction);}
+  .pill.draft{background:var(--ricepaper-2); color:var(--inkwell-2);}
+  .pill.ai{background:var(--ai-soft); color:var(--ai);}
+  .tagchip{display:inline-block; font-size:10.5px; background:var(--cobalt-soft); color:var(--cobalt); border-radius:5px; padding:1px 8px; margin-right:4px;}
+  .tagchip.gray{background:var(--ricepaper-2); color:var(--inkwell-2);}
+  .select, .input{
+    border:1px solid var(--line); background:#fff; border-radius:7px; padding:7px 10px; font-size:12.5px;
+    font-family:var(--f-body); color:var(--inkwell); outline:none;
+  }
+  .select:focus, .input:focus{border-color:var(--cobalt);}
+  .toolbar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+  .toolbar .spacer{flex:1;}
+  .toolbar h3{font-family:var(--f-display); font-size:24px; font-weight:380; letter-spacing:-0.01em; margin-right:6px;}
+  .muted{color:var(--inkwell-2); font-size:12px;}
+  .mono{font-family:var(--f-mono);}
+  .num{font-family:var(--f-display); font-weight:380; letter-spacing:-0.01em;}
+  .seg{display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#fff;}
+  .seg button{border:none; background:transparent; padding:7px 13px; font-size:12px; cursor:pointer; color:var(--inkwell-2); font-family:var(--f-body);}
+  .seg button.on{background:var(--inkwell); color:var(--ricepaper);}
+  .empty{padding:48px 20px; text-align:center; color:var(--inkwell-2); font-size:13px;}
+  .empty .big{font-size:36px; margin-bottom:10px;}
+
+  /* ===== Thumbnails ===== */
+  .thumb{position:relative; aspect-ratio:16/9; border-radius:8px; overflow:hidden; background:linear-gradient(135deg,#3a3c52 0%,#15161f 70%,#0F1020 100%);}
+  .thumb::after{content:''; position:absolute; inset:0; background:radial-gradient(circle at 30% 20%, rgba(255,255,255,0.10), transparent 45%);}
+  .thumb .tt{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.5); font-family:var(--f-display); font-size:15px; font-style:italic; z-index:1; text-align:center; padding:6px;}
+  .thumb .dur{position:absolute; right:6px; bottom:6px; z-index:2; background:rgba(15,16,32,0.82); color:#fff; font-family:var(--f-mono); font-size:10px; padding:1px 6px; border-radius:4px;}
+  .thumb.w160{width:160px; flex:0 0 160px;}
+  .thumb.w120{width:120px; flex:0 0 120px;}
+  .thumb.w96{width:96px; flex:0 0 96px;}
+
+  /* ===== Video table ===== */
+  .vtable{width:100%; border-collapse:collapse;}
+  .vtable th{
+    text-align:left; font-family:var(--f-mono); font-size:9.5px; text-transform:uppercase; letter-spacing:0.12em;
+    color:var(--inkwell-2); font-weight:500; padding:8px 10px; border-bottom:1px solid var(--line-strong);
+  }
+  .vtable td{padding:12px 10px; border-bottom:1px solid var(--line); vertical-align:middle; font-size:12.5px;}
+  .vtable tr:hover td{background:rgba(61,70,201,0.03);}
+  .vtable .vtitle{font-weight:600; font-size:13px; margin-bottom:2px;}
+  .vtable .assoc{color:var(--inkwell-2); font-size:11.5px;}
+  .tablewrap{overflow-x:auto;}
+  .metric{font-family:var(--f-mono); font-size:11px;}
+  .metric b{font-family:var(--f-display); font-weight:380; font-size:15px;}
+
+  /* card view */
+  .vgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px;}
+  .vcard{background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:var(--shadow); transition:transform .15s;}
+  .vcard:hover{transform:translateY(-2px);}
+  .vcard .thumb{border-radius:0; aspect-ratio:16/9;}
+  .vcard .body{padding:12px 14px;}
+  .vcard .body .vt{font-weight:600; font-size:13.5px; margin-bottom:3px;}
+  .vcard .body .va{color:var(--inkwell-2); font-size:11.5px; margin-bottom:8px;}
+  .vcard .foot{display:flex; justify-content:space-between; align-items:center; margin-top:8px;}
+
+  /* ===== Modal ===== */
+  .overlay{
+    position:fixed; inset:0; background:rgba(15,16,32,0.5); z-index:200; display:none;
+    align-items:center; justify-content:center; padding:24px; backdrop-filter:blur(3px);
+  }
+  .overlay.open{display:flex; animation:fadein .18s ease;}
+  .modal{background:var(--ricepaper); border:1px solid var(--line-strong); border-radius:16px; width:min(680px,100%); max-height:88vh; overflow-y:auto; box-shadow:0 24px 64px rgba(15,16,32,0.28); animation:pop .22s cubic-bezier(.2,.9,.3,1.2);}
+  .modal.lg{width:min(980px,100%);}
+  @keyframes pop{from{opacity:0; transform:scale(0.94) translateY(10px);} to{opacity:1; transform:none;}}
+  .modal-head{display:flex; justify-content:space-between; align-items:center; padding:16px 22px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--ricepaper); z-index:2;}
+  .modal-head h3{font-family:var(--f-display); font-size:19px; font-weight:380;}
+  .x{border:none; background:var(--ricepaper-2); width:28px; height:28px; border-radius:50%; cursor:pointer; font-size:14px; color:var(--inkwell-2);}
+  .modal-body{padding:20px 22px;}
+  .modal-foot{display:flex; justify-content:flex-end; gap:8px; padding:14px 22px; border-top:1px solid var(--line); position:sticky; bottom:0; background:var(--ricepaper);}
+  .field{margin-bottom:13px;}
+  .field label{display:block; font-family:var(--f-mono); font-size:9.5px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); margin-bottom:5px;}
+  .field .input, .field .select, .field textarea{width:100%;}
+  .field textarea{border:1px solid var(--line); border-radius:7px; padding:8px 10px; font-family:var(--f-body); font-size:12.5px; resize:vertical; min-height:56px; background:#fff;}
+  .frow{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .hint{font-size:11px; color:var(--inkwell-2); margin-top:4px;}
+
+  /* upload */
+  .dropzone{
+    border:2px dashed var(--line-strong); border-radius:12px; padding:34px 20px; text-align:center; cursor:pointer;
+    background:rgba(255,255,255,0.6); transition:all .18s;
+  }
+  .dropzone:hover, .dropzone.over{border-color:var(--cobalt); background:var(--cobalt-soft);}
+  .dropzone .ic{font-size:34px; margin-bottom:8px;}
+  .chunks{margin-top:14px;}
+  .chunk-row{display:flex; align-items:center; gap:10px; margin-bottom:7px; font-family:var(--f-mono); font-size:10.5px; color:var(--inkwell-2);}
+  .chunk-bar{flex:1; height:7px; background:var(--ricepaper-2); border-radius:99px; overflow:hidden;}
+  .chunk-bar i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--cobalt),#6A72E8); border-radius:99px; transition:width .25s;}
+  .chunk-bar i.done{background:var(--growth);}
+
+  /* ===== Recording / clip editor ===== */
+  .g-split{display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:start;}
+  .g-player{display:grid; grid-template-columns:minmax(0,2.2fr) minmax(280px,1fr); gap:16px; align-items:start;}
+  .editor{background:var(--inkwell); border-radius:12px; padding:16px; color:#E7E8F2;}
+  .editor .prev{aspect-ratio:16/9; background:radial-gradient(circle at 50% 42%, #2c2e44 0%, #12131e 75%); border-radius:8px; display:flex; align-items:center; justify-content:center; position:relative; margin-bottom:14px; overflow:hidden;}
+  .playbtn{
+    width:58px; height:58px; border-radius:50%; background:rgba(255,255,255,0.12); border:1.5px solid rgba(255,255,255,0.5);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .15s;
+  }
+  .playbtn:hover{background:var(--cobalt); border-color:var(--cobalt);}
+  .playbtn svg{width:22px; height:22px; fill:#fff; margin-left:3px;}
+  .prev .cap{position:absolute; top:10px; left:12px; font-family:var(--f-mono); font-size:10px; color:rgba(255,255,255,0.6); letter-spacing:0.08em;}
+  .tl-wrap{padding:2px 6px;}
+  .tl-meta{display:flex; justify-content:space-between; font-family:var(--f-mono); font-size:10px; color:rgba(255,255,255,0.55); margin-bottom:6px;}
+  .tl{position:relative; height:64px; background:#1A1B2B; border-radius:8px; overflow:hidden; cursor:crosshair; touch-action:none; user-select:none;}
+  .tl .wave{position:absolute; inset:0; display:flex; align-items:center; gap:2px; padding:0 4px;}
+  .tl .wave i{flex:1; background:linear-gradient(180deg,#5560C9,#303879); border-radius:1px; min-width:2px;}
+  .tl .wave i.dim{background:linear-gradient(180deg,#33354d,#232437);}
+  .tl .sil{position:absolute; top:0; bottom:0; background:rgba(232,93,58,0.28); border-left:1px dashed var(--correction); border-right:1px dashed var(--correction);}
+  .tl .sil span{position:absolute; top:3px; left:4px; font-family:var(--f-mono); font-size:8.5px; color:#FFB59A; white-space:nowrap;}
+  .tl .region{position:absolute; top:0; bottom:0; background:rgba(245,184,0,0.10); pointer-events:none;}
+  .tl .mark{position:absolute; top:-4px; bottom:-4px; width:3px; background:var(--highlighter); cursor:ew-resize; z-index:5;}
+  .tl .mark::before{content:attr(data-l); position:absolute; top:21px; left:50%; transform:translateX(-50%); font-family:var(--f-mono); font-size:9px; color:var(--highlighter); white-space:nowrap;}
+  .tl .mark i{position:absolute; top:0; left:-5px; width:13px; height:18px; background:var(--highlighter); border-radius:2px; clip-path:polygon(0 0,100% 0,100% 62%,50% 100%,0 62%);}
+  .tl .ph{position:absolute; top:0; bottom:0; width:2px; background:#fff; z-index:6; pointer-events:none; display:none;}
+  .tl-tools{display:flex; gap:8px; flex-wrap:wrap; margin-top:18px; align-items:center;}
+  .tl-tools .btn{background:rgba(255,255,255,0.07); border-color:rgba(255,255,255,0.16); color:#E7E8F2;}
+  .tl-tools .btn.warn2{background:var(--correction); border-color:var(--correction); color:#fff;}
+  .tl-tools .btn.hl2{background:var(--highlighter); border-color:var(--highlighter); color:var(--inkwell); font-weight:600;}
+  .vis-opt{display:flex; flex-direction:column; gap:8px;}
+  .opt{display:flex; align-items:center; gap:9px; border:1px solid var(--line); background:#fff; border-radius:8px; padding:9px 12px; cursor:pointer; font-size:12.5px;}
+  .opt input{accent-color:var(--cobalt);}
+  .opt.on{border-color:var(--cobalt); background:var(--cobalt-soft);}
+  .switch{position:relative; width:34px; height:19px; background:var(--line-strong); border-radius:99px; cursor:pointer; transition:background .18s; flex:0 0 auto;}
+  .switch::after{content:''; position:absolute; top:2px; left:2px; width:15px; height:15px; border-radius:50%; background:#fff; transition:left .18s; box-shadow:0 1px 3px rgba(0,0,0,0.25);}
+  .switch.on{background:var(--growth);}
+  .switch.on::after{left:17px;}
+
+  /* ===== Player (student) ===== */
+  .player{background:#000; border-radius:12px; overflow:hidden; position:relative;}
+  .stage{aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 50% 40%, #1d1e2e 0%, #000 80%); position:relative; cursor:pointer;}
+  .stage .big-play{width:74px; height:74px; border-radius:50%; background:rgba(255,255,255,0.10); border:1.5px solid rgba(255,255,255,0.55); display:flex; align-items:center; justify-content:center; transition:all .2s;}
+  .stage.playing .big-play{opacity:0; transform:scale(1.25);}
+  .stage .big-play svg{width:28px; height:28px; fill:#fff; margin-left:4px;}
+  .stage .resume-tip{position:absolute; top:14px; left:14px; background:rgba(15,16,32,0.8); color:#fff; font-size:11px; border-radius:6px; padding:5px 10px; display:flex; gap:8px; align-items:center;}
+  .stage .resume-tip b{color:var(--highlighter);}
+  .stage .ai-tag{position:absolute; top:14px; right:14px;}
+  .ctrls{display:flex; align-items:center; gap:10px; padding:10px 14px; background:linear-gradient(180deg, rgba(0,0,0,0.0), rgba(10,10,20,0.92)); position:absolute; left:0; right:0; bottom:0; flex-wrap:wrap;}
+  .ctr{background:none; border:none; cursor:pointer; padding:4px; display:flex; align-items:center;}
+  .ctr svg{width:18px; height:18px; fill:#fff;}
+  .pbar{flex:1 1 160px; height:20px; display:flex; align-items:center; cursor:pointer; position:relative; min-width:120px;}
+  .pbar .rail{width:100%; height:4px; background:rgba(255,255,255,0.25); border-radius:99px; position:relative;}
+  .pbar .fill{height:100%; width:0; background:var(--cobalt); border-radius:99px; position:relative;}
+  .pbar .fill::after{content:''; position:absolute; right:-5px; top:50%; transform:translateY(-50%); width:11px; height:11px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.5);}
+  .pbar .rmark{position:absolute; top:50%; transform:translateY(-50%); width:8px; height:8px; border-radius:50%; background:var(--highlighter); border:1.5px solid var(--inkwell);}
+  .pbar .chdot{position:absolute; top:50%; transform:translateY(-50%); width:3px; height:8px; background:rgba(255,255,255,0.55); border-radius:1px;}
+  .ptime{font-family:var(--f-mono); font-size:11px; color:#fff; white-space:nowrap;}
+  .menu-wrap{position:relative;}
+  .menu-btn{background:rgba(255,255,255,0.10); border:none; color:#fff; font-family:var(--f-mono); font-size:10.5px; padding:4px 9px; border-radius:5px; cursor:pointer;}
+  .menu{position:absolute; bottom:30px; right:0; background:#181A28; border:1px solid rgba(255,255,255,0.14); border-radius:8px; padding:4px; display:none; min-width:86px; z-index:20;}
+  .menu.open{display:block; animation:fadein .12s ease;}
+  .menu button{display:block; width:100%; text-align:left; background:none; border:none; color:#D8D9E8; font-size:11.5px; padding:5px 10px; border-radius:5px; cursor:pointer; font-family:var(--f-mono);}
+  .menu button:hover{background:rgba(255,255,255,0.08);}
+  .menu button.on{color:var(--highlighter);}
+  .danmu{background:var(--inkwell); color:#E7E8F2; border-radius:0 0 12px 12px; padding:0 14px; font-size:12px;}
+  .danmu summary{cursor:pointer; padding:9px 0; font-family:var(--f-mono); font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.6); list-style:none; display:flex; justify-content:space-between; align-items:center;}
+  .danmu summary::after{content:'▾'; transition:transform .15s;}
+  .danmu[open] summary::after{transform:rotate(180deg);}
+  .dmtop{display:flex; gap:8px; margin-bottom:8px;}
+  .dmtop input{flex:1; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.14); border-radius:6px; padding:6px 10px; color:#fff; font-size:12px; outline:none;}
+  .dm{display:flex; gap:8px; padding:5px 0; border-top:1px dashed rgba(255,255,255,0.1); font-size:12px;}
+  .dm .who{color:var(--highlighter); font-weight:600; flex:0 0 auto;}
+  .dm .at{font-family:var(--f-mono); font-size:9.5px; color:rgba(255,255,255,0.4); flex:0 0 auto;}
+
+  /* right panel */
+  .panel{background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden; position:sticky; top:74px;}
+  .ptabs{display:flex; border-bottom:1px solid var(--line); background:var(--ricepaper);}
+  .ptab{flex:1; border:none; background:none; padding:11px 4px; font-size:12px; cursor:pointer; color:var(--inkwell-2); font-family:var(--f-body); border-bottom:2px solid transparent;}
+  .ptab.on{color:var(--cobalt); border-bottom-color:var(--cobalt); background:#fff; font-weight:600;}
+  .pbody{padding:12px 14px; max-height:520px; overflow-y:auto;}
+  .note{display:flex; gap:9px; padding:9px 0; border-bottom:1px solid var(--line);}
+  .note .nshot{width:52px; height:30px; border-radius:4px; flex:0 0 52px; background:linear-gradient(135deg,#3a3c52,#111); position:relative;}
+  .note-body{flex:1;}
+  .note-body .nx{font-size:12px; margin-bottom:3px;}
+  .tstamp{font-family:var(--f-mono); font-size:10px; color:var(--cobalt); background:var(--cobalt-soft); border:none; padding:2px 7px; border-radius:5px; cursor:pointer; flex:0 0 auto; height:fit-content;}
+  .tstamp:hover{background:var(--cobalt); color:#fff;}
+  .pnote-acts{display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--line); background:var(--ricepaper);}
+  .kbd{font-family:var(--f-mono); font-size:9px; background:#fff; border:1px solid var(--line-strong); border-bottom-width:2px; border-radius:4px; padding:0 5px; color:var(--inkwell-2);}
+  .chap{padding:8px 0; border-bottom:1px solid var(--line); display:flex; gap:10px; align-items:flex-start;}
+  .chap .cthumb{width:64px; height:36px; border-radius:4px; flex:0 0 64px; background:linear-gradient(135deg,#40435e,#0F1020);}
+  .chap .ct{font-size:12.5px; font-weight:600;}
+  .chap .cd{font-size:11px; color:var(--inkwell-2);}
+  .chap.l2{padding-left:26px;}
+  .sr-item{padding:9px 0; border-bottom:1px solid var(--line); cursor:pointer;}
+  .sr-item:hover .sr-t{color:var(--cobalt);}
+  .sr-item p{font-size:12px;}
+  .sr-item mark{background:var(--highlighter-soft); color:var(--inkwell); border-radius:2px; padding:0 2px;}
+  .sr-t{font-family:var(--f-mono); font-size:10px; color:var(--cobalt); margin-right:8px;}
+  .sr-item .sn{display:flex; gap:8px; align-items:center;}
+  .snote{background:var(--ai-soft); color:var(--ai); font-size:10px; border-radius:5px; padding:2px 8px; margin-bottom:8px; font-family:var(--f-mono);}
+
+  /* note popover */
+  .popover{
+    position:absolute; z-index:30; background:#fff; border:1px solid var(--line-strong); border-radius:10px; box-shadow:var(--shadow);
+    padding:12px; width:240px; display:none; right:10px; top:10px;
+  }
+  .popover.open{display:block; animation:fadein .15s ease;}
+  .popover textarea{width:100%; border:1px solid var(--line); border-radius:6px; padding:7px 9px; font-size:12px; font-family:var(--f-body); min-height:56px; resize:vertical;}
+
+  /* ===== Stats ===== */
+  .statgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:16px;}
+  .stat{background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px;}
+  .stat .lb{font-family:var(--f-mono); font-size:9.5px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2);}
+  .stat .vv{font-family:var(--f-display); font-weight:380; font-size:34px; letter-spacing:-0.02em; margin-top:4px;}
+  .stat .dt{font-family:var(--f-mono); font-size:10.5px; margin-top:3px;}
+  .stat .dt.up{color:var(--growth);} .stat .dt.down{color:var(--correction);}
+  .charts{display:grid; grid-template-columns:1.4fr 1fr; gap:14px;}
+  .bars{display:flex; align-items:flex-end; gap:10px; height:150px; padding-top:10px;}
+  .bar{flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; height:100%; justify-content:flex-end;}
+  .bar i{width:100%; max-width:34px; background:linear-gradient(180deg,#6A72E8,var(--cobalt)); border-radius:4px 4px 0 0;}
+  .bar.c2 i{background:linear-gradient(180deg,#F7CE4B,var(--highlighter));}
+  .bar span{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2);}
+  .heat{display:grid; grid-template-columns:34px repeat(24,1fr); gap:2px; font-family:var(--f-mono); font-size:8px; color:var(--inkwell-2);}
+  .heat .hc{aspect-ratio:1; border-radius:2px; background:var(--ricepaper-2);}
+  .heat .hh{display:flex; align-items:center; justify-content:flex-end; padding-right:5px;}
+  .rank li{display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); font-size:12.5px; list-style:none;}
+  .rank .no{font-family:var(--f-display); font-size:17px; font-weight:380; color:var(--cobalt); flex:0 0 26px;}
+  .rank .no.t1{color:var(--highlighter);} .rank .no.t2{color:#9AA0B4;} .rank .no.t3{color:#B87333;}
+  .rank .grow-bar{flex:0 0 90px; height:5px; background:var(--ricepaper-2); border-radius:99px; overflow:hidden;}
+  .rank .grow-bar i{display:block; height:100%; background:var(--growth);}
+  .pie{width:150px; height:150px; border-radius:50%; background:conic-gradient(var(--cobalt) 0 38%, var(--highlighter) 38% 60%, var(--growth) 60% 76%, var(--correction) 76% 88%, var(--ai) 88% 95%, var(--line-strong) 95% 100%); position:relative; margin:6px auto;}
+  .pie::after{content:''; position:absolute; inset:36px; background:#fff; border-radius:50%;}
+  .legend{font-size:11px; display:flex; flex-direction:column; gap:5px; justify-content:center;}
+  .legend i{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:7px;}
+  .quota{border-radius:10px; padding:10px 14px; font-size:12px; display:flex; justify-content:space-between; align-items:center; margin-top:10px;}
+  .quota.warn{background:var(--correction-soft); border:1px solid var(--correction); color:#8C2F12;}
+  .g31{display:grid; grid-template-columns:1fr 1.5fr; gap:14px;}
+
+  /* ===== Review ===== */
+  .badge{background:var(--correction); color:#fff; font-family:var(--f-mono); font-size:10px; border-radius:99px; padding:2px 9px; margin-left:8px;}
+  .policy-row{display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--line); font-size:12.5px;}
+  .rv-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:18px;}
+  .meta-tb{width:100%; border-collapse:collapse; font-size:12px;}
+  .meta-tb td{padding:6px 4px; border-bottom:1px dashed var(--line);}
+  .meta-tb td:first-child{color:var(--inkwell-2); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.08em; width:90px;}
+  .radio-row{display:flex; gap:10px;}
+  .radio-card{flex:1; border:1.5px solid var(--line); border-radius:10px; padding:10px; text-align:center; cursor:pointer; font-size:13px; background:#fff;}
+  .radio-card.on.pass{border-color:var(--growth); background:var(--growth-soft); color:var(--growth); font-weight:600;}
+  .radio-card.on.rej{border-color:var(--correction); background:var(--correction-soft); color:var(--correction); font-weight:600;}
+  .legal-foot{margin-top:34px; padding-top:16px; border-top:1px solid var(--line); display:flex; justify-content:space-between; font-size:11.5px; color:var(--inkwell-2); flex-wrap:wrap; gap:10px;}
+  .legal-foot a{color:var(--cobalt);}
+
+  /* toast */
+  #toast{position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--inkwell); color:var(--ricepaper); font-size:13px; padding:11px 20px; border-radius:10px; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:all .25s; z-index:500; max-width:82vw; text-align:center;}
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  #toast b{color:var(--highlighter);}
+
+  /* ===== Responsive ===== */
+  @media (max-width:1100px){
+    .g-split, .g-player, .charts, .g31, .rv-grid{grid-template-columns:1fr;}
+    .statgrid{grid-template-columns:repeat(2,1fr);}
+    .panel{position:static;}
+  }
+  @media (max-width:768px){
+    body{padding:22px 16px 48px;}
+    .page-header h1{font-size:30px;}
+    .vtable .col-hidem{display:none;}
+    .frow{grid-template-columns:1fr;}
+    .tabs{margin:0 -16px 20px; padding:8px 16px 12px;}
+  }
+  @media (max-width:480px){
+    .statgrid{grid-template-columns:1fr;}
+    .thumb.w160{width:110px; flex-basis:110px;}
+    .tab{padding:7px 12px; font-size:12px;}
+    .toolbar h3{font-size:19px; width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>教学视频 · <em>录播回放</em> <span class="hl">Video</span></h1>
+  <div class="meta">D-08 · Prototype v1.0 · 2026-09-03<br>5 表 · 20 端点 · 教师 / 学生 / 管理员三视角</div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-p="p1">🎬 视频管理台 <span class="role">教师</span></button>
+  <button class="tab" data-p="p2">📼 录播管理 <span class="role">教师</span></button>
+  <button class="tab" data-p="p3">▶️ 播放 · 笔记 · 检索 <span class="role">学生</span></button>
+  <button class="tab" data-p="p4">📊 统计报表 <span class="role">教师</span></button>
+  <button class="tab" data-p="p5">🛡️ 审核工作台 <span class="role">管理员</span></button>
+</nav>
+
+<!-- ==================== P1 视频管理台 ==================== -->
+<section class="page active" id="p1">
+  <div class="toolbar">
+    <h3>视频管理</h3>
+    <button class="btn primary" onclick="openUpload()">⬆ 上传视频</button>
+    <div class="spacer"></div>
+    <select class="select" id="f-course" onchange="renderVideos()"><option value="">全部课程</option></select>
+    <select class="select" id="f-status" onchange="renderVideos()">
+      <option value="">全部状态</option><option value="published">已发布</option><option value="transcoding">转码中</option><option value="rejected">审核失败</option><option value="draft">草稿</option>
+    </select>
+    <select class="select" id="f-tag" onchange="renderVideos()"><option value="">全部标签</option></select>
+    <input class="input" id="f-q" placeholder="搜索标题 / 简介…" style="width:170px" oninput="renderVideos()" />
+    <div class="seg" id="viewSeg">
+      <button class="on" data-v="table" onclick="setView('table')">☰ 表格</button>
+      <button data-v="card" onclick="setView('card')">▦ 卡片</button>
+    </div>
+  </div>
+
+  <div class="card" id="listTable">
+    <div class="tablewrap">
+      <table class="vtable">
+        <thead><tr>
+          <th style="width:180px">预览</th><th>标题 / 关联</th><th>标签</th><th>状态</th>
+          <th class="col-hidem">播放 · 完播</th><th class="col-hidem">上传时间</th><th style="width:120px">操作</th>
+        </tr></thead>
+        <tbody id="v-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="vgrid" id="listCard" style="display:none"></div>
+  <div class="muted" id="v-count"></div>
+</section>
+
+<!-- ==================== P2 录播管理 ==================== -->
+<section class="page" id="p2">
+  <div class="toolbar">
+    <h3>录播管理</h3>
+    <button class="btn ink" onclick="toast('已进入「直播 → 转录播」向导：选择课堂 <b>LINEAR-8</b> · 自动拉取分段录制文件')">⚡ 从直播生成</button>
+    <div class="spacer"></div>
+    <div class="seg" id="recSeg">
+      <button class="on" data-s="" onclick="filterRec(this)">全部来源</button>
+      <button data-s="live" onclick="filterRec(this)">直播录制</button>
+      <button data-s="upload" onclick="filterRec(this)">手动上传</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4>录制列表</h4>
+    <div class="tablewrap">
+      <table class="vtable">
+        <thead><tr><th style="width:130px">缩略图</th><th>来源课堂</th><th class="col-hidem">来源</th><th>时长</th><th class="col-hidem">录制日期</th><th>状态</th><th style="width:110px">操作</th></tr></thead>
+        <tbody id="rec-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="g-split">
+    <div class="editor">
+      <div class="prev">
+        <span class="cap">剪辑预览 · 线性代数 第 8 讲（直播转录播）</span>
+        <div class="playbtn" onclick="tlPreview()" title="预览剪辑效果"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+      </div>
+      <div class="tl-wrap">
+        <div class="tl-meta"><span>时间轴 · <b id="tl-range">04:20 → 88:40</b> · 剪辑后 <b id="tl-clip">84:20</b></span><span id="tl-sil-info">检测到 2 段静音</span></div>
+        <div class="tl" id="tl">
+          <div class="wave" id="wave"></div>
+          <div class="region" id="tl-region"></div>
+          <div class="sil" id="sil1"><span>静音 48s</span></div>
+          <div class="sil" id="sil2"><span>静音 1m38s</span></div>
+          <div class="mark" id="mark-in" data-l="入点"><i></i></div>
+          <div class="mark" id="mark-out" data-l="出点"><i></i></div>
+          <div class="ph" id="tl-ph"></div>
+        </div>
+        <div class="tl-tools">
+          <button class="btn hl2" onclick="setIN()">⇤ 入点=<span id="btn-in">当前播放位</span></button>
+          <button class="btn hl2" onclick="setOUT()">⇥ 出点=<span id="btn-out">当前播放位</span></button>
+          <button class="btn warn2" id="btn-purge" onclick="purgeSilence()">🧹 一键剔除静音段</button>
+          <button class="btn" onclick="tlPreview()">▶ 预览剪辑</button>
+          <button class="btn" id="btn-gen" onclick="genVersion()" style="background:var(--cobalt);border-color:var(--cobalt);color:#fff">⚙ 生成新版本</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h4>发布设置 · 可见性</h4>
+        <div class="vis-opt" id="visOpts">
+          <label class="opt on"><input type="radio" name="vis" value="course" checked onchange="setVis(this)"> 课程内可见（仅选课学生）</label>
+          <label class="opt"><input type="radio" name="vis" value="public" onchange="setVis(this)"> 公开（全校可检索）</label>
+          <label class="opt"><input type="radio" name="vis" value="password" onchange="setVis(this)"> 密码访问</label>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <label>定时发布 publish_at（留空 = 立即）</label>
+          <input class="input" type="datetime-local" value="2026-09-05T08:00" style="width:100%" />
+        </div>
+        <div style="display:flex; gap:8px; margin-top:6px;">
+          <button class="btn grow" style="flex:1" onclick="toast('已提交发布：<b>REC-08-v2</b> · 定时 2026-09-05 08:00')">🚀 发布</button>
+          <button class="btn" onclick="toast('草稿已保存')">保存草稿</button>
+        </div>
+      </div>
+      <div class="card">
+        <h4>版本历史</h4>
+        <div style="font-size:12px">
+          <div class="policy-row"><span><b>v3</b> · 剪辑版（草稿）</span><span class="mono muted">今天 14:22</span></div>
+          <div class="policy-row"><span><b>v2</b> · 剪辑版 · 已发布</span><span class="mono muted">08-28</span></div>
+          <div class="policy-row" style="border:none"><span><b>v1</b> · 直播原始录制</span><span class="mono muted">08-27</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== P3 播放器 + 笔记 + 检索 ==================== -->
+<section class="page" id="p3">
+  <div class="g-player">
+    <div>
+      <div class="player">
+        <div class="stage" id="stage" onclick="togglePlay()">
+          <span class="resume-tip">⏮ 上次学到 <b id="resume-label">31:19</b> · <button class="btn sm" style="background:var(--highlighter);border-color:var(--highlighter);color:var(--inkwell);font-weight:600" onclick="event.stopPropagation();seekPct(RESUME)">续播</button></span>
+          <span class="ai-tag pill ai">AI 字幕 · 生成式</span>
+          <div class="big-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+        </div>
+        <div class="ctrls">
+          <button class="ctr" id="btn-play" onclick="togglePlay()" title="播放/暂停"><svg id="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+          <div class="pbar" id="pbar">
+            <div class="rail" id="rail">
+              <div class="fill" id="pfill"></div>
+              <span class="rmark" id="rmark" title="上次观看位置"></span>
+            </div>
+          </div>
+          <span class="ptime"><span id="t-cur">00:00</span> / 48:12</span>
+          <div class="menu-wrap">
+            <button class="menu-btn" id="m-speed" onclick="toggleMenu('speed')">1x 倍速</button>
+            <div class="menu" id="menu-speed">
+              <button onclick="setSpeed(0.5)">0.5x</button><button class="on" onclick="setSpeed(1)">1x</button><button onclick="setSpeed(1.5)">1.5x</button><button onclick="setSpeed(2)">2x</button>
+            </div>
+          </div>
+          <div class="menu-wrap">
+            <button class="menu-btn" id="m-quality" onclick="toggleMenu('quality')">1080p</button>
+            <div class="menu" id="menu-quality">
+              <button onclick="setQuality('4K')">4K</button><button class="on" onclick="setQuality('1080p')">1080p</button><button onclick="setQuality('720p')">720p</button><button onclick="setQuality('360p')">360p</button>
+            </div>
+          </div>
+          <div class="menu-wrap">
+            <button class="menu-btn" id="m-sub" onclick="toggleMenu('sub')">字幕：关</button>
+            <div class="menu" id="menu-sub">
+              <button class="on" onclick="setSub('关')">关</button><button onclick="setSub('中文')">中文</button><button onclick="setSub('EN')">EN</button>
+            </div>
+          </div>
+          <button class="ctr" onclick="toast('已进入全屏（原型示意）')" title="全屏"><svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg></button>
+        </div>
+      </div>
+      <details class="danmu" id="danmuBox" open>
+        <summary>弹幕 / 讨论 · <span id="dm-count">3</span> 条</summary>
+        <div id="dm-list"></div>
+        <div class="dmtop">
+          <input id="dm-input" placeholder="发一条弹幕（回车发送）…" onkeydown="if(event.key==='Enter')sendDM()" />
+          <button class="btn sm primary" onclick="sendDM()">发送</button>
+        </div>
+      </details>
+    </div>
+
+    <div class="panel">
+      <div class="ptabs">
+        <button class="ptab on" data-pt="notes" onclick="panelTab('notes')">📝 笔记</button>
+        <button class="ptab" data-pt="chapters" onclick="panelTab('chapters')">📚 章节</button>
+        <button class="ptab" data-pt="search" onclick="panelTab('search')">🔍 检索</button>
+      </div>
+
+      <div class="pbody" id="pt-notes" style="position:relative">
+        <div class="popover" id="notePop">
+          <div class="field" style="margin-bottom:8px"><label>在 <span class="mono" id="pop-time">00:00</span> 插入笔记</label></div>
+          <textarea id="pop-input" placeholder="记录此刻的疑问或要点…"></textarea>
+          <div style="display:flex; gap:6px; margin-top:8px;">
+            <button class="btn sm primary" style="flex:1" onclick="saveNote()">保存</button>
+            <button class="btn sm" onclick="closeNotePop()">取消</button>
+          </div>
+        </div>
+        <div id="notes-list"></div>
+      </div>
+
+      <div class="pbody" id="pt-chapters" style="display:none">
+        <div class="snote">⚙ 知识点切片由 AI 自动生成，可人工调整</div>
+        <div id="chaps-list"></div>
+      </div>
+
+      <div class="pbody" id="pt-search" style="display:none">
+        <div class="snote">⚖️ AI 生成 · 字幕由 ASR 转写，检索命中以时间戳为准</div>
+        <input class="input" id="sr-input" placeholder="全文搜索字幕内容，如：洛必达…" style="width:100%;margin-bottom:10px" oninput="doSearch()" />
+        <div id="sr-list"><div class="muted" style="padding:16px 0; text-align:center">输入关键词开始检索</div></div>
+      </div>
+
+      <div class="pnote-acts">
+        <button class="btn sm primary" onclick="openNotePop()" style="flex:1">＋ 暂停插入笔记 <span class="kbd">N</span></button>
+        <button class="btn sm" onclick="snap()" style="flex:1">📷 截图标记 <span class="kbd">S</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== P4 统计报表 ==================== -->
+<section class="page" id="p4">
+  <div class="toolbar">
+    <h3>统计报表</h3>
+    <div class="seg">
+      <button onclick="setRange(this,'近 7 天')">近 7 天</button>
+      <button class="on" onclick="setRange(this,'近 30 天')">近 30 天</button>
+      <button onclick="setRange(this,'本学期')">学期</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" onclick="toast('报表导出中：<b>video-stats-30d.csv</b> 已生成')">⬇ 导出 CSV</button>
+  </div>
+
+  <div class="statgrid">
+    <div class="stat"><div class="lb">总播放量</div><div class="vv">18,427</div><div class="dt up">▲ 12.4% vs 上周期</div></div>
+    <div class="stat"><div class="lb">平均完播率</div><div class="vv">68.2<span style="font-size:18px">%</span></div><div class="dt up">▲ 3.1pp</div></div>
+    <div class="stat"><div class="lb">平均观看时长</div><div class="vv">26:41</div><div class="dt down">▼ 00:38</div></div>
+    <div class="stat"><div class="lb">存储占用</div><div class="vv">312<span style="font-size:18px"> GB</span></div><div class="dt down" style="color:var(--correction)">■ 配额 390 GB · 已用 80%</div></div>
+  </div>
+
+  <div class="charts">
+    <div class="card">
+      <h4>播放量趋势 · 近 30 天</h4>
+      <svg viewBox="0 0 300 120" style="width:100%;height:150px" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3D46C9" stop-opacity="0.28"/><stop offset="1" stop-color="#3D46C9" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <g stroke="rgba(15,16,32,0.08)" stroke-width="1">
+          <line x1="0" y1="30" x2="300" y2="30"/><line x1="0" y1="60" x2="300" y2="60"/><line x1="0" y1="90" x2="300" y2="90"/>
+        </g>
+        <path d="M0,95 L20,88 L40,92 L60,70 L80,74 L100,55 L120,60 L140,42 L160,50 L180,30 L200,38 L220,22 L240,34 L260,18 L280,26 L300,12 L300,120 L0,120 Z" fill="url(#lg)"/>
+        <polyline points="0,95 20,88 40,92 60,70 80,74 100,55 120,60 140,42 160,50 180,30 200,38 220,22 240,34 260,18 280,26 300,12" fill="none" stroke="var(--cobalt)" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="300" cy="12" r="3" fill="var(--highlighter)" stroke="var(--cobalt)"/>
+      </svg>
+      <div class="muted mono" style="font-size:9px;display:flex;justify-content:space-between"><span>08-05</span><span>08-19</span><span>09-03</span></div>
+    </div>
+    <div class="card">
+      <h4>完播率分布 · 全部视频</h4>
+      <div class="bars">
+        <div class="bar"><i style="height:18%"></i><span>&lt;40%</span></div>
+        <div class="bar"><i style="height:34%"></i><span>40-60</span></div>
+        <div class="bar"><i style="height:52%"></i><span>60-75</span></div>
+        <div class="bar c2"><i style="height:78%"></i><span>75-90</span></div>
+        <div class="bar"><i style="height:30%"></i><span>≥90</span></div>
+      </div>
+      <div class="muted" style="font-size:11px;margin-top:8px">60-90% 区间占 58%，与督学清单联动看 →</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4>观看高峰时段 · 24h × 7d 热力图</h4>
+    <div class="heat" id="heat"></div>
+    <div class="muted" style="margin-top:8px;font-size:11px">高峰集中在 <b>19:00–22:00</b>（工作日）与 <b>10:00–12:00</b>（周末）；建议直播回放定时发布避开该时段转码排队。</div>
+  </div>
+
+  <div class="g31">
+    <div class="card">
+      <h4>视频排行 · Top 10（播放量）</h4>
+      <ul class="rank" id="rank"></ul>
+    </div>
+    <div class="card">
+      <h4>督学清单 · 未观看 <span class="mono">（已按完播 &lt; 10% 过滤）</span></h4>
+      <div class="tablewrap">
+        <table class="vtable">
+          <thead><tr><th>学生</th><th>课程 / 视频</th><th class="col-hidem">未看时长</th><th style="width:90px">操作</th></tr></thead>
+          <tbody id="nudge-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="g31">
+    <div class="card" style="display:flex; gap:18px; align-items:center; flex-wrap:wrap">
+      <div style="text-align:center">
+        <h4>存储 · 课程分布</h4>
+        <div class="pie"></div>
+      </div>
+      <div class="legend">
+        <div><i style="background:var(--cobalt)"></i>高等数学 A 38%</div>
+        <div><i style="background:var(--highlighter)"></i>线性代数 22%</div>
+        <div><i style="background:var(--growth)"></i>数据结构 16%</div>
+        <div><i style="background:var(--correction)"></i>大学英语 12%</div>
+        <div><i style="background:var(--ai)"></i>概率论 7%</div>
+        <div><i style="background:var(--line-strong)"></i>其他 5%</div>
+        <div class="quota warn">⚠ 配额告警：<b>312 / 390 GB（80%）</b> · 建议归档 4K 源文件</div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>TOP 10 大文件</h4>
+      <div class="tablewrap">
+        <table class="vtable">
+          <thead><tr><th>文件</th><th>码流</th><th>大小</th><th class="col-hidem">存储层</th></tr></thead>
+          <tbody id="bigfile-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== P5 审核工作台 ==================== -->
+<section class="page" id="p5">
+  <div class="toolbar">
+    <h3>内容审核<span class="badge" id="pend-badge">3 待审</span></h3>
+    <div class="spacer"></div>
+    <div class="seg">
+      <button class="on" data-as="" onclick="filterAudit(this,'')">全部</button>
+      <button data-as="pending" onclick="filterAudit(this,'pending')">待审</button>
+      <button data-as="approved" onclick="filterAudit(this,'approved')">已通过</button>
+      <button data-as="rejected" onclick="filterAudit(this,'rejected')">已驳回</button>
+    </div>
+  </div>
+
+  <div class="g-split">
+    <div class="card">
+      <h4>待审队列</h4>
+      <div class="tablewrap">
+        <table class="vtable">
+          <thead><tr><th style="width:130px">缩略图</th><th>标题 / 上传者</th><th class="col-hidem">课程</th><th class="col-hidem">时长</th><th>状态</th><th style="width:150px">操作</th></tr></thead>
+          <tbody id="audit-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h4>审核策略 · 按课程 <span class="muted">（关闭 = 教师发布免审）</span></h4>
+      <div id="policy-list"></div>
+      <div class="muted" style="font-size:11px; margin-top:10px">变更即时生效并写入审计日志（logs 模块 · 30 天留存）。</div>
+    </div>
+  </div>
+
+  <div class="legal-foot">
+    <span>⚖️ 依据《网络信息内容生态治理规定》《著作权法》：平台对用户上传教学视频承担内容审核义务。</span>
+    <a href="javascript:void(0)" onclick="toast('侵权投诉通道：请提交权利证明与链接至 <b>copyright@lumina.edu</b>（7 个工作日内处理）')">📮 侵权投诉入口</a>
+  </div>
+</section>
+
+<!-- ==================== 上传弹窗 ==================== -->
+<div class="overlay" id="upOverlay" onclick="if(event.target===this)closeUpload()">
+  <div class="modal">
+    <div class="modal-head"><h3>⬆ 上传视频</h3><button class="x" onclick="closeUpload()">✕</button></div>
+    <div class="modal-body">
+      <div class="dropzone" id="dz" onclick="mockPick()">
+        <div class="ic">🎞</div>
+        <div style="font-weight:600; margin-bottom:4px">拖拽视频文件到此处，或点击选择</div>
+        <div class="hint">支持 MP4 / MOV / MKV · 单文件上限 <b>4 GB</b> · 分片直传（8 MB/片 × 4 路并行） · 断点续传</div>
+      </div>
+      <div class="chunks" id="chunks" style="display:none"></div>
+      <div id="upMeta" style="display:none; margin-top:16px; border-top:1px dashed var(--line); padding-top:14px;">
+        <div class="frow">
+          <div class="field"><label>标题 *</label><input class="input" value="概率论与数理统计 · 第 3 讲 多维随机变量" /></div>
+          <div class="field"><label>课程 *</label><select class="select" style="width:100%"><option>概率论与数理统计</option><option>高等数学 A(上)</option><option>线性代数</option></select></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>章节</label><select class="select" style="width:100%"><option>第 3 章 多维随机变量及其分布</option><option>不关联</option></select></div>
+          <div class="field"><label>标签</label><input class="input" value="必修, 强化" /></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>封面（自动抽帧，可替换）</label><div class="thumb" style="height:74px"><span class="tt">封面帧 00:41:22</span></div></div>
+          <div class="field"><label>简介</label><textarea>多维随机变量联合分布函数、边缘分布与条件分布的核心方法讲解，配合 2025 真题剖析。</textarea></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeUpload()">取消</button>
+      <button class="btn primary" id="up-submit" disabled onclick="submitUpload()">提交并转码</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 审核弹窗 ==================== -->
+<div class="overlay" id="rvOverlay" onclick="if(event.target===this)closeReview()">
+  <div class="modal lg">
+    <div class="modal-head"><h3 id="rv-title">视频审核</h3><button class="x" onclick="closeReview()">✕</button></div>
+    <div class="modal-body">
+      <div class="rv-grid">
+        <div>
+          <div class="thumb" style="aspect-ratio:16/9"><span class="tt" id="rv-thumb">预览占位</span></div>
+          <div class="editor" style="margin-top:10px; padding:10px 12px">
+            <div style="display:flex; gap:10px; align-items:center">
+              <div class="playbtn" style="width:34px;height:34px" onclick="toast('预览播放（原型示意）')"><svg viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M8 5v14l11-7z"/></svg></div>
+              <div class="pbar" style="height:14px"><div class="rail"><div class="fill" style="width:34%"></div></div></div>
+              <span class="mono" style="font-size:10px; color:rgba(255,255,255,0.7)">12:04 / 35:28</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h4 style="font-family:var(--f-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--inkwell-2); margin-bottom:8px">视频元信息</h4>
+          <table class="meta-tb" id="rv-meta"></table>
+          <div class="field" style="margin-top:14px">
+            <label>审核结果</label>
+            <div class="radio-row">
+              <div class="radio-card pass on" id="rc-pass" onclick="setVerdict('pass')">✓ 通过发布</div>
+              <div class="radio-card rej" id="rc-rej" onclick="setVerdict('reject')">✕ 驳回</div>
+            </div>
+          </div>
+          <div class="field" id="rej-box" style="display:none">
+            <label>驳回原因（必填）</label>
+            <select class="select" id="rej-reason" style="width:100%" onchange="document.getElementById('rej-custom').value=''">
+              <option>内容涉及版权物料，请补充授权证明</option>
+              <option>画质 / 音质不达标（≥720p、≥64kbps 音频）</option>
+              <option>与申报课程章节不符</option>
+              <option>含不当言论或敏感内容</option>
+              <option value="__custom">自定义…</option>
+            </select>
+            <input class="input" id="rej-custom" placeholder="输入自定义驳回原因" style="width:100%; margin-top:6px; display:none" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeReview()">稍后再审</button>
+      <button class="btn grow" onclick="submitReview()">提交审核</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============ Mock 数据 ============ */
+const VIDEOS = [
+  {id:'V-001', title:'微积分 I · 极限与连续', course:'高等数学 A(上)', chapter:'第 1 章', tags:['必修','基础'], status:'published', dur:'48:12', plays:1284, fin:72, date:'08-21'},
+  {id:'V-002', title:'线性代数 · 矩阵的初等变换', course:'线性代数', chapter:'第 2 章', tags:['必修','核心'], status:'published', dur:'52:40', plays:1105, fin:66, date:'08-24'},
+  {id:'V-003', title:'数据结构 · 二叉树遍历（直播回放 v2）', course:'数据结构', chapter:'第 6 章', tags:['核心','进阶'], status:'transcoding', dur:'1:31:22', plays:0, fin:0, date:'09-02'},
+  {id:'V-004', title:'大学英语 · 四级写作冲刺', course:'大学英语(三)', chapter:'Unit 4', tags:['选修','应试'], status:'rejected', dur:'36:05', plays:0, fin:0, date:'08-30'},
+  {id:'V-005', title:'概率论 · 大数定律与中心极限', course:'概率论与数理统计', chapter:'第 5 章', tags:['必修','强化'], status:'published', dur:'44:51', plays:862, fin:81, date:'08-18'},
+  {id:'V-006', title:'数学分析 · 多元函数微分（草稿）', course:'数学分析 B', chapter:'第 9 章', tags:['基础'], status:'draft', dur:'58:30', plays:0, fin:0, date:'09-01'},
+  {id:'V-007', title:'高等数学 · 期末总复习串讲', course:'高等数学 A(上)', chapter:'全章', tags:['应试','强化'], status:'published', dur:'1:12:08', plays:1590, fin:58, date:'08-12'},
+  {id:'V-008', title:'离散数学 · 图论入门', course:'离散数学', chapter:'第 10 章', tags:['必修','基础'], status:'transcoding', dur:'41:16', plays:0, fin:0, date:'09-03'},
+];
+const STATUS = {published:['pub','🟢 已发布'], transcoding:['trans','🟡 转码中'], rejected:['rej','🔴 审核失败'], draft:['draft','⚪ 草稿']};
+const RECS = [
+  {id:'REC-01', src:'live', title:'直播转录播 · 线性代数 第 8 讲', dur:'1:32:05', date:'08-27', status:'draft', open:true},
+  {id:'REC-02', src:'live', title:'直播转录播 · 数据结构 第 6 讲', dur:'1:31:22', date:'09-02', status:'transcoding'},
+  {id:'REC-03', src:'upload', title:'手动上传 · 概率论串讲原片', dur:'1:12:40', date:'08-12', status:'published'},
+  {id:'REC-04', src:'live', title:'直播转录播 · 高数 习题课', dur:'55:18', date:'08-29', status:'published'},
+];
+const TL_TOTAL = 92*60+15; // 1:32:05
+let inPct = 270/TL_TOTAL, outPct = (88*60+40)/TL_TOTAL;
+const SILENCES = [[23*60+10,23*60+58],[51*60+2,52*60+40]];
+const NOTES = [
+  {t:1879, x:'洛必达法则三个前提条件易漏：0/0 或 ∞/∞、去心邻域可导、 lim f\'/g\' 存在', shot:true},
+  {t:1502, x:'ε-δ 语言的「任意给定 ε」→「存在 δ」顺序不能反！', shot:false},
+  {t:960, x:'例 1.3：夹逼准则求 lim sinx/x —— 记住几何证明套路', shot:true},
+  {t:318, x:'本节路线图：极限 → 连续 → 间断点分类', shot:false},
+];
+const CHAPS = [
+  {t:0, title:'00 开场 · 本章导览', kids:[{t:0, title:'课程介绍与考核方式'}]},
+  {t:318, title:'01 数列极限的 ε-N 定义', kids:[{t:318,title:'从割圆术引入'},{t:596,title:'ε-N 形式化定义'}]},
+  {t:960, title:'02 函数极限与夹逼准则', kids:[{t:960,title:'lim sin x / x 几何证明'},{t:1250,title:'两个重要极限'}]},
+  {t:1502, title:'03 无穷小与连续', kids:[{t:1502,title:'无穷小阶比较'},{t:1750,title:'间断点分类'}]},
+  {t:1879, title:'04 洛必达法则与例题精讲', kids:[]},
+  {t:2480, title:'05 小结与课后任务', kids:[]},
+];
+const TR = [
+  {t:120, s:'今天我们进入第一章，极限——它是整个微积分的地基。'},
+  {t:335, s:'先用割圆术感受一下：用无穷多边形去逼近圆，这就是极限思想。'},
+  {t:601, s:'ε-N 定义里有五个词必须背下来：任意、给定、存在、正整数 N、当 n 大于 N。'},
+  {t:742, s:'注意：N 依赖于 ε，ε 越小，N 通常越大。'},
+  {t:963, s:'看这个经典例题：lim x 趋于 0 时 sin x 比 x，我们用面积夹逼。'},
+  {t:1108, s:'夹逼准则要求两侧极限都存在且相等，缺一不可。'},
+  {t:1512, s:'无穷小不是零，而是一个趋于零的过程，别把常量零混进来。'},
+  {t:1766, s:'第一类间断点：左右极限都存在；可去间断点是左右极限相等但不等于函数值。'},
+  {t:1884, s:'洛必达法则使用条件再强调一遍：必须是 0 比 0 或 无穷比无穷 型。'},
+  {t:2010, s:'求导后要回头检查极限是否存在，不存在时洛必达失效，退回定义。'},
+  {t:2301, s:'课后任务：教材 1.3 节习题 2、4、7，下节课随机点名板演。'},
+  {t:2492, s:'小结：定义 → 性质 → 计算 → 应用，四步走完这一章。'},
+];
+const DM = [
+  {who:'20260001', t:'12:30', x:'这页 PPT 拍下来了，谢谢老师！'},
+  {who:'20260014', t:'31:25', x:'洛必达这里差点睡着，突然醒了'},
+  {who:'20260009', t:'40:02', x:'习题 7 要用夹逼吗？'},
+];
+const RANK = [
+  ['高等数学 · 期末总复习串讲',1590,58],['微积分 I · 极限与连续',1284,72],['线性代数 · 初等变换',1105,66],
+  ['概率论 · 大数定律',862,81],['数据结构 · 二叉树（v1）',733,61],['大学英语 · 翻译技巧',624,49],
+  ['高数 · 不定积分习题课',588,77],['离散数学 · 命题逻辑',512,55],['线性代数 · 特征值',471,63],['概率论 · 假设检验',402,52],
+];
+const NUDGE = [
+  ['王思远','数据结构 / 二叉树遍历 v2','1:31:22'],['李承宇','高等数学 / 期末总复习','52:10'],['赵一诺','线性代数 / 第 8 讲','1:05:00'],
+  ['陈嘉言','概率论 / 大数定律','44:51'],['孙禾','高等数学 / 极限与连续','18:30'],['周景行','离散数学 / 图论入门','41:16'],
+];
+const BIGF = [
+  ['linear8-raw-4k.mp4','4K · 28Mbps','4.1 GB','OSS 归档'],['calc1-1080p.mp4','1080p · 6Mbps','2.3 GB','OSS 标准'],
+  ['ds-tree-live-v1.mp4','1080p · 5.5Mbps','2.1 GB','OSS 标准'],['final-review-1080p.mp4','1080p · 5Mbps','1.9 GB','OSS 标准'],
+  ['prob5-720p.mp4','720p · 2.8Mbps','0.9 GB','OSS 低频'],['eng4-1080p.mp4','1080p · 4.5Mbps','1.3 GB','OSS 低频'],
+  ['mathana-9-draft.mov','ProRes 源','6.8 GB','NAS 暂存'],['discrete10-720p.mp4','720p · 2.5Mbps','0.7 GB','OSS 低频'],
+  ['prob3-1080p.mp4','1080p · 5Mbps','1.6 GB','OSS 待传'],['linear2-1080p.mp4','1080p · 4.8Mbps','1.4 GB','OSS 标准'],
+];
+const AUDITS = [
+  {id:'A-01', title:'高等数学 · 期中复习串讲', who:'王立群 教授', course:'高等数学 A(上)', dur:'1:05:22', date:'09-02 16:40', status:'pending'},
+  {id:'A-02', title:'大学英语 · 四级写作冲刺', who:'刘婧 讲师', course:'大学英语(三)', dur:'36:05', date:'09-02 09:12', status:'pending'},
+  {id:'A-03', title:'数据结构 · 图的最小生成树', who:'张弛 副教授', course:'数据结构', dur:'49:31', date:'09-01 20:05', status:'pending'},
+  {id:'A-04', title:'线性代数 · 二次型（剪辑版 v2）', who:'本人 · 李维', course:'线性代数', dur:'52:40', date:'08-31 11:30', status:'approved'},
+  {id:'A-05', title:'概率论 · 课件录屏带广告水印', who:'某校外机构', course:'概率论与数理统计', dur:'28:44', date:'08-30 15:02', status:'rejected'},
+];
+let POLICIES = [
+  {course:'全校 · 默认策略', on:true},
+  {course:'高等数学 A(上)', on:true},
+  {course:'线性代数', on:true},
+  {course:'大学英语(三)', on:false},
+  {course:'数据结构', on:true},
+];
+
+/* ============ 工具 ============ */
+const $ = id => document.getElementById(id);
+function s2t(s){s=Math.floor(s); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), x=s%60;
+  return (h?String(h).padStart(2,'0')+':':'')+String(m).padStart(2,'0')+':'+String(x).padStart(2,'0');}
+let toastTimer;
+function toast(html){const t=$('toast'); t.innerHTML=html; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
+
+/* ============ Tab 切换 ============ */
+$('tabs').addEventListener('click', e=>{
+  const b = e.target.closest('.tab'); if(!b) return;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); $(b.dataset.p).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+/* ============ P1 视频列表 ============ */
+function uniq(a){return [...new Set(a)];}
+function initFilters(){
+  uniq(VIDEOS.map(v=>v.course)).forEach(c=>$('f-course').insertAdjacentHTML('beforeend',`<option>${c}</option>`));
+  uniq(VIDEOS.flatMap(v=>v.tags)).forEach(t=>$('f-tag').insertAdjacentHTML('beforeend',`<option>${t}</option>`));
+}
+function vRows(){
+  const c=$('f-course').value, s=$('f-status').value, t=$('f-tag').value, q=$('f-q').value.trim();
+  return VIDEOS.filter(v=>(!c||v.course===c)&&(!s||v.status===s)&&(!t||v.tags.includes(t))&&(!q||v.title.includes(q)||v.course.includes(q)));
+}
+function thumbHtml(v,cls){return `<div class="thumb ${cls}"><span class="tt">${v.title.split('·')[0]}</span><span class="dur">${v.dur}</span></div>`;}
+function renderVideos(){
+  const rows=vRows(), cls=STATUS;
+  $('v-tbody').innerHTML = rows.length ? rows.map(v=>`
+    <tr>
+      <td>${thumbHtml(v,'w160')}</td>
+      <td><div class="vtitle">${v.title}</div><div class="assoc">${v.course} · ${v.chapter}</div></td>
+      <td>${v.tags.map(t=>`<span class="tagchip">${t}</span>`).join('')}</td>
+      <td><span class="pill ${cls[v.status][0]}"><span class="dot"></span>${cls[v.status][1]}</span></td>
+      <td class="col-hidem"><span class="metric"><b>${v.plays.toLocaleString()}</b> 次 · <b>${v.fin||'—'}%</b> 完播</span></td>
+      <td class="col-hidem mono" style="font-size:11px">${v.date}</td>
+      <td><button class="btn sm" onclick="toast('编辑「<b>${v.title}</b>」元信息（原型示意）')">编辑</button>
+          <button class="btn sm" title="下载" onclick="toast('开始下载源文件（4 GB 分片打包）')">⬇</button>
+          <button class="btn sm" title="删除" onclick="delVideo('${v.id}')">✕</button></td>
+    </tr>`).join('') : '<tr><td colspan="7"><div class="empty"><div class="big">🎬</div>没有符合条件的视频</div></td></tr>';
+  $('listCard').innerHTML = rows.map(v=>`
+    <div class="vcard">
+      ${thumbHtml(v,'')}
+      <div class="body">
+        <div class="vt">${v.title}</div><div class="va">${v.course} · ${v.chapter}</div>
+        ${v.tags.map(t=>`<span class="tagchip">${t}</span>`).join('')}
+        <div class="foot"><span class="pill ${cls[v.status][0]}"><span class="dot"></span>${cls[v.status][1]}</span>
+        <span class="metric"><b>${v.plays.toLocaleString()}</b> · ${v.fin||'—'}%</span></div>
+      </div>
+    </div>`).join('');
+  $('v-count').textContent = `共 ${rows.length} 个视频 · 已发布 ${rows.filter(v=>v.status==='published').length} · 转码中 ${rows.filter(v=>v.status==='transcoding').length}`;
+}
+function delVideo(id){
+  const v=VIDEOS.find(x=>x.id===id);
+  if(confirm(`删除「${v.title}」？源文件与全部转码产物、AI 字幕将进入 30 天回收站。`)){
+    VIDEOS.splice(VIDEOS.indexOf(v),1); renderVideos(); toast('已删除（30 天内可在回收站恢复）');
+  }
+}
+function setView(v){
+  document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on', b.dataset.v===v));
+  $('listTable').style.display = v==='table'?'':'none';
+  $('listCard').style.display  = v==='card'?'':'none';
+}
+
+/* ============ 上传弹窗 ============ */
+function openUpload(){ $('upOverlay').classList.add('open'); }
+function closeUpload(){ $('upOverlay').classList.remove('open'); }
+function mockPick(){
+  $('dz').style.display='none'; $('chunks').style.display=''; $('upMeta').style.display='';
+  const names=['part-0001','part-0002','part-0003','part-0004'];
+  $('chunks').innerHTML = names.map((n,i)=>`<div class="chunk-row"><span>${n}</span><div class="chunk-bar"><i id="ck${i}"></i></div><span id="ckl${i}" style="width:64px;text-align:right">0%</span></div>`).join('')
+    + `<div class="chunk-row"><span style="flex:1;text-align:right">已分片 <b>512</b> / 512 片（8 MB × 4 路并行 · 1.42 GB / 4 GB 上限）</span></div>`;
+  let done=0;
+  names.forEach((n,i)=>{
+    let p = [35,60,20,0][i];
+    const iv=setInterval(()=>{
+      p=Math.min(100,p+Math.random()*16); $('ck'+i).style.width=p+'%'; $('ckl'+i).textContent=Math.floor(p)+'%';
+      if(p>=100){clearInterval(iv); $('ck'+i).classList.add('done'); $('ckl'+i).textContent='完成 ✓'; if(++done===4){$('up-submit').disabled=false; toast('全部 512 分片上传完成，可提交转码');}}
+    },160+i*70);
+  });
+}
+$('dz').addEventListener('dragover',e=>{e.preventDefault(); $('dz').classList.add('over');});
+$('dz').addEventListener('dragleave',()=>$('dz').classList.remove('over'));
+$('dz').addEventListener('drop',e=>{e.preventDefault(); $('dz').classList.remove('over'); mockPick();});
+function submitUpload(){
+  closeUpload(); renderVideos();
+  VIDEOS.unshift({id:'V-009', title:'概率论与数理统计 · 第 3 讲 多维随机变量', course:'概率论与数理统计', chapter:'第 3 章', tags:['必修','强化'], status:'transcoding', dur:'47:02', plays:0, fin:0, date:'09-03'});
+  renderVideos(); toast('已提交转码（多码率 4K/1080p/720p/360p + ASR 字幕生成），完成后进入<b>待审核</b>队列');
+}
+
+/* ============ P2 录播列表 + 剪辑台 ============ */
+function renderRecs(f=''){
+  const rows=RECS.filter(r=>!f||r.src===f);
+  $('rec-tbody').innerHTML = rows.map(r=>`
+    <tr>
+      <td>${`<div class="thumb w120"><span class="tt" style="font-size:11px">${r.src==='live'?'📹 直播':'⬆ 上传'}</span><span class="dur">${r.dur}</span></div>`}</td>
+      <td><div class="vtitle">${r.title}</div><div class="assoc mono">${r.id}</div></td>
+      <td class="col-hidem"><span class="tagchip ${r.src==='live'?'':'gray'}">${r.src==='live'?'直播录制':'手动上传'}</span></td>
+      <td class="mono">${r.dur}</td>
+      <td class="col-hidem mono" style="font-size:11px">${r.date}</td>
+      <td><span class="pill ${STATUS[r.status][0]}"><span class="dot"></span>${STATUS[r.status][1]}</span></td>
+      <td><button class="btn sm ${r.open?'primary':''}" onclick="toast('已载入「${r.title}」到剪辑台')">剪辑</button></td>
+    </tr>`).join('') || '<tr><td colspan="7"><div class="empty">暂无该来源录播</div></td></tr>';
+}
+function filterRec(b){
+  document.querySelectorAll('#recSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  renderRecs(b.dataset.s);
+}
+// 波形
+(function(){
+  const w=$('wave'); let html='';
+  for(let i=0;i<120;i++){const a=Math.abs(Math.sin(i*0.55))*0.7+Math.random()*0.28; html+=`<i style="height:${Math.round(a*100)}%"></i>`;}
+  w.innerHTML=html;
+})();
+const tl=$('tl');
+function layoutTL(){
+  const W=tl.clientWidth;
+  $('sil1').style.left=(SILENCES[0][0]/TL_TOTAL*100)+'%'; $('sil1').style.width=((SILENCES[0][1]-SILENCES[0][0])/TL_TOTAL*100)+'%';
+  $('sil2').style.left=(SILENCES[1][0]/TL_TOTAL*100)+'%'; $('sil2').style.width=((SILENCES[1][1]-SILENCES[1][0])/TL_TOTAL*100)+'%';
+  $('mark-in').style.left=(inPct*100)+'%';
+  $('mark-out').style.left=(outPct*100)+'%';
+  $('tl-region').style.left=(inPct*100)+'%'; $('tl-region').style.width=((outPct-inPct)*100)+'%';
+  $('tl-range').textContent=s2t(inPct*TL_TOTAL)+' → '+s2t(outPct*TL_TOTAL);
+  $('tl-clip').textContent=s2t((outPct-inPct)*TL_TOTAL);
+  document.querySelectorAll('#wave i').forEach((b,i)=>b.classList.toggle('dim', !(i/120>=inPct && i/120<=outPct)));
+}
+function dragMark(el, isIN){
+  el.addEventListener('pointerdown', e=>{
+    e.preventDefault(); el.setPointerCapture(e.pointerId);
+    const move=ev=>{
+      const r=tl.getBoundingClientRect();
+      let p=(ev.clientX-r.left)/r.width; p=Math.max(0,Math.min(1,p));
+      if(isIN) inPct=Math.min(p,outPct-0.01); else outPct=Math.max(p,inPct+0.01);
+      layoutTL();
+    };
+    const up=()=>{el.removeEventListener('pointermove',move); el.removeEventListener('pointerup',up);};
+    el.addEventListener('pointermove',move); el.addEventListener('pointerup',up);
+  });
+}
+dragMark($('mark-in'),true); dragMark($('mark-out'),false);
+let tlPh=0.42;
+function setIN(){inPct=Math.min(tlPh,outPct-0.01); layoutTL(); toast(`入点已设为 <b>${s2t(inPct*TL_TOTAL)}</b>`);}
+function setOUT(){outPct=Math.max(tlPh,inPct+0.01); layoutTL(); toast(`出点已设为 <b>${s2t(outPct*TL_TOTAL)}</b>`);}
+tl.addEventListener('click', e=>{
+  const r=tl.getBoundingClientRect(); tlPh=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
+  const ph=$('tl-ph'); ph.style.display='block'; ph.style.left=(tlPh*100)+'%';
+});
+function tlPreview(){
+  toast('预览剪辑区间 <b>'+s2t(inPct*TL_TOTAL)+' → '+s2t(outPct*TL_TOTAL)+'</b>（原型示意）');
+}
+let purged=false;
+function purgeSilence(){
+  if(purged){toast('静音段已剔除过');return;}
+  purged=true;
+  $('sil1').style.display='none'; $('sil2').style.display='none';
+  $('tl-sil-info').innerHTML='✓ 已剔除 2 段静音（共 2m26s）· 片段已自动拼合';
+  $('btn-purge').disabled=true;
+  toast('静音检测剔除完成，<b>时间轴已重新拼接</b>');
+}
+function genVersion(){
+  const b=$('btn-gen'); b.disabled=true; b.textContent='⏳ 异步转码中…';
+  setTimeout(()=>{b.disabled=false; b.textContent='✓ 已生成 v4 · 草稿'; toast('<b>v4</b> 新版本生成完成（多码率 + AI 字幕重跑），可发布');},2200);
+}
+function setVis(r){
+  document.querySelectorAll('#visOpts .opt').forEach(o=>o.classList.remove('on'));
+  r.closest('.opt').classList.add('on');
+  if(r.value==='password') toast('访问密码将下发至班级群（示例）');
+}
+layoutTL(); window.addEventListener('resize',layoutTL);
+
+/* ============ P3 播放器 ============ */
+const DUR=2892, RESUME=1879/2892;
+let cur=0, playing=false, playIv=null, speed=1;
+$('rmark').style.left=(RESUME*100)+'%';
+$('resume-label').textContent=s2t(RESUME*DUR);
+(function(){ // 章节打点
+  CHAPS.forEach(c=>{const d=document.createElement('span'); d.className='chdot'; d.style.left=(c.t/DUR*100)+'%'; $('rail').appendChild(d);});
+})();
+function paintP(){ $('pfill').style.width=(cur/DUR*100)+'%'; $('t-cur').textContent=s2t(cur); }
+function togglePlay(){
+  playing=!playing; $('stage').classList.toggle('playing',playing);
+  $('ic-play').innerHTML = playing?'<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>';
+  clearInterval(playIv);
+  if(playing) playIv=setInterval(()=>{cur+=0.25*speed; if(cur>=DUR){cur=DUR; togglePlay(); toast('播放结束 · 完播数据已上报（video_views 聚合）');} paintP();},250);
+}
+function seekPct(p){cur=p*DUR; paintP(); toast('已跳转 <b>'+s2t(cur)+'</b>');}
+$('pbar').addEventListener('click',e=>{const r=$('rail').getBoundingClientRect(); seekPct(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)));});
+function toggleMenu(k){ ['speed','quality','sub'].forEach(x=>$('menu-'+x).classList.toggle('open', x===k && !$('menu-'+x).classList.contains('open'))); }
+document.addEventListener('click',e=>{ if(!e.target.closest('.menu-wrap')) ['speed','quality','sub'].forEach(x=>$('menu-'+x).classList.remove('open')); });
+function menuPick(k,el,label){el.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('on')); el.classList.add('on'); $('m-'+k).textContent=label; $('menu-'+k).classList.remove('open');}
+function setSpeed(s){speed=s; menuPick('speed',event.target,s+'x 倍速'); toast('倍速 <b>'+s+'x</b> · 观看进度按实际时间记录');}
+function setQuality(q){menuPick('quality',event.target,q); toast('已切换 <b>'+q+'</b>（HLS 自适应）');}
+function setSub(s){menuPick('sub',event.target,'字幕：'+s);
+  if(s!=='关') toast('字幕由 <b>AI 语音识别</b> 自动生成（⚖️ 已标注「AI 生成」）');}
+
+/* 弹幕 */
+function renderDM(){ $('dm-list').innerHTML=DM.map(d=>`<div class="dm"><span class="at">${d.t}</span><span class="who">${d.who}</span><span>${d.x}</span></div>`).join(''); $('dm-count').textContent=DM.length; }
+function sendDM(){const v=$('dm-input').value.trim(); if(!v)return; DM.unshift({who:'20260001', t:s2t(cur), x:v}); $('dm-input').value=''; renderDM();}
+
+/* 侧栏 Tab */
+function panelTab(k){
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.toggle('on',b.dataset.pt===k));
+  ['notes','chapters','search'].forEach(x=>$('pt-'+x).style.display=x===k?'':'none');
+}
+/* 笔记 */
+function renderNotes(){
+  $('notes-list').innerHTML=NOTES.sort((a,b)=>b.t-a.t).map((n,i)=>`
+    <div class="note">
+      ${n.shot?'<div class="nshot"></div>':'<div class="nshot" style="visibility:hidden"></div>'}
+      <div class="note-body"><div class="nx">${n.x}</div>${n.shot?'<span class="tagchip gray">📷 截图</span>':''}</div>
+      <button class="tstamp" onclick="jumpTo(${n.t})">${s2t(n.t)}</button>
+    </div>`).join('');
+}
+function jumpTo(t){cur=t; paintP(); toast('已跳转 <b>'+s2t(t)+'</b>');}
+function openNotePop(){
+  const was=playing; if(was)togglePlay();
+  $('pop-time').textContent=s2t(cur); $('notePop').classList.add('open'); $('pop-input').focus();
+}
+function closeNotePop(){$('notePop').classList.remove('open');}
+function saveNote(){
+  const v=$('pop-input').value.trim(); if(!v){toast('笔记内容不能为空');return;}
+  NOTES.unshift({t:Math.floor(cur), x:v, shot:false}); $('pop-input').value=''; closeNotePop(); renderNotes();
+  toast('笔记已插入 <b>'+s2t(cur)+'</b>（video_notes）');
+}
+function snap(){NOTES.unshift({t:Math.floor(cur), x:'截图标记 · 第 '+s2t(cur)+' 秒画面', shot:true}); renderNotes(); toast('📷 当前帧截图已附加到笔记');}
+document.addEventListener('keydown',e=>{
+  if(!$('p3').classList.contains('active')||/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;
+  if(e.key==='n'||e.key==='N'){e.preventDefault(); openNotePop();}
+  if(e.key==='s'||e.key==='S'){e.preventDefault(); snap();}
+  if(e.key===' '){e.preventDefault(); togglePlay();}
+});
+/* 章节 */
+function renderChaps(){
+  let html='';
+  CHAPS.forEach(c=>{
+    html+=`<div class="chap"><div class="cthumb"></div><div><div class="ct">${c.title}</div><div class="cd">知识点切片 · <button class="tstamp" onclick="jumpTo(${c.t})">${s2t(c.t)}</button></div></div></div>`;
+    c.kids.slice(1).forEach(k=>html+=`<div class="chap l2"><div><div class="ct" style="font-weight:500;font-size:12px">${k.title}</div><div class="cd"><button class="tstamp" onclick="jumpTo(${k.t})">${s2t(k.t)}</button></div></div></div>`);
+  });
+  $('chaps-list').innerHTML=html;
+}
+/* 检索 */
+function doSearch(){
+  const q=$('sr-input').value.trim();
+  if(!q){$('sr-list').innerHTML='<div class="muted" style="padding:16px 0; text-align:center">输入关键词开始检索</div>'; return;}
+  const hits=TR.filter(x=>x.s.includes(q));
+  $('sr-list').innerHTML = hits.length ? hits.map(h=>{
+    const parts=h.s.split(q);
+    return `<div class="sr-item" onclick="jumpTo(${h.t})">
+      <div class="sn"><button class="tstamp" onclick="event.stopPropagation();jumpTo(${h.t})">${s2t(h.t)}</button><div style="width:44px;height:25px;border-radius:3px;background:linear-gradient(135deg,#40435e,#0F1020)"></div></div>
+      <p style="margin-top:5px">${parts[0]}<mark>${q}</mark>${parts.slice(1).join(q)}</p></div>`;
+  }).join('') : `<div class="empty" style="padding:24px">🔍 未在 AI 字幕中找到「${q}」</div>`;
+}
+
+/* ============ P4 统计 ============ */
+$('rank').innerHTML=RANK.map((r,i)=>`<li><span class="no ${i<3?'t'+(i+1):''}">${i+1}</span><span style="flex:1">${r[0]}</span><span class="metric"><b>${r[1].toLocaleString()}</b></span><div class="grow-bar"><i style="width:${r[2]}%"></i></div><span class="metric">${r[2]}%</span></li>`).join('');
+$('nudge-tbody').innerHTML=NUDGE.map(n=>`<tr><td><b>${n[0]}</b></td><td class="muted">${n[1]}</td><td class="col-hidem mono" style="font-size:11px">${n[2]}</td><td><button class="btn sm primary" onclick="nudge(this,'${n[0]}')">📣 催看</button></td></tr>`).join('');
+function nudge(btn,name){btn.outerHTML='<span class="pill pub"><span class="dot"></span>已催看</span>'; toast(`已向 <b>${name}</b> 发送督学提醒（站内信 + 企微）`);}
+$('bigfile-tbody').innerHTML=BIGF.map(f=>`<tr><td class="mono" style="font-size:11.5px">${f[0]}</td><td class="muted">${f[1]}</td><td class="metric"><b>${f[2]}</b></td><td class="col-hidem"><span class="tagchip gray">${f[3]}</span></td></tr>`).join('');
+(function(){ // 热力图
+  const days=['一','二','三','四','五','六','日']; let html='<div class="hh"></div>';
+  for(let h=0;h<24;h++) html+=`<div class="hh" style="justify-content:center">${h%3===0?h:''}</div>`;
+  days.forEach((d,i)=>{
+    html+=`<div class="hh">${d}</div>`;
+    for(let h=0;h<24;h++){
+      const wk=i>=5;
+      let v=0.04;
+      if(h>=8&&h<=11) v+= wk?0.5:0.35;
+      if(h>=13&&h<=17) v+=0.2;
+      if(h>=19&&h<=22) v+= wk?0.25:0.85;
+      v=Math.min(1,v+(i===2&&h===20?0.2:0));
+      html+=`<div class="hc" style="background:rgba(61,70,201,${v.toFixed(2)})" title="${'周'+d} ${h}:00"></div>`;
+    }
+  });
+  $('heat').innerHTML=html;
+})();
+function setRange(b,label){b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); toast('已切换到 <b>'+label+'</b>（图表联动刷新）');}
+
+/* ============ P5 审核 ============ */
+function auditRows(f=''){return AUDITS.filter(a=>!f||a.status===f);}
+function renderAudits(f){
+  const rows=auditRows(f);
+  $('audit-tbody').innerHTML=rows.map(a=>`
+    <tr>
+      <td><div class="thumb w120"><span class="tt" style="font-size:11px">${a.title.slice(0,6)}</span></div></td>
+      <td><div class="vtitle">${a.title}</div><div class="assoc">${a.who} · <span class="mono">${a.date}</span></div></td>
+      <td class="col-hidem muted">${a.course}</td>
+      <td class="col-hidem mono" style="font-size:11px">${a.dur}</td>
+      <td>${a.status==='pending'?'<span class="pill trans"><span class="dot"></span>⏳ 待审</span>':a.status==='approved'?'<span class="pill pub"><span class="dot"></span>✓ 已通过</span>':'<span class="pill rej"><span class="dot"></span>✕ 已驳回</span>'}</td>
+      <td>${a.status==='pending'
+        ? `<button class="btn sm" onclick="openReview('${a.id}')">预览</button>
+           <button class="btn sm grow" onclick="quickPass('${a.id}')">通过</button>
+           <button class="btn sm danger" onclick="openReview('${a.id}','reject')">驳回</button>`
+        : `<span class="muted mono" style="font-size:10.5px">已归档</span>`}</td>
+    </tr>`).join('') || '<tr><td colspan="6"><div class="empty"><div class="big">🛡️</div>队列为空，一切安好</div></td></tr>';
+  updBadge();
+}
+function filterAudit(b,f){b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); renderAudits(f);}
+function updBadge(){const n=AUDITS.filter(a=>a.status==='pending').length; $('pend-badge').textContent=n+' 待审'; $('pend-badge').style.display=n?'':'none';}
+function renderPolicies(){
+  $('policy-list').innerHTML=POLICIES.map((p,i)=>`<div class="policy-row"><span>${p.course}</span><div class="switch ${p.on?'on':''}" onclick="this.classList.toggle('on');POLICIES[${i}].on=!POLICIES[${i}].on;toast('「<b>${p.course}</b>」审核策略：${POLICIES[i].on?'开启':'关闭'} · 已记录审计日志')"></div></div>`).join('');
+}
+let curAudit=null, verdict='pass';
+function openReview(id, preset){
+  curAudit=AUDITS.find(a=>a.id===id); verdict=preset||'pass';
+  $('rv-title').textContent='视频审核 · '+curAudit.id;
+  $('rv-thumb').textContent=curAudit.title.slice(0,8)+'… 预览';
+  $('rv-meta').innerHTML=`<tr><td>标题</td><td>${curAudit.title}</td></tr><tr><td>上传者</td><td>${curAudit.who}</td></tr>
+    <tr><td>课程</td><td>${curAudit.course}</td></tr><tr><td>时长</td><td>${curAudit.dur}</td></tr>
+    <tr><td>提交时间</td><td>${curAudit.date}</td></tr><tr><td>AI 字幕</td><td><span class="pill ai">AI 生成 · 待抽检</span></td></tr>`;
+  setVerdict(verdict); $('rvOverlay').classList.add('open');
+}
+function closeReview(){$('rvOverlay').classList.remove('open');}
+function setVerdict(v){
+  verdict=v;
+  $('rc-pass').classList.toggle('on',v==='pass'); $('rc-rej').classList.toggle('on',v==='reject');
+  $('rej-box').style.display=v==='reject'?'':'none';
+}
+document.getElementById('rej-reason').addEventListener('change',function(){ $('rej-custom').style.display=this.value==='__custom'?'':'none'; });
+function submitReview(){
+  if(!curAudit)return;
+  if(verdict==='reject'){
+    const sel=$('rej-reason'), cust=$('rej-custom');
+    const reason=sel.value==='__custom' ? (cust.value.trim()||'') : sel.options[sel.selectedIndex].text;
+    if(!reason){toast('⚠️ 驳回必须填写原因');return;}
+    curAudit.status='rejected'; toast('已驳回：<b>'+reason+'</b> · 通知上传者');
+  } else { curAudit.status='approved'; toast('审核通过，<b>'+curAudit.title+'</b> 已发布'); }
+  closeReview(); renderAudits(document.querySelector('#p5 .seg button.on').dataset.as);
+}
+function quickPass(id){const a=AUDITS.find(x=>x.id===id); a.status='approved'; renderAudits(document.querySelector('#p5 .seg button.on').dataset.as); toast('已通过 <b>'+a.title+'</b>');}
+
+/* ============ 初始化 ============ */
+initFilters(); renderVideos(); renderRecs(); paintP(); renderNotes(); renderChaps(); renderDM(); renderAudits(); renderPolicies();
+</script>
+</body>
+</html>

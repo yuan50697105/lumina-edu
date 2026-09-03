@@ -24,11 +24,12 @@ edu/
 │   ├── lumina-learning-system.html  # D-06 自主学习与闯关奖励需求 v1.0
 │   ├── lumina-status-report.html    # 项目全景状态报告 v1.0（里程碑/模块/技术栈/质量/风险）
 │   │
-│   ├── APP/phone/  (8 files)   # 手机 APP 原型
+│   ├── APP/phone/  (9 files)   # 手机 APP 原型
 │   ├── APP/tablet/ (6 files)   # 平板 APP 原型
-│   ├── Web/        (7 files)   # 浏览器端原型
+│   ├── Web/        (9 files)   # 浏览器端原型
 │   ├── PC/         (7 files)   # 桌面端原型
-│   └── AI/         (3 files)   # AI 模块原型
+│   ├── AI/         (3 files)   # AI 模块原型
+│   └── Harmony/    (1 file)    # 📟 鸿蒙生态原型（D-11 六设备形态）
 │
 ├── 服务/                   # 单体应用 + 前端
 │   ├── lumina-app/             # ✅ 单体 FastAPI（16 模块 · 141 paths · 44 表）
@@ -207,13 +208,14 @@ background: linear-gradient(
 
 | 平台 | 目录 | 文件数 | 说明 |
 |------|------|--------|------|
-| 📱 手机 | APP/phone/ | 8 | 学生/教师移动端 |
+| 📱 手机 | APP/phone/ | 9 | 学生/教师移动端 + D-06/D-08 学习视频 |
 | 📲 平板 | APP/tablet/ | 6 | 大屏触控优化 |
-| 🌐 Web | Web/ | 7 | 浏览器端 |
+| 🌐 Web | Web/ | 9 | 浏览器端 + D-06 学习系统 + D-08 视频系统 |
 | 🖥️ 桌面 | PC/ | 7 | 桌面客户端 |
 | 🤖 AI | AI/ | 3 | AI 功能模块 |
+| 📟 鸿蒙 | Harmony/ | 1 | D-11 鸿蒙六设备形态（手机/平板/PC/智慧屏/穿戴/车机）|
 
-**总计**: 40 个 HTML 原型文件
+**总计**: 49 个 HTML 文件（35 接口原型 + 14 根目录文档）
 
 ## Git Workflow
 

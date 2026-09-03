@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  Lumina 墨光 · 鸿蒙硬件平台与操作系统支持原型
+  Version : v1.0
+  Author  : Lumina
+  Requirement : D-11 鸿蒙生态（HarmonyOS NEXT）多设备形态支持
+  Description : 6 设备形态横向切换原型 —— 手机 / 平板 / PC / 智慧屏 / 穿戴 / 车机
+  Tech    : 纯 HTML + CSS + 原生 JS，单文件独立可运行，数据全部 JS Mock
+  ============================================================================
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · 鸿蒙硬件平台与操作系统支持原型（D-11）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding-bottom:64px;}
+
+  /* ============ 顶部导航 ============ */
+  .topbar{position:sticky; top:0; z-index:50; background:rgba(250,246,236,0.92); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); padding:14px 32px; display:flex; align-items:center; gap:24px; flex-wrap:wrap;}
+  .topbar .brand{display:flex; align-items:center; gap:12px; flex-shrink:0;}
+  .topbar .logo{width:42px; height:42px; border-radius:12px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:21px; font-weight:500; font-style:italic;}
+  .topbar .name{font-family:var(--f-display); font-size:17px; font-weight:500; line-height:1.2;}
+  .topbar .name small{display:block; font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:2px;}
+  .device-switcher{display:flex; gap:6px; margin-left:auto; background:#fff; border:1px solid var(--line); border-radius:14px; padding:6px;}
+  .dev-btn{position:relative; display:flex; flex-direction:column; align-items:center; gap:2px; border:none; background:transparent; cursor:pointer; padding:8px 14px 10px; border-radius:10px; font-family:var(--f-body); transition:background .2s;}
+  .dev-btn .ico{font-size:20px; line-height:1;}
+  .dev-btn .lbl{font-size:11px; color:var(--inkwell-2); font-weight:500;}
+  .dev-btn:hover{background:var(--ricepaper);}
+  .dev-btn.active{background:var(--cobalt-soft);}
+  .dev-btn.active .lbl{color:var(--cobalt); font-weight:600;}
+  .dev-btn.active:after{content:""; position:absolute; bottom:3px; left:50%; transform:translateX(-50%); width:18px; height:3px; border-radius:2px; background:var(--cobalt);}
+  .dev-btn .prio{position:absolute; top:2px; right:4px; font-family:var(--f-mono); font-size:8px; color:var(--correction);}
+
+  /* ============ 封面标题 ============ */
+  .hero{max-width:1280px; margin:0 auto; padding:48px 32px 8px;}
+  .hero .doc-type{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--ai); background:var(--ai-soft); padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:16px;}
+  .hero h1{font-family:var(--f-display); font-weight:300; font-size:56px; letter-spacing:-0.04em; line-height:1.05;}
+  .hero h1 em{font-style:italic; color:var(--correction);}
+  .hero h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .hero .subtitle{font-size:17px; color:var(--inkwell-2); margin-top:14px; font-weight:300;}
+  .hero .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:16px; line-height:2;}
+  .hero .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:28px; padding:18px; background:#fff; border:1px solid var(--line); border-radius:14px;}
+  .hero .stat{text-align:center; padding:4px; border-right:1px solid var(--line);}
+  .hero .stat:last-child{border-right:none;}
+  .hero .stat .val{font-family:var(--f-display); font-size:24px; font-weight:300;}
+  .hero .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  /* ============ 设备视图容器 ============ */
+  .stage{max-width:1280px; margin:0 auto; padding:28px 32px 0;}
+  .view{display:none; animation:fadein .35s ease;}
+  .view.active{display:block;}
+  @keyframes fadein{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+  .view-head{display:flex; align-items:baseline; gap:14px; margin-bottom:8px; flex-wrap:wrap;}
+  .view-head h2{font-family:var(--f-display); font-weight:400; font-size:30px; letter-spacing:-0.02em;}
+  .view-head h2 em{font-style:italic; color:var(--cobalt);}
+  .view-head .spec{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); background:#fff; border:1px solid var(--line); padding:3px 10px; border-radius:8px;}
+  .prio-tag{display:inline-block; font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; padding:3px 9px; border-radius:5px;}
+  .prio-tag.p0{background:var(--correction); color:#fff;}
+  .prio-tag.p1{background:var(--highlighter); color:var(--inkwell);}
+  .prio-tag.p2{background:var(--cobalt-soft); color:var(--cobalt);}
+  .prio-tag.p3{background:var(--ricepaper-2); color:var(--inkwell-2);}
+  .view-row{display:flex; gap:36px; align-items:flex-start; justify-content:center; flex-wrap:wrap;}
+
+  /* ============ 鸿蒙特色标注气泡 ============ */
+  .notes{display:flex; flex-direction:column; gap:12px; width:250px; flex-shrink:0; padding-top:40px;}
+  .note{position:relative; background:var(--ai-soft); border:1px solid var(--ai); color:var(--ai); border-radius:12px; padding:10px 14px; font-size:12.5px; font-weight:500; line-height:1.5;}
+  .note:before{content:""; position:absolute; left:-7px; top:14px; width:12px; height:12px; background:var(--ai-soft); border-left:1px solid var(--ai); border-bottom:1px solid var(--ai); transform:rotate(45deg);}
+  .note .nt{font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.12em; display:block; margin-bottom:3px; opacity:.8;}
+  .note.warn{background:var(--correction-soft); border-color:var(--correction); color:var(--correction);}
+  .note.warn:before{background:var(--correction-soft); border-color:var(--correction);}
+  .note.growth{background:var(--growth-soft); border-color:var(--growth); color:var(--growth);}
+  .note.growth:before{background:var(--growth-soft); border-color:var(--growth);}
+
+  /* ============ 设备外框通用 ============ */
+  .frame-wrap{display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .frame-caption{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  /* ---------- 手机 ---------- */
+  .phone-frame{width:377px; height:814px; background:#111; border-radius:40px; padding:8px; box-shadow:0 24px 60px rgba(15,16,32,.28), inset 0 0 0 2px #2c2c34;}
+  .phone-screen{width:100%; height:100%; background:var(--ricepaper); border-radius:33px; overflow:hidden; display:flex; flex-direction:column; position:relative;}
+  .phone-notch{position:absolute; top:10px; left:50%; transform:translateX(-50%); width:110px; height:24px; background:#111; border-radius:14px; z-index:6;}
+  .status-bar{height:44px; flex-shrink:0; display:flex; align-items:flex-end; justify-content:space-between; padding:0 22px 4px; font-family:var(--f-mono); font-size:11px; color:var(--inkwell);}
+  .status-bar .sb-r{display:flex; gap:5px; align-items:center;}
+  .harmony-pill{font-size:8px; background:var(--inkwell); color:var(--highlighter); border-radius:4px; padding:1px 5px; letter-spacing:.06em;}
+  .app-content{flex:1; overflow-y:auto; padding:12px 14px 14px; scrollbar-width:thin;}
+  .app-content::-webkit-scrollbar{width:3px;}
+  .app-content::-webkit-scrollbar-thumb{background:var(--line-strong); border-radius:2px;}
+  .tabbar{height:62px; flex-shrink:0; background:#fff; border-top:1px solid var(--line); display:grid; grid-template-columns:repeat(5,1fr); padding-bottom:8px;}
+  .tab-btn{border:none; background:transparent; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-family:var(--f-body); font-size:10px; color:var(--inkwell-2);}
+  .tab-btn .t-ico{font-size:19px; line-height:1;}
+  .tab-btn.active{color:var(--cobalt); font-weight:600;}
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block; animation:fadein .25s;}
+
+  /* ---------- 应用内通用组件（设备屏内） ---------- */
+  .app-title{font-family:var(--f-display); font-size:21px; font-weight:400; margin:4px 0 10px;}
+  .app-title em{font-style:italic; color:var(--cobalt);}
+  .greet{font-size:12px; color:var(--inkwell-2); margin-bottom:2px;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px;}
+  .card .c-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .card .c-title{font-size:13px; font-weight:600;}
+  .card .c-more{font-family:var(--f-mono); font-size:10px; color:var(--cobalt);}
+  .chip{display:inline-block; font-family:var(--f-mono); font-size:9px; padding:2px 7px; border-radius:5px; letter-spacing:.05em;}
+  .chip.live{background:var(--correction); color:#fff;}
+  .chip.soon{background:var(--cobalt-soft); color:var(--cobalt);}
+  .chip.done{background:var(--growth-soft); color:var(--growth);}
+  .chip.mut{background:var(--ricepaper-2); color:var(--inkwell-2);}
+  .chip.warn{background:var(--highlighter-soft); color:var(--inkwell);}
+  .kicker{font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:.14em; color:var(--inkwell-2); margin:12px 0 6px;}
+  .row-item{display:flex; gap:10px; align-items:center; padding:9px 0; border-bottom:1px dashed var(--line);}
+  .row-item:last-child{border-bottom:none;}
+  .row-item .ri-ico{width:34px; height:34px; border-radius:10px; background:var(--cobalt-soft); color:var(--cobalt); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;}
+  .row-item .ri-body{flex:1; min-width:0;}
+  .row-item .ri-t{font-size:12.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .row-item .ri-d{font-size:11px; color:var(--inkwell-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .row-item .ri-x{font-family:var(--f-mono); font-size:10px; color:var(--correction); flex-shrink:0;}
+  .progress{height:5px; border-radius:3px; background:var(--ricepaper-2); overflow:hidden; margin-top:6px;}
+  .progress i{display:block; height:100%; background:var(--cobalt); border-radius:3px;}
+  .progress i.g{background:var(--growth);}
+  .next-class{background:linear-gradient(135deg, var(--cobalt) 0%, #5a4fd0 100%); color:#fff; border:none;}
+  .next-class .c-title{color:#fff;}
+  .next-class .nc-time{font-family:var(--f-mono); font-size:11px; opacity:.85;}
+  .next-class .nc-room{font-size:11px; opacity:.85;}
+  .streak{display:flex; align-items:center; gap:10px;}
+  .streak .flame{font-size:26px;}
+  .streak .s-num{font-family:var(--f-display); font-size:22px; font-weight:500; color:var(--correction);}
+  .streak .s-days{font-size:11px; color:var(--inkwell-2);}
+  .streak .checkin-btn{margin-left:auto; background:var(--highlighter); color:var(--inkwell); border:none; font-family:var(--f-body); font-weight:600; font-size:12px; padding:8px 14px; border-radius:20px; cursor:pointer;}
+  .hscroll{display:flex; gap:10px; overflow-x:auto; padding-bottom:8px; scrollbar-width:none;}
+  .hscroll::-webkit-scrollbar{display:none;}
+  .path-card{flex-shrink:0; width:150px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px;}
+  .path-card .p-lv{font-family:var(--f-mono); font-size:9px; color:var(--ai); background:var(--ai-soft); border-radius:4px; padding:1px 6px; display:inline-block; margin-bottom:6px;}
+  .path-card .p-t{font-size:12.5px; font-weight:600; line-height:1.35; margin-bottom:4px;}
+  .path-card .p-d{font-size:10.5px; color:var(--inkwell-2);}
+  .course-cover{width:46px; height:46px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;}
+  .notice-item{display:flex; gap:8px; padding:9px 0; border-bottom:1px dashed var(--line);}
+  .notice-item:last-child{border-bottom:none;}
+  .notice-item .n-dot{width:7px; height:7px; border-radius:50%; background:var(--correction); margin-top:6px; flex-shrink:0;}
+  .notice-item.read .n-dot{background:var(--line-strong);}
+  .notice-item .n-t{font-size:12px; font-weight:600;}
+  .notice-item .n-b{font-size:11px; color:var(--inkwell-2);}
+  .notice-item .n-time{font-family:var(--f-mono); font-size:9.5px; color:var(--inkwell-2); margin-top:2px;}
+  .profile-head{display:flex; align-items:center; gap:14px; padding:14px 4px;}
+  .profile-head .avatar{width:58px; height:58px; border-radius:50%; background:var(--cobalt-soft); display:flex; align-items:center; justify-content:center; font-size:26px; border:2px solid var(--cobalt);}
+  .profile-head .p-name{font-family:var(--f-display); font-size:17px; font-weight:500;}
+  .profile-head .p-id{font-family:var(--f-mono); font-size:10.5px; color:var(--inkwell-2);}
+  .menu-list{background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden;}
+  .menu-item{display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid var(--line); font-size:13px; cursor:pointer;}
+  .menu-item:last-child{border-bottom:none;}
+  .menu-item:hover{background:var(--ricepaper);}
+  .menu-item .m-ico{width:26px; text-align:center;}
+  .menu-item .m-arrow{margin-left:auto; color:var(--inkwell-2);}
+  .menu-item .m-badge{margin-left:auto; background:var(--correction); color:#fff; font-family:var(--f-mono); font-size:9px; padding:1px 6px; border-radius:8px;}
+
+  /* ---------- 平板 ---------- */
+  .tablet-frame{width:880px; max-width:100%; height:640px; background:#16161e; border-radius:22px; padding:12px; box-shadow:0 24px 60px rgba(15,16,32,.28);}
+  .tablet-screen{width:100%; height:100%; background:var(--ricepaper); border-radius:12px; overflow:hidden; display:flex; flex-direction:column;}
+  .tb-status{height:30px; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding:0 16px; font-family:var(--f-mono); font-size:10px; color:var(--inkwell);}
+  .tb-body{flex:1; display:flex; min-height:0;}
+  .tb-side{width:210px; flex-shrink:0; background:#fff; border-right:1px solid var(--line); padding:14px 10px;}
+  .tb-nav-item{display:flex; align-items:center; gap:9px; padding:9px 12px; border-radius:9px; font-size:13px; color:var(--inkwell-2); cursor:pointer; margin-bottom:2px;}
+  .tb-nav-item:hover{background:var(--ricepaper);}
+  .tb-nav-item.active{background:var(--cobalt-soft); color:var(--cobalt); font-weight:600;}
+  .tb-main{flex:1; overflow-y:auto; padding:18px 22px;}
+  .tb-tabs{display:flex; gap:4px; border-bottom:1px solid var(--line); margin:14px 0 12px;}
+  .tb-tab{border:none; background:transparent; padding:8px 14px; font-size:13px; color:var(--inkwell-2); cursor:pointer; font-family:var(--f-body);}
+  .tb-tab.active{color:var(--cobalt); font-weight:600; border-bottom:2px solid var(--cobalt); margin-bottom:-1px;}
+  .chapter{background:#fff; border:1px solid var(--line); border-radius:10px; margin-bottom:8px; overflow:hidden;}
+  .chapter-head{display:flex; align-items:center; gap:10px; padding:11px 14px; cursor:pointer; font-size:13px; font-weight:600;}
+  .chapter-head .chev{margin-left:auto; color:var(--inkwell-2); transition:transform .2s; font-size:11px;}
+  .chapter.open .chev{transform:rotate(90deg);}
+  .chapter-list{display:none; padding:0 14px 10px 38px;}
+  .chapter.open .chapter-list{display:block;}
+  .lesson{display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px dashed var(--line); font-size:12px; color:var(--inkwell-2);}
+  .lesson:last-child{border-bottom:none;}
+  .lesson .l-ico{width:20px; text-align:center;}
+  .lesson .l-type{margin-left:auto; font-family:var(--f-mono); font-size:9px; padding:1px 6px; border-radius:4px;}
+  .l-type.video{background:var(--ai-soft); color:var(--ai);}
+  .l-type.live{background:var(--correction-soft); color:var(--correction);}
+  .l-type.task{background:var(--highlighter-soft); color:var(--inkwell);}
+  /* M-Pencil 批注浮层 */
+  .annotate-layer{position:relative; background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px 18px 22px; margin-top:14px;}
+  .annotate-layer .pdf-line{height:8px; border-radius:4px; background:var(--ricepaper-2); margin-bottom:9px;}
+  .annotate-layer .pdf-line.w70{width:70%;} .annotate-layer .pdf-line.w85{width:85%;} .annotate-layer .pdf-line.w60{width:60%;}
+  .pencil-svg{position:absolute; inset:0; pointer-events:none;}
+  .pencil-toolbar{position:absolute; right:10px; top:10px; display:flex; gap:5px; background:var(--inkwell); border-radius:20px; padding:6px 9px;}
+  .pencil-toolbar button{width:26px; height:26px; border-radius:50%; border:none; cursor:pointer; font-size:13px; background:transparent; color:#fff; display:flex; align-items:center; justify-content:center;}
+  .pencil-toolbar button.on{background:var(--cobalt);}
+  .pencil-toolbar .dot{width:12px; height:12px; border-radius:50%; margin:auto;}
+
+  /* ---------- PC ---------- */
+  .pc-frame{width:1040px; max-width:100%; height:656px; background:#1b1b24; border-radius:16px 16px 4px 4px; padding:10px 10px 14px; box-shadow:0 24px 60px rgba(15,16,32,.28);}
+  .pc-screen{width:100%; height:100%; background:var(--ricepaper); border-radius:8px; overflow:hidden; display:flex; flex-direction:column;}
+  .pc-titlebar{height:38px; flex-shrink:0; background:var(--inkwell); display:flex; align-items:center; padding:0 14px; gap:8px;}
+  .traffic{display:flex; gap:7px;}
+  .traffic i{width:12px; height:12px; border-radius:50%;}
+  .traffic .r{background:#ff5f57;} .traffic .y{background:#febc2e;} .traffic .g{background:#28c840;}
+  .pc-titlebar .pt-name{margin:0 auto; font-family:var(--f-mono); font-size:11px; color:rgba(250,246,236,.85); letter-spacing:.08em;}
+  .pc-body{flex:1; display:flex; min-height:0;}
+  .pc-rail{width:190px; flex-shrink:0; background:#fff; border-right:1px solid var(--line); padding:12px 8px;}
+  .pc-list{width:265px; flex-shrink:0; background:var(--ricepaper); border-right:1px solid var(--line); overflow-y:auto; padding:14px;}
+  .pc-main{flex:1; overflow-y:auto; padding:18px 22px;}
+  .pc-statusbar{height:26px; flex-shrink:0; background:#fff; border-top:1px solid var(--line); display:flex; align-items:center; gap:18px; padding:0 14px; font-family:var(--f-mono); font-size:9.5px; color:var(--inkwell-2);}
+  .pc-statusbar .dot{width:7px; height:7px; border-radius:50%; background:var(--growth); display:inline-block; margin-right:5px;}
+  .grading-grid{display:grid; grid-template-columns:1fr 250px; gap:16px;}
+  .rich-text{background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px 18px; font-size:13px; line-height:1.8;}
+  .rich-text h4{font-family:var(--f-display); font-size:16px; margin-bottom:8px;}
+  .ai-suggest{background:var(--ai-soft); border:1px solid var(--ai); border-radius:10px; padding:12px 14px; margin-top:12px; font-size:12.5px; color:#5b21b6;}
+  .ai-suggest .ai-tag{font-family:var(--f-mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; background:var(--ai); color:#fff; padding:2px 8px; border-radius:5px; margin-right:8px;}
+  .score-panel{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; height:fit-content;}
+  .score-panel h4{font-size:13px; margin-bottom:10px;}
+  .score-big{font-family:var(--f-display); font-size:40px; font-weight:300; color:var(--cobalt); text-align:center;}
+  .score-panel textarea{width:100%; border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-family:var(--f-body); font-size:12px; resize:none; height:70px; background:var(--ricepaper); margin:10px 0;}
+  .btn{display:inline-block; border:none; cursor:pointer; font-family:var(--f-body); font-weight:600; border-radius:9px; padding:9px 16px; font-size:13px;}
+  .btn.primary{background:var(--cobalt); color:#fff; width:100%;}
+  .btn.ghost{background:transparent; border:1px solid var(--line-strong); color:var(--inkwell-2);}
+  .kbd{font-family:var(--f-mono); font-size:10px; background:#fff; border:1px solid var(--line-strong); border-bottom-width:2px; border-radius:4px; padding:1px 5px; color:var(--inkwell);}
+
+  /* ---------- 智慧屏 ---------- */
+  .tv-frame{width:1000px; max-width:100%; aspect-ratio:16/9; background:#000; border-radius:10px; padding:14px; box-shadow:0 24px 60px rgba(15,16,32,.35); position:relative;}
+  .tv-screen{width:100%; height:100%; background:radial-gradient(ellipse at 50% 42%, #1d2340 0%, #0b0d18 70%); border-radius:4px; overflow:hidden; position:relative; color:#fff;}
+  .tv-center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;}
+  .play-circle{width:88px; height:88px; border-radius:50%; background:rgba(255,255,255,.12); border:2px solid rgba(255,255,255,.55); display:flex; align-items:center; justify-content:center; font-size:34px; cursor:pointer; transition:background .2s, transform .2s;}
+  .play-circle:hover{background:rgba(245,184,0,.25); transform:scale(1.06);}
+  .tv-title{font-family:var(--f-display); font-size:26px; font-weight:300; letter-spacing:.02em;}
+  .tv-sub{font-family:var(--f-mono); font-size:11px; color:rgba(255,255,255,.55); letter-spacing:.14em;}
+  .tv-controls{position:absolute; left:50%; bottom:22px; transform:translateX(-50%); display:flex; gap:12px; background:rgba(15,16,32,.72); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,.14); border-radius:22px; padding:10px 20px;}
+  .tv-btn{width:52px; height:52px; border-radius:50%; border:none; background:rgba(255,255,255,.1); color:#fff; font-size:21px; cursor:pointer; transition:background .2s;}
+  .tv-btn:hover{background:var(--cobalt);}
+  .tv-btn.wide{width:auto; border-radius:26px; padding:0 22px; font-family:var(--f-mono); font-size:13px; letter-spacing:.06em;}
+  .tv-chart{position:absolute; right:22px; top:20px; width:250px; background:rgba(15,16,32,.7); border:1px solid rgba(255,255,255,.14); border-radius:14px; padding:14px 16px;}
+  .tv-chart h5{font-family:var(--f-mono); font-size:10px; letter-spacing:.14em; color:var(--highlighter); margin-bottom:10px; text-transform:uppercase;}
+  .bar-row{display:flex; align-items:center; gap:8px; margin-bottom:7px; font-size:11px;}
+  .bar-row .bl{width:16px; font-family:var(--f-mono); color:rgba(255,255,255,.75);}
+  .bar-track{flex:1; height:12px; background:rgba(255,255,255,.12); border-radius:6px; overflow:hidden;}
+  .bar-track i{display:block; height:100%; border-radius:6px; background:linear-gradient(90deg, var(--cobalt), #6d6af0); transition:width 1s ease;}
+  .bar-row .bn{font-family:var(--f-mono); font-size:10px; color:rgba(255,255,255,.6); width:24px; text-align:right;}
+  .tv-qr{position:absolute; left:22px; bottom:22px; background:#fff; border-radius:12px; padding:10px; width:104px; text-align:center;}
+  .qr-grid{width:80px; height:80px; margin:0 auto 5px; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); gap:1px;}
+  .qr-grid i{background:var(--inkwell);}
+  .qr-grid i.o{background:transparent;}
+  .tv-qr .qr-txt{font-size:9px; color:var(--inkwell-2); font-family:var(--f-mono);}
+  .tv-live-badge{position:absolute; left:22px; top:20px; display:flex; align-items:center; gap:7px; background:rgba(232,93,58,.9); padding:5px 12px; border-radius:8px; font-family:var(--f-mono); font-size:10.5px; letter-spacing:.1em;}
+  .tv-live-badge i{width:7px; height:7px; border-radius:50%; background:#fff; animation:blink 1.4s infinite;}
+  @keyframes blink{50%{opacity:.25;}}
+
+  /* ---------- 手表 ---------- */
+  .watch-frame{width:252px; height:252px; border-radius:50%; background:#101018; padding:9px; box-shadow:0 20px 44px rgba(15,16,32,.3); position:relative;}
+  .watch-frame:before,.watch-frame:after{content:""; position:absolute; left:50%; transform:translateX(-50%); width:70px; height:34px; background:#23232e; border-radius:8px;}
+  .watch-frame:before{top:-24px;} .watch-frame:after{bottom:-24px;}
+  .watch-screen{width:100%; height:100%; border-radius:50%; background:var(--inkwell); overflow:hidden; position:relative; color:var(--ricepaper);}
+  .watch-scroll{position:absolute; inset:0; overflow-y:auto; padding:26px 20px 30px; scrollbar-width:none;}
+  .watch-scroll::-webkit-scrollbar{display:none;}
+  .w-card{background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:8px 10px; margin-bottom:8px;}
+  .w-card .w-k{font-family:var(--f-mono); font-size:7.5px; letter-spacing:.14em; color:var(--highlighter); text-transform:uppercase; margin-bottom:2px;}
+  .w-card .w-t{font-size:11px; font-weight:600; line-height:1.3;}
+  .w-card .w-d{font-size:9.5px; color:rgba(250,246,236,.6);}
+  .w-checkin{width:100%; border:none; border-radius:12px; background:var(--cobalt); color:#fff; font-family:var(--f-body); font-weight:700; font-size:12px; padding:10px 0; cursor:pointer; margin-bottom:8px;}
+  .w-checkin:active{transform:scale(.96);}
+  .w-foot{position:absolute; left:0; right:0; bottom:16px; display:flex; justify-content:center; gap:14px; font-family:var(--f-mono); font-size:8px; color:rgba(250,246,236,.55); background:linear-gradient(transparent, var(--inkwell) 40%); padding:10px 0 0;}
+
+  /* ---------- 车机 ---------- */
+  .car-frame{width:1000px; max-width:100%; height:360px; background:#14141c; border-radius:22px; padding:12px; box-shadow:0 24px 60px rgba(15,16,32,.3);}
+  .car-screen{width:100%; height:100%; border-radius:14px; background:linear-gradient(120deg, #171a2e 0%, #0e1020 100%); overflow:hidden; display:flex; color:#fff; position:relative;}
+  .car-left{width:270px; flex-shrink:0; padding:20px; display:flex; flex-direction:column; gap:10px;}
+  .car-cover{width:100%; flex:1; min-height:0; border-radius:14px; background:linear-gradient(135deg, var(--cobalt), var(--ai)); display:flex; align-items:center; justify-content:center; font-size:52px;}
+  .car-left .cl-t{font-size:15px; font-weight:600; line-height:1.3;}
+  .car-left .cl-a{font-size:11.5px; color:rgba(255,255,255,.55);}
+  .car-mid{flex:1; display:flex; flex-direction:column; justify-content:center; padding:18px 24px;}
+  .car-progress{height:6px; border-radius:3px; background:rgba(255,255,255,.15); margin:14px 0 6px; overflow:hidden;}
+  .car-progress i{display:block; height:100%; width:34%; border-radius:3px; background:var(--highlighter);}
+  .car-times{display:flex; justify-content:space-between; font-family:var(--f-mono); font-size:10px; color:rgba(255,255,255,.5);}
+  .car-ctrl{display:flex; align-items:center; justify-content:center; gap:22px; margin-top:16px;}
+  .car-btn{width:52px; height:52px; border-radius:50%; border:none; background:rgba(255,255,255,.1); color:#fff; font-size:20px; cursor:pointer;}
+  .car-btn.main{width:72px; height:72px; background:var(--highlighter); color:var(--inkwell); font-size:27px;}
+  .car-speed{display:flex; justify-content:center; gap:8px; margin-top:14px;}
+  .sp-btn{border:1px solid rgba(255,255,255,.25); background:transparent; color:rgba(255,255,255,.7); font-family:var(--f-mono); font-size:11px; border-radius:14px; padding:3px 12px; cursor:pointer;}
+  .sp-btn.on{background:#fff; color:var(--inkwell); border-color:#fff; font-weight:600;}
+  .car-right{width:250px; flex-shrink:0; border-left:1px solid rgba(255,255,255,.1); padding:16px 14px; overflow-y:auto;}
+  .car-right .cr-k{font-family:var(--f-mono); font-size:9px; letter-spacing:.16em; color:var(--highlighter); text-transform:uppercase; margin-bottom:10px;}
+  .audio-item{display:flex; gap:9px; align-items:center; padding:8px 6px; border-radius:9px; cursor:pointer;}
+  .audio-item:hover{background:rgba(255,255,255,.07);}
+  .audio-item.playing{background:rgba(61,70,201,.35);}
+  .audio-item .a-ico{width:30px; height:30px; border-radius:8px; background:rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;}
+  .audio-item .a-t{font-size:11.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .audio-item .a-d{font-size:9.5px; color:rgba(255,255,255,.45); font-family:var(--f-mono);}
+  .voice-bar{position:absolute; left:50%; bottom:12px; transform:translateX(-50%); display:flex; align-items:center; gap:8px; background:rgba(15,16,32,.8); border:1px solid rgba(124,58,237,.5); color:#c4b5fd; border-radius:18px; padding:6px 16px; font-size:11.5px;}
+  .voice-bar .vb-dot{width:8px; height:8px; border-radius:50%; background:var(--ai); animation:blink 1.6s infinite;}
+  .safety-strip{position:absolute; top:10px; right:14px; background:rgba(232,93,58,.16); border:1px solid rgba(232,93,58,.55); color:#fda48a; font-family:var(--f-mono); font-size:9.5px; letter-spacing:.08em; border-radius:8px; padding:4px 10px;}
+</style>
+  /* ============ 底部信息区 ============ */
+  .bottom{max-width:1280px; margin:0 auto; padding:56px 32px 0;}
+  .section{margin-bottom:56px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:22px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:32px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+  .phase-tag{display:inline-block; font-family:var(--f-mono); font-size:10px; letter-spacing:.1em; background:var(--ai-soft); color:var(--ai); border-radius:6px; padding:2px 9px; margin-left:10px; vertical-align:middle;}
+
+  /* 分布式流转 */
+  .flow-demo{background:#fff; border:1px solid var(--line); border-radius:16px; padding:30px 26px 24px; position:relative;}
+  .flow-stage{position:relative; height:150px;}
+  .flow-track{position:absolute; left:6%; right:6%; top:56px; height:4px; border-radius:2px; background:repeating-linear-gradient(90deg, var(--highlighter) 0 10px, var(--highlighter-soft) 10px 20px); opacity:.9;}
+  .flow-dot{position:absolute; top:49px; width:18px; height:18px; border-radius:50%; background:var(--cobalt); box-shadow:0 0 0 6px rgba(61,70,201,.2); left:6%; animation:travel 8s linear infinite;}
+  .flow-dot.paused{animation-play-state:paused;}
+  @keyframes travel{
+    0%{left:6%;} 22%{left:calc(6% + (94% - 6%)*0.28125);} 25%{left:calc(6% + (94% - 6%)*0.28125);}
+    47%{left:calc(6% + (94% - 6%)*0.5625);} 50%{left:calc(6% + (94% - 6%)*0.5625);}
+    72%{left:calc(6% + (94% - 6%)*0.84375);} 75%{left:calc(6% + (94% - 6%)*0.84375);}
+    97%,100%{left:94%;}
+  }
+  .flow-nodes{position:absolute; inset:0; display:flex; justify-content:space-between; padding:0 2%;}
+  .flow-node{width:23%; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center;}
+  .flow-node .fn-ico{width:58px; height:58px; border-radius:16px; background:var(--ricepaper); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:26px; transition:border-color .2s, box-shadow .2s;}
+  .flow-node.hot .fn-ico{border-color:var(--cobalt); box-shadow:0 0 0 4px var(--cobalt-soft);}
+  .flow-node .fn-name{font-size:12.5px; font-weight:600;}
+  .flow-node .fn-desc{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); letter-spacing:.06em;}
+  .flow-note{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:18px; padding-top:16px; border-top:1px dashed var(--line); flex-wrap:wrap;}
+  .flow-note .fn-text{font-size:13px; color:var(--inkwell-2);}
+  .flow-note .fn-text b{color:var(--cobalt);}
+  .pause-btn{border:1px solid var(--line-strong); background:var(--ricepaper); border-radius:10px; padding:7px 16px; font-family:var(--f-mono); font-size:11px; cursor:pointer; color:var(--inkwell);}
+  .pause-btn:hover{background:var(--cobalt-soft); border-color:var(--cobalt); color:var(--cobalt);}
+
+  /* 原子化服务卡片 */
+  .atomic-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+  .atomic-cell{position:relative;}
+  .atomic-cell .host-label{font-family:var(--f-mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.14em; color:var(--inkwell-2); margin-bottom:8px; text-align:center;}
+  .widget-card{background:#fff; border-radius:18px; box-shadow:0 8px 22px rgba(15,16,32,.12); padding:16px 18px; cursor:pointer; transition:transform .2s, box-shadow .2s; position:relative;}
+  .widget-card:hover{transform:translateY(-4px); box-shadow:0 14px 30px rgba(15,16,32,.18);}
+  .widget-card .wc-kicker{font-family:var(--f-mono); font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--cobalt); margin-bottom:6px;}
+  .widget-card .wc-title{font-family:var(--f-display); font-size:17px; font-weight:500; margin-bottom:6px;}
+  .widget-card .wc-body{font-size:12px; color:var(--inkwell-2); line-height:1.6;}
+  .widget-card .wc-go{margin-top:10px; font-size:11px; color:var(--cobalt); font-weight:600;}
+  .widget-tip{position:absolute; left:0; right:0; bottom:-8px; transform:translateY(100%); background:var(--inkwell); color:var(--ricepaper); font-size:11.5px; line-height:1.55; border-radius:10px; padding:9px 12px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:5;}
+  .widget-tip:after{content:""; position:absolute; top:-5px; left:24px; width:10px; height:10px; background:var(--inkwell); transform:rotate(45deg);}
+  .atomic-cell:hover .widget-tip{opacity:1;}
+
+  /* 技术架构 */
+  .arch-grid{display:grid; grid-template-columns:1.4fr 1fr; gap:20px; align-items:start;}
+  table{width:100%; border-collapse:collapse; margin:0 0 8px; font-size:13px; background:#fff; border-radius:12px; overflow:hidden;}
+  th{background:var(--ricepaper); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-strong);}
+  td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  .rec-star{color:var(--highlighter); font-weight:700;}
+  .api-block{background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin:10px 0; font-family:var(--f-mono); font-size:12px;}
+  .api-block .method{display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600; margin-right:8px;}
+  .api-block .method.post{background:var(--cobalt-soft); color:var(--cobalt);}
+  .api-block .method.get{background:var(--growth-soft); color:var(--growth);}
+  .api-block .desc{color:var(--inkwell-2); font-size:11px; margin-top:4px; font-family:var(--f-body);}
+  .reuse-banner{background:var(--growth-soft); border:1px solid var(--growth); border-radius:12px; padding:14px 18px; font-size:13px; color:var(--growth); margin-bottom:16px;}
+  .reuse-banner b{font-family:var(--f-mono);}
+  .info{padding:14px 18px; border-radius:10px; margin:14px 0; font-size:13px; line-height:1.7;}
+  .info.note{background:var(--cobalt-soft); border:1px solid var(--cobalt);}
+  .info.warn{background:var(--highlighter-soft); border:1px solid var(--highlighter);}
+
+  footer{max-width:1280px; margin:56px auto 0; padding:24px 32px 0; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; flex-wrap:wrap; gap:10px;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+
+  /* ============ 响应式：小屏垂直堆叠 ============ */
+  @media (max-width: 1080px){
+    .hero h1{font-size:42px;}
+    .arch-grid{grid-template-columns:1fr;}
+    .atomic-grid{grid-template-columns:1fr; max-width:420px; margin:0 auto;}
+    .grading-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width: 860px){
+    body{font-size:14px;}
+    .topbar{padding:12px 16px; gap:12px;}
+    .device-switcher{margin-left:0; order:3; width:100%; overflow-x:auto; justify-content:flex-start;}
+    .hero, .stage, .bottom{padding-left:16px; padding-right:16px;}
+    .hero h1{font-size:34px;}
+    .hero .stats{grid-template-columns:repeat(2,1fr);}
+    /* 小屏：全部视图垂直堆叠并显示标签 */
+    .view{display:block !important; margin-bottom:52px; animation:none;}
+    .view:not(.active){opacity:1;}
+    .view-switched{display:none;}
+    .view-head:before{content:"▼ "; color:var(--cobalt);}
+    .notes{width:100%; padding-top:8px;}
+    .note:before{display:none;}
+    .tablet-frame, .pc-frame, .tv-frame, .car-frame{height:auto; min-height:420px;}
+    .pc-rail{display:none;}
+    .car-left{display:none;}
+    .flow-stage{height:auto; position:static;}
+    .flow-track,.flow-dot{display:none;}
+    .flow-nodes{position:static; flex-wrap:wrap; gap:14px; justify-content:flex-start; padding:0;}
+    .flow-node{width:44%;}
+  }
+</head>
+<body>
+<!-- ============ 顶部导航 ============ -->
+<nav class="topbar">
+  <div class="brand">
+    <div class="logo">墨</div>
+    <div class="name">鸿蒙生态 · Lumina 墨光<small>HarmonyOS NEXT · D-11 Prototype · v1.0</small></div>
+  </div>
+  <div class="device-switcher" id="deviceSwitcher" role="tablist" aria-label="设备形态切换">
+    <button class="dev-btn active" data-view="phone"><span class="prio">P0</span><span class="ico">📱</span><span class="lbl">手机</span></button>
+    <button class="dev-btn" data-view="tablet"><span class="prio">P0</span><span class="ico">📲</span><span class="lbl">平板</span></button>
+    <button class="dev-btn" data-view="pc"><span class="prio">P1</span><span class="ico">💻</span><span class="lbl">PC</span></button>
+    <button class="dev-btn" data-view="tv"><span class="prio">P2</span><span class="ico">📺</span><span class="lbl">智慧屏</span></button>
+    <button class="dev-btn" data-view="watch"><span class="prio">P3</span><span class="ico">⌚</span><span class="lbl">穿戴</span></button>
+    <button class="dev-btn" data-view="car"><span class="prio">P3</span><span class="ico">🚗</span><span class="lbl">车机</span></button>
+  </div>
+</nav>
+
+<!-- ============ 封面 ============ -->
+<header class="hero">
+  <div class="doc-type">D-11 · HarmonyOS 多设备原型</div>
+  <h1><span class="hl">鸿蒙硬件</span> 平台与<br/><em>操作系统</em> 支持</h1>
+  <p class="subtitle">One Ink, Six Screens — 手机 · 平板 · PC · 智慧屏 · 穿戴 · 车机，六种设备形态的 Lumina 墨光体验原型</p>
+  <div class="meta">
+    Document ID: LUMINA-PROTO-D11-001 · 对应需求：D-11 / WBS D-09 三路线评估（原生 ArkTS 推荐）<br/>
+    Version: 1.0 · Date: 2026-09-03 · Author: Lumina · 纯 HTML/CSS/JS · 数据 Mock
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="val">6</div><div class="lbl">设备形态 Device Forms</div></div>
+    <div class="stat"><div class="val">141<span style="font-size:13px"> paths</span></div><div class="lbl">复用现有 API · 零新增表</div></div>
+    <div class="stat"><div class="val">+2</div><div class="lbl">新增端点 Endpoints</div></div>
+    <div class="stat"><div class="val">&lt;2s</div><div class="lbl">跨设备接续分布式软总线</div></div>
+  </div>
+</header>
+
+<!-- ============ 设备视图舞台 ============ -->
+<main class="stage">
+
+  <!-- ======== 视图 1：鸿蒙手机 ======== -->
+  <section class="view active" id="view-phone" data-device="📱 手机">
+    <div class="view-head">
+      <h2>📱 <em>鸿蒙手机</em> · 学生随身学习台</h2>
+      <span class="prio-tag p0">P0</span>
+      <span class="spec">6.1"~6.9" · 375×812 · 单列布局 · 对齐 mobile-app</span>
+    </div>
+    <div class="view-row">
+      <div class="frame-wrap">
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="phone-notch"></div>
+            <div class="status-bar">
+              <span>09:41</span>
+              <span class="sb-r"><span class="harmony-pill">HarmonyOS NEXT</span><span>5G</span><span>▮▮▮</span><span>100%</span></span>
+            </div>
+            <div class="app-content">
+              <!-- 首页 Tab -->
+              <div class="tab-pane active" id="pane-home">
+                <div class="greet">周三 · 早上好</div>
+                <div class="app-title">沈 <em>同学</em>，今天有 2 节课</div>
+                <div class="card next-class">
+                  <div class="c-head"><span class="c-title">▸ 高等数学（下）</span><span class="chip warn" style="background:rgba(255,255,255,.2);color:#fff">10 分钟后</span></div>
+                  <div class="nc-time">10:30 – 12:00 · 第 7 周</div>
+                  <div class="nc-room">📍 教三楼 305 · 王老师</div>
+                </div>
+                <div class="kicker">待交作业</div>
+                <div class="card" id="phoneHomework"></div>
+                <div class="card streak">
+                  <span class="flame">🔥</span>
+                  <div><div class="s-num">7 天连续</div><div class="s-days">本周已学 5.2 小时 · 超过 82% 同学</div></div>
+                  <button class="checkin-btn">打卡</button>
+                </div>
+                <div class="kicker">推荐路径 · 基于薄弱知识点</div>
+                <div class="hscroll" id="phonePaths"></div>
+              </div>
+              <!-- 课程 Tab -->
+              <div class="tab-pane" id="pane-course">
+                <div class="app-title">我的<em>课程</em></div>
+                <div id="phoneCourses"></div>
+              </div>
+              <!-- 直播 Tab -->
+              <div class="tab-pane" id="pane-live">
+                <div class="app-title">课程<em>直播</em></div>
+                <div id="phoneLives"></div>
+              </div>
+              <!-- 消息 Tab -->
+              <div class="tab-pane" id="pane-msg">
+                <div class="app-title">消息<em>中心</em></div>
+                <div class="card" id="phoneNotices"></div>
+              </div>
+              <!-- 我的 Tab -->
+              <div class="tab-pane" id="pane-mine">
+                <div class="profile-head">
+                  <div class="avatar">🧑‍🎓</div>
+                  <div><div class="p-name">沈同学</div><div class="p-id">学号 20260001 · 计算机科学与技术</div></div>
+                </div>
+                <div class="menu-list" id="phoneMenu"></div>
+              </div>
+            </div>
+            <div class="tabbar" id="phoneTabbar">
+              <button class="tab-btn active" data-pane="home"><span class="t-ico">🏠</span>首页</button>
+              <button class="tab-btn" data-pane="course"><span class="t-ico">📚</span>课程</button>
+              <button class="tab-btn" data-pane="live"><span class="t-ico">📡</span>直播</button>
+              <button class="tab-btn" data-pane="msg"><span class="t-ico">💬</span>消息<span class="m-badge" style="position:absolute;margin-left:20px;margin-top:-6px;font-size:8px;background:var(--correction);color:#fff;border-radius:8px;padding:0 5px;font-family:var(--f-mono)">3</span></button>
+              <button class="tab-btn" data-pane="mine"><span class="t-ico">👤</span>我的</button>
+            </div>
+          </div>
+        </div>
+        <div class="frame-caption">Mate 60 Pro · 375 × 812 vp</div>
+      </div>
+      <div class="notes">
+        <div class="note"><span class="nt">Security · HUKS</span>HUKS 加密存储 Token —— 登录凭证托管在鸿蒙硬件密钥库，不落明文 SharedPrefs。</div>
+        <div class="note"><span class="nt">Form Kit</span>原子化服务卡片 —— 桌面「今日课表 / 待交作业」卡片，免打开 App 直达。</div>
+        <div class="note"><span class="nt">NearLink / NFC</span>一碰传登录 —— 手机触碰平板 / PC，NFC 交换凭证自动接续会话。</div>
+        <div class="note growth"><span class="nt">ArkUI 响应式</span>单列断点 &lt;600vp 自动适配折叠屏悬停态。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== 视图 2：鸿蒙平板 ======== -->
+  <section class="view" id="view-tablet" data-device="📲 平板">
+    <div class="view-head">
+      <h2>📲 <em>鸿蒙平板</em> · 双栏学习 + 手写批注</h2>
+      <span class="prio-tag p0">P0</span>
+      <span class="spec">10.4"~12.6" · 1024×768 vp · 双栏布局 · M-Pencil</span>
+    </div>
+    <div class="view-row">
+      <div class="frame-wrap">
+        <div class="tablet-frame">
+          <div class="tablet-screen">
+            <div class="tb-status"><span>14:05 · 9月3日 星期三</span><span class="harmony-pill">HarmonyOS NEXT</span><span>📶 &nbsp;🔋 86%</span></div>
+            <div class="tb-body">
+              <aside class="tb-side" id="tabletNav"></aside>
+              <main class="tb-main">
+                <div class="c-head" style="display:flex;gap:14px;align-items:center;margin-bottom:4px">
+                  <div class="course-cover" style="width:64px;height:64px;font-size:28px;background:var(--cobalt-soft)">🎬</div>
+                  <div style="flex:1">
+                    <div style="font-family:var(--f-display);font-size:22px;font-weight:500">数字影像创作</div>
+                    <div style="font-size:12px;color:var(--inkwell-2)">李教授 · <b style="color:var(--cobalt)">128</b> 人选课 · 我的进度 <b>64%</b></div>
+                    <div class="progress" style="max-width:260px"><i style="width:64%"></i></div>
+                  </div>
+                  <button class="btn primary" style="width:auto">继续学习</button>
+                </div>
+                <div class="tb-tabs" id="tbTabs">
+                  <button class="tb-tab active" data-tb="chapter">章节</button>
+                  <button class="tb-tab" data-tb="homework">作业</button>
+                  <button class="tb-tab" data-tb="notice">公告</button>
+                  <button class="tb-tab" data-tb="discuss">讨论</button>
+                </div>
+                <div id="tbChapterPane"></div>
+                <div id="tbHomeworkPane" style="display:none">
+                  <div class="annotate-layer">
+                    <div class="pencil-toolbar">
+                      <button class="on" title="钢笔">✒️</button>
+                      <button title="橡皮">🧽</button>
+                      <button title="高亮">🖍️</button>
+                      <span style="width:1px;background:rgba(255,255,255,.2);margin:4px 3px"></span>
+                      <button class="on" title="墨色"><span class="dot" style="background:#0F1020"></span></button>
+                      <button title="钴蓝"><span class="dot" style="background:#3D46C9"></span></button>
+                      <button title="警示红"><span class="dot" style="background:#E85D3A"></span></button>
+                    </div>
+                    <div style="font-size:12px;color:var(--inkwell-2);margin-bottom:10px;font-family:var(--f-mono)">assignment-3.pdf · 第 2 / 5 页</div>
+                    <div class="pdf-line"></div><div class="pdf-line w85"></div><div class="pdf-line"></div><div class="pdf-line w70"></div><div class="pdf-line w85"></div><div class="pdf-line w60"></div>
+                    <svg class="pencil-svg" viewBox="0 0 600 220" preserveAspectRatio="none">
+                      <path d="M40 60 C 120 30, 200 90, 300 55 S 470 70, 545 45" fill="none" stroke="#E85D3A" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+                      <circle cx="185" cy="62" r="26" fill="none" stroke="#E85D3A" stroke-width="2.5" opacity=".8"/>
+                      <path d="M60 150 q 30 -18 60 0 t 60 0 t 60 0" fill="none" stroke="#3D46C9" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+                      <rect x="330" y="128" width="215" height="26" rx="4" fill="#F5B800" opacity=".38"/>
+                      <text x="336" y="146" font-size="13" fill="#2A2B3D" font-family="Inter">注意：此处需补充引用来源</text>
+                      <path d="M75 200 l 14 -12 M89 200 l -14 -12" stroke="#2A7F4F" stroke-width="2.5" stroke-linecap="round"/>
+                      <text x="100" y="198" font-size="12" fill="#2A7F4F" font-family="Inter">✓ 论证成立</text>
+                    </svg>
+                    <div style="height:120px"></div>
+                  </div>
+                </div>
+                <div id="tbNoticePane" style="display:none"><div class="card"><div class="ri-t" style="font-size:13px;font-weight:600;margin-bottom:6px">📢 第 8 周课程调整</div><div style="font-size:12.5px;color:var(--inkwell-2)">因国庆调休，10 月 2 日课程顺延至 10 月 9 日，直播回放同步延迟发布。</div></div></div>
+                <div id="tbDiscussPane" style="display:none"><div class="card"><div class="row-item"><div class="ri-ico">💬</div><div class="ri-body"><div class="ri-t">关于色彩空间的疑问</div><div class="ri-d">张同学 · 2 小时前 · 3 条回复</div></div></div><div class="row-item"><div class="ri-ico">💬</div><div class="ri-body"><div class="ri-t">作业 3 拍摄设备建议</div><div class="ri-d">陈同学 · 昨天 · 8 条回复</div></div></div></div></div>
+              </main>
+            </div>
+          </div>
+        </div>
+        <div class="frame-caption">MatePad Pro 12.6" · 双栏 320px + 自适应</div>
+      </div>
+      <div class="notes">
+        <div class="note"><span class="nt">M-Pencil（第三代）</span>手写批注浮层 —— 万级压感 + 微振反馈，笔迹以 SVG Path 存储，随作业提交给教师。</div>
+        <div class="note"><span class="nt">平行视界 / 分屏</span>分屏多任务 —— 左侧课程目录 + 右侧笔记，双窗口同 App 不同页面栈。</div>
+        <div class="note"><span class="nt">Floating Window</span>视频后台小窗 —— 切走听课时直播以小窗悬浮继续播放，声音不断。</div>
+        <div class="note warn"><span class="nt">Pending</span>批注笔迹云端同步依赖 collab 模块扩展，列入 Phase 2。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== 视图 3：鸿蒙 PC ======== -->
+  <section class="view" id="view-pc" data-device="💻 PC">
+    <div class="view-head">
+      <h2>💻 <em>鸿蒙 PC</em> · 教师生产力三栏</h2>
+      <span class="prio-tag p1">P1</span>
+      <span class="spec">13"~14.2" · 1440×900 vp · 三栏布局 · 向 Web 端看齐</span>
+    </div>
+    <div class="view-row">
+      <div class="frame-wrap">
+        <div class="pc-frame">
+          <div class="pc-screen">
+            <div class="pc-titlebar">
+              <div class="traffic"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+              <div class="pt-name">LUMINA 墨光 · 教学工作台 — MateBook Pro</div>
+              <div style="width:54px"></div>
+            </div>
+            <div class="pc-body">
+              <aside class="pc-rail" id="pcRail"></aside>
+              <div class="pc-list">
+                <div style="font-family:var(--f-mono);font-size:9.5px;letter-spacing:.14em;color:var(--inkwell-2);text-transform:uppercase;margin-bottom:10px">待批阅 · 8 份</div>
+                <div id="pcGradingList"></div>
+              </div>
+              <main class="pc-main">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+                  <div style="font-family:var(--f-display);font-size:20px;font-weight:500">作业批阅 · 纪录片旁白文案</div>
+                  <div style="font-size:11px;color:var(--inkwell-2)">提交于 09-02 23:41 · 截止 09-03 08:00 <span class="chip warn">迟交 5h</span></div>
+                </div>
+                <div class="grading-grid">
+                  <div>
+                    <div class="rich-text">
+                      <h4>《山河墨色》第三集 · 旁白草稿</h4>
+                      <p>晨雾从江面升起的时候，渡口的第一班船刚刚离岸。艄公老陈在这条江上撑了四十年<u style="text-decoration-color:var(--correction)">（此处建议补充年代数据）</u>，江水换来的不只是生计，还有一整套即将失传的号子。</p>
+                      <p>「喊号子不是给别人听的，是给力气找个伴。」老陈说这句话时，正在整理第三天要用的竹缆……</p>
+                      <div style="margin-top:10px;padding:10px 12px;background:var(--ricepaper);border-radius:8px;font-size:12px;color:var(--inkwell-2)">📎 附件：narrative_draft_v3.docx · 2.1 MB · 🎧 音频小样 3'42"</div>
+                    </div>
+                    <div class="ai-suggest">
+                      <span class="ai-tag">AI 辅助批阅</span>结构完整度 87% · 建议给分 <b>82 / 100</b> · 口语化表达优秀；第二段事实性表述缺信源，按评分标准第 4 条扣分；<b>教师确认后生效</b>（ai_grade.review_status）。
+                    </div>
+                    <div style="margin-top:10px;font-size:11.5px;color:var(--inkwell-2)">快捷键：<span class="kbd">Ctrl</span>+<span class="kbd">S</span> 保存草稿 · <span class="kbd">Ctrl</span>+<span class="kbd">N</span> 新建笔记 · <span class="kbd">Alt</span>+<span class="kbd">→</span> 下一份</div>
+                  </div>
+                  <div class="score-panel">
+                    <h4>评分</h4>
+                    <div class="score-big">82</div>
+                    <div style="text-align:center;font-family:var(--f-mono);font-size:10px;color:var(--inkwell-2);margin-bottom:6px">/ 100 · 等级 A−</div>
+                    <div class="progress"><i class="g" style="width:82%"></i></div>
+                    <textarea placeholder="给学生的评语…">旁白画面感强，号子段落可再克制些；第二段请补数据信源后重交。</textarea>
+                    <button class="btn primary">✓ 确认评分并反馈</button>
+                    <button class="btn ghost" style="width:100%;margin-top:8px">退回重做</button>
+                  </div>
+                </div>
+              </main>
+            </div>
+            <div class="pc-statusbar">
+              <span><span class="dot"></span>网络正常 12ms</span>
+              <span><span class="dot" style="background:var(--cobalt)"></span>云端同步 · 14:02 已保存</span>
+              <span style="margin-left:auto">大列表已启用虚拟滚动 · 1,248 条成绩</span>
+            </div>
+          </div>
+        </div>
+        <div class="frame-caption">MateBook Pro 14.2" · 190 + 265 + 自适应三栏</div>
+      </div>
+      <div class="notes">
+        <div class="note"><span class="nt">多窗口</span>多窗口并行 —— 同时打开多个课程窗口，自由悬浮 / 分屏 / 级联，任务栏卡片预览。</div>
+        <div class="note"><span class="nt">输入效率</span>鼠标快捷键 —— Ctrl+S 保存、右键菜单批阅、拖拽附件上传，对齐桌面肌肉记忆。</div>
+        <div class="note"><span class="nt">Performance</span>虚拟滚动 —— 成绩册 / 题库万级列表仅渲染视口行，滚动 60fps。</div>
+        <div class="note warn"><span class="nt">⚖️ AI 合规</span>AI 批阅建议显式标识「AI 辅助」，教师人工复核后方可生效。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== 视图 4：智慧屏 ======== -->
+  <section class="view" id="view-tv" data-device="📺 智慧屏">
+    <div class="view-head">
+      <h2>📺 <em>智慧屏</em> · 教室大屏演示模式</h2>
+      <span class="prio-tag p2">P2</span>
+      <span class="spec">65"~98" · 1920×1080（支持 4K）· 极简演示 · 遥控器友好</span>
+    </div>
+    <div class="view-row">
+      <div class="frame-wrap">
+        <div class="tv-frame" style="padding:14px 14px 22px">
+          <div class="tv-screen">
+            <div class="tv-live-badge"><i></i>LIVE · HLS 1080P</div>
+            <div class="tv-center">
+              <div class="play-circle">▶</div>
+              <div class="tv-title">数字影像创作 · 第 9 讲：纪实光影</div>
+              <div class="tv-sub">HLS 拉流 · 3,142 人在线 · 码率 6.0 Mbps · 延迟 2.4s</div>
+            </div>
+            <div class="tv-chart">
+              <h5>随堂答题 · 实时统计</h5>
+              <div id="tvBars"></div>
+              <div style="font-family:var(--f-mono);font-size:9px;color:rgba(255,255,255,.45);margin-top:6px;text-align:right">正确率 <b style="color:var(--highlighter)">68%</b> · 作答 421/436</div>
+            </div>
+            <div class="tv-qr">
+              <div class="qr-grid" id="qrGrid"></div>
+              <div class="qr-txt">扫码加入互动</div>
+            </div>
+            <div class="tv-controls">
+              <button class="tv-btn" title="播放/暂停">⏸</button>
+              <button class="tv-btn" title="音量减">🔉</button>
+              <button class="tv-btn" title="音量加">🔊</button>
+              <button class="tv-btn wide" title="画质切换">1080P ▾</button>
+              <button class="tv-btn" title="全屏">⛶</button>
+              <button class="tv-btn wide" style="background:rgba(232,93,58,.85)" title="退出">退出</button>
+            </div>
+          </div>
+        </div>
+        <div class="frame-caption">Vision 4 智慧屏 75" · 演示模式（去导航 · 大字距）</div>
+      </div>
+      <div class="notes">
+        <div class="note"><span class="nt">Demo Mode</span>演示模式 —— 隐藏一切导航 chrome，3 米外可读字号，按键焦点环可见。</div>
+        <div class="note"><span class="nt">Remote</span>遥控器 / 手机遥控 —— 方向键焦点流转，教师手机可当遥控翻页。</div>
+        <div class="note"><span class="nt">AVS / HLS</span>1080P / 4K 拉流 —— 复用 D-01 直播 /media 反代与 stream_key。</div>
+        <div class="note warn"><span class="nt">Stability</span>长时间内存回收 —— 连续直播 6h+，周期释放解码缓冲，OOM 率 &lt;0.1%。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== 视图 5：穿戴设备 ======== -->
+  <section class="view" id="view-watch" data-device="⌚ 穿戴">
+    <div class="view-head">
+      <h2>⌚ <em>穿戴设备</em> · 抬腕即学的轻应用</h2>
+      <span class="prio-tag p3">P3</span>
+      <span class="spec">1.4"~1.8" · 360×360 圆屏 · Atomic Service 轻应用</span>
+    </div>
+    <div class="view-row">
+      <div class="frame-wrap">
+        <div class="watch-frame">
+          <div class="watch-screen">
+            <div class="watch-scroll" id="watchCards"></div>
+            <div class="w-foot"><span>🔋 72%</span><span>◉ 已连手机</span><span>14:05</span></div>
+          </div>
+        </div>
+        <div class="frame-caption">Watch 4 · 46mm 圆形表盘</div>
+      </div>
+      <div class="notes">
+        <div class="note"><span class="nt">Atomic Service</span>轻应用形态 —— 无独立安装包，元服务卡片即开即用，包体 &lt;10MB。</div>
+        <div class="note"><span class="nt">One-tap</span>一键签到 —— 到课地理围栏触发大按钮，误触率优先优化。</div>
+        <div class="note"><span class="nt">Glanceable</span>抬腕即看 —— 只保留「下一节课 / 待办 / 计时」三层信息密度。</div>
+        <div class="note growth"><span class="nt">Battery</span>低电耗轮询 —— 后台仅 15min 增量轮询 + 推送唤醒，续航影响 &lt;3%/天。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== 视图 6：车机 ======== -->
+  <section class="view" id="view-car" data-device="🚗 车机">
+    <div class="view-head">
+      <h2>🚗 <em>车机</em> · 通勤路上的音频课程</h2>
+      <span class="prio-tag p3">P3</span>
+      <span class="spec">12"~17" 中控横屏 · 1920×720 · 音频模式 · 驾驶安全优先</span>
+    </div>
+    <div class="view-row">
+      <div class="frame-wrap">
+        <div class="car-frame">
+          <div class="car-screen">
+            <div class="safety-strip">⚠ 行中已禁用视频与答题 · 仅音频</div>
+            <div class="car-left">
+              <div class="car-cover">🎧</div>
+              <div>
+                <div class="cl-t">中国古典文学十五讲</div>
+                <div class="cl-a">第 9 讲 · 苏轼的黄州突围 · 顾讲师</div>
+              </div>
+            </div>
+            <div class="car-mid">
+              <div style="font-family:var(--f-mono);font-size:9px;letter-spacing:.16em;color:var(--highlighter)">AUDIO COURSE · 后台音频常驻</div>
+              <div class="car-progress"><i></i></div>
+              <div class="car-times"><span>21:14</span><span>-22:46</span></div>
+              <div class="car-ctrl">
+                <button class="car-btn" title="快退 15s">⏪</button>
+                <button class="car-btn main" title="播放/暂停">▶</button>
+                <button class="car-btn" title="快进 15s">⏩</button>
+              </div>
+              <div class="car-speed">
+                <button class="sp-btn">0.8x</button>
+                <button class="sp-btn on">1x</button>
+                <button class="sp-btn">1.2x</button>
+              </div>
+            </div>
+            <div class="car-right">
+              <div class="cr-k">本课目录 · 音频</div>
+              <div id="carPlaylist"></div>
+            </div>
+            <div class="voice-bar"><span class="vb-dot"></span>「你好，小艺」—— 说「继续上课」或「下一讲」即可操控</div>
+          </div>
+        </div>
+        <div class="frame-caption">鸿蒙车机 15.6" 中控 · 大字距触控目标 ≥56dp</div>
+      </div>
+      <div class="notes">
+        <div class="note warn"><span class="nt">Safety First</span>行中禁止视频 / 答题 —— 挂 D 档即切纯音频，课件画面锁屏。</div>
+        <div class="note"><span class="nt">TTS</span>语音播报 —— 作业截止、课程提醒由小艺播报，免视线操作。</div>
+        <div class="note"><span class="nt">Xiao Yi</span>语音助手入口 —— 「继续上课 / 快进一分钟 / 上一讲」全语音指令集。</div>
+        <div class="note growth"><span class="nt">AVSession</span>后台音频常驻 —— 锁屏 / 切应用不断流，方向盘按键可接管。</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ 底部信息区 ============ -->
+<div class="bottom">
+
+  <!-- 分布式流转 -->
+  <section class="section">
+    <div class="section-header">
+      <h2>跨设备<em>流转</em>演示<span class="phase-tag">Phase 3</span></h2>
+      <span class="num-tag">Distributed Soft Bus · §01</span>
+    </div>
+    <div class="flow-demo">
+      <div class="flow-stage">
+        <div class="flow-track"></div>
+        <div class="flow-dot" id="flowDot"></div>
+        <div class="flow-nodes">
+          <div class="flow-node" data-step="0"><div class="fn-ico">📱</div><div class="fn-name">手机</div><div class="fn-desc">14:05 听课中 · 62%</div></div>
+          <div class="flow-node" data-step="1"><div class="fn-ico">📲</div><div class="fn-name">平板</div><div class="fn-desc">接续进度 · 打开批注</div></div>
+          <div class="flow-node" data-step="2"><div class="fn-ico">💻</div><div class="fn-name">PC</div><div class="fn-desc">回到工位 · 继续剪片</div></div>
+          <div class="flow-node" data-step="3"><div class="fn-ico">📺</div><div class="fn-name">智慧屏</div><div class="fn-desc">进教室 · 大屏放映</div></div>
+        </div>
+      </div>
+      <div class="flow-note">
+        <div class="fn-text">小圆点沿荧光黄轨迹移动：课堂会话状态（播放进度 / 批注草稿 / 未完成答题）经 <b>分布式软总线</b> 同步，任意设备一键接续，<b>接续耗时 &lt; 2s</b>；接续令牌由 HUKS 签发，会话数据端到端加密。</div>
+        <button class="pause-btn" id="flowPause">⏸ 暂停动画</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 原子化服务卡片 -->
+  <section class="section">
+    <div class="section-header">
+      <h2><em>原子化服务</em>桌面卡片<span class="phase-tag">Phase 3</span></h2>
+      <span class="num-tag">Form Kit Widgets · §02</span>
+    </div>
+    <div class="atomic-grid" id="atomicGrid"></div>
+    <div class="info note">卡片由 <code>card-refresh</code> 端点定时刷新（亮屏事件触发），点击即深链（Deep Link）直达对应页面 —— 学生无需先打开 App。</div>
+  </section>
+
+  <!-- 技术架构说明 -->
+  <section class="section">
+    <div class="section-header">
+      <h2>技术<em>架构</em>说明</h2>
+      <span class="num-tag">Routes & API Reuse · §03</span>
+    </div>
+    <div class="arch-grid">
+      <div>
+        <h3 class="sub" style="font-family:var(--f-display);font-size:20px;margin-bottom:12px">三路线对比（承 WBS D-09）</h3>
+        <table>
+          <thead><tr><th>路线</th><th>技术栈</th><th>覆盖设备</th><th>结论</th></tr></thead>
+          <tbody>
+            <tr><td><b>A · 原生 ArkTS</b> <span class="rec-star">★推荐</span></td><td>ArkTS + ArkUI + DevEco Studio</td><td>手机 / 平板 / PC / 智慧屏 / 穿戴 / 车机</td><td><span class="prio-tag p0">选定</span> 六形态全官方 API，流转 / 元服务体验最佳</td></tr>
+            <tr><td>B · RNOH 迁移</td><td>React Native for OpenHarmony</td><td>手机 / 平板</td><td><span class="prio-tag p2">备选</span> 复用 mobile-app 逻辑，但智慧屏 / 穿戴 / 车机覆盖缺失</td></tr>
+            <tr><td>C · uni-app x</td><td>UTS 编译 ArkTS</td><td>手机 / 平板（部分）</td><td><span class="prio-tag p3">不采纳</span> 大屏与原子化卡片能力弱，长期维护风险高</td></tr>
+          </tbody>
+        </table>
+        <div class="info warn">⚖️ 合规延续：鸿蒙端不新增个人信息采集；Token 走 HUKS；AI 内容与批阅标识（D-11 复用 ai_grade 复核链路）在各形态一致展示。</div>
+        <h3 class="sub" style="font-family:var(--f-display);font-size:20px;margin:20px 0 10px">ArkUI 断点与适配策略</h3>
+        <table>
+          <thead><tr><th>断点（vp）</th><th>目标设备</th><th>布局策略</th></tr></thead>
+          <tbody>
+            <tr><td><code>&lt; 600</code></td><td>手机 / 手表方屏降级</td><td>单列 + 底部 5 Tab；手表独立走轻应用圆屏规范</td></tr>
+            <tr><td><code>600 – 840</code></td><td>小平板 / 折叠屏展开 / 车机</td><td>双栏（侧栏 210 + 自适应主区）；车机替换为音频三区块</td></tr>
+            <tr><td><code>840 – 1440</code></td><td>大平板 / PC</td><td>三栏（导航栏 + 列表栏 + 详情栏），支持多窗口分屏</td></tr>
+            <tr><td><code>&gt; 1440</code></td><td>智慧屏 / 带鱼屏</td><td>演示模式：隐藏导航，内容居中限宽，焦点环 ≥4px</td></tr>
+          </tbody>
+        </table>
+        <div class="info note">设计 token 与 Web 基座同源（色板 / 字阶 / 圆角），鸿蒙侧以 <code>$r('app.color.*')</code> 资源限定词映射同一套变量，保证六形态视觉一致。</div>
+      </div>
+      <div>
+        <h3 class="sub" style="font-family:var(--f-display);font-size:20px;margin-bottom:12px">API 复用与新增</h3>
+        <div class="reuse-banner">复用现有单体 <b>141 paths / 180 ops</b> · <b>零新增数据表</b> —— 各设备形态仅做视图与交互适配，业务契约与 Web / mobile-app 完全一致。</div>
+        <div class="api-block"><span class="method post">POST</span><span class="path">/api/v1/devices/register</span><div class="desc">设备注册与形态上报（device_type / screen / capability），绑定用户可信设备列表，支持远程解绑。</div></div>
+        <div class="api-block"><span class="method post">POST</span><span class="path">/api/v1/devices/harmony/card-refresh</span><div class="desc">原子化卡片数据聚合刷新：一次返回课表 / 待交 / 打卡三卡所需字段，降低穿戴与桌面卡片轮询开销。</div></div>
+        <div class="api-block"><span class="method get">GET</span><span class="path">/api/v1/live/{room}/stream</span><div class="desc">（已存在）智慧屏 / 平板 / 手机复用同一 HLS 地址与 /media 同源反代，无新增契约。</div></div>
+      </div>
+    </div>
+  </section>
+  <!-- 六形态功能对齐矩阵 -->
+  <section class="section">
+    <div class="section-header">
+      <h2>六形态<em>功能对齐</em>矩阵</h2>
+      <span class="num-tag">Feature Parity · §04</span>
+    </div>
+    <table>
+      <thead><tr><th>能力（对齐 Web 响应式基座）</th><th>📱 手机 P0</th><th>📲 平板 P0</th><th>💻 PC P1</th><th>📺 智慧屏 P2</th><th>⌚ 穿戴 P3</th><th>🚗 车机 P3</th></tr></thead>
+      <tbody>
+        <tr><td><b>登录认证</b>（JWT + HUKS）</td><td>✅ 一碰传</td><td>✅ 一碰传接续</td><td>✅ 扫码登录</td><td>🟡 扫码 / 接续令牌</td><td>✅ 随手机配对</td><td>✅ 语音 + 账号接续</td></tr>
+        <tr><td><b>课表 / 课程浏览</b>（course）</td><td>✅ 全功能</td><td>✅ 双栏</td><td>✅ 三栏</td><td>🟡 仅当前课</td><td>🟡 下一节卡片</td><td>⏳ 不做</td></tr>
+        <tr><td><b>直播观看</b>（live · HLS）</td><td>✅ 全功能</td><td>✅ + 小窗</td><td>✅ 多窗口</td><td>✅ 大屏主演播</td><td>⏳ 仅音频</td><td>✅ 纯音频</td></tr>
+        <tr><td><b>随堂答题 / 点名签到</b>（live）</td><td>✅ 全功能</td><td>✅ 全功能</td><td>✅ 教师发起</td><td>🟡 大屏统计展示</td><td>✅ 一键签到</td><td>🚫 行中禁用</td></tr>
+        <tr><td><b>作业提交 / 批阅</b>（assignment · ai_grade）</td><td>✅ 提交</td><td>✅ 提交 + M-Pencil 批注</td><td>✅ 教师批阅主力</td><td>⏳ 不做</td><td>⏳ 仅截止提醒</td><td>🚫 行中禁用</td></tr>
+        <tr><td><b>题库 / 考试</b>（exam）</td><td>✅ 全功能</td><td>✅ 全功能</td><td>✅ 全功能</td><td>🟡 只读成绩单</td><td>⏳ 不做</td><td>🚫 行中禁用</td></tr>
+        <tr><td><b>学情 / 档案</b>（analytics）</td><td>✅ 查看</td><td>✅ 查看</td><td>✅ 教师视图</td><td>⏳ 不做</td><td>🟡 计时摘要</td><td>⏳ 语音播报</td></tr>
+        <tr><td><b>AI 对话 / 推荐路径</b>（ai_chat · D-06）</td><td>✅ 全功能</td><td>✅ 全功能</td><td>✅ AI 批阅辅助</td><td>⏳ 不做</td><td>🟡 路径提醒</td><td>✅ 音频课 + TTS</td></tr>
+        <tr><td><b>原子化服务卡片</b>（Form Kit）</td><td>✅ 3 卡</td><td>✅ 2 卡</td><td>⏳ Phase 4</td><td>⏳ 不做</td><td>✅ 表盘 complications</td><td>⏳ 不做</td></tr>
+        <tr><td><b>跨设备流转</b>（软总线）</td><td>✅ 发起</td><td>✅ 接续</td><td>✅ 接续</td><td>✅ 接续放映</td><td>🟡 状态同步</td><td>🟡 音频接续</td></tr>
+      </tbody>
+    </table>
+    <div class="info note">✅ 完整支持 · 🟡 精简 / 只读形态 · ⏳ 后续 Phase · 🚫 因安全 / 合规定位明确不做。凡「AI」单元格均继承 <b>AI 生成内容显式标识 + 人工复核</b> 合规要求（《生成式人工智能服务管理暂行办法》）。</div>
+    <h3 class="sub" style="font-family:var(--f-display);font-size:20px;margin:22px 0 10px">原型 → 开发追踪矩阵</h3>
+    <table>
+      <thead><tr><th>原型视图</th><th>对应 AC</th><th>落地工程</th><th>实现状态</th></tr></thead>
+      <tbody>
+        <tr><td>视图 1 📱 手机</td><td>AC1/AC2/AC6</td><td>Harmony/phone（ArkTS · 对齐 mobile-app 契约）</td><td><span class="chip soon">⏳ 待开发</span></td></tr>
+        <tr><td>视图 2 📲 平板</td><td>AC1/AC6</td><td>Harmony/tablet（双栏 + Pencil Kit 批注）</td><td><span class="chip soon">⏳ 待开发</span></td></tr>
+        <tr><td>视图 3 💻 PC</td><td>AC6</td><td>Harmony/pc（三栏 · 复用 Web 组件语义）</td><td><span class="chip soon">⏳ Phase 2</span></td></tr>
+        <tr><td>视图 4 📺 智慧屏</td><td>AC7/AC8</td><td>Harmony/tv（演示模式 + HLS /media 反代）</td><td><span class="chip soon">⏳ Phase 2</span></td></tr>
+        <tr><td>视图 5 ⌚ 穿戴</td><td>AC4/AC5</td><td>Harmony/watch（Atomic Service 元服务）</td><td><span class="chip soon">⏳ Phase 3</span></td></tr>
+        <tr><td>视图 6 🚗 车机</td><td>AC3</td><td>Harmony/auto（音频 + AVSession）</td><td><span class="chip soon">⏳ Phase 3</span></td></tr>
+        <tr><td>底部 · 流转 / 卡片</td><td>AC4/AC5</td><td>devices/register · card-refresh 两端点</td><td><span class="chip soon">⏳ 契约先行</span></td></tr>
+      </tbody>
+    </table>
+    <h3 class="sub" style="font-family:var(--f-display);font-size:20px;margin:22px 0 10px">验收标准（AC）与测试方法映射</h3>
+    <table>
+      <thead><tr><th>AC</th><th>描述</th><th>测试方法</th><th>优先级</th></tr></thead>
+      <tbody>
+        <tr><td>AC1</td><td>手机 / 平板 / PC 三形态核心学习闭环（课表 → 直播 → 作业）全流程可用</td><td>🤖 E2E + 🖐️ Manual</td><td>P0</td></tr>
+        <tr><td>AC2</td><td>Token 经 HUKS 加密存储，抓包与文件系统均不可见明文</td><td>🔒 Sec + 🖐️ Manual</td><td>P0</td></tr>
+        <tr><td>AC3</td><td>车机 D 档状态下视频与答题入口不可达，仅音频链路可用</td><td>🖐️ Manual（台架）</td><td>P0</td></tr>
+        <tr><td>AC4</td><td>跨设备接续 &lt;2s（软总线会话恢复），失败自动回退云端进度</td><td>📊 Perf</td><td>P1</td></tr>
+        <tr><td>AC5</td><td>原子化卡片亮屏刷新 &lt;800ms，点击深链路由正确</td><td>🧩 API + 🖐️ Manual</td><td>P1</td></tr>
+        <tr><td>AC6</td><td>AI 批阅 / 推荐在所有形态均带「AI 辅助」标识且教师确认前不生效</td><td>⚖️ Comp + 🧩 API</td><td>P0</td></tr>
+        <tr><td>AC7</td><td>智慧屏连续直播 6h 无 OOM，内存曲线平稳</td><td>📊 Perf（浸泡）</td><td>P2</td></tr>
+        <tr><td>AC8</td><td>六形态视觉符合 Lumina 设计系统（色板 / 字阶 / 荧光签名）</td><td>👁️ VR</td><td>P2</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>
+
+<footer>
+  <div>Lumina 墨光 · D-11 HarmonyOS 原型 · DOC-LUMINA-2026-D11-001</div>
+  <div class="sig">One Ink, <span class="hl">Six Screens</span></div>
+  <div>Version 1.0 · 2026-09-03</div>
+</footer>
+
+<script>
+/* ============================================================================
+   D-11 鸿蒙多设备原型 · Mock 数据与交互（纯原生 JS）
+   ============================================================================ */
+const MOCK = {
+  homework: [
+    { icon: '📝', title: '纪录片旁白文案', due: '明天 08:00', urgent: true, course: '数字影像创作' },
+    { icon: '🎞️', title: '分镜脚本 · 第 3 组', due: '09-05 23:59', urgent: false, course: '数字影像创作' },
+    { icon: '📐', title: '课后练习 7.3（极限）', due: '09-06 12:00', urgent: false, course: '高等数学（下）' }
+  ],
+  paths: [
+    { lv: 'Lv.4 · 薄弱', title: '三角函数图像变换', desc: '12 题 · 预计 25 min', prog: 33 },
+    { lv: 'Lv.6 · 闯关', title: '空间几何挑战关', desc: '8 关节点 · 奖励 ×2', prog: 12 },
+    { lv: 'Lv.3 · 推荐', title: '导数应用热身', desc: '10 题 · 连击模式', prog: 0 }
+  ],
+  courses: [
+    { icon: '🎬', bg: 'var(--cobalt-soft)', title: '数字影像创作', teacher: '李教授 · 2026 春', prog: 64 },
+    { icon: '📐', bg: 'var(--growth-soft)', title: '高等数学（下）', teacher: '王老师 · 2026 春', prog: 81 },
+    { icon: '💻', bg: 'var(--ai-soft)', title: '操作系统原理', teacher: '赵副教授 · 2026 春', prog: 47 },
+    { icon: '📚', bg: 'var(--highlighter-soft)', title: '学术写作与规范', teacher: '陈老师 · 2025 秋', prog: 100 }
+  ],
+  lives: [
+    { status: 'live', title: '纪实光影 · 第 9 讲', meta: '李教授主讲 · 3,142 人在线', time: '正在直播' },
+    { status: 'soon', title: '操作系统 · 进程调度答疑', meta: '赵副教授 · 预约 486 人', time: '今晚 19:30' },
+    { status: 'done', title: '高等数学 · 期中串讲', meta: '回放时长 92:14 · 观看 61%', time: '回看' }
+  ],
+  notices: [
+    { unread: true, title: '作业已批阅：色彩构成练习', body: '得分 88 · 点击查看教师手写评语', time: '10 分钟前', tag: '作业批阅' },
+    { unread: true, title: '第 8 周课程调整公告', body: '国庆调休，课程顺延至 10 月 9 日', time: '2 小时前', tag: '课程公告' },
+    { unread: true, title: '直播即将开始', body: '「纪实光影」第 9 讲 5 分钟后开播', time: '今天 13:55', tag: '系统通知' },
+    { unread: false, title: '连续打卡 7 天达成', body: '获得徽章「七日不辍」· 经验值 +70', time: '昨天 22:10', tag: '系统通知' }
+  ],
+  menu: [
+    { icon: '🔥', label: '学习打卡与连胜', extra: '' },
+    { icon: '🏅', label: '徽章与经验值', extra: '12 枚' },
+    { icon: '📊', label: '我的学情档案', extra: '' },
+    { icon: '🧩', label: '桌面卡片设置', extra: '鸿蒙' },
+    { icon: '🔔', label: '通知与免打扰', extra: '' },
+    { icon: '🔒', label: '账号与设备管理', extra: '3 台' },
+    { icon: '⚖️', label: '隐私政策', extra: '' }
+  ],
+  tabletNav: [
+    { icon: '🏠', label: '首页' }, { icon: '📚', label: '课程', active: true }, { icon: '📡', label: '直播' },
+    { icon: '📝', label: '作业' }, { icon: '📊', label: '成绩' }, { icon: '🤝', label: '协作' }, { icon: '🤖', label: 'AI 对话' }
+  ],
+  chapters: [
+    { open: true, title: '第三章 · 光影造型', done: 3, total: 5, lessons: [
+      { t: '光比与情绪', type: 'video', dur: '18:24' }, { t: '纪实用光实战', type: 'video', dur: '24:10' },
+      { t: '直播答疑：色温', type: 'live', dur: '今晚' }, { t: '作业 3：旁白文案', type: 'task', dur: '待批' }
+    ]},
+    { open: false, title: '第四章 · 声音设计', done: 0, total: 4, lessons: [
+      { t: '同期声与拟音', type: 'video', dur: '21:02' }, { t: '旁白录制工作坊', type: 'live', dur: '预约' }
+    ]},
+    { open: false, title: '第五章 · 成片与放映', done: 0, total: 3, lessons: [
+      { t: '调色流程总览', type: 'video', dur: '16:45' }, { t: '结课作品展', type: 'task', dur: '12 月' }
+    ]}
+  ],
+  pcRail: [
+    { icon: '📋', label: '教学工作台', active: true }, { icon: '📚', label: '我的课程' }, { icon: '📡', label: '直播课堂' },
+    { icon: '📝', label: '作业批阅', badge: 8 }, { icon: '💯', label: '成绩册' }, { icon: '🧪', label: '题库考试' },
+    { icon: '📊', label: '学情分析' }, { icon: '🤖', label: 'AI 助手' }
+  ],
+  grading: [
+    { name: '王同学', sub: '12 分钟前', active: true, status: '批改中' },
+    { name: '刘同学', sub: '1 小时前', status: '待批' }, { name: '陈同学', sub: '今天 09:12', status: '待批' },
+    { name: '赵同学', sub: '昨天 23:40', status: 'AI 预批' }, { name: '孙同学', sub: '昨天 21:05', status: '待批' },
+    { name: '周同学', sub: '09-01', status: '已批', ok: true }, { name: '吴同学', sub: '09-01', status: '已批', ok: true }
+  ],
+  tvPoll: [
+    { opt: 'A', n: 173 }, { opt: 'B', n: 52 }, { opt: 'C', n: 164 }, { opt: 'D', n: 32 }
+  ],
+  watch: [
+    { k: '下一节课', t: '高等数学（下）', d: '10:30 · 教三楼 305' },
+    { k: '待办提醒', t: '旁白文案 明天 08:00 截止', d: '直播「纪实光影」19:30' },
+    { k: '快捷签到', checkin: true },
+    { k: '今日学习', t: '2 小时 36 分', d: '🔥 连续 7 天' }
+  ],
+  carPlaylist: [
+    { t: '第 8 讲 · 辛弃疾的刀与剑', d: '43:10', done: true },
+    { t: '第 9 讲 · 苏轼的黄州突围', d: '44:00', playing: true },
+    { t: '第 10 讲 · 李清照的南渡', d: '41:32' },
+    { t: '第 11 讲 · 陆游的梦与马', d: '45:18' },
+    { t: '第 12 讲 · 辛弃疾的晚年', d: '40:02' }
+  ],
+  atomic: [
+    { host: '📱 手机桌面 · 2×2', kicker: '今日课表', title: '下一节 · 高等数学', body: '10:30 – 12:00<br/>教三楼 305 · 还有 10 分钟上课', go: '点击 → 课程详情', tip: '课表卡片由 card-refresh 聚合；亮屏即更新，点击深链到课程页对应章节。' },
+    { host: '📲 平板桌面 · 2×4', kicker: '待交作业', title: '2 项待办', body: '① 纪录片旁白文案（明天 08:00）<br/>② 分镜脚本 · 第 3 组（09-05）', go: '点击 → 作业列表', tip: '临期 24h 内卡片描边转为警示红；点击直达作业详情并开始手写。' },
+    { host: '⌚ 手表表盘 · 圆形', kicker: '打卡状态', title: '🔥 7 天连胜', body: '今日已学 2h36m · 经验 +40<br/>点击完成打卡', go: '点击 → 打卡页', tip: '手表侧展示为精简版；打卡成功触发震动反馈 + 徽章动效。' }
+  ],
+  phoneTabMap: { home: 'pane-home', course: 'pane-course', live: 'pane-live', msg: 'pane-msg', mine: 'pane-mine' }
+};
+
+/* ---------- 渲染工具 ---------- */
+const $ = s => document.querySelector(s);
+const el = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- 手机：首页 ---------- */
+$('#phoneHomework').innerHTML = MOCK.homework.map(h => `
+  <div class="row-item">
+    <div class="ri-ico">${h.icon}</div>
+    <div class="ri-body"><div class="ri-t">${esc(h.title)}</div><div class="ri-d">${esc(h.course)}</div></div>
+    <span class="ri-x" style="${h.urgent ? '' : 'color:var(--inkwell-2)'}">${h.due}</span>
+  </div>`).join('');
+$('#phonePaths').innerHTML = MOCK.paths.map(p => `
+  <div class="path-card">
+    <span class="p-lv">${esc(p.lv)}</span>
+    <div class="p-t">${esc(p.title)}</div>
+    <div class="p-d">${esc(p.desc)}</div>
+    <div class="progress"><i style="width:${p.prog}%;background:var(--ai)"></i></div>
+  </div>`).join('');
+
+/* ---------- 手机：课程 / 直播 / 消息 / 我的 ---------- */
+$('#phoneCourses').innerHTML = MOCK.courses.map(c => `
+  <div class="card" style="display:flex;gap:12px;align-items:center">
+    <div class="course-cover" style="background:${c.bg}">${c.icon}</div>
+    <div style="flex:1;min-width:0">
+      <div class="ri-t">${esc(c.title)}</div>
+      <div class="ri-d">${esc(c.teacher)}</div>
+      <div class="progress"><i class="${c.prog === 100 ? 'g' : ''}" style="width:${c.prog}%"></i></div>
+      <div class="ri-d" style="font-family:var(--f-mono);font-size:9.5px;margin-top:2px">进度 ${c.prog}%</div>
+    </div>
+  </div>`).join('');
+$('#phoneLives').innerHTML = MOCK.lives.map(l => `
+  <div class="card">
+    <div class="c-head"><span class="c-title">${esc(l.title)}</span>
+      <span class="chip ${l.status}">${l.status === 'live' ? '● 直播中' : l.status === 'soon' ? '即将开始' : '已结束'}</span></div>
+    <div class="ri-d">${esc(l.meta)}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span style="font-family:var(--f-mono);font-size:10.5px;color:var(--inkwell-2)">${esc(l.time)}</span>
+      <button class="btn ${l.status === 'done' ? 'ghost' : 'primary'}" style="width:auto;padding:6px 14px;font-size:12px">${l.status === 'live' ? '进入直播' : l.status === 'soon' ? '预约提醒' : '观看回放'}</button>
+    </div>
+  </div>`).join('');
+$('#phoneNotices').innerHTML = MOCK.notices.map(n => `
+  <div class="notice-item ${n.unread ? '' : 'read'}">
+    <span class="n-dot"></span>
+    <div style="flex:1">
+      <div class="n-t">${esc(n.title)} <span class="chip mut">${esc(n.tag)}</span></div>
+      <div class="n-b">${esc(n.body)}</div>
+      <div class="n-time">${esc(n.time)}</div>
+    </div>
+  </div>`).join('');
+$('#phoneMenu').innerHTML = MOCK.menu.map(m => `
+  <div class="menu-item"><span class="m-ico">${m.icon}</span>${esc(m.label)}
+    ${m.extra ? `<span class="m-badge" style="background:var(--ricepaper-2);color:var(--inkwell-2)">${esc(m.extra)}</span>` : '<span class="m-arrow">›</span>'}
+  </div>`).join('');
+
+/* ---------- 手机 Tab 切换 ---------- */
+$('#phoneTabbar').addEventListener('click', e => {
+  const btn = e.target.closest('.tab-btn'); if (!btn) return;
+  document.querySelectorAll('#phoneTabbar .tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+  document.querySelectorAll('.phone-screen .tab-pane').forEach(p => p.classList.remove('active'));
+  $('#' + MOCK.phoneTabMap[btn.dataset.pane]).classList.add('active');
+});
+
+/* ---------- 平板：侧栏 / 章节树 / Tab ---------- */
+$('#tabletNav').innerHTML = MOCK.tabletNav.map(n => `
+  <div class="tb-nav-item ${n.active ? 'active' : ''}"><span>${n.icon}</span>${esc(n.label)}</div>`).join('');
+$('#tbChapterPane').innerHTML = MOCK.chapters.map(ch => `
+  <div class="chapter ${ch.open ? 'open' : ''}">
+    <div class="chapter-head"><span>▸</span>${esc(ch.title)}
+      <span class="chip mut" style="margin-left:auto">${ch.done}/${ch.total}</span><span class="chev">▶</span></div>
+    <div class="chapter-list">${ch.lessons.map(l => `
+      <div class="lesson"><span class="l-ico">${l.type === 'video' ? '🎬' : l.type === 'live' ? '📡' : '📝'}</span>${esc(l.t)}
+        <span class="l-type ${l.type}">${esc(l.dur)}</span></div>`).join('')}</div>
+  </div>`).join('');
+document.querySelectorAll('#tbChapterPane .chapter-head').forEach(h =>
+  h.addEventListener('click', () => h.parentElement.classList.toggle('open')));
+const TB_PANES = { chapter: 'tbChapterPane', homework: 'tbHomeworkPane', notice: 'tbNoticePane', discuss: 'tbDiscussPane' };
+$('#tbTabs').addEventListener('click', e => {
+  const b = e.target.closest('.tb-tab'); if (!b) return;
+  document.querySelectorAll('#tbTabs .tb-tab').forEach(x => x.classList.toggle('active', x === b));
+  Object.entries(TB_PANES).forEach(([k, id]) => $('#' + id).style.display = k === b.dataset.tb ? '' : 'none');
+});
+
+/* ---------- PC：侧栏 / 批阅列表 ---------- */
+$('#pcRail').innerHTML = MOCK.pcRail.map(n => `
+  <div class="tb-nav-item ${n.active ? 'active' : ''}" style="position:relative"><span>${n.icon}</span>${esc(n.label)}
+    ${n.badge ? `<span class="m-badge" style="margin-left:auto">${n.badge}</span>` : ''}</div>`).join('');
+$('#pcGradingList').innerHTML = MOCK.grading.map(g => `
+  <div class="card" style="padding:10px 12px;margin-bottom:8px;${g.active ? 'border-color:var(--cobalt);box-shadow:0 0 0 2px var(--cobalt-soft)' : ''}">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="avatar" style="width:28px;height:28px;border-radius:50%;background:var(--ricepaper-2);display:flex;align-items:center;justify-content:center;font-size:13px">${g.name[0]}</div>
+      <div style="flex:1"><div style="font-size:12.5px;font-weight:600">${esc(g.name)} <span style="font-weight:400;color:var(--inkwell-2);font-size:10.5px">· ${esc(g.sub)}</span></div></div>
+      <span class="chip ${g.ok ? 'done' : g.status === 'AI 预批' ? 'soon' : 'warn'}">${esc(g.status)}</span>
+    </div>
+  </div>`).join('');
+
+/* ---------- 智慧屏：答题柱状图 + 二维码 ---------- */
+const tvMax = Math.max(...MOCK.tvPoll.map(b => b.n));
+$('#tvBars').innerHTML = MOCK.tvPoll.map((b, i) => `
+  <div class="bar-row"><span class="bl">${b.opt}</span>
+    <div class="bar-track"><i data-w="${Math.round(b.n / tvMax * 100)}" style="width:0${i === 0 ? ';background:linear-gradient(90deg,var(--growth),#4ade80)' : ''}"></i></div>
+    <span class="bn">${b.n}</span></div>`).join('');
+setTimeout(() => document.querySelectorAll('#tvBars .bar-track i').forEach(i => i.style.width = i.dataset.w + '%'), 300);
+(function qr() { /* 8×8 伪二维码（角定位 + 伪随机点阵） */
+  const pat = [1,1,1,0,1,1,1,0, 1,0,1,1,0,0,1,0, 1,1,1,0,1,1,1,1, 0,0,0,1,0,1,0,1, 1,0,1,1,1,0,1,0, 1,1,0,0,1,1,0,1, 0,1,0,1,0,1,1,0, 1,0,1,0,1,1,0,1];
+  $('#qrGrid').innerHTML = pat.map(v => `<i class="${v ? '' : 'o'}"></i>`).join('');
+})();
+
+/* ---------- 手表 ---------- */
+$('#watchCards').innerHTML = MOCK.watch.map(c => c.checkin
+  ? `<button class="w-checkin" id="wCheckin">🔥 一键签到</button>`
+  : `<div class="w-card"><div class="w-k">${esc(c.k)}</div><div class="w-t">${esc(c.t)}</div><div class="w-d">${esc(c.d)}</div></div>`).join('');
+document.addEventListener('click', e => {
+  if (e.target.id === 'wCheckin') { e.target.textContent = '✓ 已签到 · +40 XP'; e.target.style.background = 'var(--growth)'; }
+  if (e.target.classList.contains('checkin-btn')) { e.target.textContent = '✓ 今日已打卡'; e.target.style.background = 'var(--growth-soft)'; e.target.style.color = 'var(--growth)'; }
+});
+
+/* ---------- 车机 ---------- */
+$('#carPlaylist').innerHTML = MOCK.carPlaylist.map(a => `
+  <div class="audio-item ${a.playing ? 'playing' : ''}">
+    <div class="a-ico">${a.playing ? '🔊' : a.done ? '✓' : '🎧'}</div>
+    <div style="min-width:0"><div class="a-t">${esc(a.t)}</div><div class="a-d">${a.d}</div></div>
+  </div>`).join('');
+$('.car-screen').addEventListener('click', e => {
+  if (e.target.classList.contains('sp-btn')) {
+    document.querySelectorAll('.sp-btn').forEach(b => b.classList.toggle('on', b === e.target));
+  }
+  if (e.target.closest('.car-btn.main')) {
+    const b = e.target.closest('.car-btn.main');
+    b.textContent = b.textContent === '▶' ? '⏸' : '▶';
+  }
+});
+
+/* ---------- 底部：流转动画 ---------- */
+$('#flowPause').addEventListener('click', () => {
+  const dot = $('#flowDot');
+  dot.classList.toggle('paused');
+  const paused = dot.classList.contains('paused');
+  $('#flowPause').textContent = paused ? '▶ 播放动画' : '⏸ 暂停动画';
+});
+const flowNodes = document.querySelectorAll('.flow-node');
+const flowNames = ['📱 手机', '📲 平板', '💻 PC', '📺 智慧屏'];
+let fn = 0;
+setInterval(() => { if ($('#flowDot').classList.contains('paused')) return; fn = (fn + 1) % 4;
+  flowNodes.forEach((n, i) => n.classList.toggle('hot', i === fn)); }, 2000);
+
+/* ---------- 底部：原子化卡片 ---------- */
+$('#atomicGrid').innerHTML = MOCK.atomic.map(a => `
+  <div class="atomic-cell">
+    <div class="host-label">${esc(a.host)}</div>
+    <div class="widget-card">
+      <div class="wc-kicker">${esc(a.kicker)}</div>
+      <div class="wc-title">${esc(a.title)}</div>
+      <div class="wc-body">${a.body}</div>
+      <div class="wc-go">${esc(a.go)} →</div>
+    </div>
+    <div class="widget-tip">${esc(a.tip)}</div>
+  </div>`).join('');
+
+/* ---------- 顶部设备切换（宽屏生效；≤860px 自动垂直堆叠） ---------- */
+document.querySelectorAll('.dev-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.dev-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.stage .view').forEach(v => v.classList.toggle('active', v.id === 'view-' + btn.dataset.view));
+    document.querySelector('.stage').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+/* 小屏堆叠模式：CSS @media 已强制所有 .view display:block 垂直堆叠；
+   此处仅调低切换器透明度，不改动 active 状态，避免回到宽屏时全部视图同时显示 */
+const mq = window.matchMedia('(max-width: 860px)');
+function applyStack() {
+  const sw = document.querySelector('.device-switcher');
+  if (sw) sw.style.opacity = mq.matches ? '.45' : '1';
+}
+mq.addEventListener('change', applyStack);
+applyStack();
+</script>
+
+</body>
+</html>

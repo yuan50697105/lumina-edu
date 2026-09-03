@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina · 21 · 自主学习与闯关奖励（Web）</title>
+<!--
+  ============================================================
+  Lumina 墨光 · D-06 自主学习与闯关奖励系统 · Web 响应式原型
+  版本：v1.0
+  作者：Lumina
+  对应需求：原型/lumina-learning-system.html（D-06 v1.0）
+  页面：学习广场 /learning · 路径地图 /learning/paths/:id ·
+        成就中心 /learning/profile · 排行榜 /learning/leaderboard
+  说明：纯 HTML + CSS + 原生 JS，数据为 JS 对象 Mock，
+        便于后续对接 learning 模块 API。
+  ============================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC;
+    --ricepaper-2:#F2EBD8;
+    --inkwell:#0F1020;
+    --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9;
+    --cobalt-soft:#E8EAFB;
+    --highlighter:#F5B800;
+    --highlighter-soft:#FDE68A;
+    --correction:#E85D3A;
+    --correction-soft:#FDE0D4;
+    --growth:#2A7F4F;
+    --growth-soft:#D4EDDC;
+    --ai:#7C3AED;
+    --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12);
+    --line-strong:rgba(15,16,32,0.22);
+    --shadow:0 1px 2px rgba(15,16,32,0.04), 0 8px 24px rgba(15,16,32,0.06);
+
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.5;}
+  body{padding:40px 48px 96px;}
+  .wrap{max-width:1400px; margin:0 auto;}
+
+  /* ============ 页头与 Tab ============ */
+  .page-header{
+    display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px;
+    padding-bottom:24px; border-bottom:1px solid var(--line); margin-bottom:28px;
+  }
+  .page-header h1{font-family:var(--f-display); font-weight:380; font-size:42px; letter-spacing:-0.02em;}
+  .page-header h1 em{font-style:italic; color:var(--cobalt);}
+  .page-header .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.14em;}
+
+  .tabs{
+    display:flex; gap:6px; margin-bottom:32px; background:#fff; border:1px solid var(--line);
+    border-radius:12px; padding:6px; box-shadow:var(--shadow); width:fit-content; max-width:100%; overflow-x:auto;
+  }
+  .tab{
+    font-family:var(--f-body); font-size:13px; font-weight:500; color:var(--inkwell-2);
+    padding:9px 18px; border-radius:8px; border:none; background:transparent; cursor:pointer;
+    display:flex; align-items:center; gap:7px; white-space:nowrap; transition:all .25s ease;
+  }
+  .tab:hover{background:var(--ricepaper-2);}
+  .tab.active{background:var(--cobalt); color:#fff; box-shadow:0 2px 8px rgba(61,70,201,0.35);}
+  .tab .url{font-family:var(--f-mono); font-size:10px; opacity:.65;}
+
+  .panel{display:none; animation:panelIn .35s ease;}
+  .panel.active{display:block;}
+  @keyframes panelIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+
+  /* ============ 通用组件 ============ */
+  .card{background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow);}
+  .pill{
+    display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px;
+    font-family:var(--f-mono); font-size:10px; letter-spacing:0.06em; text-transform:uppercase;
+  }
+  .pill.cobalt{background:var(--cobalt-soft); color:var(--cobalt);}
+  .pill.yellow{background:var(--highlighter-soft); color:#8A6100;}
+  .pill.green{background:var(--growth-soft); color:var(--growth);}
+  .pill.red{background:var(--correction-soft); color:var(--correction);}
+  .pill.gray{background:var(--ricepaper-2); color:var(--inkwell-2);}
+  .pill.ai{background:var(--ai-soft); color:var(--ai);}
+
+  .btn{
+    font-family:var(--f-body); font-size:13px; font-weight:500; padding:9px 16px; border-radius:8px;
+    border:1px solid var(--line); background:#fff; color:var(--inkwell); cursor:pointer;
+    display:inline-flex; align-items:center; gap:7px; transition:all .2s ease;
+  }
+  .btn:hover{border-color:var(--line-strong); background:var(--ricepaper-2);}
+  .btn.primary{background:var(--cobalt); color:#fff; border-color:var(--cobalt);}
+  .btn.primary:hover{background:#2F37A8;}
+  .btn.gold{background:var(--highlighter); color:#4A3600; border-color:var(--highlighter); font-weight:600;}
+  .btn.gold:hover{background:#E0A800;}
+  .btn:disabled{opacity:.55; cursor:default;}
+  .btn.lg{padding:13px 26px; font-size:15px; border-radius:10px;}
+
+  .xp-hl{
+    font-family:var(--f-display); font-style:italic; font-weight:500;
+    background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 92%);
+    padding:0 3px;
+  }
+  .sec-title{font-family:var(--f-display); font-weight:400; font-size:22px; letter-spacing:-0.01em; margin-bottom:14px; display:flex; align-items:baseline; gap:10px;}
+  .sec-title .sub{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  .compliance{font-size:11px; color:var(--inkwell-2); margin-top:18px; display:flex; align-items:center; gap:6px;}
+  .compliance a{color:var(--cobalt); text-decoration:none; border-bottom:1px dashed var(--cobalt); cursor:pointer;}
+
+  /* ============ P1 学习广场 ============ */
+  .hero{
+    display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;
+    background:linear-gradient(120deg, #fff 55%, var(--cobalt-soft)); border:1px solid var(--line);
+    border-radius:14px; padding:22px 26px; margin-bottom:20px; box-shadow:var(--shadow);
+  }
+  .hero h2{font-family:var(--f-display); font-weight:380; font-size:32px; letter-spacing:-0.02em;}
+  .hero h2 em{font-style:italic; background:linear-gradient(180deg, transparent 64%, var(--highlighter) 64%, var(--highlighter) 90%, transparent 90%); padding:0 3px;}
+  .hero .sub{font-size:13px; color:var(--inkwell-2); margin-top:2px;}
+  .hero-right{display:flex; align-items:center; gap:14px;}
+  .streak-box{text-align:right;}
+  .streak-box .n{font-family:var(--f-display); font-size:28px; font-weight:420; line-height:1;}
+  .streak-box .l{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  #checkinBtn.pop{animation:pop .4s ease;}
+  @keyframes pop{0%{transform:scale(1);} 40%{transform:scale(1.18);} 100%{transform:scale(1);}}
+  .xp-badge{border:1px solid var(--highlighter); background:#fff; border-radius:12px; padding:8px 14px; text-align:center;}
+  .xp-badge .n{font-family:var(--f-display); font-style:italic; font-size:20px; font-weight:500; color:#4A3600;}
+  .xp-badge .l{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+
+  .filterbar{display:flex; gap:18px; flex-wrap:wrap; align-items:center; margin-bottom:22px;}
+  .fgroup{display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
+  .fgroup .gl{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.1em; margin-right:2px;}
+  .chip{
+    font-size:12px; padding:5px 13px; border-radius:20px; border:1px solid var(--line);
+    background:#fff; color:var(--inkwell-2); cursor:pointer; transition:all .2s ease;
+  }
+  .chip:hover{border-color:var(--cobalt); color:var(--cobalt);}
+  .chip.on{background:var(--cobalt); color:#fff; border-color:var(--cobalt);}
+
+  .plaza{display:grid; grid-template-columns:1fr 320px; gap:24px; align-items:start;}
+  .path-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+  .path-card{overflow:hidden; cursor:pointer; transition:transform .25s ease, box-shadow .25s ease;}
+  .path-card:hover{transform:translateY(-4px); box-shadow:0 12px 32px rgba(15,16,32,0.12);}
+  .path-cover{height:120px; position:relative; display:flex; align-items:flex-end; padding:12px;}
+  .path-cover::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(15,16,32,0) 30%, rgba(15,16,32,0.55) 100%);}
+  .path-cover .glyph{position:absolute; right:12px; top:10px; font-size:34px; opacity:.85; filter:drop-shadow(0 2px 6px rgba(15,16,32,.3));}
+  .path-cover .diff{position:relative; z-index:1;}
+  .path-body{padding:14px 16px 16px;}
+  .path-body .title{font-family:var(--f-display); font-size:18px; font-weight:450; letter-spacing:-0.01em; line-height:1.25;}
+  .path-body .desc{
+    font-size:12px; color:var(--inkwell-2); margin:6px 0 10px; line-height:1.55;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:37px;
+  }
+  .path-tags{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .path-meta{display:flex; justify-content:space-between; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:8px;}
+  .progress{height:5px; background:var(--ricepaper-2); border-radius:3px; overflow:hidden;}
+  .progress .bar{height:100%; background:var(--cobalt); border-radius:3px; transition:width .5s ease;}
+  .empty-hint{grid-column:1/-1; text-align:center; padding:48px 0; color:var(--inkwell-2); font-size:13px;}
+
+  .side-col{display:flex; flex-direction:column; gap:18px;}
+  .challenge-card{border:1px solid var(--highlighter); background:linear-gradient(160deg,#fff 40%, var(--highlighter-soft)); padding:18px; position:relative; overflow:hidden;}
+  .challenge-card::before{content:"⏳"; position:absolute; right:-6px; top:-10px; font-size:64px; opacity:.12;}
+  .challenge-card .tag{font-family:var(--f-mono); font-size:10px; letter-spacing:0.12em; color:#8A6100; text-transform:uppercase;}
+  .challenge-card .q{font-family:var(--f-display); font-size:17px; font-weight:450; margin:8px 0 4px; line-height:1.35;}
+  .challenge-card .hint{font-size:12px; color:var(--inkwell-2); margin-bottom:12px;}
+  .continue-card{padding:18px;}
+  .continue-card .lbl{font-family:var(--f-mono); font-size:10px; letter-spacing:0.12em; color:var(--inkwell-2); text-transform:uppercase; margin-bottom:8px;}
+  .continue-card .name{font-family:var(--f-display); font-size:17px; font-weight:450; margin-bottom:8px;}
+  .continue-card .row{display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2);}
+
+  /* ============ P2 路径地图 ============ */
+  .path-layout{display:grid; grid-template-columns:2fr 1fr; gap:24px; align-items:start;}
+  .map-card{padding:26px 26px 14px; position:relative;}
+  .map-head{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:8px;}
+  .map-head h3{font-family:var(--f-display); font-weight:400; font-size:26px; letter-spacing:-0.01em;}
+  .map-head .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); margin-top:4px;}
+  .map-scroll{position:relative; padding:10px 0 20px;}
+  #connector{position:absolute; left:0; top:0; width:100%; pointer-events:none; z-index:0;}
+  .node{position:relative; z-index:1; display:flex; gap:16px; align-items:flex-start; padding:9px 0; cursor:pointer;}
+  .node .dot{
+    width:56px; height:56px; border-radius:16px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    font-size:22px; background:#fff; border:2px solid var(--line-strong); transition:all .25s ease; position:relative;
+  }
+  .node.done .dot{background:var(--growth); border-color:var(--growth); color:#fff;}
+  .node.current .dot{border-color:var(--cobalt); background:var(--cobalt-soft); animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(245,184,0,0.55);}
+    50%{box-shadow:0 0 0 10px rgba(245,184,0,0);}
+  }
+  .node.locked .dot{background:var(--ricepaper-2); color:var(--inkwell-2); opacity:.7;}
+  .node .body{flex:1; border:1px solid var(--line); border-radius:10px; padding:12px 16px; background:#fff; transition:all .25s ease;}
+  .node.current .body{border-color:var(--cobalt); box-shadow:0 0 0 3px var(--cobalt-soft);}
+  .node.selected .body{border-color:var(--highlighter); box-shadow:0 0 0 3px var(--highlighter-soft);}
+  .node.locked .body{opacity:.62;}
+  .node:hover .body{transform:translateX(4px);}
+  .node .seq{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.1em; text-transform:uppercase;}
+  .node .t{font-family:var(--f-display); font-size:17px; font-weight:450; line-height:1.3; margin:2px 0 6px;}
+  .node .tags{display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+  .node .tags .mins{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);}
+  .node .tip{
+    position:absolute; left:66px; bottom:calc(100% - 4px); z-index:5; background:var(--inkwell); color:#fff;
+    font-size:11px; padding:7px 11px; border-radius:8px; white-space:nowrap; opacity:0; pointer-events:none;
+    transform:translateY(4px); transition:all .2s ease;
+  }
+  .node:hover .tip{opacity:1; transform:none;}
+  .start-node, .end-node{display:flex; align-items:center; gap:14px; padding:6px 0; position:relative; z-index:1;}
+  .start-node .bigdot{width:26px; height:26px; border-radius:50%; background:var(--cobalt); border:5px solid var(--cobalt-soft); box-shadow:0 0 0 2px var(--cobalt);}
+  .start-node .lab, .end-node .lab{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); letter-spacing:0.1em; text-transform:uppercase;}
+  .end-node .trophy{font-size:30px; filter:drop-shadow(0 3px 8px rgba(245,184,0,.5));}
+  .end-node .lab b{color:var(--cobalt);}
+
+  .detail-card{padding:22px; position:sticky; top:20px;}
+  .detail-card .rtype{font-family:var(--f-mono); font-size:10px; letter-spacing:0.12em; color:var(--cobalt); text-transform:uppercase;}
+  .detail-card h4{font-family:var(--f-display); font-weight:420; font-size:22px; letter-spacing:-0.01em; line-height:1.25; margin:6px 0 8px;}
+  .detail-facts{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .preview{
+    border:1px dashed var(--line-strong); border-radius:10px; background:var(--ricepaper); padding:16px;
+    min-height:180px; margin-bottom:16px; font-size:13px; color:var(--inkwell-2);
+  }
+  .preview.video{display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; background:var(--inkwell); color:#fff; border-style:none;}
+  .preview.video .play{width:56px; height:56px; border-radius:50%; background:rgba(255,255,255,0.14); border:1.5px solid rgba(255,255,255,0.5); display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer; transition:all .2s;}
+  .preview.video .play:hover{background:var(--cobalt); border-color:var(--cobalt);}
+  .preview.quiz .opt{display:block; width:100%; text-align:left; margin-top:8px; padding:9px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; font-size:12.5px; cursor:pointer; color:var(--inkwell);}
+  .preview.quiz .opt:hover{border-color:var(--cobalt); background:var(--cobalt-soft);}
+  .detail-card .actions{display:flex; gap:10px; flex-wrap:wrap;}
+
+  /* 完成弹窗 */
+  .modal-mask{
+    position:fixed; inset:0; background:rgba(15,16,32,0.55); z-index:50; display:none;
+    align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(3px);
+  }
+  .modal-mask.show{display:flex; animation:fadeIn .3s ease;}
+  @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
+  .modal{
+    background:#fff; border-radius:18px; padding:40px 44px; text-align:center; max-width:440px; width:100%;
+    position:relative; overflow:hidden; box-shadow:0 24px 80px rgba(15,16,32,.35); animation:rise .4s cubic-bezier(.2,.9,.3,1.2);
+  }
+  @keyframes rise{from{transform:translateY(28px) scale(.95); opacity:0;} to{transform:none; opacity:1;}}
+  .modal::before{
+    content:""; position:absolute; left:50%; top:-120px; transform:translateX(-50%);
+    width:340px; height:280px; border-radius:50%;
+    background:radial-gradient(circle, rgba(245,184,0,0.5), rgba(245,184,0,0) 70%);
+    animation:glow 2.4s ease-in-out infinite;
+  }
+  @keyframes glow{0%,100%{opacity:.7;} 50%{opacity:1;}}
+  .modal .badge-new{position:relative; z-index:1; font-size:52px; margin-bottom:6px;}
+  .modal h3{font-family:var(--f-display); font-weight:420; font-size:26px; position:relative; z-index:1;}
+  .modal .gained{font-family:var(--f-display); font-style:italic; font-size:52px; font-weight:500; color:#4A3600; margin:12px 0 2px; position:relative; z-index:1;}
+  .modal .gained small{font-family:var(--f-mono); font-style:normal; font-size:13px; letter-spacing:0.1em;}
+  .modal .bd{font-size:13px; color:var(--inkwell-2); position:relative; z-index:1; margin-bottom:20px;}
+  .modal .medal{display:inline-flex; gap:8px; align-items:center; background:var(--highlighter-soft); border:1px solid var(--highlighter); padding:8px 16px; border-radius:24px; font-size:13px; font-weight:600; color:#4A3600; position:relative; z-index:1; margin-bottom:22px;}
+  .modal .m-actions{display:flex; gap:10px; justify-content:center; position:relative; z-index:1;}
+
+  /* ============ P3 成就中心 ============ */
+  .profile-top{display:flex; gap:20px; align-items:center; flex-wrap:wrap; padding:24px 26px; margin-bottom:18px;}
+  .avatar-xl{width:76px; height:76px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:30px; font-weight:500; box-shadow:0 0 0 4px var(--cobalt-soft), 0 0 0 7px var(--highlighter);}
+  .profile-top .who{flex:1; min-width:220px;}
+  .profile-top .nick{font-family:var(--f-display); font-size:26px; font-weight:440; display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .tier{display:inline-flex; align-items:center; gap:6px; padding:4px 14px; border-radius:20px; font-size:12px; font-weight:700; letter-spacing:0.04em;}
+  .tier.t1{background:#E5E2D8; color:#6B675C;}
+  .tier.t2{background:#F3D9BE; color:#8C5A2B;}
+  .tier.t3{background:#E8E8EE; color:#5A5A6E;}
+  .tier.t4{background:var(--highlighter-soft); color:#8A6100; border:1px solid var(--highlighter);}
+  .tier.t5{background:#DCEFF2; color:#1F7A8C;}
+  .tier.t6{background:var(--ai-soft); color:var(--ai); border:1px solid #C4B5FD;}
+  .levelbar{margin-top:10px; max-width:480px;}
+  .levelbar .progress{height:8px;}
+  .levelbar .progress .bar{background:linear-gradient(90deg, var(--cobalt), var(--ai));}
+  .levelbar .cap{display:flex; justify-content:space-between; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); margin-top:5px;}
+
+  .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px;}
+  .stat-card{padding:18px 20px;}
+  .stat-card .lbl{font-family:var(--f-mono); font-size:10px; letter-spacing:0.12em; color:var(--inkwell-2); text-transform:uppercase;}
+  .stat-card .val{font-family:var(--f-display); font-size:40px; font-weight:360; letter-spacing:-0.02em; line-height:1.1; margin-top:6px;}
+  .stat-card .val .u{font-size:15px; color:var(--inkwell-2); font-weight:400; margin-left:4px;}
+  .stat-card .foot{font-size:11px; color:var(--inkwell-2); margin-top:4px;}
+
+  .ach-layout{display:grid; grid-template-columns:380px 1fr; gap:24px; align-items:start;}
+  .cal-card{padding:20px;}
+  .cal-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px;}
+  .cal-head .m{font-family:var(--f-display); font-size:18px; font-weight:450;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:7px;}
+  .cal-wd{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-align:center; letter-spacing:0.05em;}
+  .cal-day{
+    aspect-ratio:1; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:var(--f-mono); font-size:10.5px; color:var(--inkwell-2); position:relative;
+  }
+  .cal-day.on{background:var(--highlighter); color:#4A3600; font-weight:600;}
+  .cal-day.on.streakrun{box-shadow:inset 0 0 0 2px rgba(245,184,0,.35);}
+  .cal-day.today{outline:2px solid var(--cobalt); outline-offset:2px; font-weight:600;}
+  .cal-day.future{color:rgba(15,16,32,0.25);}
+  .cal-day.pad{visibility:hidden;}
+  .cal-legend{display:flex; gap:14px; margin-top:14px; font-size:10.5px; color:var(--inkwell-2); flex-wrap:wrap;}
+  .cal-legend i{width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:5px; vertical-align:-1px;}
+
+  .badge-wall{padding:20px;}
+  .badge-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:14px;}
+  .badge-cell{position:relative; display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 4px 10px; border-radius:12px; cursor:default; transition:all .2s ease;}
+  .badge-cell:hover{background:var(--ricepaper-2);}
+  .badge-cell .ic{
+    width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px;
+    background:var(--ricepaper-2); border:1.5px solid var(--line);
+  }
+  .badge-cell.earned .ic{background:#fff; border-color:var(--highlighter); box-shadow:0 0 12px rgba(245,184,0,.45);}
+  .badge-cell.locked .ic{filter:grayscale(1); opacity:.45; border-style:dashed;}
+  .badge-cell .nm{font-size:10.5px; color:var(--inkwell-2); text-align:center; line-height:1.25;}
+  .badge-cell.earned .nm{color:var(--inkwell);}
+  .badge-cell .tip{
+    position:absolute; bottom:calc(100% - 2px); left:50%; transform:translateX(-50%) translateY(4px); z-index:6;
+    background:var(--inkwell); color:#fff; font-size:11px; padding:8px 12px; border-radius:8px; width:190px; text-align:center;
+    opacity:0; pointer-events:none; transition:all .2s ease; line-height:1.45;
+  }
+  .badge-cell .tip b{display:block; font-size:12px; margin-bottom:2px;}
+  .badge-cell:hover .tip{opacity:1; transform:translateX(-50%);}
+
+  /* ============ P4 排行榜 ============ */
+  .lb-head{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:22px;}
+  .seg{display:inline-flex; background:#fff; border:1px solid var(--line); border-radius:10px; padding:4px; gap:4px;}
+  .seg button{border:none; background:transparent; font-family:var(--f-body); font-size:13px; font-weight:500; color:var(--inkwell-2); padding:7px 20px; border-radius:7px; cursor:pointer; transition:all .2s ease;}
+  .seg button.on{background:var(--cobalt); color:#fff;}
+
+  .podium{display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; align-items:end; margin-bottom:26px;}
+  .pod{ text-align:center; padding:22px 14px 18px; position:relative; transition:transform .3s ease;}
+  .pod:hover{transform:translateY(-4px);}
+  .pod .ring{width:74px; height:74px; margin:0 auto 10px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:28px; font-weight:500; color:#fff; position:relative;}
+  .pod .ring::after{content:attr(data-medal); position:absolute; right:-8px; bottom:-6px; font-size:24px;}
+  .pod.gold .ring{background:linear-gradient(140deg,#F5B800,#D98E00); box-shadow:0 6px 18px rgba(245,184,0,.45);}
+  .pod.silver .ring{background:linear-gradient(140deg,#AEB4C6,#8189A3);}
+  .pod.bronze .ring{background:linear-gradient(140deg,#C98F5F,#9A6234);}
+  .pod.first{padding-top:34px; padding-bottom:26px;}
+  .pod.first .ring{width:92px; height:92px; font-size:34px;}
+  .pod .name{font-family:var(--f-display); font-size:17px; font-weight:470;}
+  .pod .xpv{font-family:var(--f-display); font-style:italic; font-size:22px; font-weight:500; color:#4A3600; margin-top:2px; background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); display:inline-block; padding:0 4px;}
+  .pod .tiermini{margin-top:6px;}
+
+  .lb-table{overflow:hidden;}
+  .lb-row{
+    display:grid; grid-template-columns:52px 44px 1fr 100px 130px; gap:12px; align-items:center;
+    padding:11px 18px; border-bottom:1px solid var(--line); font-size:13px; animation:rowIn .4s ease backwards;
+  }
+  @keyframes rowIn{from{opacity:0; transform:translateX(14px);} to{opacity:1; transform:none;}}
+  .lb-row:last-child{border-bottom:none;}
+  .lb-row .rank{font-family:var(--f-display); font-size:18px; font-weight:420; color:var(--inkwell-2);}
+  .lb-row .av{width:34px; height:34px; border-radius:50%; background:var(--ricepaper-2); color:var(--inkwell); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:14px; font-weight:500;}
+  .lb-row .who{display:flex; flex-direction:column;}
+  .lb-row .who .n{font-weight:500;}
+  .lb-row .who .id{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);}
+  .lb-row .xpcell{font-family:var(--f-mono); font-size:12px; text-align:right;}
+  .lb-row.me{background:var(--cobalt-soft);}
+  .lb-row.me .av{background:var(--cobalt); color:#fff;}
+  .lb-row.me .who .n::after{content:"（我）"; color:var(--cobalt); font-size:11px; margin-left:6px;}
+
+  .myrank{
+    position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:30;
+    display:none; align-items:center; gap:16px; background:var(--inkwell); color:#fff;
+    padding:10px 22px; border-radius:40px; box-shadow:0 12px 40px rgba(15,16,32,.4); font-size:13px;
+    border:1px solid rgba(255,255,255,0.14);
+  }
+  .myrank.show{display:flex; animation:rise .4s ease;}
+  .myrank .rk{font-family:var(--f-display); font-style:italic; font-size:22px; font-weight:500; color:var(--highlighter);}
+  .myrank .mxp{font-family:var(--f-mono); font-size:11px; opacity:.8;}
+
+  .footnote{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.08em; text-align:center; margin-top:56px; padding-top:20px; border-top:1px solid var(--line);}
+
+  /* ============ 响应式 ============ */
+  @media (max-width:1100px){
+    .path-grid{grid-template-columns:repeat(2,1fr);}
+    .badge-grid{grid-template-columns:repeat(5,1fr);}
+    .ach-layout{grid-template-columns:1fr;}
+  }
+  @media (max-width:900px){
+    body{padding:24px 20px 96px;}
+    .plaza{grid-template-columns:1fr;}
+    .path-layout{grid-template-columns:1fr;}
+    .detail-card{position:static;}
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .page-header h1{font-size:32px;}
+  }
+  @media (max-width:560px){
+    .path-grid{grid-template-columns:1fr;}
+    .badge-grid{grid-template-columns:repeat(3,1fr);}
+    .podium{grid-template-columns:1fr; align-items:stretch;}
+    .pod.first{order:-1;}
+    .lb-row{grid-template-columns:36px 34px 1fr 70px; }
+    .lb-row .tiercell{display:none;}
+    .hero{flex-direction:column; align-items:flex-start;}
+    .tabs{width:100%;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-header">
+    <h1>Lumina <em>墨光</em> · 自主学习与闯关</h1>
+    <div class="meta">D-06 · Web 原型 v1.0 · 4 页面 · Tab 切换演示</div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-page="plaza">🗺️ 学习广场 <span class="url">/learning</span></button>
+    <button class="tab" data-page="map">🎯 路径地图 <span class="url">/learning/paths/:id</span></button>
+    <button class="tab" data-page="profile">🏆 成就中心 <span class="url">/learning/profile</span></button>
+    <button class="tab" data-page="leaderboard">📊 排行榜 <span class="url">/learning/leaderboard</span></button>
+  </nav>
+
+  <!-- ================= P1 学习广场 ================= -->
+  <section class="panel active" id="panel-plaza">
+    <div class="hero">
+      <div>
+        <h2>学习<em>广场</em></h2>
+        <div class="sub">选择一个路径，像闯关一样完成自主学习 · 每关都有 XP 与徽章奖励</div>
+      </div>
+      <div class="hero-right">
+        <div class="xp-badge"><div class="n" id="heroXp">12,480</div><div class="l">累计 XP</div></div>
+        <div class="streak-box"><div class="n">🔥 <span id="streakN">7</span> 天</div><div class="l">连续打卡</div></div>
+        <button class="btn gold lg" id="checkinBtn">📅 今日打卡</button>
+      </div>
+    </div>
+
+    <div class="filterbar" id="filterbar"></div>
+
+    <div class="plaza">
+      <div class="path-grid" id="pathGrid"></div>
+      <aside class="side-col">
+        <div class="card challenge-card">
+          <div class="tag">⚡ 今日挑战 · 限时 24h</div>
+          <div class="q">Python：以下哪个不是不可变类型？<br><span style="font-size:12px;font-family:var(--f-mono);color:var(--inkwell-2)">A. tuple&nbsp;&nbsp;B. str&nbsp;&nbsp;C. list&nbsp;&nbsp;D. frozenset</span></div>
+          <div class="hint">答对得 <span class="xp-hl">+20 XP</span>，答错不扣分</div>
+          <button class="btn primary" onclick="alert('原型演示：进入答题面板')">立即作答</button>
+        </div>
+        <div class="card continue-card">
+          <div class="lbl">▶ 继续学习</div>
+          <div class="name" id="contName">Python 入门 · 第 5 关</div>
+          <div class="progress"><div class="bar" id="contBar" style="width:42%"></div></div>
+          <div class="row"><span id="contPct">42% · 12 关中</span><button class="btn primary" style="padding:5px 12px;font-size:12px" onclick="showPage('map')">继续 →</button></div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="compliance">⚖️ 学习路径推荐基于你的学习行为生成，可在「设置 → 隐私」中 <a>关闭个性化推荐</a></div>
+  </section>
+
+  <!-- ================= P2 路径地图 ================= -->
+  <section class="panel" id="panel-map">
+    <div class="path-layout">
+      <div class="card map-card">
+        <div class="map-head">
+          <div>
+            <h3>Python 入门 · 闯关地图</h3>
+            <div class="meta">12 关 · 总奖励 <span class="xp-hl">600 XP</span> · 234 人正在学习 · 完成 4/12</div>
+          </div>
+          <span class="pill cobalt">编程 · 入门</span>
+        </div>
+        <div class="map-scroll" id="mapScroll">
+          <svg id="connector" aria-hidden="true"></svg>
+          <div class="start-node"><div class="bigdot"></div><div class="lab">起点 · Start</div></div>
+          <div id="nodeList"></div>
+          <div class="end-node"><div class="trophy">🏆</div><div class="lab">终点 · 完成全部 12 关解锁 <b>「Python 行者」</b>徽章 + <b>100 XP</b></div></div>
+        </div>
+      </div>
+
+      <aside class="card detail-card" id="detailCard"></aside>
+    </div>
+  </section>
+
+  <!-- ================= P3 成就中心 ================= -->
+  <section class="panel" id="panel-profile">
+    <div class="card profile-top">
+      <div class="avatar-xl">林</div>
+      <div class="who">
+        <div class="nick">林晓墨 <span class="tier t4" id="tierTag">🥇 Lv.4 黄金</span></div>
+        <div class="levelbar">
+          <div class="progress"><div class="bar" id="lvBar" style="width:0%"></div></div>
+          <div class="cap"><span id="lvCap">12,480 XP</span><span>距 Lv.5 铂金还需 2,520 XP</span></div>
+        </div>
+      </div>
+      <button class="btn" onclick="alert('原型演示：编辑个人资料')">编辑资料</button>
+    </div>
+
+    <div class="stat-grid" id="statGrid"></div>
+
+    <div class="ach-layout">
+      <div class="card cal-card">
+        <div class="cal-head"><div class="m">近 30 天打卡</div><div class="pill yellow">🔥 当前连续 7 天</div></div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-legend">
+          <span><i style="background:var(--highlighter)"></i>已打卡</span>
+          <span><i style="outline:2px solid var(--cobalt);outline-offset:1px"></i>今日</span>
+          <span><i style="background:rgba(15,16,32,.1)"></i>未来日期</span>
+          <span><i style="background:#fff;border:1px solid var(--line-strong)"></i>未打卡</span>
+        </div>
+      </div>
+      <div class="card badge-wall">
+        <div class="sec-title">徽章墙 <span class="sub">12 / 18 已获得</span></div>
+        <div class="badge-grid" id="badgeGrid"></div>
+      </div>
+    </div>
+    <div class="compliance">⚖️ 你的成就数据仅本人、授课教师与管理员可见；成绩信息受《个人信息保护法》保护，可在 <a>个人中心 → 隐私</a> 查看与更正</div>
+  </section>
+
+  <!-- ================= P4 排行榜 ================= -->
+  <section class="panel" id="panel-leaderboard">
+    <div class="lb-head">
+      <div class="sec-title" style="margin:0">排行榜 <span class="sub">按本周期获得 XP 排名 · 每 10 分钟刷新</span></div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div class="seg" id="lbSeg">
+          <button class="on" data-range="week">周榜</button>
+          <button data-range="month">月榜</button>
+          <button data-range="all">总榜</button>
+        </div>
+        <button class="btn" id="csvBtn" title="教师 / 管理员视角">⬇ 导出 CSV</button>
+      </div>
+    </div>
+
+    <div class="podium" id="podium"></div>
+    <div class="card lb-table" id="lbTable"></div>
+
+    <div class="compliance">⚖️ 排行榜展示昵称与 XP，不展示真实姓名与学号；可在「设置 → 隐私」中 <a>关闭排行榜参与</a>（关闭后不影响 XP 与徽章获取）</div>
+  </section>
+
+  <!-- 完成关卡弹窗 -->
+  <div class="modal-mask" id="modalMask">
+    <div class="modal">
+      <div class="badge-new">🎉</div>
+      <h3>关卡完成！</h3>
+      <div class="gained" id="modalXp">+0<small> XP</small></div>
+      <div class="bd" id="modalSub">第 5 关「列表与切片」· 用时 8 分 12 秒</div>
+      <div class="medal">🎖️ 获得新徽章：「切片高手」</div>
+      <div class="m-actions">
+        <button class="btn" id="shareBtn">分享战绩</button>
+        <button class="btn primary" id="nextBtn">下一关 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 我的排名悬浮条 -->
+  <div class="myrank" id="myRank">
+    <span class="rk" id="mkRk">#38</span>
+    <span>林晓墨</span>
+    <span class="mxp" id="mkXp">1,240 XP · Lv.4 黄金</span>
+  </div>
+
+  <div class="footnote">LUMINA 墨光 · D-06 自主学习与闯关奖励系统 · WEB PROTOTYPE v1.0 · MOCK DATA — 对应需求文档 lumina-learning-system.html</div>
+</div>
+
+<script>
+/* ================================================================
+   Mock 数据（后续对接 learning 模块 API 时整体替换）
+   ================================================================ */
+const DB = {
+  user: {
+    name:'林晓墨', initial:'林', xp:12480, level:4, tier:'黄金', tierCls:'t4',
+    streak:7, pathsDone:5, badgesGot:12, badgesTotal:18, checkedToday:false
+  },
+  filters: {
+    category: ['全部','编程','设计','语言','通识'],
+    difficulty: ['全部','入门','进阶','挑战'],
+    sort: ['热门','最新','推荐']
+  },
+  paths: [
+    {id:1, title:'Python 入门', glyph:'🐍', grad:'linear-gradient(135deg,#3D46C9,#7C3AED)', cat:'编程', diff:'入门', levels:12, xp:600, learners:234, progress:42, hot:98, fresh:5, rec:true},
+    {id:2, title:'UI 设计思维 100 问', glyph:'🎨', grad:'linear-gradient(135deg,#E85D3A,#F5B800)', cat:'设计', diff:'入门', levels:8, xp:400, learners:187, progress:0, hot:91, fresh:8, rec:true},
+    {id:3, title:'英语学术写作', glyph:'✍️', grad:'linear-gradient(135deg,#2A7F4F,#94C97A)', cat:'语言', diff:'进阶', levels:10, xp:520, learners:156, progress:10, hot:84, fresh:6, rec:false},
+    {id:4, title:'数据结构与算法挑战', glyph:'🧮', grad:'linear-gradient(135deg,#0F1020,#3D46C9)', cat:'编程', diff:'挑战', levels:15, xp:900, learners:98, progress:0, hot:77, fresh:9, rec:true},
+    {id:5, title:'日语入门 · 五十音', glyph:'🈺', grad:'linear-gradient(135deg,#7C3AED,#E85D3A)', cat:'语言', diff:'入门', levels:6, xp:300, learners:312, progress:66, hot:95, fresh:3, rec:false},
+    {id:6, title:'批判性思维与逻辑', glyph:'🧠', grad:'linear-gradient(135deg,#1F7A8C,#2A7F4F)', cat:'通识', diff:'进阶', levels:9, xp:450, learners:121, progress:0, hot:70, fresh:7, rec:false},
+    {id:7, title:'Figma 组件实战', glyph:'🧩', grad:'linear-gradient(135deg,#F5B800,#E85D3A)', cat:'设计', diff:'进阶', levels:7, xp:380, learners:143, progress:0, hot:82, fresh:10, rec:true},
+    {id:8, title:'线性代数图解', glyph:'📐', grad:'linear-gradient(135deg,#3D46C9,#2A7F4F)', cat:'通识', diff:'挑战', levels:11, xp:660, learners:76, progress:0, hot:64, fresh:4, rec:false},
+    {id:9, title:'SQL 数据探索', glyph:'🗄️', grad:'linear-gradient(135deg,#2A2B3D,#7C3AED)', cat:'编程', diff:'进阶', levels:9, xp:480, learners:205, progress:0, hot:89, fresh:2, rec:true}
+  ],
+  nodes: [
+    {seq:1,  type:'article', icon:'📖', title:'变量与数据类型',     xp:40, mins:6,  state:'done'},
+    {seq:2,  type:'video',   icon:'🎬', title:'条件与循环（视频）', xp:50, mins:12, state:'done'},
+    {seq:3,  type:'quiz',    icon:'📝', title:'小测验：控制流',     xp:30, mins:5,  state:'done'},
+    {seq:4,  type:'article', icon:'📖', title:'函数与作用域',       xp:40, mins:8,  state:'done'},
+    {seq:5,  type:'article', icon:'📖', title:'列表与切片',         xp:50, mins:9,  state:'current'},
+    {seq:6,  type:'quiz',    icon:'📝', title:'小测验：容器类型',   xp:30, mins:5,  state:'locked'},
+    {seq:7,  type:'video',   icon:'🎬', title:'字典与集合（视频）', xp:50, mins:11, state:'locked'},
+    {seq:8,  type:'challenge',icon:'⚔️', title:'挑战：学生成绩统计', xp:80, mins:20, state:'locked'},
+    {seq:9,  type:'article', icon:'📖', title:'文件读写入门',       xp:40, mins:8,  state:'locked'},
+    {seq:10, type:'quiz',    icon:'📝', title:'阶段测验（一）',     xp:40, mins:7,  state:'locked'},
+    {seq:11, type:'challenge',icon:'⚔️', title:'挑战：猜数字游戏',   xp:80, mins:18, state:'locked'},
+    {seq:12, type:'challenge',icon:'⚔️', title:'毕业挑战：迷你记账本', xp:100, mins:30, state:'locked'}
+  ],
+  typeLabel: {article:'📖 文章', video:'🎬 视频', quiz:'📝 测验', challenge:'⚔️ 挑战'},
+  badges: [
+    {icon:'🌱', name:'初出茅庐', desc:'完成第一个学习路径', got:'2026-06-12'},
+    {icon:'🔥', name:'七日之约', desc:'连续打卡 7 天', got:'2026-08-28'},
+    {icon:'⚔️', name:'挑战大师', desc:'单路径答对 10 道挑战题', got:'2026-07-03'},
+    {icon:'🦉', name:'夜猫子', desc:'在 22:00 后完成一关', got:'2026-06-20'},
+    {icon:'⚡', name:'闪电通关', desc:'30 分钟内完成一个测验', got:'2026-07-11'},
+    {icon:'📚', name:'博学多才', desc:'累计学习 5 个不同分类', got:'2026-08-01'},
+    {icon:'🎯', name:'全对先生', desc:'测验一次通过且全对', got:'2026-06-25'},
+    {icon:'🧗', name:'登山者', desc:'完成首个「挑战」难度路径', got:'2026-08-15'},
+    {icon:'💎', name:'千分俱乐部', desc:'累计获得 1000 XP', got:'2026-06-30'},
+    {icon:'🚀', name:'万点宗师', desc:'累计获得 10000 XP', got:'2026-09-01'},
+    {icon:'🤝', name:'结伴学习', desc:'与好友组队完成一关', got:'2026-07-22'},
+    {icon:'📅', name:'月月红', desc:'单月打卡 25 天以上', got:'2026-08-31'},
+    {icon:'👑', name:'路径之王', desc:null, got:null, need:'完成 10 个学习路径（当前 5/10）'},
+    {icon:'🌙', name:'三十而立', desc:null, got:null, need:'连续打卡 30 天（当前 7/30）'},
+    {icon:'🧲', name:'全科制霸', desc:null, got:null, need:'在每个分类下各完成 1 个路径'},
+    {icon:'🏹', name:'百步穿杨', desc:null, got:null, need:'连续答对 50 题'},
+    {icon:'🎓', name:'学以致用', desc:null, got:null, need:'首个路径获得教师点评优秀'},
+    {icon:'🌟', name:'登顶为王', desc:null, got:null, need:'周榜进入前 3 名'}
+  ],
+  lb: {
+    week: [
+      {n:'陈一舟', id:'20260012', xp:1860, lv:'钻石', tier:'t6'},
+      {n:'苏晚晴', id:'20260045', xp:1720, lv:'铂金', tier:'t5'},
+      {n:'何思远', id:'20260108', xp:1650, lv:'铂金', tier:'t5'},
+      {n:'周行野', id:'20260031', xp:1520, lv:'黄金', tier:'t4'},
+      {n:'李慕白', id:'20260087', xp:1480, lv:'黄金', tier:'t4'},
+      {n:'王心澄', id:'20260052', xp:1390, lv:'黄金', tier:'t4'},
+      {n:'赵陆铭', id:'20260076', xp:1310, lv:'白银', tier:'t3'},
+      {n:'孙朴',   id:'20260099', xp:1280, lv:'白银', tier:'t3'},
+      {n:'吴桐雨', id:'20260064', xp:1250, lv:'白银', tier:'t3'},
+      {n:'林晓墨', id:'20260001', xp:1240, lv:'黄金', tier:'t4', me:true}
+    ],
+    month: [
+      {n:'苏晚晴', id:'20260045', xp:6420, lv:'铂金', tier:'t5'},
+      {n:'陈一舟', id:'20260012', xp:6180, lv:'钻石', tier:'t6'},
+      {n:'李慕白', id:'20260087', xp:5340, lv:'黄金', tier:'t4'},
+      {n:'何思远', id:'20260108', xp:4980, lv:'铂金', tier:'t5'},
+      {n:'周行野', id:'20260031', xp:4620, lv:'黄金', tier:'t4'},
+      {n:'林晓墨', id:'20260001', xp:4410, lv:'黄金', tier:'t4', me:true},
+      {n:'王心澄', id:'20260052', xp:4080, lv:'黄金', tier:'t4'},
+      {n:'赵陆铭', id:'20260076', xp:3760, lv:'白银', tier:'t3'},
+      {n:'孙朴',   id:'20260099', xp:3510, lv:'白银', tier:'t3'},
+      {n:'郑板桥', id:'20260120', xp:3320, lv:'白银', tier:'t3'}
+    ],
+    all: [
+      {n:'陈一舟', id:'20260012', xp:38420, lv:'钻石', tier:'t6'},
+      {n:'苏晚晴', id:'20260045', xp:35180, lv:'钻石', tier:'t6'},
+      {n:'何思远', id:'20260108', xp:29760, lv:'铂金', tier:'t5'},
+      {n:'林晓墨', id:'20260001', xp:12480, lv:'黄金', tier:'t4', me:true},
+      {n:'李慕白', id:'20260087', xp:11940, lv:'黄金', tier:'t4'},
+      {n:'周行野', id:'20260031', xp:10880, lv:'黄金', tier:'t4'},
+      {n:'王心澄', id:'20260052', xp:9410, lv:'白银', tier:'t3'},
+      {n:'赵陆铭', id:'20260076', xp:8260, lv:'白银', tier:'t3'},
+      {n:'吴桐雨', id:'20260064', xp:7930, lv:'白银', tier:'t3'},
+      {n:'孙朴',   id:'20260099', xp:6870, lv:'青铜', tier:'t2'}
+    ]
+  },
+  myRank: {week:'#38', month:'#26', all:'#156'}
+};
+
+const $ = s => document.querySelector(s);
+const fmt = n => n.toLocaleString('en-US');
+
+/* ================================================================
+   Tab 切换
+   ================================================================ */
+function showPage(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.page===id));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+id));
+  $('#myRank').classList.toggle('show', id==='leaderboard');
+  if(id==='map') requestAnimationFrame(drawConnector);
+  if(id==='profile'){ /* 等级条动画 */
+    const bar=$('#lvBar'); bar.style.width='0%';
+    requestAnimationFrame(()=>setTimeout(()=>bar.style.width='78%',60));
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+$('#tabs').addEventListener('click', e=>{
+  const t = e.target.closest('.tab'); if(t) showPage(t.dataset.page);
+});
+
+/* ================================================================
+   P1 学习广场：打卡 / 筛选 / 卡片
+   ================================================================ */
+$('#checkinBtn').addEventListener('click', function(){
+  if(DB.user.checkedToday) return;
+  DB.user.checkedToday = true;
+  DB.user.streak += 1;
+  DB.user.xp += 10;
+  $('#streakN').textContent = DB.user.streak;
+  $('#heroXp').textContent = fmt(DB.user.xp);
+  this.classList.remove('pop'); void this.offsetWidth; this.classList.add('pop');
+  this.textContent = '✅ 已打卡 +10 XP';
+  this.disabled = true;
+  renderStats();
+});
+
+const state = {cat:'全部', diff:'全部', sort:'热门'};
+function renderFilters(){
+  const groups = [
+    ['分类','category',DB.filters.category],
+    ['难度','difficulty',DB.filters.difficulty],
+    ['排序','sort',DB.filters.sort]
+  ];
+  $('#filterbar').innerHTML = groups.map(([label,key,opts])=>`
+    <div class="fgroup"><span class="gl">${label}</span>
+      ${opts.map(o=>`<button class="chip ${state[key]===o?'on':''}" data-k="${key}" data-v="${o}">${o}</button>`).join('')}
+    </div>`).join('');
+}
+$('#filterbar').addEventListener('click', e=>{
+  const c = e.target.closest('.chip'); if(!c) return;
+  state[c.dataset.k] = c.dataset.v;
+  renderFilters(); renderPaths();
+});
+function renderPaths(){
+  let list = DB.paths.filter(p =>
+    (state.cat==='全部'||p.cat===state.cat) && (state.diff==='全部'||p.diff===state.diff));
+  if(state.sort==='热门') list.sort((a,b)=>b.hot-a.hot);
+  if(state.sort==='最新') list.sort((a,b)=>b.fresh-a.fresh);
+  if(state.sort==='推荐') list.sort((a,b)=>(b.rec?1:0)-(a.rec?1:0)||b.hot-a.hot);
+  const diffPill = d => d==='入门'?'green':d==='进阶'?'cobalt':'red';
+  $('#pathGrid').innerHTML = list.length ? list.map(p=>`
+    <div class="card path-card" onclick="showPage('map')">
+      <div class="path-cover" style="background:${p.grad}">
+        <span class="glyph">${p.glyph}</span>
+        <span class="pill diff" style="background:rgba(255,255,255,.9);color:var(--inkwell)">${p.diff}</span>
+      </div>
+      <div class="path-body">
+        <div class="title">${p.title}</div>
+        <div class="desc">${p.levels} 个关卡串联文章、视频、测验与挑战，完成全部关卡即可获得路径徽章与 ${p.xp} XP 总奖励。</div>
+        <div class="path-tags">
+          <span class="pill gray">${p.cat}</span>
+          <span class="pill ${diffPill(p.diff)}">${p.diff}</span>
+          <span class="pill yellow">${p.levels} 关</span>
+          ${p.rec?'<span class="pill ai">✦ 推荐</span>':''}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-family:var(--f-display);font-style:italic;font-weight:500;color:#4A3600;background:linear-gradient(180deg,transparent 62%,var(--highlighter) 62%,var(--highlighter) 88%,transparent 88%);padding:0 3px">${p.xp} XP</span>
+          <span class="pill gray" style="font-size:9.5px">${p.learners} 人学习</span>
+        </div>
+        ${p.progress>0?`
+          <div class="progress" style="margin-top:10px"><div class="bar" style="width:${p.progress}%"></div></div>
+          <div class="path-meta"><span>我的进度</span><span>${p.progress}%</span></div>`
+        :`<div class="path-meta" style="margin-top:10px"><span>尚未开始</span><span>点击开始 →</span></div>`}
+      </div>
+    </div>`).join('')
+    : '<div class="empty-hint">该筛选组合下暂无路径，试试切换分类或难度</div>';
+}
+
+/* ================================================================
+   P2 路径地图：节点渲染 + 详情面板 + SVG 连接线
+   ================================================================ */
+let selectedNode = DB.nodes[4]; // 默认当前关
+function renderNodes(){
+  const statePill = {done:'<span class="pill green">✅ 已完成</span>', current:'<span class="pill cobalt">🎯 当前关</span>', locked:'<span class="pill gray">🔒 未解锁</span>'};
+  $('#nodeList').innerHTML = DB.nodes.map((n,i)=>`
+    <div class="node ${n.state} ${n===selectedNode?'selected':''}" data-i="${i}">
+      <div class="dot">${n.state==='locked' ? '🔒' : (n.state==='done' ? '✓' : n.icon)}</div>
+      <div class="body">
+        <div class="seq">LEVEL ${String(n.seq).padStart(2,'0')} · ${DB.typeLabel[n.type]}</div>
+        <div class="t">${n.icon} ${n.title}</div>
+        <div class="tags">
+          ${statePill[n.state]}
+          <span class="pill yellow">+${n.xp} XP</span>
+          <span class="mins">⏱ 约 ${n.mins} 分钟</span>
+        </div>
+      </div>
+      <div class="tip">${n.title} · ${DB.typeLabel[n.type]} · +${n.xp} XP · ${n.mins} 分钟 · ${n.state==='done'?'已完成':n.state==='current'?'进行中':'未解锁'}</div>
+    </div>`).join('');
+  document.querySelectorAll('.node').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const n = DB.nodes[el.dataset.i];
+      if(n.state==='locked'){ alert('🔒 该关卡尚未解锁，请先完成前面的关卡'); return; }
+      selectedNode = n; renderNodes(); renderDetail(); requestAnimationFrame(drawConnector);
+    });
+  });
+}
+function renderDetail(){
+  const n = selectedNode;
+  let preview = '';
+  if(n.type==='article') preview = `<div class="preview"><b style="color:var(--inkwell)">正文预览</b><br>列表是 Python 中最常用的容器。本节通过 4 个生活化例子讲解索引、切片与常用方法……<div style="border-top:1px dashed var(--line);margin-top:10px;padding-top:8px;font-family:var(--f-mono);font-size:10px">1,860 字 · 预计 9 分钟</div></div>`;
+  if(n.type==='video') preview = `<div class="preview video"><div class="play">▶</div><div style="font-family:var(--f-mono);font-size:11px;opacity:.8">视频占位 · 1080P · ${n.mins}:00 · 支持字幕与倍速</div></div>`;
+  if(n.type==='quiz') preview = `<div class="preview quiz"><b style="color:var(--inkwell)">测验预览 · 5 题 / 每题 20 分</b>
+      <div style="margin-top:8px">Q1. len([1, [2, 3]]) 的结果是？</div>
+      <button class="opt">A. 2</button><button class="opt">B. 3</button><button class="opt">C. 报错</button></div>`;
+  if(n.type==='challenge') preview = `<div class="preview"><b style="color:var(--inkwell)">⚔️ 挑战任务</b><br>读取 students.csv，统计各科平均分并输出前三名。可提交代码，AI 预批改 + 教师复核。<div style="border-top:1px dashed var(--line);margin-top:10px;padding-top:8px;font-family:var(--f-mono);font-size:10px">限时 30 分钟 · 最多 3 次提交</div></div>`;
+  $('#detailCard').innerHTML = `
+    <div class="rtype">当前关卡详情 · LEVEL ${String(n.seq).padStart(2,'0')}</div>
+    <h4>${n.icon} ${n.title}</h4>
+    <div class="detail-facts">
+      <span class="pill cobalt">${DB.typeLabel[n.type]}</span>
+      <span class="pill gray">⏱ ${n.mins} 分钟</span>
+      <span class="pill yellow">+${n.xp} XP</span>
+      ${n.state==='done'?'<span class="pill green">✅ 已通过</span>':'<span class="pill red">🎯 进行中</span>'}
+    </div>
+    ${preview}
+    <div class="actions">
+      ${n.state==='done'
+        ? `<button class="btn" onclick="alert('原型演示：重新学习该关卡')">重新学习</button><button class="btn primary" onclick="nextLevel()">下一关 →</button>`
+        : `<button class="btn primary lg" style="flex:1;justify-content:center" onclick="completeLevel()">⚔️ 开始闯关</button>`}
+      <button class="btn" onclick="alert('已加入书架，可在「我的学习」查看')">📌 稍后再学</button>
+    </div>
+    <div class="compliance" style="margin-top:16px">⚖️ 挑战题 AI 预批改结果仅供参考，成绩以教师复核为准</div>`;
+}
+/* SVG 连接线：done 段绿色实线，其余灰色虚线 */
+function drawConnector(){
+  const wrap = $('#mapScroll'); const svg = $('#connector');
+  if(!wrap || !wrap.offsetParent) return;
+  const items = [...document.querySelectorAll('.start-node, .node, .end-node')];
+  if(items.length < 2) return;
+  const wr = wrap.getBoundingClientRect();
+  const pts = items.map(el=>{
+    const dot = el.querySelector('.dot, .bigdot, .trophy');
+    const r = dot.getBoundingClientRect();
+    return {x: r.left - wr.left + r.width/2, y: r.top - wr.top + r.height/2, el};
+  });
+  svg.setAttribute('height', wrap.scrollHeight);
+  svg.setAttribute('width', wrap.clientWidth);
+  let html = `<defs>
+    <marker id="arrow" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="rgba(15,16,32,.3)"/>
+    </marker></defs>`;
+  for(let i=0;i<pts.length-1;i++){
+    const a=pts[i], b=pts[i+1];
+    const nextIsDone = b.el.classList.contains('done') || b.el.classList.contains('current') || b.el.classList.contains('end-node') && DB.nodes[DB.nodes.length-1].state==='done';
+    const fromDone = a.el.classList.contains('done');
+    const doneSeg = fromDone && nextIsDone;
+    html += `<path d="M ${a.x} ${a.y} C ${a.x+26} ${a.y+(b.y-a.y)*0.3}, ${b.x+26} ${b.y-(b.y-a.y)*0.3}, ${b.x} ${b.y}"
+      fill="none" stroke="${doneSeg?'var(--growth)':'rgba(15,16,32,.28)'}" stroke-width="2.5"
+      ${doneSeg?'':'stroke-dasharray="5 6"'} stroke-linecap="round" marker-end="url(#arrow)"/>`;
+  }
+  svg.innerHTML = html;
+}
+window.addEventListener('resize', ()=>{ if($('#panel-map').classList.contains('active')) drawConnector(); });
+
+/* 完成关卡 → 弹窗 + XP 数字滚动 */
+function completeLevel(){
+  const n = selectedNode;
+  $('#modalMask').classList.add('show');
+  $('#modalSub').textContent = `第 ${n.seq} 关「${n.title}」· 用时 ${Math.max(2,Math.round(n.mins*0.7))} 分 ${Math.floor(Math.random()*50)+10} 秒`;
+  const target = n.xp, el = $('#modalXp');
+  const t0 = performance.now(), dur = 900;
+  (function tick(t){
+    const k = Math.min(1, (t-t0)/dur);
+    el.innerHTML = `+${Math.round(target*(1-Math.pow(1-k,3)))}<small> XP</small>`;
+    if(k<1) requestAnimationFrame(tick);
+  })(t0);
+}
+function nextLevel(){
+  const n = selectedNode;
+  if(n.state==='current') n.state='done';
+  const nxt = DB.nodes.find(x=>x.state==='locked');
+  if(nxt){ nxt.state='current'; selectedNode=nxt; }
+  $('#heroXp').textContent = fmt(DB.user.xp += n.xp);
+  closeModal(); renderNodes(); renderDetail(); requestAnimationFrame(drawConnector);
+}
+$('#nextBtn').addEventListener('click', nextLevel);
+$('#shareBtn').addEventListener('click', ()=>alert('原型演示：生成战绩分享卡片（含 AI 标识与昵称脱敏）'));
+$('#modalMask').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeModal(); });
+function closeModal(){ $('#modalMask').classList.remove('show'); }
+
+/* ================================================================
+   P3 成就中心
+   ================================================================ */
+function renderStats(){
+  const u = DB.user;
+  $('#statGrid').innerHTML = `
+    <div class="card stat-card"><div class="lbl">累计 XP</div><div class="val"><span class="xp-hl">${fmt(u.xp)}</span></div><div class="foot">本周 +1,240 · 超过 86% 同学</div></div>
+    <div class="card stat-card"><div class="lbl">连续打卡</div><div class="val">🔥 ${u.streak}<span class="u">天</span></div><div class="foot">历史最长 15 天</div></div>
+    <div class="card stat-card"><div class="lbl">完成路径</div><div class="val">${u.pathsDone}<span class="u">个</span></div><div class="foot">进行中 3 个</div></div>
+    <div class="card stat-card"><div class="lbl">获得徽章</div><div class="val">${u.badgesGot}<span class="u">/ ${u.badgesTotal}</span></div><div class="foot">还差 6 枚集齐</div></div>`;
+}
+function renderCalendar(){
+  const grid = $('#calGrid');
+  const wd = ['日','一','二','三','四','五','六'];
+  const today = new Date(2026,8,3);           // 原型基线日期 2026-09-03
+  const start = new Date(today); start.setDate(start.getDate()-29);
+  // 打卡记录：今天 + 往前连续 6 天（连续 7 天），另有零散打卡
+  const checked = new Set();
+  for(let i=0;i<DB.user.streak;i++){ const d=new Date(today); d.setDate(d.getDate()-i); checked.add(d.toDateString()); }
+  [[9,1],[6,2],[20,3],[17,4],[13,5],[27,6],[24,7],[10,8]].forEach(([dom,m])=>{ const d=new Date(2026,m-1,dom); checked.add(d.toDateString()); });
+  let html = wd.map(w=>`<div class="cal-wd">${w}</div>`).join('');
+  for(let i=0;i<start.getDay();i++) html += `<div class="cal-day pad"></div>`;
+  const end = new Date(today); end.setDate(end.getDate()+5);
+  for(const d of rng(start,end)){
+    const isToday = d.toDateString()===today.toDateString();
+    const isFuture = d > today;
+    const isOn = checked.has(d.toDateString()) && !isFuture;
+    html += `<div class="cal-day ${isOn?'on':''} ${isToday?'today':''} ${isFuture?'future':''}" title="${d.getMonth()+1}/${d.getDate()}${isOn?' · 已打卡':''}">${d.getDate()}</div>`;
+  }
+  grid.innerHTML = html;
+}
+function* rng(a,b){ const d=new Date(a); while(d<=b){ yield new Date(d); d.setDate(d.getDate()+1);} }
+function renderBadges(){
+  $('#badgeGrid').innerHTML = DB.badges.map(b=>{
+    const earned = !!b.got;
+    return `<div class="badge-cell ${earned?'earned':'locked'}">
+      <div class="ic">${b.icon}</div>
+      <div class="nm">${b.name}</div>
+      <div class="tip"><b>${b.icon} ${b.name}</b>${earned ? b.desc+'<br>获得于 '+b.got : '🔒 '+b.need}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ================================================================
+   P4 排行榜
+   ================================================================ */
+let lbRange = 'week';
+const PODIUM = ['silver','gold','bronze'];   // 视觉顺序：2 1 3
+const MEDAL = {gold:'🥇', silver:'🥈', bronze:'🥉'};
+function renderLb(){
+  const data = DB.lb[lbRange];
+  const top3 = [data[1], data[0], data[2]];  // 亚 冠 季
+  $('#podium').innerHTML = top3.map((p,i)=>{
+    if(!p) return '<div></div>';
+    const cls = PODIUM[i];
+    return `<div class="card pod ${cls} ${cls==='gold'?'first':''}">
+      <div class="ring" data-medal="${MEDAL[cls]}">${p.n[0]}</div>
+      <div class="name">${p.n}</div>
+      <div class="xpv">${fmt(p.xp)} XP</div>
+      <div class="tiermini"><span class="tier ${p.tier}" style="padding:2px 10px;font-size:10.5px">${p.lv}</span></div>
+    </div>`;
+  }).join('');
+  $('#lbTable').innerHTML = data.slice(3).map((p,i)=>`
+    <div class="lb-row ${p.me?'me':''}" style="animation-delay:${i*40}ms">
+      <span class="rank">${i+4}</span>
+      <span class="av">${p.n[0]}</span>
+      <span class="who"><span class="n">${p.n}</span><span class="id">学号 ${p.id}</span></span>
+      <span class="xpcell"><span class="xp-hl" style="font-size:14px">${fmt(p.xp)}</span></span>
+      <span class="tiercell"><span class="tier ${p.tier}" style="padding:2px 10px;font-size:10.5px">${p.lv}</span></span>
+    </div>`).join('');
+  const me = data.find(p=>p.me);
+  $('#mkRk').textContent = DB.myRank[lbRange];
+  $('#mkXp').textContent = `${fmt(me?me.xp:1240)} XP · Lv.${DB.user.level} ${DB.user.tier}`;
+}
+$('#lbSeg').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  lbRange = b.dataset.range;
+  document.querySelectorAll('#lbSeg button').forEach(x=>x.classList.toggle('on', x===b));
+  $('#podium').style.opacity = 0; $('#lbTable').style.opacity = 0;
+  setTimeout(()=>{ renderLb(); $('#podium').style.opacity=1; $('#lbTable').style.opacity=1; }, 180);
+});
+$('#podium').style.transition = 'opacity .18s ease';
+$('#lbTable').style.transition = 'opacity .18s ease';
+$('#csvBtn').addEventListener('click', ()=>{
+  const rows = [['排名','昵称','学号','XP','等级']].concat(
+    DB.lb[lbRange].map((p,i)=>[i+1, p.n, p.id, p.xp, p.lv]));
+  const csv = '﻿' + rows.map(r=>r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+  a.download = `lumina-leaderboard-${lbRange}.csv`; a.click(); URL.revokeObjectURL(a.href);
+});
+
+/* ================================================================
+   初始化
+   ================================================================ */
+renderFilters(); renderPaths(); renderNodes(); renderDetail();
+renderStats(); renderCalendar(); renderBadges(); renderLb();
+</script>
+</body>
+</html>
