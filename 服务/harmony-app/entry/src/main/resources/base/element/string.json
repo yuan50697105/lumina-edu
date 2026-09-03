@@ -1,0 +1,56 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "Lumina 墨光 · 高校教学协作平台"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "墨光教育应用"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "墨光"
+    },
+    {
+      "name": "tab_home",
+      "value": "首页"
+    },
+    {
+      "name": "tab_course",
+      "value": "课程"
+    },
+    {
+      "name": "tab_live",
+      "value": "直播"
+    },
+    {
+      "name": "tab_learning",
+      "value": "学习"
+    },
+    {
+      "name": "tab_profile",
+      "value": "我的"
+    },
+    {
+      "name": "login_title",
+      "value": "登录墨光"
+    },
+    {
+      "name": "login_subtitle",
+      "value": "面向高校师生的跨端教学协作平台"
+    },
+    {
+      "name": "login_email",
+      "value": "邮箱"
+    },
+    {
+      "name": "login_password",
+      "value": "密码"
+    },
+    {
+      "name": "login_button",
+      "value": "登录"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/Home",
+    "pages/LiveRoom",
+    "pages/Learning",
+    "pages/Videos",
+    "pages/Profile"
+  ]
+}

@@ -291,10 +291,10 @@
       <tr><td><b>D-04</b></td><td>题库与考试（组卷/在线考试/评分）</td><td>07 · P1</td><td><span class="tag done">✅ 已实施</span></td><td>exam 模块 22 端点 · 4 表（题库/试卷/组卷/作答自动评分）· Web 教师题库试卷管理 + 学生在线考试（2026-09-01，冒烟 28/28）；可接 AI 组卷</td></tr>
       <tr><td><b>D-05</b></td><td>学情分析 + 学生档案 + 辅导记录 + 教学分组 + 用户批量操作</td><td>06 · 08 · 10 · 13 · P1</td><td><span class="tag done">✅ 已实施</span></td><td>analytics 模块扩展 12 端点 + tutoring 模块 5 端点 + course 模块 6 端点 + user 模块 3 端点 · 5 新表（35→40，D-06 并行 49）· 风险规则引擎（AlertRuleIn 可配）· 单测 173→215（+42 test_d05_analytics.py）（2026-09-03）</td></tr>
       <tr><td><b>D-06</b></td><td>课程审批 + 系统设置 + 审计日志（含账户管理/批量操作、监控大盘）</td><td>14 · 16 · 17 · P1</td><td><span class="tag medium">P2</span></td><td>管理端补齐</td></tr>
-      <tr><td><b>D-07</b></td><td>管理端补齐（课程审批/系统设置/审计日志/内容举报/监控大盘）✅ 已实施；AI 基础设施：RAG 向量检索 ✅ / Agent 编排 ✅ / MCP ⏳ / 内容审核 ✅（2026-09-03 D-09 落地）</td><td>RAG/Agent/审核已落地 · MCP 规划中</td><td><span class="tag high">P1</span></td><td>Milvus / AgentScope / 知网 AIGC</td></tr>
-      <tr><td><b>D-08</b></td><td>运营演进：独立监控 + CI/CD</td><td>—</td><td><span class="tag medium">P2</span></td><td>Prometheus + Grafana · GitHub Actions</td></tr>
+      <tr><td><b>D-07</b></td><td>管理端补齐（课程审批/系统设置/审计日志/内容举报/监控大盘）✅ 已实施；AI 基础设施：RAG 向量检索 ✅ / Agent 编排 ✅ / MCP ⏳ / 内容审核 ✅（2026-09-03 D-09 落地）；运营监控 ✅（2026-09-03 D-10 落地：Prometheus/健康检查/业务指标）</td><td>MCP 规划中</td><td><span class="tag high">P1</span></td><td>Milvus / AgentScope / 知网 AIGC</td></tr>
+      <tr><td><b>D-08</b></td><td>运营演进：独立监控 ✅（已合并至 D-10） + CI/CD ⏳</td><td>—</td><td><span class="tag medium">P2</span></td><td>GitHub Actions（单测 + 契约核对 + 镜像构建）</td></tr>
       <tr><td><b>D-09</b></td><td>规模演进：K8s 集群</td><td>—</td><td><span class="tag medium">P2</span></td><td>触发条件：用户量 > 5000</td></tr>
-      <tr><td><b>D-10</b></td><td>鸿蒙（HarmonyOS）适配评估 + 移动端平台矩阵</td><td>—</td><td><span class="tag medium">P2</span></td><td><b>Expo 官方不支持鸿蒙</b>（现状移动端仅 iOS/Android）；三路线评估：**原生 ArkTS / ArkUI 独立客户端（DevEco Studio，移动端仅 6 页面 · 推荐评估项）** · RNOH（bare RN 迁移 + 依赖替换）· uni-app 跨端；产出兼容矩阵结论，不阻塞 M4 · 校园信创诉求触发评审</td></tr>
+      <tr><td><b>D-10</b></td><td>鸿蒙（HarmonyOS）适配 · <b style="color:var(--growth);">✅ 骨架已落地</b>（2026-09-03 · <code>服务/harmony-app/</code> · 原生 ArkTS/ArkUI · 6 页面）</td><td>—</td><td><span class="tag medium">P2</span></td><td>选型决策：<b>原生 ArkTS/ArkUI 方案胜出</b>（Expo 不支持鸿蒙 · 分布式通知/平行视界/多窗口/小艺语音等系统能力）；RNOH/uni-app 备选；Phase 2 待接入：AVPlayer / 平行视界 / 分布式通知 / 元服务卡片 / 车机</td></tr>
     </tbody>
   </table>
 

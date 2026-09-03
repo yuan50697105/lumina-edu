@@ -1,0 +1,31 @@
+# DevEco Studio
+.idea/
+.venv/
+.hvigor/
+build/
+node_modules/
+oh_modules/
+local.properties
+
+# Build outputs
+*.hap
+*.app
+*.sg
+*.p7b
+*.p12
+*.cer
+*.crt
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Secret files
+.env
+.env.local
+*.pem
+*.secret

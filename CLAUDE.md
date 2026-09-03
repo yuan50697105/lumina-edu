@@ -155,7 +155,7 @@ cd 服务/mobile-app && npm install && npx expo start
 | iOS / Android | ✅ 已实现 | `服务/mobile-app/`（React Native / Expo SDK 52） |
 | Web | ✅ 已实现 | `服务/web-frontend/`（React 18 + Vite） |
 | 桌面 | 🟡 原型 | `原型/PC/`（Electron 方案规划中，TDD §3.2） |
-| 鸿蒙 HarmonyOS | ⏳ 演进评估 | **Expo 官方不支持鸿蒙**；WBS D-09 三路线评估：原生 ArkTS／ArkUI 独立客户端（DevEco，移动端 6 页 · 推荐）· RNOH bare 迁移 · uni-app；不阻塞 M4 |
+| 鸿蒙 HarmonyOS | ✅ 原型 + 骨架已落地 | **原生 ArkTS/ArkUI 方案**（`服务/harmony-app/`，6 页面：登录/主页/直播/学习/视频/我的）；Expo 不支持鸿蒙，直接走原生；详见 `原型/Harmony/lumina-01-harmony-overview.html` 六形态规划 |
 
 > 详见 `原型/lumina-wbs-pending.html` v1.1 D-09 任务包。
 
@@ -214,7 +214,7 @@ background: linear-gradient(
 | 🌐 Web | Web/ | 9 | 浏览器端 + D-06 学习系统 + D-08 视频系统 |
 | 🖥️ 桌面 | PC/ | 7 | 桌面客户端 |
 | 🤖 AI | AI/ | 3 | AI 功能模块 |
-| 📟 鸿蒙 | Harmony/ | 1 | D-11 鸿蒙六设备形态（手机/平板/PC/智慧屏/穿戴/车机）|
+| 📟 鸿蒙 | Harmony/ | 1 | D-11 鸿蒙六设备形态（手机/平板/PC/智慧屏/穿戴/车机）· **原生客户端**：`服务/harmony-app/`（ArkTS/ArkUI · 6 页面） |
 
 **总计**: 49 个 HTML 文件（35 接口原型 + 14 根目录文档）
 

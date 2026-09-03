@@ -1,0 +1,48 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FAF6EC"
+    },
+    {
+      "name": "paper",
+      "value": "#FAF6EC"
+    },
+    {
+      "name": "ink",
+      "value": "#0F1020"
+    },
+    {
+      "name": "cobalt",
+      "value": "#3D46C9"
+    },
+    {
+      "name": "highlighter",
+      "value": "#F5B800"
+    },
+    {
+      "name": "warning_red",
+      "value": "#E85D3A"
+    },
+    {
+      "name": "growth_green",
+      "value": "#2A7F4F"
+    },
+    {
+      "name": "ai_purple",
+      "value": "#7C3AED"
+    },
+    {
+      "name": "ink_2",
+      "value": "#6B6C7A"
+    },
+    {
+      "name": "ink_3",
+      "value": "#A8A9B8"
+    },
+    {
+      "name": "divider",
+      "value": "#E8E4D8"
+    }
+  ]
+}

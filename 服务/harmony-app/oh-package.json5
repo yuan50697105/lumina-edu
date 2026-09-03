@@ -1,0 +1,14 @@
+{
+  "name": "lumina-harmony",
+  "version": "1.0.0",
+  "description": "Lumina 墨光 · 鸿蒙原生客户端",
+  "main": "",
+  "author": "lumina",
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "devDependencies": {
+    "@ohos/hypium": "1.0.18",
+    "@ohos/hvigor-ohos-plugin": "4.2.2",
+    "@ohos/hvigor": "4.2.2"
+  }
+}
