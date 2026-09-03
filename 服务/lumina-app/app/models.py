@@ -606,4 +606,80 @@ class ExamAttempt(Base):
     total_score = Column(Integer, default=0, nullable=False)
 
 
+# ─── 学情分析 / 学生档案 / 辅导 / 预警（V1.1 · D-05 · WBS-P 阶段 D）───
+# 教学分组（课程级，区分 collab.project_groups 协作小组）
+class StudentGroup(Base):
+    """教学分组：教师把选课学生分组便于管理/布置任务"""
+    __tablename__ = "student_groups"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+    teacher_id = Column(GUID, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
+
+
+class StudentGroupMember(Base):
+    """教学分组明细（UNIQUE(group, user)）"""
+    __tablename__ = "student_group_members"
+    __table_args__ = (
+        UniqueConstraint("group_id", "user_id", name="uq_student_group_member"),
+    )
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    group_id = Column(GUID, ForeignKey("student_groups.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(GUID, nullable=False)
+    joined_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
+class TutoringSession(Base):
+    """辅导记录：教师/助教对学生的辅导纪要"""
+    __tablename__ = "tutoring_sessions"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    student_id = Column(GUID, nullable=False)
+    tutor_id = Column(GUID, nullable=False)           # 辅导人（teacher/ta/admin）
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="SET NULL"), nullable=True)
+    mode = Column(String(20), default="online")       # online | offline
+    topic = Column(String(200), nullable=False)
+    notes = Column(Text, nullable=True)
+    scheduled_at = Column(DateTime(timezone=True), default=_now)
+    duration_min = Column(Integer, default=30, nullable=False)
+    outcome = Column(String(50), default="scheduled") # scheduled | completed | cancelled
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
+
+
+class RiskAlert(Base):
+    """风险预警记录：规则引擎自动生成，教师可标记处理"""
+    __tablename__ = "risk_alerts"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    student_id = Column(GUID, nullable=False, index=True)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    level = Column(String(10), default="low", nullable=False)    # high | med | low
+    reasons = Column(JSON, nullable=True)                        # ["absent_3", "score_drop_25"]
+    metrics = Column(JSON, nullable=True)                        # 快照：当时成绩/出勤等
+    resolved = Column(Boolean, default=False, nullable=False)
+    resolved_at = Column(DateTime(timezone=True), nullable=True)
+    resolved_by = Column(GUID, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
+
+
+class LearningInsight(Base):
+    """关键洞察（规则引擎按周生成，课程维度）"""
+    __tablename__ = "learning_insights"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False, index=True)
+    week_start = Column(String(10), nullable=False)              # "2026-W08" 格式
+    content = Column(Text, nullable=False)                       # 洞察文本
+    suggestion = Column(String(200), nullable=True)              # 建议动作
+    metrics = Column(JSON, nullable=True)                        # 触发数据
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
 # ─── 监控共享表 ───

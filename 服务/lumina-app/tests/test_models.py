@@ -41,8 +41,8 @@ class TestTableDefinitions:
         assert expected.issubset(tables), f"缺少表: {expected - tables}"
 
     def test_table_count(self, tables):
-        """表数量为 35（17 业务 + 5 直播 + 8 协作 + 1 消息通知 + 4 题库考试 D-04）"""
-        assert len(tables) == 35
+        """表数量为 40（17 业务 + 5 直播 + 8 协作 + 1 消息通知 + 4 题库考试 D-04 + 5 学情 D-05）"""
+        assert len(tables) == 40
 
 
 class TestUserModel:

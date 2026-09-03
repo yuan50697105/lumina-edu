@@ -20,7 +20,7 @@ from app.instrumentation import (
     EVENT_COURSE_VIEW,
     Instrumentation,
 )
-from app.models import Announcement, Chapter, Course, Enrollment, UserBrief
+from app.models import Announcement, Chapter, Course, Enrollment, StudentGroup, StudentGroupMember, User, UserBrief
 from app.schemas import (
     AnnouncementCreate,
     AnnouncementOut,
@@ -32,6 +32,10 @@ from app.schemas import (
     CourseUpdate,
     EnrollmentOut,
     Pagination,
+    StudentGroupCreate,
+    StudentGroupMemberOut,
+    StudentGroupOut,
+    StudentGroupUpdate,
     StudentOut,
     SuccessResponse,
 )
@@ -430,3 +434,248 @@ def create_announcement(
         EVENT_ANNOUNCEMENT_CREATED, course_id=str(course_id), announcement_id=str(announcement.id)
     )
     return announcement
+
+
+# ═══════════════════════════════════════════════════════════════════
+# D-05 · 教学分组（课程级）
+# ═══════════════════════════════════════════════════════════════════
+@router.get("/{course_id}/student-groups", response_model=list[StudentGroupOut],
+            summary="教学分组列表")
+def list_student_groups(
+    course_id: uuid.UUID,
+    user: UserBrief = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    course = _get_course_or_404(db, course_id)
+    # 教师/管理员可见，选课学生也可见（看分组名单）
+    if user.role not in ("admin", "teacher", "student"):
+        raise HTTPException(status_code=403, detail="无权查看")
+    if user.role == "student":
+        enrolled = db.query(Enrollment.id).filter(
+            Enrollment.course_id == course_id, Enrollment.user_id == user.id,
+            Enrollment.role == "student", Enrollment.status == "active",
+        ).first()
+        if not enrolled:
+            raise HTTPException(status_code=403, detail="未选课")
+
+    groups = db.query(StudentGroup).filter(StudentGroup.course_id == course_id).all()
+    out = []
+    for g in groups:
+        members = (
+            db.query(StudentGroupMember, User)
+            .join(User, User.id == StudentGroupMember.user_id)
+            .filter(StudentGroupMember.group_id == g.id)
+            .all()
+        )
+        teacher = db.get(User, g.teacher_id)
+        out.append(StudentGroupOut(
+            id=g.id,
+            course_id=g.course_id,
+            name=g.name,
+            description=g.description,
+            teacher_id=g.teacher_id,
+            teacher_name=teacher.name if teacher else None,
+            member_count=len(members),
+            members=[
+                StudentGroupMemberOut(
+                    user_id=m.user_id,
+                    name=u.name,
+                    student_id=u.student_id,
+                    joined_at=m.joined_at,
+                )
+                for m, u in members
+            ],
+            created_at=g.created_at,
+        ))
+    return out
+
+
+@router.post("/{course_id}/student-groups", response_model=StudentGroupOut, status_code=201,
+             summary="创建教学分组（教师）")
+def create_student_group(
+    course_id: uuid.UUID,
+    payload: StudentGroupCreate,
+    user: UserBrief = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    course = _get_course_or_404(db, course_id)
+    _check_course_teacher(db, course, user.id, user.role)
+
+    g = StudentGroup(
+        course_id=course_id,
+        teacher_id=user.id,
+        name=payload.name,
+        description=payload.description,
+    )
+    db.add(g)
+    db.flush()
+
+    # 加成员（需为选课学生）
+    if payload.member_ids:
+        _add_group_members(db, g.id, course_id, payload.member_ids)
+
+    db.commit()
+    db.refresh(g)
+
+    members = (
+        db.query(StudentGroupMember, User)
+        .join(User, User.id == StudentGroupMember.user_id)
+        .filter(StudentGroupMember.group_id == g.id)
+        .all()
+    )
+    teacher = db.get(User, g.teacher_id)
+    return StudentGroupOut(
+        id=g.id, course_id=g.course_id, name=g.name, description=g.description,
+        teacher_id=g.teacher_id, teacher_name=teacher.name if teacher else None,
+        member_count=len(members),
+        members=[
+            StudentGroupMemberOut(user_id=m.user_id, name=u.name,
+                                  student_id=u.student_id, joined_at=m.joined_at)
+            for m, u in members
+        ],
+        created_at=g.created_at,
+    )
+
+
+@router.patch("/{course_id}/student-groups/{group_id}", response_model=StudentGroupOut,
+              summary="更新教学分组")
+def update_student_group(
+    course_id: uuid.UUID,
+    group_id: uuid.UUID,
+    payload: StudentGroupUpdate,
+    user: UserBrief = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    course = _get_course_or_404(db, course_id)
+    _check_course_teacher(db, course, user.id, user.role)
+
+    g = db.get(StudentGroup, group_id)
+    if not g or str(g.course_id) != str(course_id):
+        raise HTTPException(status_code=404, detail="分组不存在")
+
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(g, field, value)
+    db.commit()
+    db.refresh(g)
+
+    members = (
+        db.query(StudentGroupMember, User)
+        .join(User, User.id == StudentGroupMember.user_id)
+        .filter(StudentGroupMember.group_id == g.id)
+        .all()
+    )
+    teacher = db.get(User, g.teacher_id)
+    return StudentGroupOut(
+        id=g.id, course_id=g.course_id, name=g.name, description=g.description,
+        teacher_id=g.teacher_id, teacher_name=teacher.name if teacher else None,
+        member_count=len(members),
+        members=[
+            StudentGroupMemberOut(user_id=m.user_id, name=u.name,
+                                  student_id=u.student_id, joined_at=m.joined_at)
+            for m, u in members
+        ],
+        created_at=g.created_at,
+    )
+
+
+@router.delete("/{course_id}/student-groups/{group_id}", response_model=SuccessResponse,
+               summary="删除教学分组")
+def delete_student_group(
+    course_id: uuid.UUID,
+    group_id: uuid.UUID,
+    user: UserBrief = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    course = _get_course_or_404(db, course_id)
+    _check_course_teacher(db, course, user.id, user.role)
+
+    g = db.get(StudentGroup, group_id)
+    if not g or str(g.course_id) != str(course_id):
+        raise HTTPException(status_code=404, detail="分组不存在")
+    db.delete(g)
+    db.commit()
+    return SuccessResponse()
+
+
+@router.post("/{course_id}/student-groups/{group_id}/members",
+             response_model=list[StudentGroupMemberOut], status_code=201,
+             summary="添加组成员")
+def add_group_members(
+    course_id: uuid.UUID,
+    group_id: uuid.UUID,
+    user_ids: list[uuid.UUID],
+    user: UserBrief = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    course = _get_course_or_404(db, course_id)
+    _check_course_teacher(db, course, user.id, user.role)
+
+    g = db.get(StudentGroup, group_id)
+    if not g or str(g.course_id) != str(course_id):
+        raise HTTPException(status_code=404, detail="分组不存在")
+
+    added = _add_group_members(db, g.id, course_id, user_ids)
+    db.commit()
+    return [
+        StudentGroupMemberOut(
+            user_id=m.user_id,
+            name=u.name,
+            student_id=u.student_id,
+            joined_at=m.joined_at,
+        )
+        for m, u in added
+    ]
+
+
+@router.delete("/{course_id}/student-groups/{group_id}/members/{user_id}",
+               response_model=SuccessResponse, summary="移除组成员")
+def remove_group_member(
+    course_id: uuid.UUID,
+    group_id: uuid.UUID,
+    user_id: uuid.UUID,
+    user: UserBrief = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    course = _get_course_or_404(db, course_id)
+    _check_course_teacher(db, course, user.id, user.role)
+
+    g = db.get(StudentGroup, group_id)
+    if not g or str(g.course_id) != str(course_id):
+        raise HTTPException(status_code=404, detail="分组不存在")
+
+    m = db.query(StudentGroupMember).filter(
+        StudentGroupMember.group_id == g.id,
+        StudentGroupMember.user_id == user_id,
+    ).first()
+    if not m:
+        raise HTTPException(status_code=404, detail="成员不在该分组")
+    db.delete(m)
+    db.commit()
+    return SuccessResponse()
+
+
+def _add_group_members(db: Session, group_id, course_id, user_ids):
+    """添加组成员，校验必须是选课学生；返回 [(member, user), ...]"""
+    added = []
+    for uid in user_ids:
+        enrolled = db.query(Enrollment.id).filter(
+            Enrollment.course_id == course_id,
+            Enrollment.user_id == uid,
+            Enrollment.role == "student",
+            Enrollment.status == "active",
+        ).first()
+        if not enrolled:
+            raise HTTPException(status_code=400, detail=f"用户 {uid} 未选该课程")
+        # 幂等：已存在则跳过
+        existing = db.query(StudentGroupMember).filter(
+            StudentGroupMember.group_id == group_id,
+            StudentGroupMember.user_id == uid,
+        ).first()
+        if existing:
+            continue
+        m = StudentGroupMember(group_id=group_id, user_id=uid)
+        db.add(m)
+        db.flush()
+        u = db.get(User, uid)
+        added.append((m, u))
+    return added

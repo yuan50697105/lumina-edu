@@ -180,8 +180,8 @@
   <table>
     <thead><tr><th>维度</th><th>基线</th><th>未实现差距</th></tr></thead>
     <tbody>
-      <tr><td><b>功能</b></td><td>单体 98 端点 · 13 模块 · 35 表 · 冒烟 25/25 + 协作 21/21 + 通知 12/12 + 考试 28/28 · 直播（D-01）· 协作（D-02）· 账户补全（D-03）· 题库与考试（D-04）已落地</td><td>PRD P1 模块（学情分析/学生档案等）未实现</td></tr>
-      <tr><td><b>测试</b></td><td>单测 173/0 · 契约三层一致（60 ⊂ 98 ⊂ Nginx） · 压测 365 req/s · p50 26ms</td><td>UAT 人工签字未完成 · AI 真批阅未跑真实模型</td></tr>
+      <tr><td><b>功能</b></td><td>单体 122 paths / 159 ops · 14 模块 · 49 表（D-05 +5 / D-06 +9） · 直播（D-01）· 协作（D-02）· 账户补全（D-03）· 题库与考试（D-04）· <b style="color:var(--growth);">学情分析/学生档案/辅导/分组/批量（D-05）已落地</b> · 自主学习（D-06）占位</td><td>PRD P1 管理端（审批/审计/设置）、AI 基础设施（D-07）未实现</td></tr>
+      <tr><td><b>测试</b></td><td>单测 215/0 · 契约三层一致 · OpenAPI 122 paths</td><td>UAT 人工签字未完成 · AI 真批阅未跑真实模型</td></tr>
       <tr><td><b>部署</b></td><td>离线资产生产化（init.sql/seed 幂等/监控/文档 v1.2）</td><td>真实生产环境（MySQL + Docker + TLS + 域名）未就绪</td></tr>
       <tr><td><b>前端</b></td><td>Web 构建通过 · 埋点链路闭合</td><td>移动端 typecheck 待 RN 工具链 · 未真机冒烟</td></tr>
     </tbody>
@@ -289,7 +289,7 @@
       <tr><td><b>D-02</b></td><td>协作工具（小组/看板/文件/讨论）</td><td>05 · P1</td><td><span class="tag done">✅ 已实施</span></td><td>collab 模块 27 端点 · 8 表 · Web 看板/讨论/共享文件（2026-08-31，冒烟 21/21）；移动端待鸿蒙评估（D-10）</td></tr>
       <tr><td><b>D-03</b></td><td>账户与认证补齐（P0 缺口 · 注册/消息中心）</td><td>P0 缺口 #1 #2</td><td><span class="tag done">✅ 已实施</span></td><td>notif 模块 4 端点 · notifications 表（31 表）· Web 登录/注册双 Tab + 顶栏通知铃铛（2026-08-31，冒烟 12/12）；账户管理/批量操作仍待 D-05</td></tr>
       <tr><td><b>D-04</b></td><td>题库与考试（组卷/在线考试/评分）</td><td>07 · P1</td><td><span class="tag done">✅ 已实施</span></td><td>exam 模块 22 端点 · 4 表（题库/试卷/组卷/作答自动评分）· Web 教师题库试卷管理 + 学生在线考试（2026-09-01，冒烟 28/28）；可接 AI 组卷</td></tr>
-      <tr><td><b>D-05</b></td><td>学情分析 + 学生档案（含课程资料浏览/学生分组等 P0 缺口）</td><td>08 · 10 · P1</td><td><span class="tag high">P1</span></td><td>基于 analytics 模块扩展</td></tr>
+      <tr><td><b>D-05</b></td><td>学情分析 + 学生档案 + 辅导记录 + 教学分组 + 用户批量操作</td><td>06 · 08 · 10 · 13 · P1</td><td><span class="tag done">✅ 已实施</span></td><td>analytics 模块扩展 12 端点 + tutoring 模块 5 端点 + course 模块 6 端点 + user 模块 3 端点 · 5 新表（35→40，D-06 并行 49）· 风险规则引擎（AlertRuleIn 可配）· 单测 173→215（+42 test_d05_analytics.py）（2026-09-03）</td></tr>
       <tr><td><b>D-06</b></td><td>课程审批 + 系统设置 + 审计日志（含账户管理/批量操作、监控大盘）</td><td>14 · 16 · 17 · P1</td><td><span class="tag medium">P2</span></td><td>管理端补齐</td></tr>
       <tr><td><b>D-07</b></td><td>AI 基础设施：RAG 向量检索 / Agent 编排 / MCP / 内容审核（含学习路径/知识图谱、课件生成/课堂 Copilot/学情预测）</td><td>18-20 · 规划中</td><td><span class="tag high">P1</span></td><td>Milvus / AgentScope / 知网 AIGC</td></tr>
       <tr><td><b>D-08</b></td><td>运营演进：独立监控 + CI/CD</td><td>—</td><td><span class="tag medium">P2</span></td><td>Prometheus + Grafana · GitHub Actions</td></tr>

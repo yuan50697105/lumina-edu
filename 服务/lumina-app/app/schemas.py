@@ -1044,3 +1044,230 @@ class StartAttemptOut(BaseModel):
     end_at: Optional[datetime] = None    # 提交截止（start + 时长 / 试卷截止早者）
     duration_minutes: int
     questions: list[PaperQuestionOut] = []   # 不含答案
+
+
+# ═══════════════════════════════════════════════════════════════════
+# D-05 · 学情分析 / 学生档案 / 辅导 / 教学分组 / 批量操作
+# ═══════════════════════════════════════════════════════════════════
+
+# ─── 学情分析 ───
+class CourseOverviewOut(BaseModel):
+    """课程学情概览"""
+    course_id: uuid.UUID
+    course_title: str
+    semester: str
+    student_count: int                   # 选课人数
+    average_score: Optional[float] = None
+    attendance_rate: Optional[float] = None     # 0~1
+    submission_rate: Optional[float] = None     # 作业完成率 0~1
+    risk_count: int = 0                  # 风险学生数
+    risk_high: int = 0
+    risk_med: int = 0
+    risk_low: int = 0
+    vs_previous: Optional[dict] = None   # {"average_score": +3, "attendance": +0.02}
+
+class TrendPoint(BaseModel):
+    week: str                            # "2026-W08"
+    average_score: Optional[float] = None
+    submission_rate: Optional[float] = None
+    attendance_rate: Optional[float] = None
+
+class CourseTrendOut(BaseModel):
+    course_id: uuid.UUID
+    weeks: list[TrendPoint]
+
+class DistributionBucket(BaseModel):
+    range_label: str                     # "90-100" / "80-89" / "70-79" / "60-69" / "<60"
+    count: int
+    percentage: float                    # 0~1
+
+class CourseDistributionOut(BaseModel):
+    course_id: uuid.UUID
+    assessment_type: str                 # midterm / final / overall / assignment
+    total_students: int
+    buckets: list[DistributionBucket]
+
+class InsightOut(BaseModel):
+    id: uuid.UUID
+    week_start: str
+    content: str
+    suggestion: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class CourseInsightsOut(BaseModel):
+    course_id: uuid.UUID
+    insights: list[InsightOut]
+
+class ProgressStudent(BaseModel):
+    student_id: uuid.UUID
+    student_name: str
+    student_student_id: Optional[str] = None
+    delta: float                         # 进步分值
+    from_score: Optional[float] = None
+    to_score: Optional[float] = None
+    highlights: list[str] = []           # 亮点（主动提问/作业完成率等）
+
+class CourseProgressOut(BaseModel):
+    course_id: uuid.UUID
+    top_improved: list[ProgressStudent]  # 本周进步前 N
+
+class RiskStudent(BaseModel):
+    student_id: uuid.UUID
+    student_name: str
+    student_student_id: Optional[str] = None
+    level: str                           # high | med | low
+    reasons: list[str] = []
+    score_trend: Optional[float] = None  # 最近一次成绩/均分
+
+class CourseRisksOut(BaseModel):
+    course_id: uuid.UUID
+    total: int
+    risks: list[RiskStudent]
+
+class RiskAlertOut(BaseModel):
+    id: uuid.UUID
+    student_id: uuid.UUID
+    student_name: Optional[str] = None
+    student_student_id: Optional[str] = None
+    course_id: uuid.UUID
+    level: str
+    reasons: Optional[list[str]] = None
+    resolved: bool
+    resolved_at: Optional[datetime] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AlertRuleIn(BaseModel):
+    """预警规则阈值（管理员配置）"""
+    absent_threshold: int = Field(3, ge=1, le=10)       # 连续缺席次数触发高风险
+    submission_low: float = Field(0.5, ge=0, le=1)      # 作业完成率低于该值触发高风险
+    submission_mid: float = Field(0.7, ge=0, le=1)      # 作业完成率低于该值触发中风险
+    score_drop_high: float = Field(0.2, ge=0, le=1)     # 成绩下降超过该比例触发高风险
+    score_drop_mid: float = Field(0.1, ge=0, le=1)      # 成绩下降超过该比例触发中风险
+    inactive_days_high: int = Field(14, ge=1, le=60)    # 连续未登录天数触发高风险
+    inactive_days_mid: int = Field(7, ge=1, le=60)      # 连续未登录天数触发中风险
+
+# ─── 学生档案 ───
+class StudentProfileOut(BaseModel):
+    """学生档案：基本信息 + 选课 + 成绩趋势 + 预警 + 辅导"""
+    student_id: uuid.UUID
+    student_name: str
+    student_student_id: Optional[str] = None
+    department: Optional[str] = None
+    grade: Optional[str] = None
+    avatar_url: Optional[str] = None
+    email: Optional[str] = None
+    enrolled_courses: list[dict] = []    # [{course_id, title, semester, final_score, gpa_point}]
+    overall_gpa: Optional[float] = None
+    score_trend: list[TrendPoint] = []   # 各学期/各课程成绩曲线
+    active_alerts: list[RiskAlertOut] = []
+    recent_tutoring: list[dict] = []     # 近 5 次辅导
+
+# ─── 辅导记录 ───
+class TutoringSessionCreate(BaseModel):
+    student_id: uuid.UUID
+    course_id: Optional[uuid.UUID] = None
+    mode: str = Field("online", pattern="^(online|offline)$")
+    topic: str = Field(..., min_length=1, max_length=200)
+    notes: Optional[str] = None
+    scheduled_at: Optional[datetime] = None
+    duration_min: int = Field(30, ge=5, le=480)
+
+class TutoringSessionUpdate(BaseModel):
+    mode: Optional[str] = Field(None, pattern="^(online|offline)$")
+    topic: Optional[str] = None
+    notes: Optional[str] = None
+    scheduled_at: Optional[datetime] = None
+    duration_min: Optional[int] = Field(None, ge=5, le=480)
+    outcome: Optional[str] = None        # scheduled | completed | cancelled
+
+class TutoringSessionOut(BaseModel):
+    id: uuid.UUID
+    student_id: uuid.UUID
+    student_name: Optional[str] = None
+    tutor_id: uuid.UUID
+    tutor_name: Optional[str] = None
+    course_id: Optional[uuid.UUID] = None
+    course_title: Optional[str] = None
+    mode: str
+    topic: str
+    notes: Optional[str] = None
+    scheduled_at: datetime
+    duration_min: int
+    outcome: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# ─── 教学分组 ───
+class StudentGroupCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    description: Optional[str] = None
+    member_ids: list[uuid.UUID] = Field(default_factory=list)
+
+class StudentGroupUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    description: Optional[str] = None
+
+class StudentGroupMemberOut(BaseModel):
+    user_id: uuid.UUID
+    name: str
+    student_id: Optional[str] = None
+    joined_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class StudentGroupOut(BaseModel):
+    id: uuid.UUID
+    course_id: uuid.UUID
+    name: str
+    description: Optional[str] = None
+    teacher_id: uuid.UUID
+    teacher_name: Optional[str] = None
+    member_count: int = 0
+    members: list[StudentGroupMemberOut] = []
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# ─── 批量操作 ───
+class BatchImportRow(BaseModel):
+    """单行导入"""
+    email: EmailStr
+    name: str = Field(..., min_length=1, max_length=50)
+    student_id: Optional[str] = Field(None, max_length=20)
+    role: str = Field("student", pattern="^(student|teacher|admin)$")
+    department: Optional[str] = Field(None, max_length=100)
+    grade: Optional[str] = Field(None, max_length=10)
+
+class BatchImportIn(BaseModel):
+    """批量导入"""
+    users: list[BatchImportRow] = Field(..., min_length=1, max_length=500)
+    default_password: Optional[str] = Field(None, min_length=8, max_length=64)
+
+class BatchUpdateIn(BaseModel):
+    """批量更新（角色/状态）"""
+    user_ids: list[uuid.UUID] = Field(..., min_length=1, max_length=200)
+    new_role: Optional[str] = Field(None, pattern="^(student|teacher|admin)$")
+    # 注：V1 不支持 status 字段（users 表无 status），预留
+
+class BatchToggleIn(BaseModel):
+    """批量启用/禁用：V1 通过删除/重建 refresh token 模拟"""
+    user_ids: list[uuid.UUID] = Field(..., min_length=1, max_length=200)
+    action: str = Field(..., pattern="^(enable|disable)$")
+
+class BatchResultOut(BaseModel):
+    """批量操作结果"""
+    total: int
+    success: int
+    failed: int
+    errors: list[dict] = []              # [{user_id/email, message}]
+
