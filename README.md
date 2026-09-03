@@ -34,6 +34,7 @@ edu/
 │   ├── lumina-userguide.html          # 📋 用户手册 v1.0
 │   ├── lumina-launch-wbs.html         # 📋 上线 WBS v1.0
 │   ├── lumina-wbs-pending.html        # 📋 未实现内容落地 WBS v1.1
+│   ├── lumina-learning-system.html    # 📋 D-06 自主学习与闯关奖励需求 v1.0
 │   │
 │   ├── APP/phone/      (8 文件)       # 📱 手机 APP 原型
 │   ├── APP/tablet/     (6 文件)       # 📲 平板 APP 原型
@@ -89,6 +90,7 @@ edu/
 | 📋 **UG v1.1** | 用户手册，10 章 · 3 角色 | `lumina-userguide.html` |
 | 📋 **WBS v1.1** | 上线工作分解结构，10 周轻量方案 | `lumina-launch-wbs.html` |
 | 📋 **WBS-P v1.3** | 未实现内容落地 WBS：M4 上线 + 收口认证 + V1.1 演进 | `lumina-wbs-pending.html` |
+| 📋 **REQ-D06 v1.0** | 自主学习与闯关奖励机制需求规格（路径/关卡/XP/徽章/排行） | `lumina-learning-system.html` |
 
 ## 🎨 设计系统
 

@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · 自主学习与闯关奖励机制需求文档</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding:56px 64px; max-width:1280px; margin:0 auto;}
+
+  .cover{padding:64px 0 56px; border-bottom:1px solid var(--line); margin-bottom:48px;}
+  .cover .brand{display:flex; align-items:center; gap:14px; margin-bottom:28px;}
+  .cover .brand .logo{width:56px; height:56px; border-radius:14px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:28px; font-weight:500; font-style:italic;}
+  .cover .brand .name{font-family:var(--f-display); font-size:20px; font-weight:500;}
+  .cover .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:4px;}
+  .cover .doc-type{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--ai); background:var(--ai-soft); padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:18px;}
+  .cover h1{font-family:var(--f-display); font-weight:300; font-size:66px; letter-spacing:-0.04em; line-height:1;}
+  .cover h1 em{font-style:italic; color:var(--correction);}
+  .cover h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .cover .subtitle{font-size:18px; color:var(--inkwell-2); margin-top:18px; font-weight:300;}
+  .cover .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:22px; line-height:2;}
+
+  .stats{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:48px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px;}
+  .stat{text-align:center; padding:6px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .val{font-family:var(--f-display); font-size:26px; font-weight:300;}
+  .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  .section{margin-bottom:56px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:22px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:34px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  h3.sub{font-family:var(--f-display); font-size:22px; font-weight:400; margin:28px 0 14px; letter-spacing:-0.01em;}
+  h3.sub em{font-style:italic; color:var(--cobalt);}
+
+  p{margin-bottom:12px; line-height:1.7;}
+  ul,ol{margin:0 0 16px 20px; line-height:1.8;}
+  li{margin-bottom:4px;}
+  b{font-weight:600;}
+  code{font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px; font-size:13px; border:1px solid var(--line);}
+
+  table{width:100%; border-collapse:collapse; margin:14px 0 22px; font-size:13px;}
+  th{background:var(--ricepaper); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-strong);}
+  td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  tr:hover td{background:rgba(250,246,236,0.5);}
+  .tag{display:inline-block; font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; padding:2px 7px; border-radius:4px;}
+  .tag.p0{background:var(--correction); color:#fff;}
+  .tag.p1{background:var(--highlighter); color:var(--inkwell);}
+  .tag.p2{background:var(--cobalt-soft); color:var(--cobalt);}
+  .tag.done{background:var(--growth-soft); color:var(--growth);}
+  .tag.todo{background:var(--ai-soft); color:var(--ai);}
+  .tag.student{background:#E0F2FE; color:#0369A1;}
+  .tag.teacher{background:#FEF3C7; color:#92400E;}
+  .tag.admin{background:var(--correction-soft); color:var(--correction);}
+
+  .info{padding:16px 20px; border-radius:10px; margin:16px 0 20px; font-size:13px; line-height:1.7;}
+  .info .label{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; font-weight:600;}
+  .info.note{background:var(--cobalt-soft); border:1px solid var(--cobalt);}
+  .info.warn{background:var(--highlighter-soft); border:1px solid var(--highlighter);}
+  .info.success{background:var(--growth-soft); border:1px solid var(--growth);}
+  .info.ai{background:var(--ai-soft); border:1px solid var(--ai);}
+  .info.risk{background:var(--correction-soft); border:1px solid var(--correction);}
+
+  .module-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:22px 24px; margin:14px 0; position:relative; overflow:hidden;}
+  .module-card:before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--cobalt);}
+  .module-card.gamification:before{background:var(--ai);}
+  .module-card.reward:before{background:var(--highlighter);}
+  .module-card .card-header{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+  .module-card .card-icon{width:36px; height:36px; border-radius:10px; background:var(--cobalt-soft); color:var(--cobalt); display:flex; align-items:center; justify-content:center; font-size:18px;}
+  .module-card.gamification .card-icon{background:var(--ai-soft); color:var(--ai);}
+  .module-card.reward .card-icon{background:var(--highlighter-soft); color:var(--inkwell);}
+  .module-card .card-title{font-family:var(--f-display); font-size:20px; font-weight:400;}
+  .module-card .card-title em{font-style:italic; color:var(--cobalt);}
+  .module-card.gamification .card-title em{color:var(--ai);}
+  .module-card.reward .card-title em{color:var(--highlighter);}
+
+  .flow{background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; margin:18px 0;}
+  .flow-step{display:flex; gap:14px; padding:10px 0; border-bottom:1px dashed var(--line); align-items:flex-start;}
+  .flow-step:last-child{border-bottom:none;}
+  .flow-num{flex-shrink:0; width:28px; height:28px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-mono); font-size:12px; font-weight:600;}
+  .flow-content{flex:1;}
+  .flow-content .title{font-weight:600; margin-bottom:4px;}
+  .flow-content .desc{font-size:13px; color:var(--inkwell-2); line-height:1.6;}
+
+  .persona{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 22px; margin:14px 0; display:grid; grid-template-columns:80px 1fr; gap:18px; align-items:center;}
+  .persona .avatar{width:72px; height:72px; border-radius:50%; background:var(--cobalt-soft); display:flex; align-items:center; justify-content:center; font-size:32px;}
+  .persona .info-block .name{font-family:var(--f-display); font-size:18px; font-weight:500; margin-bottom:4px;}
+  .persona .info-block .role{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--cobalt); margin-bottom:8px;}
+  .persona .info-block .quote{font-style:italic; color:var(--inkwell-2); font-size:13px; line-height:1.6;}
+
+  .api-block{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 18px; margin:10px 0; font-family:var(--f-mono); font-size:12px;}
+  .api-block .method{display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600; margin-right:8px;}
+  .api-block .method.get{background:var(--growth-soft); color:var(--growth);}
+  .api-block .method.post{background:var(--cobalt-soft); color:var(--cobalt);}
+  .api-block .method.put{background:var(--highlighter-soft); color:var(--inkwell);}
+  .api-block .method.delete{background:var(--correction-soft); color:var(--correction);}
+  .api-block .path{color:var(--inkwell);}
+  .api-block .desc{color:var(--inkwell-2); font-size:11px; margin-top:4px; font-family:var(--f-body);}
+
+  .db-card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin:14px 0;}
+  .db-card .table-name{font-family:var(--f-mono); font-size:13px; color:var(--cobalt); background:var(--cobalt-soft); padding:3px 10px; border-radius:6px; display:inline-block; margin-bottom:10px;}
+  .db-card .table-desc{font-size:13px; color:var(--inkwell-2); margin-bottom:10px; line-height:1.6;}
+  .db-card table{font-size:12px; margin:0;}
+  .db-card td:first-child{font-family:var(--f-mono); color:var(--inkwell);}
+
+  footer{margin-top:56px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div>
+    <div class="brand">
+      <div class="logo">墨</div>
+      <div class="name">Lumina · 墨光<small>Requirements Document · D-06</small></div>
+    </div>
+    <div class="doc-type">V1.1 · 需求规格说明书</div>
+    <h1><span class="hl">自主学习</span> 与<br/><em>闯关奖励</em> 机制</h1>
+    <p class="subtitle">Self-Learning Paths · Gamification · XP/Badge/Leaderboard · Daily Check-in</p>
+    <div class="meta">
+      Document ID: LUMINA-REQ-D06-001 · Status: Draft<br/>
+      Version: 1.0 · Date: 2026-09-03<br/>
+      Author: Claude Team Review · Owner: Yuan
+    </div>
+  </div>
+</header>
+
+<!-- ============ STATS ============ -->
+<div class="stats">
+  <div class="stat">
+    <div class="val hl">3</div>
+    <div class="lbl">Core Modules</div>
+  </div>
+  <div class="stat">
+    <div class="val">9</div>
+    <div class="lbl">Data Tables</div>
+  </div>
+  <div class="stat">
+    <div class="val">~20</div>
+    <div class="lbl">API Endpoints</div>
+  </div>
+  <div class="stat">
+    <div class="val">5</div>
+    <div class="lbl">Frontend Pages</div>
+  </div>
+</div>
+
+<!-- ============ §1 背景与目标 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>01 · <em>Background</em></h2>
+    <span class="num-tag">§1 背景与目标</span>
+  </div>
+
+  <h3 class="sub">1.1 · <em>业务背景</em></h3>
+  <p>Lumina 墨光已完成 M1-M3 阶段：课程 / 作业 / 成绩 / AI 对话 / 直播 / 协作 / 通知 / 题库考试 等核心教学链路已稳定落地。但当前平台主要服务<b>「被组织的教学」</b>（教师开课 → 学生选课 → 按时上课），<b>缺少面向学生主动性的自学与激励体系</b>。</p>
+  <p>高校教学反馈显示：学生课外自学缺乏引导、学习动力难以持续、优秀学习者无法获得认可。本需求通过「<b>闯关式学习路径 + 游戏化激励</b>」补齐这块拼图，让 Lumina 从"教学工具"升级为"学习伴侣"。</p>
+
+  <h3 class="sub">1.2 · <em>核心目标</em></h3>
+  <table>
+    <tr><th>目标维度</th><th>描述</th><th>量化指标</th></tr>
+    <tr>
+      <td><b>🎯 提升自学参与率</b></td>
+      <td>学生愿意在课程之外主动学习拓展内容</td>
+      <td>DAU 中 ≥30% 进入学习路径</td>
+    </tr>
+    <tr>
+      <td><b>🔥 增强学习粘性</b></td>
+      <td>通过打卡、连续天数、排行榜维持习惯</td>
+      <td>周活跃天数 ≥ 4 天的用户占比 ≥ 25%</td>
+    </tr>
+    <tr>
+      <td><b>🏆 构建成就体系</b></td>
+      <td>让优秀可见：徽章、等级、排行榜形成正反馈</td>
+      <td>每学期人均获得 ≥ 3 枚徽章</td>
+    </tr>
+    <tr>
+      <td><b>📚 沉淀内容资产</b></td>
+      <td>教师把零散资料串成结构化路径，可复用</td>
+      <td>每学期新增 ≥ 20 条学习路径</td>
+    </tr>
+  </table>
+
+  <div class="info note">
+    <div class="label">📘 定位</div>
+    <b>补充性模块，不阻塞主流程</b>：学习路径与正式课程并行，闯关积分独立于课程成绩（GPA），但可通过徽章/排行激励反哺课程参与。
+  </div>
+</section>
+
+<!-- ============ §2 用户画像与故事 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>02 · <em>Personas</em></h2>
+    <span class="num-tag">§2 用户画像与故事</span>
+  </div>
+
+  <div class="persona">
+    <div class="avatar">👩‍🎓</div>
+    <div class="info-block">
+      <div class="name">林小墨 · 大二学生</div>
+      <div class="role">Primary Persona · <span class="tag student">Student</span></div>
+      <div class="quote">"上完高数课想再深入看看线性代数，但图书馆的书太杂，要是有个学长带我一步步闯关就好了——每过一关还能拿个徽章发朋友圈。"</div>
+    </div>
+  </div>
+
+  <div class="persona">
+    <div class="avatar">👨‍🏫</div>
+    <div class="info-block">
+      <div class="name">张教授 · 计算机系</div>
+      <div class="role">Secondary Persona · <span class="tag teacher">Teacher</span></div>
+      <div class="quote">"我想把 Python 入门资料做成闯关路线让学生寒假自学，开学直接用——最好能自动判分、自动发 XP，不用我天天催。"</div>
+    </div>
+  </div>
+
+  <div class="persona">
+    <div class="avatar">👨‍💼</div>
+    <div class="info-block">
+      <div class="name">王运营 · 教务处</div>
+      <div class="role">Tertiary Persona · <span class="tag admin">Admin</span></div>
+      <div class="quote">"每学期搞一次'学习之星'评选，能不能直接看排行榜导出？新徽章上线能不能配个限时活动？"</div>
+    </div>
+  </div>
+
+  <h3 class="sub">2.1 · <em>用户故事（User Stories）</em></h3>
+  <table>
+    <tr><th>ID</th><th>角色</th><th>我想要…</th><th>以便…</th><th>优先级</th></tr>
+    <tr>
+      <td>US-01</td>
+      <td><span class="tag student">学生</span></td>
+      <td>浏览并加入一条学习路径</td>
+      <td>按计划自学某个主题</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td>US-02</td>
+      <td><span class="tag student">学生</span></td>
+      <td>一关一关推进，看视频/读文章后完成小测</td>
+      <td>逐步掌握知识并获得 XP</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td>US-03</td>
+      <td><span class="tag student">学生</span></td>
+      <td>每天做一道"今日挑战"题</td>
+      <td>养成学习习惯、保持连续天数</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td>US-04</td>
+      <td><span class="tag student">学生</span></td>
+      <td>每天打卡 + 看我的连续天数</td>
+      <td>形成学习惯性，断签有提醒</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td>US-05</td>
+      <td><span class="tag student">学生</span></td>
+      <td>收集徽章、提升等级</td>
+      <td>看到自己的成长轨迹</td>
+      <td><span class="tag p1">P1</span></td>
+    </tr>
+    <tr>
+      <td>US-06</td>
+      <td><span class="tag student">学生</span></td>
+      <td>查看排行榜（周/月/总）</td>
+      <td>和同学良性竞争</td>
+      <td><span class="tag p1">P1</span></td>
+    </tr>
+    <tr>
+      <td>US-07</td>
+      <td><span class="tag teacher">教师</span></td>
+      <td>创建一条学习路径（多关编排）</td>
+      <td>把零散资料结构化</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td>US-08</td>
+      <td><span class="tag teacher">教师</span></td>
+      <td>发布每日挑战题</td>
+      <td>活跃班级学习氛围</td>
+      <td><span class="tag p1">P1</span></td>
+    </tr>
+    <tr>
+      <td>US-09</td>
+      <td><span class="tag admin">管理员</span></td>
+      <td>配置全局徽章（条件、奖励）</td>
+      <td>运营激励活动</td>
+      <td><span class="tag p1">P1</span></td>
+    </tr>
+    <tr>
+      <td>US-10</td>
+      <td><span class="tag admin">管理员</span></td>
+      <td>查看学习数据（完成率、活跃天数）</td>
+      <td>评估自学体系效果</td>
+      <td><span class="tag p2">P2</span></td>
+    </tr>
+  </table>
+</section>
+
+<!-- ============ §3 功能模块设计 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>03 · <em>Modules</em></h2>
+    <span class="num-tag">§3 功能模块设计</span>
+  </div>
+
+  <p>本需求拆为 3 个内聚模块，分别对应「<b>自学引导 / 游戏激励 / 成就沉淀</b>」三大目标。</p>
+
+  <!-- 模块 A -->
+  <div class="module-card">
+    <div class="card-header">
+      <div class="card-icon">🗺️</div>
+      <div class="card-title">A · <em>自主学习路径</em> Self-Learning Paths</div>
+    </div>
+    <p>教师把零散资料（文章/视频/小测）串成一条有序的"闯关地图"，学生按顺序推进。</p>
+
+    <h3 class="sub">A.1 · <em>核心概念</em></h3>
+    <table>
+      <tr><th>概念</th><th>说明</th><th>示例</th></tr>
+      <tr>
+        <td><b>学习路径 Path</b></td>
+        <td>一个主题的完整自学路线，含难度/分类/封面/总 XP</td>
+        <td>《Python 入门闯关》· beginner · 200 XP</td>
+      </tr>
+      <tr>
+        <td><b>关卡 Stage</b></td>
+        <td>路径中的一步：承载一种资源类型 + 通关奖励</td>
+        <td>第 3 关 · 视频 10 min · 20 XP</td>
+      </tr>
+      <tr>
+        <td><b>进度 Progress</b></td>
+        <td>学生在某关的状态：locked / unlocked / in_progress / completed</td>
+        <td>第 2 关已完成 · 第 3 关进行中</td>
+      </tr>
+    </table>
+
+    <h3 class="sub">A.2 · <em>资源类型</em></h3>
+    <table>
+      <tr><th>类型</th><th>承载形式</th><th>通关条件</th></tr>
+      <tr><td><code>article</code></td><td>富文本内容内嵌</td><td>点"我读完了"即通过</td></tr>
+      <tr><td><code>video</code></td><td>外链 / 内嵌播放器</td><td>观看 ≥ 80% 时长（前端上报）</td></tr>
+      <tr><td><code>quiz</code></td><td>多道客观题</td><td>答题正确率 ≥ 60%</td></tr>
+      <tr><td><code>challenge</code></td><td>综合挑战（多题型）</td><td>得分 ≥ 阈值 + 时间限制</td></tr>
+    </table>
+
+    <h3 class="sub">A.3 · <em>解锁规则</em></h3>
+    <div class="info note">
+      <div class="label">🔓 默认线性解锁</div>
+      第 N 关完成 → 第 N+1 关自动解锁。支持 <code>unlock_condition</code> JSON 扩展：
+      <ul style="margin-top:6px;">
+        <li><b>前置关卡</b>：<code>{"requires_stages": ["stage_id_1", "stage_id_2"]}</code></li>
+        <li><b>最低等级</b>：<code>{"min_level": 5}</code></li>
+        <li><b>特定徽章</b>：<code>{"requires_badge": "badge_id"}</code></li>
+      </ul>
+    </div>
+
+    <h3 class="sub">A.4 · <em>学生主流程</em></h3>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="title">浏览路径广场</div><div class="desc">按分类/难度/标签筛选，看封面/总 XP/已参与人数</div></div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="title">进入路径地图</div><div class="desc">查看全路径关卡地图（节点连线图），已完成的亮起，当前关高亮，未解锁置灰</div></div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><div class="title">推进当前关</div><div class="desc">阅读/观看 → 答题 → 系统判分 → 发放 XP → 解锁下一关</div></div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-content"><div class="title">路径完成</div><div class="desc">全关通过 → 弹出"路径完成"动画 + 总 XP 奖励 + 解锁"路径征服者"徽章</div></div></div>
+    </div>
+  </div>
+
+  <!-- 模块 B -->
+  <div class="module-card gamification">
+    <div class="card-header">
+      <div class="card-icon">🎮</div>
+      <div class="card-title">B · <em>游戏化激励</em> Gamification Engine</div>
+    </div>
+    <p>通过 XP / 等级 / 连续打卡 / 每日挑战 形成持续的学习正反馈。</p>
+
+    <h3 class="sub">B.1 · <em>经验值（XP）体系</em></h3>
+    <table>
+      <tr><th>动作</th><th>XP 奖励</th><th>说明</th></tr>
+      <tr><td>每日打卡</td><td>10 + streak×2（上限 50）</td><td>首次进入 APP 触发，连续越多奖励越高</td></tr>
+      <tr><td>通关关卡</td><td>关卡设定值（默认 10~50）</td><td>测验关按得分比例折算</td></tr>
+      <tr><td>答对每日挑战</td><td>20（默认）</td><td>答错不扣分但无奖励</td></tr>
+      <tr><td>获得徽章</td><td>徽章配置值（0~200）</td><td>一次性奖励</td></tr>
+      <tr><td>完成整条路径</td><td>路径 total_xp</td><td>额外叠加"路径完成"奖励徽章</td></tr>
+    </table>
+
+    <h3 class="sub">B.2 · <em>等级称号</em></h3>
+    <table>
+      <tr><th>等级区间</th><th>称号</th><th>所需 XP</th><th>视觉标识</th></tr>
+      <tr><td>Lv 1~4</td><td>初心者</td><td>0~599</td><td>灰阶徽章框</td></tr>
+      <tr><td>Lv 5~9</td><td>进取</td><td>600~2399</td><td>青铜框</td></tr>
+      <tr><td>Lv 10~19</td><td>好学</td><td>2400~6199</td><td>白银框</td></tr>
+      <tr><td>Lv 20~29</td><td>学者</td><td>6200~13999</td><td>黄金框</td></tr>
+      <tr><td>Lv 30~49</td><td>学霸</td><td>14000~39999</td><td>铂金框</td></tr>
+      <tr><td>Lv 50+</td><td>学神</td><td>40000+</td><td>钻石框 + 光效</td></tr>
+    </table>
+    <div class="info warn">
+      <div class="label">⚠ 等级公式</div>
+      <code>Lv(N→N+1) = 100 + 200×(N-1)</code> XP。Lv1→2 需 100，Lv2→3 需 300，Lv3→4 需 500…封顶 Lv 100。确保前期升级快（正反馈）、后期升级难（持续挑战）。
+    </div>
+
+    <h3 class="sub">B.3 · <em>每日挑战</em></h3>
+    <ul>
+      <li><b>发布</b>：教师/管理员提前发布，设定 active_date 和 expires_at</li>
+      <li><b>题型</b>：选择题（quiz）/ 阅读打卡（reading）/ 练习题（exercise）</li>
+      <li><b>生命周期</b>：每日 00:00 刷新，24 小时窗口；过期进入"历史题库"</li>
+      <li><b>幂等</b>：每人每日每挑战仅一次作答机会，已答完返回原结果</li>
+      <li><b>解析</b>：答完立即展示正确答案 + 解析（<code>explanation</code> 字段）</li>
+    </ul>
+
+    <h3 class="sub">B.4 · <em>连续打卡（Streak）</em></h3>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="title">每日首次学习行为</div><div class="desc">任意通关/答题/打卡触发 → 更新 last_active_date</div></div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="title">连续判定</div><div class="desc">若 last_active_date == 昨天 → streak += 1；否则 → streak = 1</div></div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><div class="title">记录最长连续</div><div class="desc">longest_streak = max(longest_streak, current_streak)</div></div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-content"><div class="title">断签保护（V2 考虑）</div><div class="desc">未来可引入"补签卡"道具（消费 XP 购买）</div></div></div>
+    </div>
+  </div>
+
+  <!-- 模块 C -->
+  <div class="module-card reward">
+    <div class="card-header">
+      <div class="card-icon">🏆</div>
+      <div class="card-title">C · <em>成就沉淀</em> Badges & Leaderboard</div>
+    </div>
+    <p>徽章承载"里程碑"时刻，排行榜提供"可比较"维度，二者叠加形成持续成就反馈。</p>
+
+    <h3 class="sub">C.1 · <em>徽章分类</em></h3>
+    <table>
+      <tr><th>类别</th><th>触发条件</th><th>示例</th></tr>
+      <tr>
+        <td><b>XP 阈值</b></td>
+        <td><code>xp_threshold</code> · total_xp ≥ N</td>
+        <td>「初露锋芒」100 XP · 「学海无涯」10000 XP</td>
+      </tr>
+      <tr>
+        <td><b>连续打卡</b></td>
+        <td><code>streak</code> · current_streak ≥ N</td>
+        <td>「七日成习」7 天 · 「月度坚持」30 天</td>
+      </tr>
+      <tr>
+        <td><b>路径完成</b></td>
+        <td><code>path_complete</code> · 完成 N 条路径</td>
+        <td>「单线突破」1 条 · 「博学者」10 条</td>
+      </tr>
+      <tr>
+        <td><b>挑战大师</b></td>
+        <td><code>challenge_master</code> · 答对 N 次挑战</td>
+        <td>「答题新秀」10 次 · 「常胜将军」100 次</td>
+      </tr>
+      <tr>
+        <td><b>首次行为</b></td>
+        <td><code>first_login</code> · 注册后首次进入</td>
+        <td>「墨光初识」· 欢迎徽章</td>
+      </tr>
+    </table>
+
+    <h3 class="sub">C.2 · <em>徽章自动授予流程</em></h3>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="title">XP/Streak/完成行为发生后</div><div class="desc">在发放 XP 后统一调用 <code>_check_badges()</code></div></div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="title">遍历所有未获得的徽章</div><div class="desc">按 condition_type 计算是否满足</div></div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><div class="title">满足条件 → 写入 user_badges</div><div class="desc">同时发放徽章配置的 XP 奖励（可叠加）</div></div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-content"><div class="title">返回前端「新获得徽章」列表</div><div class="desc">前端弹窗展示，支持一键分享</div></div></div>
+    </div>
+
+    <h3 class="sub">C.3 · <em>排行榜</em></h3>
+    <table>
+      <tr><th>维度</th><th>算法</th><th>更新频率</th></tr>
+      <tr><td><b>周榜</b></td><td>本周有 XP 流水的用户按 total_xp 排序</td><td>实时，周一 00:00 重置统计窗口</td></tr>
+      <tr><td><b>月榜</b></td><td>本月有 XP 流水的用户按 total_xp 排序</td><td>实时，每月 1 日重置统计窗口</td></tr>
+      <tr><td><b>总榜</b></td><td>所有用户按 total_xp 排序</td><td>实时</td></tr>
+    </table>
+    <div class="info risk">
+      <div class="label">🛡️ 防刷策略</div>
+      排行榜仅统计<b>有有效行为</b>的 XP（每日挑战 / 路径通关 / 打卡），且每类行为每日有上限（如打卡 1 次、每日挑战 1 次）。未来可引入"周 XP 获取上限"（如 2000 XP/周）防止恶意刷分。
+    </div>
+  </div>
+</section>
+
+<!-- ============ §4 数据模型设计 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>04 · <em>Data Model</em></h2>
+    <span class="num-tag">§4 数据模型设计（9 张表）</span>
+  </div>
+
+  <p>新增模块 <code>learning</code>，共 9 张表。所有主键沿用项目统一的 <code>GUID</code>（CHAR(36)），时区字段统一 <code>DateTime(timezone=True)</code>。</p>
+
+  <!-- learning_paths -->
+  <div class="db-card">
+    <span class="table-name">learning_paths</span>
+    <div class="table-desc">学习路径主表（教师/管理员创建的自学主题路线）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>路径主键</td></tr>
+      <tr><td>title</td><td>VARCHAR(200) NOT NULL</td><td>路径标题</td></tr>
+      <tr><td>description</td><td>TEXT</td><td>路径简介</td></tr>
+      <tr><td>cover_image</td><td>VARCHAR(500)</td><td>封面图 URL</td></tr>
+      <tr><td>category</td><td>VARCHAR(50)</td><td>分类（python/math/ai/general）</td></tr>
+      <tr><td>difficulty</td><td>VARCHAR(20) DEFAULT 'beginner'</td><td>难度 beginner/intermediate/advanced</td></tr>
+      <tr><td>total_xp</td><td>INT DEFAULT 0</td><td>完成全路径可获总 XP（随关卡自动累加）</td></tr>
+      <tr><td>tags</td><td>JSON</td><td>标签数组</td></tr>
+      <tr><td>status</td><td>VARCHAR(20) DEFAULT 'draft'</td><td>draft/published/archived</td></tr>
+      <tr><td>created_by</td><td>GUID NOT NULL</td><td>创建者 user_id</td></tr>
+      <tr><td>created_at / updated_at</td><td>DATETIME</td><td>时间戳</td></tr>
+    </table>
+  </div>
+
+  <!-- learning_stages -->
+  <div class="db-card">
+    <span class="table-name">learning_stages</span>
+    <div class="table-desc">关卡阶段（路径中的每一关）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>关卡主键</td></tr>
+      <tr><td>path_id</td><td>GUID FK → learning_paths</td><td>所属路径（级联删除）</td></tr>
+      <tr><td>title</td><td>VARCHAR(200) NOT NULL</td><td>关卡标题</td></tr>
+      <tr><td>description</td><td>TEXT</td><td>关卡简介</td></tr>
+      <tr><td>order_num</td><td>INT DEFAULT 0</td><td>排序序号（决定解锁顺序）</td></tr>
+      <tr><td>resource_type</td><td>VARCHAR(20) DEFAULT 'article'</td><td>article/video/quiz/challenge</td></tr>
+      <tr><td>resource_url</td><td>VARCHAR(500)</td><td>外部资源链接</td></tr>
+      <tr><td>resource_content</td><td>TEXT</td><td>内嵌富文本内容</td></tr>
+      <tr><td>quiz_questions</td><td>JSON</td><td>闯关测验 [{q, options, answer}]</td></tr>
+      <tr><td>xp_reward</td><td>INT DEFAULT 10</td><td>通关可得 XP</td></tr>
+      <tr><td>unlock_condition</td><td>JSON</td><td>解锁条件扩展</td></tr>
+      <tr><td>created_at</td><td>DATETIME</td><td>创建时间</td></tr>
+    </table>
+  </div>
+
+  <!-- learning_progress -->
+  <div class="db-card">
+    <span class="table-name">learning_progress</span>
+    <div class="table-desc">学习进度（UNIQUE(user_id, stage_id)）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>进度主键</td></tr>
+      <tr><td>user_id</td><td>GUID NOT NULL (indexed)</td><td>学生</td></tr>
+      <tr><td>stage_id</td><td>GUID FK → learning_stages</td><td>关卡</td></tr>
+      <tr><td>status</td><td>VARCHAR(20) DEFAULT 'unlocked'</td><td>locked/unlocked/in_progress/completed</td></tr>
+      <tr><td>xp_earned</td><td>INT DEFAULT 0</td><td>已获 XP</td></tr>
+      <tr><td>quiz_score</td><td>INT</td><td>测验得分（如有）</td></tr>
+      <tr><td>started_at / completed_at</td><td>DATETIME</td><td>开始/完成时间</td></tr>
+    </table>
+  </div>
+
+  <!-- daily_challenges -->
+  <div class="db-card">
+    <span class="table-name">daily_challenges</span>
+    <div class="table-desc">每日挑战（运营发布的限时任务）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>挑战主键</td></tr>
+      <tr><td>title</td><td>VARCHAR(200) NOT NULL</td><td>挑战标题</td></tr>
+      <tr><td>description</td><td>TEXT</td><td>挑战描述</td></tr>
+      <tr><td>challenge_type</td><td>VARCHAR(20) DEFAULT 'quiz'</td><td>quiz/reading/exercise</td></tr>
+      <tr><td>question</td><td>JSON NOT NULL</td><td>{q, options, answer, explanation}</td></tr>
+      <tr><td>xp_reward</td><td>INT DEFAULT 20</td><td>答对奖励 XP</td></tr>
+      <tr><td>active_date</td><td>VARCHAR(10) NOT NULL</td><td>"2026-09-03" 生效日期</td></tr>
+      <tr><td>expires_at</td><td>DATETIME NOT NULL</td><td>过期时间</td></tr>
+      <tr><td>created_by / created_at</td><td>GUID / DATETIME</td><td>发布者 + 时间</td></tr>
+    </table>
+  </div>
+
+  <!-- challenge_attempts -->
+  <div class="db-card">
+    <span class="table-name">challenge_attempts</span>
+    <div class="table-desc">挑战尝试（UNIQUE(user_id, challenge_id) 每人每挑战一次）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>尝试主键</td></tr>
+      <tr><td>user_id</td><td>GUID NOT NULL (indexed)</td><td>学生</td></tr>
+      <tr><td>challenge_id</td><td>GUID FK → daily_challenges</td><td>挑战</td></tr>
+      <tr><td>answer</td><td>JSON</td><td>学生答案 {choice/text}</td></tr>
+      <tr><td>is_correct</td><td>BOOLEAN DEFAULT FALSE</td><td>是否正确</td></tr>
+      <tr><td>xp_earned</td><td>INT DEFAULT 0</td><td>实际获得 XP</td></tr>
+      <tr><td>attempted_at</td><td>DATETIME</td><td>作答时间</td></tr>
+    </table>
+  </div>
+
+  <!-- user_points -->
+  <div class="db-card">
+    <span class="table-name">user_points</span>
+    <div class="table-desc">用户积分汇总（UNIQUE(user_id) 一人一行）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>记录主键</td></tr>
+      <tr><td>user_id</td><td>GUID NOT NULL (indexed)</td><td>用户</td></tr>
+      <tr><td>total_xp</td><td>INT DEFAULT 0</td><td>累计 XP</td></tr>
+      <tr><td>level</td><td>INT DEFAULT 1</td><td>等级 1~100</td></tr>
+      <tr><td>current_streak</td><td>INT DEFAULT 0</td><td>当前连续天数</td></tr>
+      <tr><td>longest_streak</td><td>INT DEFAULT 0</td><td>最长连续天数</td></tr>
+      <tr><td>last_active_date</td><td>VARCHAR(10)</td><td>最后活跃日期 "2026-09-03"</td></tr>
+      <tr><td>updated_at</td><td>DATETIME</td><td>更新时间</td></tr>
+    </table>
+  </div>
+
+  <!-- badges -->
+  <div class="db-card">
+    <span class="table-name">badges</span>
+    <div class="table-desc">徽章定义（成就系统）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>徽章主键</td></tr>
+      <tr><td>name</td><td>VARCHAR(100) NOT NULL</td><td>徽章名称</td></tr>
+      <tr><td>description</td><td>VARCHAR(300)</td><td>徽章描述</td></tr>
+      <tr><td>icon_url</td><td>VARCHAR(500)</td><td>徽章图标 URL</td></tr>
+      <tr><td>condition_type</td><td>VARCHAR(50) NOT NULL</td><td>xp_threshold/streak/path_complete/challenge_master/first_login</td></tr>
+      <tr><td>condition_value</td><td>INT DEFAULT 0</td><td>触发阈值</td></tr>
+      <tr><td>xp_reward</td><td>INT DEFAULT 0</td><td>获得徽章奖励 XP</td></tr>
+      <tr><td>created_at</td><td>DATETIME</td><td>创建时间</td></tr>
+    </table>
+  </div>
+
+  <!-- user_badges -->
+  <div class="db-card">
+    <span class="table-name">user_badges</span>
+    <div class="table-desc">用户获得的徽章（UNIQUE(user_id, badge_id)）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>记录主键</td></tr>
+      <tr><td>user_id</td><td>GUID NOT NULL (indexed)</td><td>用户</td></tr>
+      <tr><td>badge_id</td><td>GUID FK → badges</td><td>徽章</td></tr>
+      <tr><td>earned_at</td><td>DATETIME</td><td>获得时间</td></tr>
+    </table>
+  </div>
+
+  <!-- point_transactions -->
+  <div class="db-card">
+    <span class="table-name">point_transactions</span>
+    <div class="table-desc">积分流水（每笔 XP 变动一条记录，支撑周/月榜统计）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>流水主键</td></tr>
+      <tr><td>user_id</td><td>GUID NOT NULL (indexed)</td><td>用户</td></tr>
+      <tr><td>amount</td><td>INT NOT NULL</td><td>变动值（正=获得，负=消耗）</td></tr>
+      <tr><td>reason</td><td>VARCHAR(100) NOT NULL</td><td>stage_complete/challenge_correct/badge_earned/streak_bonus</td></tr>
+      <tr><td>source_type</td><td>VARCHAR(30)</td><td>learning_stage/daily_challenge/badge/checkin</td></tr>
+      <tr><td>source_id</td><td>GUID</td><td>来源记录 ID</td></tr>
+      <tr><td>created_at</td><td>DATETIME</td><td>流水时间（周/月榜按此过滤）</td></tr>
+    </table>
+  </div>
+
+  <div class="info success">
+    <div class="label">✅ 表数量影响</div>
+    当前 D-05 完成态 <b>40 张表</b>，D-06 新增 9 张 → 共 <b>49 张表</b>。沿用 <code>GUID</code> 主键、<code>DateTime(timezone=True)</code>、<code>server_default=func.now()</code> 等项目既有约定。
+  </div>
+</section>
+
+<!-- ============ §5 接口设计 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>05 · <em>API Design</em></h2>
+    <span class="num-tag">§5 接口设计（~20 端点）</span>
+  </div>
+
+  <p>新增模块 <code>/api/v1/learning/*</code>，统一前缀 <code>/learning</code>，按子资源分组。所有端点需 <code>Authorization: Bearer {token}</code>。</p>
+
+  <h3 class="sub">5.1 · <em>学习路径</em></h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/paths?category=&difficulty=&status=&offset=&limit=</span><div class="desc">路径列表（学生默认只看 published，教师/admin 可看全部）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/paths/{path_id}</span><div class="desc">路径详情（含 stage_count / enrolled_count / my_progress）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/paths</span><div class="desc">创建路径（teacher/admin）</div></div>
+  <div class="api-block"><span class="method put">PUT</span><span class="path">/learning/paths/{path_id}</span><div class="desc">更新路径（owner 或 admin）</div></div>
+  <div class="api-block"><span class="method delete">DELETE</span><span class="path">/learning/paths/{path_id}</span><div class="desc">删除路径（级联删关卡/进度）</div></div>
+
+  <h3 class="sub">5.2 · <em>关卡</em></h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/paths/{path_id}/stages</span><div class="desc">关卡列表（含我的进度状态 locked/unlocked/in_progress/completed）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/paths/{path_id}/stages</span><div class="desc">创建关卡（自动重算路径 total_xp）</div></div>
+  <div class="api-block"><span class="method put">PUT</span><span class="path">/learning/stages/{stage_id}</span><div class="desc">更新关卡</div></div>
+  <div class="api-block"><span class="method delete">DELETE</span><span class="path">/learning/stages/{stage_id}</span><div class="desc">删除关卡</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/stages/{stage_id}/complete</span><div class="desc">通关关卡（校验前置关 + 测验判分 + 发放 XP + 检查徽章）</div></div>
+
+  <h3 class="sub">5.3 · <em>我的进度</em></h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/my/progress</span><div class="desc">我的学习进度汇总（按路径聚合，含百分比）</div></div>
+
+  <h3 class="sub">5.4 · <em>每日挑战</em></h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/challenges/today</span><div class="desc">今日挑战列表（隐藏答案字段）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/challenges?offset=&limit=</span><div class="desc">历史挑战列表</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/challenges</span><div class="desc">创建每日挑战（teacher/admin）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/challenges/{id}/attempt</span><div class="desc">提交挑战答案（判题 + 发 XP + 检查徽章）</div></div>
+
+  <h3 class="sub">5.5 · <em>积分 / 徽章 / 排行榜 / 打卡</em></h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/my/points</span><div class="desc">我的积分/等级/连续天数/排名/徽章数</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/badges</span><div class="desc">徽章列表（含我是否已获得）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/badges</span><div class="desc">创建徽章（admin）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/leaderboard?period=week|month|all&limit=</span><div class="desc">排行榜（按 period 过滤 point_transactions）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/checkin</span><div class="desc">每日打卡（幂等：今日已打卡返回 false）</div></div>
+
+  <div class="info note">
+    <div class="label">🔒 权限矩阵</div>
+    <table style="margin-top:8px;">
+      <tr><th>端点类型</th><th>学生</th><th>教师</th><th>管理员</th></tr>
+      <tr><td>查看路径/关卡/挑战/排行</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>通关/答题/打卡/查积分</td><td>✅ 仅自己</td><td>✅ 自己</td><td>✅ 自己</td></tr>
+      <tr><td>创建/编辑路径/关卡/挑战</td><td>❌</td><td>✅ 仅自己创建</td><td>✅ 全部</td></tr>
+      <tr><td>创建/删除徽章</td><td>❌</td><td>❌</td><td>✅</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============ §6 前端页面设计 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>06 · <em>Frontend</em></h2>
+    <span class="num-tag">§6 前端页面设计（5 页）</span>
+  </div>
+
+  <p>Web 端 + 移动端同步补齐，复用既有 Lumina 视觉系统（宣纸色背景、Fraunces 标题、钴蓝强调）。</p>
+
+  <table>
+    <tr><th>页面</th><th>路由</th><th>核心元素</th><th>平台</th></tr>
+    <tr>
+      <td><b>🗺️ 学习广场</b></td>
+      <td><code>/learning</code></td>
+      <td>路径卡片网格 · 分类/难度筛选 · 我的进度条 · 每日挑战入口 · 今日打卡按钮</td>
+      <td><span class="tag student">Web</span> <span class="tag student">Mobile</span></td>
+    </tr>
+    <tr>
+      <td><b>🎯 路径地图</b></td>
+      <td><code>/learning/paths/:id</code></td>
+      <td>节点式关卡地图（横向时间线或纵向阶梯）· 当前关高亮 · 每关显示资源类型图标 + XP</td>
+      <td><span class="tag student">Web</span> <span class="tag student">Mobile</span></td>
+    </tr>
+    <tr>
+      <td><b>📖 关卡学习</b></td>
+      <td><code>/learning/stages/:id</code></td>
+      <td>富文本/视频播放器/答题面板 · "完成并获取 XP" 按钮 · 完成动画 + 新徽章弹窗</td>
+      <td><span class="tag student">Web</span> <span class="tag student">Mobile</span></td>
+    </tr>
+    <tr>
+      <td><b>🏆 成就中心</b></td>
+      <td><code>/learning/profile</code></td>
+      <td>我的等级徽章框 · 进度环 · 连续打卡日历 · 徽章墙（已获得点亮/未获得灰色）</td>
+      <td><span class="tag student">Web</span> <span class="tag student">Mobile</span></td>
+    </tr>
+    <tr>
+      <td><b>📊 排行榜</b></td>
+      <td><code>/learning/leaderboard</code></td>
+      <td>周/月/总 Tab 切换 · Top 10 头像墙 · 我的排名悬浮提示 · 教师/管理视角可导出</td>
+      <td><span class="tag student">Web</span> <span class="tag student">Mobile</span></td>
+    </tr>
+  </table>
+
+  <div class="info ai">
+    <div class="label">🎨 视觉亮点</div>
+    <ul style="margin-top:6px;">
+      <li><b>关卡地图</b>：采用 Lumina 荧光黄高亮当前关，已完成关卡用成长绿✓ 标记</li>
+      <li><b>等级徽章框</b>：根据等级显示不同材质（灰/青铜/白银/黄金/铂金/钻石）</li>
+      <li><b>打卡日历</b>：30 天网格，打卡日用荧光黄圆形高亮，连续区间连线</li>
+      <li><b>新徽章弹窗</b>：从顶部飘落 + 金色光晕 + 一键分享到朋友圈（移动端）</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ §7 验收标准 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>07 · <em>Acceptance</em></h2>
+    <span class="num-tag">§7 验收标准</span>
+  </div>
+
+  <h3 class="sub">7.1 · <em>功能验收</em></h3>
+  <table>
+    <tr><th>ID</th><th>验收项</th><th>预期结果</th></tr>
+    <tr><td>AC-01</td><td>学生浏览学习路径广场</td><td>仅显示 published 路径；按分类筛选生效</td></tr>
+    <tr><td>AC-02</td><td>学生进入路径地图</td><td>显示全部关卡 + 我的进度状态（locked/unlocked/completed）</td></tr>
+    <tr><td>AC-03</td><td>学生通关一关（含测验）</td><td>答对 ≥60% → 发放 XP + 解锁下一关；否则 400</td></tr>
+    <tr><td>AC-04</td><td>学生前置关未完成直接通关下一关</td><td>返回 403 "请先完成前置关卡"</td></tr>
+    <tr><td>AC-05</td><td>学生作答每日挑战</td><td>答对发 XP + 更新 streak；答错无奖励；已作答幂等返回</td></tr>
+    <tr><td>AC-06</td><td>学生每日打卡</td><td>今日首次 → streak += 1 + 发 XP；今日已打卡 → checked_in=false</td></tr>
+    <tr><td>AC-07</td><td>学生等级自动升级</td><td>XP 累计达到阈值 → level 字段自动递增 + 称号变化</td></tr>
+    <tr><td>AC-08</td><td>学生获得徽章</td><td>满足条件自动授予 + 发徽章 XP 奖励 + 前端弹窗</td></tr>
+    <tr><td>AC-09</td><td>学生查看排行榜</td><td>周/月/总榜按 XP 倒序；无数据用户不显示</td></tr>
+    <tr><td>AC-10</td><td>教师创建路径</td><td>成功 201 + 可继续添加关卡 + 一键发布</td></tr>
+    <tr><td>AC-11</td><td>教师发布每日挑战</td><td>设定 active_date + expires_hours → 学生在对应日期可见</td></tr>
+    <tr><td>AC-12</td><td>管理员创建徽章</td><td>配置 condition_type/value/xp_reward → 满足条件用户自动获得</td></tr>
+    <tr><td>AC-13</td><td>未登录访问</td><td>所有端点返回 401</td></tr>
+    <tr><td>AC-14</td><td>学生修改他人路径</td><td>返回 403</td></tr>
+  </table>
+
+  <h3 class="sub">7.2 · <em>埋点验收</em></h3>
+  <table>
+    <tr><th>事件</th><th>触发时机</th><th>关键字段</th></tr>
+    <tr><td><code>learning.path_view</code></td><td>进入路径详情</td><td>path_id</td></tr>
+    <tr><td><code>learning.stage_complete</code></td><td>通关关卡</td><td>stage_id, xp_earned, quiz_score</td></tr>
+    <tr><td><code>learning.challenge_attempt</code></td><td>作答挑战</td><td>challenge_id, is_correct, xp_earned</td></tr>
+    <tr><td><code>learning.daily_checkin</code></td><td>打卡</td><td>xp_earned, streak</td></tr>
+    <tr><td><code>learning.badge_earned</code></td><td>获得徽章</td><td>badge_id, badge_name</td></tr>
+    <tr><td><code>learning.leaderboard</code></td><td>查看排行榜</td><td>period, count</td></tr>
+  </table>
+
+  <h3 class="sub">7.3 · <em>性能验收</em></h3>
+  <ul>
+    <li>路径列表接口 &lt; 200ms（P95，1000 条路径规模）</li>
+    <li>通关关卡接口 &lt; 300ms（含 XP 发放 + 徽章检查）</li>
+    <li>排行榜接口 &lt; 150ms（P95，10000 用户规模）</li>
+    <li>单元测试覆盖率 ≥ 80%（核心逻辑：等级计算、徽章授予、解锁规则）</li>
+  </ul>
+</section>
+
+<!-- ============ §8 任务分解（WBS） ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>08 · <em>WBS</em></h2>
+    <span class="num-tag">§8 任务分解</span>
+  </div>
+
+  <p>按 Lumina 标准工作流拆分为 4 个阶段，预估 5 个工作日（不含审核阻塞）。</p>
+
+  <table>
+    <tr><th>任务包</th><th>内容</th><th>交付物</th><th>估时</th><th>优先级</th></tr>
+    <tr>
+      <td><b>D-06.1</b> 数据模型</td>
+      <td>9 张表加入 models.py + init.sql 重生成</td>
+      <td>models.py / init.sql / schema diff</td>
+      <td>0.5 天</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td><b>D-06.2</b> 后端路由</td>
+      <td>~20 个端点 + schemas + instrumentation 事件</td>
+      <td>app/modules/learning/ + tests/test_learning.py</td>
+      <td>1.5 天</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td><b>D-06.3</b> 单元测试 + 冒烟</td>
+      <td>≥ 40 单元测试 + smoke_learning.py 真库 E2E</td>
+      <td>tests/test_learning.py + 部署/scripts/smoke_learning.py</td>
+      <td>0.5 天</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td><b>D-06.4</b> Web 前端</b></td>
+      <td>5 个页面（广场/地图/关卡/成就/排行）</td>
+      <td>web-frontend/src/pages/Learning*.tsx</td>
+      <td>1.5 天</td>
+      <td><span class="tag p1">P1</span></td>
+    </tr>
+    <tr>
+      <td><b>D-06.5</b> 移动端对齐</td>
+      <td>广场 + 地图 + 成就 3 个主页面（移动端简化）</td>
+      <td>mobile-app/src/pages/Learning*.tsx</td>
+      <td>1 天</td>
+      <td><span class="tag p1">P1</span></td>
+    </tr>
+    <tr>
+      <td><b>D-06.6</b> 文档联动</td>
+      <td>API/TDD/DB/QA/OPS/WBS-P/索引 全部同步</td>
+      <td>原型/lumina-*.html + yaml</td>
+      <td>0.5 天</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td><b>D-06.7</b> 种子数据</td>
+      <td>seed_learning.py：3 条示范路径 + 10 个徽章 + 7 天挑战</td>
+      <td>部署/scripts/seed_learning.py</td>
+      <td>0.5 天</td>
+      <td><span class="tag p2">P2</span></td>
+    </tr>
+    <tr>
+      <td><b>D-06.8</b> 团队审核</td>
+      <td>代码 + 文档 + 端到端演示</td>
+      <td>审核纪要 + 提交 release</td>
+      <td>0.5 天</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+  </table>
+
+  <div class="info warn">
+    <div class="label">⚠ 依赖与风险</div>
+    <ul style="margin-top:6px;">
+      <li><b>依赖</b>：D-05 学情分析已落地（users/courses 表稳定）</li>
+      <li><b>风险 1</b>：排行榜大数据量性能 —— 用 <code>point_transactions.created_at</code> 索引解决</li>
+      <li><b>风险 2</b>：徽章检查逻辑复杂 —— 单元测试覆盖所有 condition_type 分支</li>
+      <li><b>风险 3</b>：移动端视频播放进度上报 —— 使用 expo-video 原生事件</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ §9 里程碑对齐 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>09 · <em>Milestones</em></h2>
+    <span class="num-tag">§9 里程碑对齐</span>
+  </div>
+
+  <p>D-06 纳入 V1.1 演进规划，不阻塞 M4 正式上线，但建议在 M4.1（上线稳定期）前完成，作为首批用户运营抓手。</p>
+
+  <table>
+    <tr><th>里程碑</th><th>状态</th><th>说明</th></tr>
+    <tr><td>M1 基础环境</td><td><span class="tag done">✅ 达成</span></td><td>W2</td></tr>
+    <tr><td>M2 核心功能</td><td><span class="tag done">✅ 达成</span></td><td>58 端点 · 9 模块</td></tr>
+    <tr><td>M3 测试通过</td><td><span class="tag done">✅ 2026-08-31</span></td><td>全部用例 + 埋点验证</td></tr>
+    <tr><td>M4 正式上线</td><td><span class="tag todo">⏳ 待生产环境</span></td><td>含 D-01~D-05 全部上线</td></tr>
+    <tr><td><b>M4.1 上线稳定</b></td><td><span class="tag todo">⏳ T0+5 周</span></td><td><b>D-06 建议在此前完成</b>（运营抓手）</td></tr>
+    <tr><td>M5 收口认证</td><td><span class="tag todo">⏳ T0+6 周</span></td><td>UAT + 培训 + 移动端收官</td></tr>
+  </table>
+
+  <div class="info success">
+    <div class="label">🎯 推荐执行顺序</div>
+    <ol style="margin-top:6px;">
+      <li>先完成 <b>D-06.1~D-06.3</b>（后端 + 测试），可独立联调</li>
+      <li>并行启动 <b>D-06.4 Web 前端</b>（基于后端 stub 开发）</li>
+      <li>后端稳定后补齐 <b>D-06.5 移动端</b></li>
+      <li>最后统一 <b>D-06.6 文档联动</b> + <b>D-06.7 种子数据</b> + <b>D-06.8 团队审核</b></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div>Lumina · 墨光 · D-06 · v1.0 · 2026-09-03</div>
+  <div class="sig">Self-Learning & <span class="hl">Gamification</span></div>
+</footer>
+
+</body>
+</html>
