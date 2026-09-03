@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · D-10 运营监控需求文档</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding:56px 64px; max-width:1280px; margin:0 auto;}
+
+  .cover{padding:64px 0 56px; border-bottom:1px solid var(--line); margin-bottom:48px;}
+  .cover .brand{display:flex; align-items:center; gap:14px; margin-bottom:28px;}
+  .cover .brand .logo{width:56px; height:56px; border-radius:14px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:28px; font-weight:500; font-style:italic;}
+  .cover .brand .name{font-family:var(--f-display); font-size:20px; font-weight:500;}
+  .cover .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:4px;}
+  .cover .doc-type{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--ai); background:var(--ai-soft); padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:18px;}
+  .cover h1{font-family:var(--f-display); font-weight:300; font-size:66px; letter-spacing:-0.04em; line-height:1;}
+  .cover h1 em{font-style:italic; color:var(--correction);}
+  .cover h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .cover .subtitle{font-size:18px; color:var(--inkwell-2); margin-top:18px; font-weight:300;}
+  .cover .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:22px; line-height:2;}
+
+  .stats{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:48px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px;}
+  .stat{text-align:center; padding:6px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .val{font-family:var(--f-display); font-size:26px; font-weight:300;}
+  .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  .section{margin-bottom:56px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:22px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:34px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  h3.sub{font-family:var(--f-display); font-size:22px; font-weight:400; margin:28px 0 14px; letter-spacing:-0.01em;}
+  h3.sub em{font-style:italic; color:var(--cobalt);}
+
+  p{margin-bottom:12px; line-height:1.7;}
+  ul,ol{margin:0 0 16px 20px; line-height:1.8;}
+  li{margin-bottom:4px;}
+  b{font-weight:600;}
+  code{font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px; font-size:13px; border:1px solid var(--line);}
+
+  table{width:100%; border-collapse:collapse; margin:14px 0 22px; font-size:13px;}
+  th{background:var(--ricepaper); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-strong);}
+  td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  tr:hover td{background:rgba(250,246,236,0.5);}
+  .tag{display:inline-block; font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; padding:2px 7px; border-radius:4px;}
+  .tag.p0{background:var(--correction); color:#fff;}
+  .tag.p1{background:var(--highlighter); color:var(--inkwell);}
+  .tag.p2{background:var(--cobalt-soft); color:var(--cobalt);}
+  .tag.done{background:var(--growth-soft); color:var(--growth);}
+  .tag.todo{background:var(--ai-soft); color:var(--ai);}
+  .tag.student{background:#E0F2FE; color:#0369A1;}
+  .tag.teacher{background:#FEF3C7; color:#92400E;}
+  .tag.admin{background:var(--correction-soft); color:var(--correction);}
+
+  .info{padding:16px 20px; border-radius:10px; margin:16px 0 20px; font-size:13px; line-height:1.7;}
+  .info .label{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; font-weight:600;}
+  .info.note{background:var(--cobalt-soft); border:1px solid var(--cobalt);}
+  .info.warn{background:var(--highlighter-soft); border:1px solid var(--highlighter);}
+  .info.success{background:var(--growth-soft); border:var(--growth); border:1px solid var(--growth);}
+  .info.ai{background:var(--ai-soft); border:1px solid var(--ai);}
+  .info.risk{background:var(--correction-soft); border:1px solid var(--correction);}
+
+  .module-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:22px 24px; margin:14px 0; position:relative; overflow:hidden;}
+  .module-card:before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--cobalt);}
+  .module-card.gamification:before{background:var(--ai);}
+  .module-card.reward:before{background:var(--highlighter);}
+  .module-card .card-header{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+  .module-card .card-icon{width:36px; height:36px; border-radius:10px; background:var(--cobalt-soft); color:var(--cobalt); display:flex; align-items:center; justify-content:center; font-size:18px;}
+  .module-card.gamification .card-icon{background:var(--ai-soft); color:var(--ai);}
+  .module-card.reward .card-icon{background:var(--highlighter-soft); color:var(--inkwell);}
+  .module-card .card-title{font-family:var(--f-display); font-size:20px; font-weight:400;}
+  .module-card .card-title em{font-style:italic; color:var(--cobalt);}
+  .module-card.gamification .card-title em{color:var(--ai);}
+  .module-card.reward .card-title em{color:var(--highlighter);}
+
+  .flow{background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; margin:18px 0;}
+  .mermaid{display:flex; justify-content:center; overflow-x:auto; background:transparent; font-family:inherit; margin:6px 0;}
+  .mermaid svg{max-width:100%; height:auto;}
+  .diagram-cap{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); text-align:center; margin-top:10px;}
+  .flow-step{display:flex; gap:14px; padding:10px 0; border-bottom:1px dashed var(--line); align-items:flex-start;}
+  .flow-step:last-child{border-bottom:none;}
+  .flow-num{flex-shrink:0; width:28px; height:28px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-mono); font-size:12px; font-weight:600;}
+  .flow-content{flex:1;}
+  .flow-content .title{font-weight:600; margin-bottom:4px;}
+  .flow-content .desc{font-size:13px; color:var(--inkwell-2); line-height:1.6;}
+
+  .api-block{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 18px; margin:10px 0; font-family:var(--f-mono); font-size:12px;}
+  .api-block .method{display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600; margin-right:8px;}
+  .api-block .method.get{background:var(--growth-soft); color:var(--growth);}
+  .api-block .path{color:var(--inkwell);}
+  .api-block .desc{color:var(--inkwell-2); font-size:11px; margin-top:4px; font-family:var(--f-body);}
+
+  footer{margin-top:56px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div>
+    <div class="brand">
+      <div class="logo">墨</div>
+      <div class="name">Lumina · 墨光<small>Requirements Document · D-10</small></div>
+    </div>
+    <div class="doc-type">V1.1 演进 · 需求规格说明书</div>
+    <h1><span class="hl">运营监控</span><br/><em>可观测性</em> 体系</h1>
+    <p class="subtitle">Prometheus Metrics · Deep Health Check · Business Metrics · Alerting Lifecycle · Degradation Strategy</p>
+    <div class="meta">
+      Document ID: LUMINA-REQ-D10-001 · Status: Draft<br/>
+      Version: 1.0 · Date: 2026-09-03<br/>
+      Author: Claude Team Review · Owner: Yuan
+    </div>
+  </div>
+</header>
+
+<!-- ============ STATS ============ -->
+<div class="stats">
+  <div class="stat">
+    <div class="val hl">1</div>
+    <div class="lbl">Module (ops)</div>
+  </div>
+  <div class="stat">
+    <div class="val">3</div>
+    <div class="lbl">API Endpoints</div>
+  </div>
+  <div class="stat">
+    <div class="val">0</div>
+    <div class="lbl">New Data Tables</div>
+  </div>
+  <div class="stat">
+    <div class="val">4</div>
+    <div class="lbl">Business Flows</div>
+  </div>
+</div>
+
+<!-- ============ §1 背景与目标 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>01 · <em>Background</em></h2>
+    <span class="num-tag">§1 背景与目标</span>
+  </div>
+
+  <h3 class="sub">1.1 · <em>业务背景</em></h3>
+  <p>Lumina 墨光已完成 M1-M4 主体功能（17 模块 · 单体 FastAPI），生产环境以 Docker Compose 编排 <b>MySQL / lumina-app / Nginx</b> 三服务运行。当前运维手段停留在「容器日志人肉翻阅 + 部署脚本 <code>check.sh</code> 契约核对」层面，<b>缺少系统化的可观测性能力</b>：</p>
+  <ul>
+    <li>无统一指标采集与趋势查询 —— 服务劣化（延迟爬升、错误率波动）无法提前感知；</li>
+    <li>健康检查仅覆盖存活探针（<code>/health</code> / <code>/health/ready</code>）—— 依赖服务（DB / 缓存）故障无法定位到点；</li>
+    <li>无告警触达链路 —— 故障依赖用户反馈才知道；</li>
+    <li>业务视角数据（DAU / 提交量 / 考试量 / AI 调用量）散落各表，管理员无汇总入口。</li>
+  </ul>
+  <p>D-10 任务包定义平台的<b>「监控大盘 + 指标导出 + 深度健康检查 + 告警生命周期 + 采集降级」</b>五项能力。应用侧（<code>ops</code> 模块 3 端点）已落地；采集/告警基础设施（Prometheus / AlertManager / Grafana）与告警处理闭环为本需求规划范围。</p>
+
+  <h3 class="sub">1.2 · <em>核心目标</em></h3>
+  <table>
+    <tr><th>目标维度</th><th>描述</th><th>量化指标</th></tr>
+    <tr>
+      <td><b>📊 指标可查询</b></td>
+      <td>系统指标（QPS / 延迟 / 错误率 / 资源）与业务指标统一导出，Prometheus 可抓取</td>
+      <td>指标采集间隔 ≤15s · 大盘刷新 ≤30s</td>
+    </tr>
+    <tr>
+      <td><b>🩺 故障可定位</b></td>
+      <td>深度健康检查逐依赖服务报告状态与延迟</td>
+      <td>故障定位时间（MTTL）≤ 5 分钟</td>
+    </tr>
+    <tr>
+      <td><b>🔔 告警可触达</b></td>
+      <td>阈值触发 → 通知 → 处理 → 复盘全生命周期闭环</td>
+      <td>P0 告警触达 ≤ 2 分钟 · 告警响应率 100%</td>
+    </tr>
+    <tr>
+      <td><b>🛡️ 采集不拖垮业务</b></td>
+      <td>指标采集异常时按降级策略保护主链路</td>
+      <td>采集自身开销 &lt; 2% RT · 数据丢失率 &lt; 0.1%</td>
+    </tr>
+  </table>
+
+  <div class="info note">
+    <div class="label">📘 定位</div>
+    <b>纯运维侧能力，不改变任何业务语义</b>：ops 模块只读聚合既有数据（<code>api_logs</code> / <code>ai_call_logs</code> / 业务表计数），不新增业务写路径；告警处理复用 <code>notif</code> 模块既有通道（邮件 / 站内信，短信与企业微信为预留通道）。
+  </div>
+</section>
+
+<!-- ============ §2 功能需求 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>02 · <em>Features</em></h2>
+    <span class="num-tag">§2 功能需求</span>
+  </div>
+
+  <div class="module-card">
+    <div class="card-header">
+      <div class="card-icon">🩺</div>
+      <div class="card-title">A · <em>健康检查</em>（已实现）</div>
+    </div>
+    <p>三级探针体系：<code>GET /health</code>（存活 liveness）、<code>GET /health/ready</code>（就绪 readiness）、<code>GET /ops/health/deep</code>（深度依赖检查）。深度检查逐项报告 <b>MySQL / Redis / lumina-app</b> 的 <code>status</code>（healthy / degraded / down）、<code>latency_ms</code> 与明细，并给出总体状态与 <code>uptime_seconds</code>。Redis 当前为 <code>degraded</code>（未部署，走内存缓存），部署后转为实际探活。</p>
+  </div>
+
+  <div class="module-card gamification">
+    <div class="card-header">
+      <div class="card-icon">📈</div>
+      <div class="card-title">B · <em>Prometheus 指标导出</em>（已实现 + 待扩展）</div>
+    </div>
+    <p><code>GET /ops/metrics</code> 输出 Prometheus 文本格式（<code>text/plain; version=0.0.4</code>），当前含 7 项指标：<code>lumina_users_total</code> / <code>lumina_courses_total</code> / <code>lumina_videos_total</code> / <code>lumina_api_requests_total{status}</code> / <code>lumina_active_users_today</code> / <code>lumina_ai_calls_total</code> / <code>lumina_uptime_seconds</code>。</p>
+    <p><b>规划扩展</b>（配合 Prometheus 抓取）：HTTP 请求时延直方图（P50/P95/P99）、进程 CPU / 内存占用、DB 连接池水位。由 Prometheus 以 15s 间隔抓取，Grafana 渲染监控大盘。</p>
+  </div>
+
+  <div class="module-card reward">
+    <div class="card-header">
+      <div class="card-icon">🧮</div>
+      <div class="card-title">C · <em>业务指标汇总</em>（已实现）</div>
+    </div>
+    <p><code>GET /ops/metrics/business</code>（仅 <code>admin</code> 角色）返回 13 项业务快照：用户总量 / 今日活跃、课程总量 / 30 天活跃、视频总量 / 今日播放、作业提交、考试作答、AI 调用、打卡次数。作为管理后台「监控大盘」页面的数据源。</p>
+  </div>
+
+  <div class="module-card">
+    <div class="card-header">
+      <div class="card-icon">🔔</div>
+      <div class="card-title">D · <em>告警生命周期</em>（需求定义）</div>
+    </div>
+    <p>Prometheus Rule → AlertManager 分级路由：<b>Warning</b>（邮件摘要）/ <b>Critical</b>（即时触达：邮件 + 企业微信/短信预留）→ 管理员介入转 <b>Resolving</b> → 解决回 <b>Normal</b>；Critical 超时未处理自动升级（Escalated，通知上一级负责人）。每次告警的触发、认领、处理、复盘经 <code>notif</code> 模块与审计日志（<code>logs</code> 模块）留痕。阈值见 §4.2 状态机注记。</p>
+  </div>
+
+  <div class="module-card gamification">
+    <div class="card-header">
+      <div class="card-icon">🛡️</div>
+      <div class="card-title">E · <em>采集降级与自愈</em>（需求定义）</div>
+    </div>
+    <p>指标采集失败或延迟过高时按五级策略降级：本地缓存批量上报 → 采样率动态调整 → 非关键指标异步化 → 关键指标同步保障 → 失败落本地日志补报。网络/服务恢复后自动补报并对账。详见 §4.4 异常流程。</p>
+  </div>
+</section>
+
+<!-- ============ §3 用户故事与验收标准 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>03 · <em>Acceptance</em></h2>
+    <span class="num-tag">§3 用户故事与验收标准</span>
+  </div>
+
+  <table>
+    <tr><th>编号</th><th>用户故事</th><th>验收标准（AC）</th><th>优先级</th></tr>
+    <tr>
+      <td><b>US-1</b></td>
+      <td><span class="tag admin">管理员</span> 我希望在监控大盘查看 QPS / 延迟 / 错误率 / 资源使用，以便随时掌握系统健康度</td>
+      <td>AC1: 大盘数据刷新延迟 ≤ 30s；AC2: 任一指标异常可从大盘下钻到详细日志（api_logs）</td>
+      <td><span class="tag p1">P1</span></td>
+    </tr>
+    <tr>
+      <td><b>US-2</b></td>
+      <td><span class="tag admin">管理员</span> 我希望依赖服务故障时收到分级告警并被闭环跟踪，以便及时介入</td>
+      <td>AC3: Critical 告警 2 分钟内触达；AC4: 告警按 §4.2 状态机流转，处理过程有记录与复盘</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td><b>US-3</b></td>
+      <td><span class="tag admin">管理员</span> 我希望通过深度健康检查快速定位故障点（DB / 缓存 / 应用）</td>
+      <td>AC5: <code>/ops/health/deep</code> 逐服务返回 status/latency/details；AC6: 总体状态聚合规则正确（down &gt; degraded &gt; healthy）</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td><b>US-4</b></td>
+      <td><span class="tag admin">管理员</span> 我希望查看业务指标（DAU / 提交 / 考试 / AI 调用）以支撑运营决策</td>
+      <td>AC7: <code>/ops/metrics/business</code> 13 项字段完整；非 admin 访问返回 403</td>
+      <td><span class="tag p1">P1</span></td>
+    </tr>
+    <tr>
+      <td><b>US-5</b></td>
+      <td><span class="tag admin">管理员</span> 指标采集故障时不得影响教学主链路</td>
+      <td>AC8: 降级策略按 §4.4 五级生效；AC9: 采集成功率 ≥ 99.9% · 上报延迟 P95 &lt; 1s · 数据丢失率 &lt; 0.1%；AC10: 每小时数据对账（采集量 vs 上报量）差异可报告</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td><b>US-6</b></td>
+      <td><span class="tag admin">管理员</span> 合规：监控数据涉及用户标识（user_id）与访问行为，须遵循最小必要与留存期限</td>
+      <td>AC11: 指标与大盘仅呈现聚合值，不展示个人可识别信息；api_logs 中 user_id 仅用于聚合统计；⚖️ 监控数据留存 ≥ 30 天供审计、到期归档（《个人信息保护法》最小必要 + 《数据安全法》数据分级）</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+  </table>
+
+  <div class="info warn">
+    <div class="label">⚖️ 合规预检结论（步骤 1.5）</div>
+    命中合规域：<b>个人信息处理</b>（访问日志含 user_id / IP，需最小必要与目的限制 → AC11）；<b>数据分级</b>（监控数据属「一般」级，审计日志属「重要」级）。<br/>
+    未命中：未成年人新增采集（不新增采集学生身份数据，复用既有日志）· AI 生成内容 · 算法推荐 · 数据跨境（全部本地部署）· 电子签名。
+  </div>
+</section>
+
+<!-- ============ §4 业务流程定义 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>04 · <em>Business Flows</em></h2>
+    <span class="num-tag">§4 业务流程定义</span>
+  </div>
+
+  <p>本节以 4 类视图固化 D-10 的核心业务语义：<b>用户旅程</b>（管理员查看监控大盘）、<b>状态机</b>（告警生命周期）、<b>跨模块时序</b>（健康检查与自动恢复）、<b>异常流程</b>（业务指标采集降级）。后续基础设施部署与测试（§8 RTM）均以本节流程为对齐基准。</p>
+
+  <h3 class="sub">4.1 · <em>用户旅程</em> 管理员查看监控大盘</h3>
+  <p>覆盖「登录 → 大盘 → 异常下钻 → 告警处理 → 复盘」与「正常巡检 → 报表导出」双分支：</p>
+  <div class="flow">
+    <pre class="mermaid">
+graph TD
+    A[管理员登录] --> B[进入管理后台]
+    B --> C[点击监控大盘]
+    C --> D[加载 Prometheus 指标]
+    D --> E[展示实时数据<br/>QPS / 延迟 / 错误率 / 资源使用]
+    E --> F{发现异常?}
+    F -->|是| G[点击查看详细日志]
+    G --> H[分析根因]
+    H --> I[触发告警处理流程]
+    F -->|否| J[定期巡检]
+    J --> K[导出报表]
+    I --> L[通知相关人员]
+    L --> M[记录处理过程]
+    M --> N[复盘总结]
+    </pre>
+    <div class="diagram-cap">Fig 4-1 · 管理员监控大盘用户旅程（User Journey）</div>
+  </div>
+
+  <h3 class="sub">4.2 · <em>状态机</em> 告警生命周期</h3>
+  <p>每条告警规则实例的状态合法流转如下，与 §2-D 告警分级路由、§3 AC3/AC4 一一对应：</p>
+  <div class="flow">
+    <pre class="mermaid">
+stateDiagram-v2
+    [*] --> Normal: 系统正常运行
+    Normal --> Warning: 指标超过警告阈值
+    Normal --> Critical: 指标超过严重阈值
+    Warning --> Critical: 指标持续恶化
+    Warning --> Normal: 指标恢复正常
+    Critical --> Resolving: 管理员介入处理
+    Resolving --> Normal: 问题解决
+    Resolving --> Critical: 问题未解决
+    Critical --> Escalated: 超时未处理
+
+    note right of Warning
+        阈值示例：
+        - CPU > 70%
+        - P95 延迟 > 500ms
+        - 错误率 > 1%
+    end note
+
+    note right of Critical
+        阈值示例：
+        - CPU > 90%
+        - P95 延迟 > 2000ms
+        - 错误率 > 5%
+    end note
+    </pre>
+    <div class="diagram-cap">Fig 4-2 · 告警生命周期状态机（State Machine）</div>
+  </div>
+
+  <h3 class="sub">4.3 · <em>跨模块交互</em> 健康检查与自动恢复</h3>
+  <p>Prometheus 周期拉取健康端点，失败时经 AlertManager → <code>notif</code> 模块触达管理员闭环；成功时沉淀指标供趋势查询：</p>
+  <div class="flow">
+    <pre class="mermaid">
+sequenceDiagram
+    participant Prometheus as Prometheus
+    participant API as lumina-app API
+    participant MySQL as MySQL
+    participant Redis as Redis
+    participant AlertManager as AlertManager
+    participant Notification as notification 模块
+    participant Admin as 管理员
+
+    Prometheus->>API: GET /health (每 15s)
+    API->>MySQL: 检查数据库连接
+    API->>Redis: 检查缓存连接
+    API-->>Prometheus: {status: "healthy", checks: {...}}
+
+    alt 健康检查失败
+        Prometheus->>AlertManager: 触发告警
+        AlertManager->>AlertManager: 评估告警规则
+        AlertManager->>Notification: 发送告警通知
+        Notification->>Admin: 邮件/短信/企业微信
+        Admin->>API: 登录排查问题
+        Admin->>API: 执行修复操作
+        API-->>Admin: 返回修复结果
+        Admin->>Notification: 记录处理日志
+    else 健康检查成功
+        Prometheus->>Prometheus: 更新指标数据
+        Note over Prometheus: API 可查询历史趋势
+    end
+    </pre>
+    <div class="diagram-cap">Fig 4-3 · 健康检查与自动恢复时序（Cross-Module Sequence）</div>
+  </div>
+
+  <h3 class="sub">4.4 · <em>异常流程</em> 业务指标采集降级</h3>
+  <p><b>触发条件</b>：指标采集失败或延迟过高。五级降级策略流转如下：</p>
+  <div class="flow">
+    <pre class="mermaid">
+graph TD
+    T[触发：采集失败 / 延迟过高] --> C1{指标关键度?}
+    C1 -->|关键指标<br/>支付 / 登录| K1[同步上报 · 优先保障]
+    C1 -->|非关键指标<br/>用户行为| K2[异步队列 · 延迟上报]
+    K1 --> F1{上报成功?}
+    K2 --> F2{上报成功?}
+    F1 -->|失败| D1[记录本地日志 · 后续补报]
+    F2 -->|失败| D2[本地缓存 · 最多 5 分钟]
+    D2 --> D3[批量补报]
+    F1 -->|高负载| D4[采样率动态调整<br/>100% → 10%]
+    D1 --> R{网络 / 服务恢复?}
+    D3 --> R
+    D4 --> R
+    R -->|是| A1[自动补报缓存数据]
+    R -->|重启后| A2[从检查点继续]
+    A1 --> A3[每小时数据对账<br/>采集量 vs 上报量]
+    A2 --> A3
+    </pre>
+    <div class="diagram-cap">Fig 4-4 · 业务指标采集降级与自愈流程（Exception Flow）</div>
+  </div>
+
+  <h3 class="sub">降级策略明细</h3>
+  <table>
+    <tr><th>#</th><th>策略</th><th>说明</th></tr>
+    <tr><td>1</td><td><b>本地缓存 → 批量上报</b></td><td>最多缓存 5 分钟数据，恢复后按序批量补报</td></tr>
+    <tr><td>2</td><td><b>采样率动态调整</b></td><td>高负载时采样率 100% → 10%，优先保住趋势可用性</td></tr>
+    <tr><td>3</td><td><b>非关键指标延迟上报</b></td><td>用户行为类指标进入异步队列，削峰填谷</td></tr>
+    <tr><td>4</td><td><b>关键指标优先保障</b></td><td>支付 / 登录类指标保持同步上报，不降级</td></tr>
+    <tr><td>5</td><td><b>失败落本地日志</b></td><td>采集失败写入本地日志文件，作为补报与审计兜底</td></tr>
+  </table>
+
+  <h3 class="sub">监控指标（降级机制自身的 SLO）</h3>
+  <table>
+    <tr><th>指标</th><th>目标</th></tr>
+    <tr><td>采集成功率</td><td>≥ 99.9%</td></tr>
+    <tr><td>上报延迟</td><td>P95 &lt; 1s</td></tr>
+    <tr><td>数据丢失率</td><td>&lt; 0.1%</td></tr>
+  </table>
+
+  <h3 class="sub">自动恢复</h3>
+  <ul>
+    <li>网络恢复后自动补报缓存数据；</li>
+    <li>服务重启后从检查点（checkpoint）继续；</li>
+    <li>数据对账：每小时核对采集量 vs 上报量，差异超阈值触发 Warning 告警（回流 §4.2 状态机）。</li>
+  </ul>
+</section>
+
+<!-- ============ §5 接口契约 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>05 · <em>API Contract</em></h2>
+    <span class="num-tag">§5 接口契约（ops 模块）</span>
+  </div>
+
+  <p>模块前缀 <code>/ops</code>，共 3 端点，均为只读。应用侧已实现；Prometheus 抓取 <code>/ops/metrics</code> 无需鉴权（仅内网暴露），<code>/health*</code> 供探针使用无需鉴权。</p>
+
+  <div class="api-block">
+    <span class="method get">GET</span><span class="path">/ops/health/deep</span>
+    <div class="desc">深度健康检查 · 返回总体 status + 逐服务（mysql/redis/lumina-app）status/latency_ms/details + uptime_seconds（免鉴权）</div>
+  </div>
+  <div class="api-block">
+    <span class="method get">GET</span><span class="path">/ops/metrics</span>
+    <div class="desc">Prometheus 文本格式指标导出（7 项，规划扩展时延直方图与资源指标）· media_type: text/plain; version=0.0.4（内网免鉴权）</div>
+  </div>
+  <div class="api-block">
+    <span class="method get">GET</span><span class="path">/ops/metrics/business</span>
+    <div class="desc">业务指标汇总 13 字段（用户/课程/视频/作业/考试/AI/打卡）· 仅 admin 角色，越权 403</div>
+  </div>
+</section>
+
+<!-- ============ §6 指标与数据 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>06 · <em>Metrics</em></h2>
+    <span class="num-tag">§6 指标清单与数据来源</span>
+  </div>
+
+  <p>D-10 <b>不新增数据表</b>，全部指标由既有表只读聚合：</p>
+  <table>
+    <tr><th>指标</th><th>类型</th><th>数据来源</th></tr>
+    <tr><td><code>lumina_users_total</code></td><td>gauge</td><td><code>users</code> 行数</td></tr>
+    <tr><td><code>lumina_courses_total</code></td><td>gauge</td><td><code>courses</code> 行数</td></tr>
+    <tr><td><code>lumina_videos_total</code></td><td>gauge</td><td><code>videos</code> 行数</td></tr>
+    <tr><td><code>lumina_api_requests_total{status}</code></td><td>counter</td><td><code>api_logs</code> 按状态码分组计数</td></tr>
+    <tr><td><code>lumina_active_users_today</code></td><td>gauge</td><td><code>api_logs</code> 今日 distinct user_id</td></tr>
+    <tr><td><code>lumina_ai_calls_total</code></td><td>counter</td><td><code>ai_call_logs</code> 行数</td></tr>
+    <tr><td><code>lumina_uptime_seconds</code></td><td>gauge</td><td>进程启动时间差</td></tr>
+    <tr><td>业务快照 13 项</td><td>API JSON</td><td><code>users / courses / enrollments / videos / video_watch_history / assignments / submissions / exam_papers / exam_attempts / ai_call_logs / check_in_records</code></td></tr>
+  </table>
+
+  <div class="info ai">
+    <div class="label">🧱 基础设施（规划范围）</div>
+    <code>部署/docker-compose.yml</code> 待新增 <b>prometheus</b>（15s 抓取 · 规则评估）、<b>alertmanager</b>（分组/静默/分级路由）、<b>grafana</b>（监控大盘）三服务；配置置于 <code>部署/config/</code>。Nginx 需限制 <code>/ops/metrics*</code> 与 <code>/ops/health/deep</code> 仅内网/管理网段可访问。
+  </div>
+</section>
+
+<!-- ============ §7 合规与数据保护 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>07 · <em>Compliance</em></h2>
+    <span class="num-tag">§7 合规与数据保护</span>
+  </div>
+
+  <table>
+    <tr><th>合规域</th><th>约束</th><th>落地措施</th></tr>
+    <tr>
+      <td>《个人信息保护法》</td>
+      <td>最小必要 · 目的限制</td>
+      <td>监控面仅呈现聚合指标，大盘/报表不下钻到个体学生画像；<code>/ops/metrics/business</code> 仅 admin 可见</td>
+    </tr>
+    <tr>
+      <td>《数据安全法》</td>
+      <td>数据分级</td>
+      <td>系统指标 = 一般级；含 user_id/IP 的访问日志 = 重要级，留存 ≥30 天后脱敏归档</td>
+    </tr>
+    <tr>
+      <td>网络安全</td>
+      <td>端点暴露面控制</td>
+      <td><code>/ops/metrics</code> 与 <code>/ops/health/deep</code> 经 Nginx ACL 限内网；生产环境 Prometheus 不与公网直通</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ============ §8 测试需求分析（RTM） ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>08 · <em>RTM</em></h2>
+    <span class="num-tag">§8 需求-测试追踪矩阵</span>
+  </div>
+
+  <table>
+    <tr><th>AC 编号</th><th>AC 描述</th><th>测试方法</th><th>优先级</th><th>测试数据</th><th>责任方</th></tr>
+    <tr><td>AC1/AC2</td><td>大盘刷新 ≤30s · 异常可下钻日志</td><td>🖐️ Manual + 📊 Perf（Grafana 冒烟）</td><td>P1</td><td>seed_demo 账号 <code>admin@lumina.edu</code></td><td>开发+QA</td></tr>
+    <tr><td>AC3/AC4</td><td>Critical 2 分钟触达 · 状态机闭环</td><td>🖐️ Manual（注入故障演练）</td><td>P0</td><td>停 MySQL 容器模拟 down</td><td>开发+运维</td></tr>
+    <tr><td>AC5/AC6</td><td>深度健康检查字段与聚合规则</td><td>🧩 API（pytest · 已有单测）</td><td>P0</td><td>TestClient + mock DB 异常</td><td>开发</td></tr>
+    <tr><td>AC7</td><td>业务指标 13 字段 · 越权 403</td><td>🧩 API（pytest）</td><td>P1</td><td>admin/teacher/student 三角色</td><td>开发</td></tr>
+    <tr><td>AC8/AC9/AC10</td><td>五级降级生效 · SLO · 对账</td><td>🤖 E2E（故障注入）+ 📊 Perf</td><td>P0</td><td>断网/高负载模拟</td><td>开发+QA</td></tr>
+    <tr><td>AC11</td><td>聚合呈现 · 留存期限 · 内网 ACL</td><td>⚖️ Comp + 🔒 Sec</td><td>P0</td><td>Nginx ACL 配置 + 审计日志抽样</td><td>QA+运维</td></tr>
+  </table>
+</section>
+
+<!-- ============ §9 里程碑对齐 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>09 · <em>Milestones</em></h2>
+    <span class="num-tag">§9 里程碑对齐</span>
+  </div>
+
+  <table>
+    <tr><th>阶段</th><th>内容</th><th>状态</th></tr>
+    <tr><td>D-10.1 应用侧</td><td>ops 模块 3 端点（深度健康检查 / Prometheus 导出 / 业务指标）+ 单测</td><td><span class="tag done">✅ 已落地 2026-09-03</span></td></tr>
+    <tr><td>D-10.2 基础设施</td><td>docker-compose 增加 Prometheus / AlertManager / Grafana + Nginx ACL</td><td><span class="tag todo">⏳ 待部署</span></td></tr>
+    <tr><td>D-10.3 告警闭环</td><td>告警规则（§4.2 阈值）+ notif 通道接驳 + 处理留痕</td><td><span class="tag todo">⏳ 待实施</span></td></tr>
+    <tr><td>D-10.4 降级与对账</td><td>五级降级策略（§4.4）+ 每小时对账任务</td><td><span class="tag todo">⏳ 待实施</span></td></tr>
+    <tr><td>D-10.5 文档联动</td><td>OPS 手册 / TDD / API / OpenAPI 同步监控端点与部署拓扑</td><td><span class="tag todo">⏳ 待联动</span></td></tr>
+  </table>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div>Lumina · 墨光 · D-10 · v1.0 · 2026-09-03</div>
+  <div class="sig">Observability & <span class="hl">Resilience</span></div>
+</footer>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      background: '#FAF6EC',
+      primaryColor: '#E8EAFB',
+      primaryBorderColor: '#3D46C9',
+      primaryTextColor: '#0F1020',
+      lineColor: '#2A2B3D',
+      secondaryColor: '#FDE68A',
+      tertiaryColor: '#D4EDDC',
+      fontFamily: 'Inter, PingFang SC, sans-serif'
+    },
+    flowchart: { htmlLabels: true, curve: 'basis' }
+  });
+</script>
+
+</body>
+</html>

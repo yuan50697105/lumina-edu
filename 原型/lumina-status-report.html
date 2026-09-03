@@ -104,7 +104,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Project Status Report</small></div>
     </div>
-    <div class="doc-type">Comprehensive Status Report · v1.1</div>
+    <div class="doc-type">Comprehensive Status Report · v1.2</div>
     <h1>
       <span class="hl">项目全景</span>状态报告<br/>
       <em>需求 · 规划 · 进度</em>
@@ -115,7 +115,7 @@
     报告生成时间：2026-09-03<br/>
     数据源：开发进度.md · lumina-wbs-pending.html v1.3 · lumina-00-index.html v1.6<br/>
     依据：WBS v1.1 · WBS-P v1.3 · PRD v1.4 · TDD v1.7 · API v1.7<br/>
-    单体快照：141 paths / 180 ops · 16 模块 · 44 表 · 251 单测
+    单体快照：174 paths / 215 ops · 20 模块 · 64 表 · 336 单测
   </div>
 </header>
 
@@ -270,8 +270,8 @@
 
   <div class="info note">
     <div class="label">📊 累计产出</div>
-    <b>116 个新增端点</b>（D-01~D-07）+ <b>27 张新增表</b> + <b>146 个新增单测</b><br/>
-    基线（M2）58 端点 / 17 表 → 当前 141 paths / 180 ops / 44 表 / 251 单测
+    <b>154 个新增端点</b>（D-01~D-10）+ <b>47 张新增表</b> + <b>231 个新增单测</b><br/>
+    基线（M2）58 端点 / 17 表 → 当前 174 paths / 215 ops / 64 表 / 336 单测
   </div>
 </section>
 
@@ -412,7 +412,7 @@
 
   <div class="info note">
     <div class="label">📦 数据表分布</div>
-    44 表分布：user(2) · course(4) · assignment(3) · grade(2) · live(5) · collab(8) · notif(1) · exam(4) · ai(5) · analytics(3) · tutoring(1) · events(1) · logs(1) · admin(3) · settings(1)
+    64 表分布：user(2) · course(4) · assignment(3) · grade(2) · live(5) · collab(8) · notif(1) · exam(4) · ai(5) · analytics(3) · tutoring(1) · events(1) · logs(1) · admin(3) · settings(1) · learning(7) · video(6) · ai_infra(4) · ops(3)
   </div>
 </section>
 
@@ -437,11 +437,11 @@
       <tr><td><b>lumina-00-index.html</b></td><td>v1.6</td><td>2026-09-03</td><td>索引导航页（10 文档入口）</td><td><span class="tag done">✅ 最新</span></td></tr>
       <tr><td><b>lumina-prd.html</b></td><td>v1.4</td><td>2026-08-31</td><td>产品需求文档（18 章 · 17 模块）</td><td><span class="tag done">✅ 最新</span></td></tr>
       <tr><td><b>lumina-tdd.html</b></td><td>v1.5</td><td>2026-09-01</td><td>技术设计文档（18 章 · 单体架构）</td><td><span class="tag done">✅ 最新</span></td></tr>
-      <tr><td><b>lumina-api.html</b></td><td>v1.7</td><td>2026-09-01</td><td>API 接口文档（16 章 · 141 端点）</td><td><span class="tag done">✅ 最新</span></td></tr>
-      <tr><td><b>lumina-api-openapi.yaml</b></td><td>1.7.0</td><td>2026-09-01</td><td>OpenAPI 3.1 规范（141 paths · 180 ops）</td><td><span class="tag done">✅ 最新</span></td></tr>
-      <tr><td><b>lumina-database.html</b></td><td>v1.7</td><td>2026-09-01</td><td>数据库设计文档（13 章 · 44 表）</td><td><span class="tag done">✅ 最新</span></td></tr>
-      <tr><td><b>lumina-operations.html</b></td><td>v1.7</td><td>2026-09-01</td><td>部署运维手册（10 章 · Docker Compose）</td><td><span class="tag done">✅ 最新</span></td></tr>
-      <tr><td><b>lumina-testcases.html</b></td><td>v1.7</td><td>2026-09-01</td><td>测试用例文档（10 章 · 251 用例）</td><td><span class="tag done">✅ 最新</span></td></tr>
+      <tr><td><b>lumina-api.html</b></td><td>v1.8</td><td>2026-09-03</td><td>API 接口文档（20 章 · 174 端点）</td><td><span class="tag done">✅ 最新</span></td></tr>
+      <tr><td><b>lumina-api-openapi.yaml</b></td><td>1.8.0</td><td>2026-09-03</td><td>OpenAPI 3.1 规范（174 paths · 215 ops）</td><td><span class="tag done">✅ 最新</span></td></tr>
+      <tr><td><b>lumina-database.html</b></td><td>v1.8</td><td>2026-09-03</td><td>数据库设计文档（17 章 · 64 表）</td><td><span class="tag done">✅ 最新</span></td></tr>
+      <tr><td><b>lumina-operations.html</b></td><td>v1.8</td><td>2026-09-03</td><td>部署运维手册（12 章 · Docker Compose）</td><td><span class="tag done">✅ 最新</span></td></tr>
+      <tr><td><b>lumina-testcases.html</b></td><td>v1.8</td><td>2026-09-03</td><td>测试用例文档（12 章 · 336 用例）</td><td><span class="tag done">✅ 最新</span></td></tr>
       <tr><td><b>lumina-userguide.html</b></td><td>v1.1</td><td>2026-08-31</td><td>用户手册（10 章 · 3 角色）</td><td><span class="tag done">✅ 最新</span></td></tr>
       <tr><td><b>lumina-launch-wbs.html</b></td><td>v1.1</td><td>2026-08-26</td><td>上线 WBS（10 周 · 4 阶段 · 48 任务包）</td><td><span class="tag done">✅ 最新</span></td></tr>
       <tr><td><b>lumina-wbs-pending.html</b></td><td>v1.3</td><td>2026-09-01</td><td>未实现内容落地 WBS（M4+收口+演进 · 33 任务包）</td><td><span class="tag done">✅ 最新</span></td></tr>
@@ -451,7 +451,7 @@
 
   <div class="info success">
     <div class="label">✅ 文档同步状态</div>
-    所有文档已同步至 D-07 完成状态（2026-09-03）：141 paths / 180 ops · 16 模块 · 44 表 · 251 单测。文档版本号与内容一致，无过期信息。
+    所有文档已同步至 D-10 完成状态（2026-09-03）：174 paths / 215 ops · 20 模块 · 64 表 · 336 单测。D-06~D-10 全部落地，文档版本号与内容一致，无过期信息。
   </div>
 </section>
 
@@ -471,7 +471,7 @@
       <tr><td><b>框架</b></td><td>FastAPI</td><td>0.115</td><td>异步 Web 框架 · OpenAPI 自动文档</td></tr>
       <tr><td><b>ORM</b></td><td>SQLAlchemy</td><td>2.0</td><td>关系映射 · declarative base</td></tr>
       <tr><td><b>认证</b></td><td>JWT + bcrypt</td><td>—</td><td>双令牌（Access 15min + Refresh 7d）</td></tr>
-      <tr><td><b>数据库</b></td><td>MySQL</td><td>9.7</td><td>utf8mb4 · 44 表 · InnoDB</td></tr>
+      <tr><td><b>数据库</b></td><td>MySQL</td><td>9.7</td><td>utf8mb4 · 64 表 · InnoDB</td></tr>
       <tr><td><b>缓存</b></td><td>Redis</td><td>—</td><td>会话/令牌黑名单</td></tr>
       <tr><td><b>流媒体</b></td><td>mediamtx</td><td>1.20.1</td><td>RTMP→HLS · 本地演示</td></tr>
     </tbody>
@@ -498,7 +498,7 @@
     <tbody>
       <tr><td><b>MySQL</b></td><td>mysql:9.7</td><td>3306</td><td>utf8mb4 · 数据卷挂载</td></tr>
       <tr><td><b>Redis</b></td><td>redis:7</td><td>6379</td><td>缓存/会话</td></tr>
-      <tr><td><b>API</b></td><td>lumina-app</td><td>8080</td><td>单体 FastAPI · 16 模块 · 141 paths</td></tr>
+      <tr><td><b>API</b></td><td>lumina-app</td><td>8080</td><td>单体 FastAPI · 20 模块 · 174 paths</td></tr>
       <tr><td><b>Nginx</b></td><td>nginx:alpine</td><td>80/443</td><td>反向代理 · TLS · 限流</td></tr>
     </tbody>
   </table>
@@ -696,7 +696,7 @@
       <tr><th>目录</th><th>说明</th><th>状态</th></tr>
     </thead>
     <tbody>
-      <tr><td><b>服务/lumina-app/</b></td><td>单体 FastAPI（16 模块 · 141 paths · 44 表 · 251 单测）</td><td><span class="tag done">✅</span></td></tr>
+      <tr><td><b>服务/lumina-app/</b></td><td>单体 FastAPI（20 模块 · 174 paths · 64 表 · 336 单测）</td><td><span class="tag done">✅</span></td></tr>
       <tr><td><b>服务/web-frontend/</b></td><td>Web 前端（React 18 + TS + Vite）</td><td><span class="tag done">✅</span></td></tr>
       <tr><td><b>服务/mobile-app/</b></td><td>移动端前端（React Native / Expo SDK 52）</td><td><span class="tag done">✅</span></td></tr>
       <tr><td><b>部署/</b></td><td>Docker Compose 部署方案（4 服务）</td><td><span class="tag done">✅</span></td></tr>
@@ -708,7 +708,7 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · 项目全景状态报告</div>
-  <div>v1.1 · 2026-09-03 · 141 paths / 180 ops · 16 模块 · 44 表 · 251 单测</div>
+  <div>v1.2 · 2026-09-03 · 174 paths / 215 ops · 20 模块 · 64 表 · 336 单测</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">STATUS-REPORT-2026-09-03</div>
 </footer>
 

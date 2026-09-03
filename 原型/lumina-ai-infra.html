@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · AI 基础设施需求文档（RAG / Agent / 内容审核）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding:56px 64px; max-width:1280px; margin:0 auto;}
+
+  .cover{padding:64px 0 56px; border-bottom:1px solid var(--line); margin-bottom:48px;}
+  .cover .brand{display:flex; align-items:center; gap:14px; margin-bottom:28px;}
+  .cover .brand .logo{width:56px; height:56px; border-radius:14px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:28px; font-weight:500; font-style:italic;}
+  .cover .brand .name{font-family:var(--f-display); font-size:20px; font-weight:500;}
+  .cover .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:4px;}
+  .cover .doc-type{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--ai); background:var(--ai-soft); padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:18px;}
+  .cover h1{font-family:var(--f-display); font-weight:300; font-size:66px; letter-spacing:-0.04em; line-height:1;}
+  .cover h1 em{font-style:italic; color:var(--correction);}
+  .cover h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .cover .subtitle{font-size:18px; color:var(--inkwell-2); margin-top:18px; font-weight:300;}
+  .cover .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:22px; line-height:2;}
+
+  .stats{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:48px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px;}
+  .stat{text-align:center; padding:6px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .val{font-family:var(--f-display); font-size:26px; font-weight:300;}
+  .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  .section{margin-bottom:56px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:22px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:34px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  h3.sub{font-family:var(--f-display); font-size:22px; font-weight:400; margin:28px 0 14px; letter-spacing:-0.01em;}
+  h3.sub em{font-style:italic; color:var(--cobalt);}
+  h4.subsub{font-family:var(--f-body); font-size:16px; font-weight:600; margin:22px 0 10px;}
+  h4.subsub .flow-num-inline{font-family:var(--f-mono); font-size:11px; color:var(--ai); background:var(--ai-soft); padding:2px 8px; border-radius:6px; margin-right:8px; vertical-align:middle;}
+
+  p{margin-bottom:12px; line-height:1.7;}
+  ul,ol{margin:0 0 16px 20px; line-height:1.8;}
+  li{margin-bottom:4px;}
+  b{font-weight:600;}
+  code{font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px; font-size:13px; border:1px solid var(--line);}
+
+  table{width:100%; border-collapse:collapse; margin:14px 0 22px; font-size:13px;}
+  th{background:var(--ricepaper); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-strong);}
+  td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  tr:hover td{background:rgba(250,246,236,0.5);}
+  .tag{display:inline-block; font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; padding:2px 7px; border-radius:4px;}
+  .tag.p0{background:var(--correction); color:#fff;}
+  .tag.p1{background:var(--highlighter); color:var(--inkwell);}
+  .tag.p2{background:var(--cobalt-soft); color:var(--cobalt);}
+  .tag.done{background:var(--growth-soft); color:var(--growth);}
+  .tag.todo{background:var(--ai-soft); color:var(--ai);}
+  .tag.student{background:#E0F2FE; color:#0369A1;}
+  .tag.teacher{background:#FEF3C7; color:#92400E;}
+  .tag.admin{background:var(--correction-soft); color:var(--correction);}
+
+  .info{padding:16px 20px; border-radius:10px; margin:16px 0 20px; font-size:13px; line-height:1.7;}
+  .info .label{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; font-weight:600;}
+  .info.note{background:var(--cobalt-soft); border:1px solid var(--cobalt);}
+  .info.warn{background:var(--highlighter-soft); border:1px solid var(--highlighter);}
+  .info.success{background:var(--growth-soft); border:1px solid var(--growth);}
+  .info.ai{background:var(--ai-soft); border:1px solid var(--ai);}
+  .info.risk{background:var(--correction-soft); border:1px solid var(--correction);}
+
+  .module-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:22px 24px; margin:14px 0; position:relative; overflow:hidden;}
+  .module-card:before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--cobalt);}
+  .module-card.gamification:before{background:var(--ai);}
+  .module-card.reward:before{background:var(--highlighter);}
+  .module-card .card-header{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+  .module-card .card-icon{width:36px; height:36px; border-radius:10px; background:var(--cobalt-soft); color:var(--cobalt); display:flex; align-items:center; justify-content:center; font-size:18px;}
+  .module-card.gamification .card-icon{background:var(--ai-soft); color:var(--ai);}
+  .module-card.reward .card-icon{background:var(--highlighter-soft); color:var(--inkwell);}
+  .module-card .card-title{font-family:var(--f-display); font-size:20px; font-weight:400;}
+  .module-card .card-title em{font-style:italic; color:var(--cobalt);}
+  .module-card.gamification .card-title em{color:var(--ai);}
+  .module-card.reward .card-title em{color:var(--highlighter);}
+
+  .persona{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 22px; margin:14px 0; display:grid; grid-template-columns:80px 1fr; gap:18px; align-items:center;}
+  .persona .avatar{width:72px; height:72px; border-radius:50%; background:var(--cobalt-soft); display:flex; align-items:center; justify-content:center; font-size:32px;}
+  .persona .info-block .name{font-family:var(--f-display); font-size:18px; font-weight:500; margin-bottom:4px;}
+  .persona .info-block .role{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--cobalt); margin-bottom:8px;}
+  .persona .info-block .quote{font-style:italic; color:var(--inkwell-2); font-size:13px; line-height:1.6;}
+
+  .api-block{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 18px; margin:10px 0; font-family:var(--f-mono); font-size:12px;}
+  .api-block .method{display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600; margin-right:8px;}
+  .api-block .method.get{background:var(--growth-soft); color:var(--growth);}
+  .api-block .method.post{background:var(--cobalt-soft); color:var(--cobalt);}
+  .api-block .method.put{background:var(--highlighter-soft); color:var(--inkwell);}
+  .api-block .method.delete{background:var(--correction-soft); color:var(--correction);}
+  .api-block .path{color:var(--inkwell);}
+  .api-block .desc{color:var(--inkwell-2); font-size:11px; margin-top:4px; font-family:var(--f-body);}
+
+  .db-card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin:14px 0;}
+  .db-card .table-name{font-family:var(--f-mono); font-size:13px; color:var(--cobalt); background:var(--cobalt-soft); padding:3px 10px; border-radius:6px; display:inline-block; margin-bottom:10px;}
+  .db-card .table-desc{font-size:13px; color:var(--inkwell-2); margin-bottom:10px; line-height:1.6;}
+  .db-card table{font-size:12px; margin:0;}
+  .db-card td:first-child{font-family:var(--f-mono); color:var(--inkwell);}
+
+  /* Mermaid 流程图容器 */
+  .flow-diagram{background:#fff; border:1px solid var(--line); border-radius:12px; padding:24px 16px; margin:18px 0 8px; text-align:center; overflow-x:auto;}
+  .flow-diagram .mermaid{display:inline-block; min-width:280px;}
+  .flow-caption{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); margin:6px 0 20px; text-align:center;}
+  pre.plain-flow{background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px 20px; margin:12px 0; font-family:var(--f-mono); font-size:12px; line-height:1.8; overflow-x:auto; white-space:pre-wrap;}
+
+  footer{margin-top:56px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+</style>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "base",
+    themeVariables: {
+      primaryColor: "#E8EAFB",
+      primaryTextColor: "#0F1020",
+      primaryBorderColor: "#3D46C9",
+      secondaryColor: "#EDE9FE",
+      tertiaryColor: "#FAF6EC",
+      lineColor: "#7C3AED",
+      fontFamily: "Inter, PingFang SC, system-ui, sans-serif",
+      fontSize: "14px",
+      noteBkgColor: "#FDE68A",
+      noteTextColor: "#0F1020",
+      actorBkg: "#E8EAFB",
+      actorBorder: "#3D46C9",
+      actorTextColor: "#0F1020",
+      signalColor: "#2A2B3D",
+      labelBoxBkgColor: "#EDE9FE",
+      labelBoxBorderColor: "#7C3AED"
+    },
+    flowchart: { htmlLabels: true, curve: "basis" },
+    sequence: { showSequenceNumbers: false, wrap: true }
+  });
+</script>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div>
+    <div class="brand">
+      <div class="logo">墨</div>
+      <div class="name">Lumina · 墨光<small>Requirements Document · D-09</small></div>
+    </div>
+    <div class="doc-type">Requirement Specification · v1.0</div>
+    <h1><span class="hl">AI 基础设施</span><br/><em>RAG · Agent · 审核</em></h1>
+    <p class="subtitle">Retrieval-Augmented Generation · Agent Tool Orchestration · Content Moderation Pipeline · LLM Fallback Strategy</p>
+    <div class="meta">
+      Document ID: REQ-LUMINA-D09-2026-001 · Status: Draft<br/>
+      Version: 1.0 · Date: 2026-09-03<br/>
+      WBS-P: D-09（AI 基础设施 · 已落地） · Author: Claude Team Review · Owner: Yuan
+    </div>
+  </div>
+</header>
+
+<!-- ============ STATS ============ -->
+<div class="stats">
+  <div class="stat">
+    <div class="val hl">4</div>
+    <div class="lbl">业务流程</div>
+  </div>
+  <div class="stat">
+    <div class="val">5</div>
+    <div class="lbl">数据表（ai_infra）</div>
+  </div>
+  <div class="stat">
+    <div class="val">11</div>
+    <div class="lbl">API 端点</div>
+  </div>
+  <div class="stat">
+    <div class="val">3</div>
+    <div class="lbl">User Roles</div>
+  </div>
+</div>
+
+<!-- ============ §1 产品概览 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>01 · <em>Overview</em></h2>
+    <span class="num-tag">§1 产品概览</span>
+  </div>
+
+  <h3 class="sub">1.1 · <em>产品定位</em></h3>
+  <p>Lumina 墨光的 AI 能力此前依赖 <code>ai_gateway</code>（模型池 / 调用日志）、<code>ai_chat</code>（多轮对话）与 <code>ai_grade</code>（AI 批改）三个模块，属于「直连大模型」形态。D-09 在此之上补齐 <b>AI 基础设施层</b>：让回答<b>有据可查</b>（RAG 知识库检索增强）、让 AI<b>能做事</b>（Agent 工具调用编排）、让内容<b>先审后发</b>（多级内容审核流水线）、让服务<b>永不裸挂</b>（多厂商降级策略）。</p>
+  <p>本文档定义 D-09 的需求范围与<b>业务流程</b>（§4 为流程图核心章节），对应后端模块 <code>ai_infra</code>（路由前缀 <code>/api/v1/ai-infra</code>）。</p>
+
+  <div class="info ai">
+    <div class="label">⚖️ 合规域识别（需求阶段合规预检结论）</div>
+    命中合规域：<b>AI 生成内容</b>（《生成式人工智能服务管理暂行办法》：AI 标识、内容审核）、<b>个人信息处理</b>（《个人信息保护法》：提问内容最小化留存）、<b>未成年人保护</b>（学生端提问需过滤不适内容）、<b>算法推荐</b>（知识库检索排序属算法应用，提供可解释与关闭路径）。以上合规域已转化为 §3 验收标准与 §7 合规章节。
+  </div>
+
+  <h3 class="sub">1.2 · <em>范围与边界</em></h3>
+  <table>
+    <tr><th>范围内（In Scope）</th><th>范围外（Out of Scope）</th></tr>
+    <tr>
+      <td>知识库管理（创建 / 分块 / 向量化）</td>
+      <td>自研 Embedding / LLM 模型（仅调用第三方 API）</td>
+    </tr>
+    <tr>
+      <td>RAG 问答检索链路（向量化 → 检索 → 生成）</td>
+      <td>向量数据库独立集群（现阶段 MySQL 存 chunk + 轻量向量检索）</td>
+    </tr>
+    <tr>
+      <td>Agent 工具注册与会话编排（工具调用循环）</td>
+      <td>自主多 Agent 协作网络（V1.2 规划）</td>
+    </tr>
+    <tr>
+      <td>内容审核流水线（规则预审 → 模型判定 → 人工复核）</td>
+      <td>专职审核团队排班制度（运营侧配套）</td>
+    </tr>
+    <tr>
+      <td>LLM 调用降级与重试策略</td>
+      <td>GPU 推理私有化部署</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ============ §2 目标用户与场景 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>02 · <em>Personas</em></h2>
+    <span class="num-tag">§2 目标用户与场景</span>
+  </div>
+
+  <div class="persona">
+    <div class="avatar">👩‍🎓</div>
+    <div class="info-block">
+      <div class="name">学生 · 小李</div>
+      <div class="role"><span class="tag student">STUDENT</span> RAG 知识问答</div>
+      <div class="quote">「课后复习时直接向课程知识库提问，答案要引用课件原文，不要胡编。」</div>
+    </div>
+  </div>
+  <div class="persona">
+    <div class="avatar">👨‍🏫</div>
+    <div class="info-block">
+      <div class="name">教师 · 王老师</div>
+      <div class="role"><span class="tag teacher">TEACHER</span> Agent 备课助手</div>
+      <div class="quote">「让 AI 查我的题库、组一份测验卷——它得真的调用工具去查，而不是凭记忆生成。」</div>
+    </div>
+  </div>
+  <div class="persona">
+    <div class="avatar">🛡️</div>
+    <div class="info-block">
+      <div class="name">管理员 · 运维</div>
+      <div class="role"><span class="tag admin">ADMIN</span> 审核与降级管控</div>
+      <div class="quote">「违规内容必须在发布前被拦下；模型厂商挂了要自动切换，我看得到每次审核和降级记录。」</div>
+    </div>
+  </div>
+
+  <h3 class="sub">2.1 · <em>核心用户场景</em></h3>
+  <table>
+    <tr><th>#</th><th>场景</th><th>路径</th><th>对应流程图</th></tr>
+    <tr><td>S1</td><td>学生基于课程知识库问答</td><td>提问 → 向量化 → 检索 → 生成 → 反馈</td><td>§4.1 流程 1</td></tr>
+    <tr><td>S2</td><td>教师用 Agent 完成多步任务（查题库/组卷）</td><td>创建会话 → 工具调用循环 → 完成</td><td>§4.2 流程 2</td></tr>
+    <tr><td>S3</td><td>学生提交讨论帖，内容先审后发</td><td>提交 → 规则预审 → 模型判定 → 放行/拦截/人工复核</td><td>§4.3 流程 3</td></tr>
+    <tr><td>S4</td><td>模型厂商故障，AI 服务无感降级</td><td>失败 → 重试 → 切换备用 → 模板兜底</td><td>§4.4 流程 4</td></tr>
+  </table>
+</section>
+
+<!-- ============ §3 功能需求 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>03 · <em>Functional</em></h2>
+    <span class="num-tag">§3 功能需求与验收标准</span>
+  </div>
+
+  <div class="module-card gamification">
+    <div class="card-header">
+      <div class="card-icon">📚</div>
+      <div class="card-title">FR-1 · <em>RAG 知识问答</em> <span class="tag p0">P0</span></div>
+    </div>
+    <ul>
+      <li>教师 / 管理员可创建知识库，向其中添加文本分块（chunk），入库时调用 Embedding 服务（百川）生成向量。</li>
+      <li>用户提问后：问题向量化 → 检索 <code>knowledge_chunks</code> → 相似度高于阈值取 Top-K 上下文 → 构建 Prompt → 调用 LLM（通义千问 / 智谱 GLM）→ SSE 流式返回。</li>
+      <li>检索无命中（低于阈值）时明确提示「无相关知识」，可转通用回答或人工。</li>
+      <li>每条回答支持点赞 / 点踩反馈，点踩可选填原因，落库用于质量分析。</li>
+    </ul>
+    <div class="info success">
+      <div class="label">验收标准（AC）</div>
+      AC1: 知识库 CRUD 与分块添加可用，向量随分块入库 · 测试方法 🧩 API<br/>
+      AC2: 命中场景下 Top-K 上下文注入 Prompt，回答附带引用来源 · 🧩 API + 🖐️ Manual<br/>
+      AC3: 未命中场景返回「无相关知识」提示，不编造 · 🧩 API<br/>
+      AC4: 赞/踩反馈落库，点踩原因可选 · 🧩 API<br/>
+      AC5: <b>AI 生成内容已打标识</b>（前端标注「AI 生成，仅供参考」）· ⚖️ Comp
+    </div>
+  </div>
+
+  <div class="module-card gamification">
+    <div class="card-header">
+      <div class="card-icon">🤖</div>
+      <div class="card-title">FR-2 · <em>Agent 工具调用</em> <span class="tag p0">P0</span></div>
+    </div>
+    <ul>
+      <li>管理员注册工具（<code>agent_tools</code>）：知识库检索、数据库查询、外部 API 调用、代码执行（沙箱）。</li>
+      <li>用户与 Agent 对话时，LLM 决定调用工具 → 执行 → 结果回填上下文 → 继续推理，直至给出最终回答。</li>
+      <li>每次会话生成 <code>agent_sessions</code> 记录，含消息轨迹与工具调用详情，可追溯。</li>
+      <li>工具调用失败时进入失败态，支持重试；连续失败可放弃并提示用户。</li>
+    </ul>
+    <div class="info success">
+      <div class="label">验收标准（AC）</div>
+      AC6: 工具列表可查询，注册的工具可被会话调用 · 🧩 API<br/>
+      AC7: 会话状态机按 §4.2 流转，全轨迹落库 · 🧩 API + 🖐️ Manual<br/>
+      AC8: 代码执行工具运行于受限沙箱，无越权文件系统访问 · 🔒 Sec<br/>
+      AC9: 危险工具（写操作）需二次确认 · 🖐️ Manual
+    </div>
+  </div>
+
+  <div class="module-card gamification">
+    <div class="card-header">
+      <div class="card-icon">🛡️</div>
+      <div class="card-title">FR-3 · <em>内容审核流水线</em> <span class="tag p0">P0</span></div>
+    </div>
+    <ul>
+      <li>用户内容（作业 / 讨论 / 笔记）发布前统一经 <code>/ai-infra/moderation/check</code> 审核。</li>
+      <li>三级流水线：规则引擎预审（敏感词 / 正则 / 黑名单，毫秒级）→ 内容安全模型判定（通义 / 智谱，返回 safe + confidence）→ 低置信度转人工复核。</li>
+      <li>所有审核结果写 <code>moderation_logs</code>（passed / blocked / reviewing），管理员可查日志并复核。</li>
+      <li>拦截与转复核均通知用户；转复核同步通知管理员（notification 模块）。</li>
+    </ul>
+    <div class="info success">
+      <div class="label">验收标准（AC）</div>
+      AC10: 规则命中即时拦截并记录 blocked，用户收到原因提示 · 🧩 API<br/>
+      AC11: 模型判定安全 → passed 放行；不安全 → reviewing 转人工复核并通知管理员 · 🧩 API<br/>
+      AC12: 审核日志仅管理员可查（越权返回 403）· 🔒 Sec<br/>
+      AC13: 未成年人相关敏感内容（涉校园欺凌、自伤）优先级最高，强制人工复核 · ⚖️ Comp
+    </div>
+  </div>
+
+  <div class="module-card gamification">
+    <div class="card-header">
+      <div class="card-icon">🔀</div>
+      <div class="card-title">FR-4 · <em>LLM 调用降级策略</em> <span class="tag p1">P1</span></div>
+    </div>
+    <ul>
+      <li>依托 <code>ai_gateway</code> 模型池配置厂商优先级：通义 → 智谱 → 讯飞 → 豆包，逐一降级。</li>
+      <li>全部失败返回预设模板兜底回答；超时中断、限流排队、审核失败默认放行 + 标记待复核。</li>
+      <li>重试：最多 3 次、指数退避（1s/2s/4s）、超时 30s 可配置。</li>
+      <li>监控指标暴露：成功率、平均响应时间、降级触发次数、Token 消耗（联动 D-10 运营监控）。</li>
+    </ul>
+    <div class="info success">
+      <div class="label">验收标准（AC）</div>
+      AC14: 主模型故障时自动切换备用模型，用户无感知（响应内标注实际模型）· 🧩 API + 📊 Perf<br/>
+      AC15: 全链路失败时返回模板兜底 + 明确提示，不返回 500 白屏 · 🖐️ Manual<br/>
+      AC16: 每次调用（含降级轨迹）记录 <code>ai_call_logs</code> · 🧩 API<br/>
+      AC17: 降级触发次数、成功率指标可被监控系统采集 · 📊 Perf
+    </div>
+  </div>
+</section>
+
+<!-- ============ §4 业务流程定义（核心章节） ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>04 · <em>Business Flows</em></h2>
+    <span class="num-tag">§4 业务流程定义</span>
+  </div>
+
+  <p>本章定义 D-09 的 4 条核心业务流程：<b>用户旅程</b>（RAG 问答）、<b>状态机</b>（Agent 会话）、<b>跨模块交互</b>（内容审核流水线）、<b>异常流程</b>（LLM 降级策略）。流程图使用 Mermaid 语法内嵌渲染，作为开发实现与测试用例设计的唯一流程基准。</p>
+
+  <!-- ---------- 流程 1 ---------- -->
+  <h3 class="sub">4.1 · <em>流程 1</em>：用户旅程 —— RAG 知识问答</h3>
+  <p>覆盖从「用户提问」到「反馈闭环」的完整旅程（FR-1）。检索命中与否走不同分支；用户反馈回流知识库质量运营。</p>
+  <div class="flow-diagram">
+    <pre class="mermaid">
+graph TD
+    A[用户提问] --> B[ai_chat 接收问题]
+    B --> C[问题向量化<br/>百川 Embedding]
+    C --> D[检索知识库<br/>knowledge_chunks]
+    D --> E{"相似度 > 阈值?"}
+    E -->|是| F[取 Top-K 上下文]
+    E -->|否| G[提示无相关知识]
+    F --> H["构建 Prompt<br/>问题 + 上下文"]
+    H --> I["调用 LLM<br/>通义千问/智谱 GLM"]
+    I --> J[流式返回 SSE]
+    J --> K[用户查看回答]
+    K --> L{用户反馈}
+    L -->|点赞| M[记录正向反馈]
+    L -->|点踩| N[记录负向反馈 + 可选原因]
+    G --> O[转人工或通用回答]
+    </pre>
+  </div>
+  <div class="flow-caption">Flow 1 · RAG Knowledge QA — User Journey（graph TD）</div>
+
+  <!-- ---------- 流程 2 ---------- -->
+  <h3 class="sub">4.2 · <em>流程 2</em>：状态机 —— Agent 工具调用会话</h3>
+  <p><code>AgentSession</code> 的生命周期状态机（FR-2）。Running 与 ToolCalling 之间可多次循环（一次会话内多轮工具调用）；Failed 可重试回到 Running，也可由用户放弃终止。</p>
+  <div class="flow-diagram">
+    <pre class="mermaid">
+stateDiagram-v2
+    [*] --> Created: 创建 AgentSession
+    Created --> Running: 用户发起对话
+    Running --> ToolCalling: LLM 决定调用工具
+    ToolCalling --> Running: 工具返回结果
+    Running --> Completed: 回答完成
+    Running --> Failed: 调用失败
+    Completed --> [*]: 会话结束
+    Failed --> Running: 重试
+    Failed --> [*]: 放弃
+
+    note right of ToolCalling
+        支持工具：
+        - 知识库检索
+        - 数据库查询
+        - 外部 API 调用
+        - 代码执行
+    end note
+    </pre>
+  </div>
+  <div class="flow-caption">Flow 2 · Agent Session State Machine（stateDiagram-v2）</div>
+
+  <!-- ---------- 流程 3 ---------- -->
+  <h3 class="sub">4.3 · <em>流程 3</em>：跨模块交互 —— 内容审核流水线</h3>
+  <p>时序图展示 ai_gateway、审核引擎、大模型服务、MySQL、notification 五方协作（FR-3）。规则预审负责快速拦截低成本违规；模型判定负责语义级风险；低置信/不安全内容进入人工复核队列。</p>
+  <div class="flow-diagram">
+    <pre class="mermaid">
+sequenceDiagram
+    participant User as 用户
+    participant Gateway as ai_gateway
+    participant Moderation as 审核引擎
+    participant LLM as 大模型服务
+    participant DB as MySQL
+    participant Notification as notification
+
+    User->>Gateway: 提交内容（作业/讨论/笔记）
+    Gateway->>Moderation: POST /moderation/check
+    Moderation->>Moderation: 规则引擎预审<br/>敏感词/正则/黑名单
+    alt 规则命中
+        Moderation->>DB: 记录 moderation_log (blocked)
+        Moderation-->>Gateway: {passed: false, reason: "违规内容"}
+        Gateway->>Notification: 通知用户内容被拦截
+        Gateway-->>User: 返回错误提示
+    else 规则未命中
+        Moderation->>LLM: 调用内容审核模型<br/>通义/智谱 内容安全
+        LLM-->>Moderation: {safe: true/false, confidence}
+        alt 模型判定安全
+            Moderation->>DB: 记录 moderation_log (passed)
+            Moderation-->>Gateway: {passed: true}
+            Gateway->>DB: 保存内容
+            Gateway-->>User: 发布成功
+        else 模型判定不安全
+            Moderation->>DB: 记录 moderation_log (reviewing)
+            Moderation->>Notification: 通知管理员人工复核
+            Moderation-->>Gateway: {passed: false, reason: "待人工审核"}
+            Gateway-->>User: 内容审核中
+        end
+    end
+    </pre>
+  </div>
+  <div class="flow-caption">Flow 3 · Content Moderation Pipeline — Cross-module Sequence（sequenceDiagram）</div>
+
+  <!-- ---------- 流程 4 ---------- -->
+  <h3 class="sub">4.4 · <em>流程 4</em>：异常流程 —— LLM 调用降级策略</h3>
+  <p>触发条件：LLM 服务不可用或响应超时。降级决策树如下（FR-4），按优先级执行五级降级策略。</p>
+  <div class="flow-diagram">
+    <pre class="mermaid">
+flowchart TD
+    A[业务侧发起 LLM 调用] --> B{调用结果}
+    B -->|成功| C[正常返回<br/>记录 ai_call_logs]
+    B -->|异常| D{错误类型判定}
+    D -->|"服务失败 / 5xx"| E["重试 ≤3 次<br/>指数退避 1s/2s/4s"]
+    E --> F{主模型恢复?}
+    F -->|是| C
+    F -->|否| G["切换备用模型<br/>通义 → 智谱 → 讯飞 → 豆包"]
+    G --> H{备用模型可用?}
+    H -->|是| C
+    H -->|否| I["返回预设模板回答<br/>提示「服务暂时不可用」"]
+    D -->|"超时 30s+"| J["中断请求<br/>提示「响应超时 请重试」"]
+    D -->|"限流 429"| K[排队等待]
+    K --> L{等待内恢复?}
+    L -->|是| C
+    L -->|否| I
+    D -->|"内容审核失败"| M["默认放行 + 标记「待复核」<br/>通知管理员"]
+    </pre>
+  </div>
+  <div class="flow-caption">Flow 4 · LLM Fallback Strategy — Exception Flow（flowchart TD）</div>
+
+  <h4 class="subsub"><span class="flow-num-inline">规则明细</span>降级策略与重试参数</h4>
+  <table>
+    <tr><th>#</th><th>触发条件</th><th>降级动作</th><th>优先级</th></tr>
+    <tr><td>1</td><td>主模型调用失败</td><td>切换到备用模型（通义 → 智谱 → 讯飞 → 豆包）</td><td>最高</td></tr>
+    <tr><td>2</td><td>所有模型失败</td><td>返回预设模板回答 + 提示「服务暂时不可用」</td><td>兜底</td></tr>
+    <tr><td>3</td><td>超时（&gt;30s）</td><td>中断请求 → 提示「响应超时 请重试」</td><td>—</td></tr>
+    <tr><td>4</td><td>限流（429）</td><td>排队等待 → 超时则返回降级回答</td><td>—</td></tr>
+    <tr><td>5</td><td>内容审核服务失败</td><td>默认放行 + 标记「待复核」 + 通知管理员</td><td>可用性优先</td></tr>
+  </table>
+
+  <h4 class="subsub"><span class="flow-num-inline">重试机制</span>参数</h4>
+  <ul>
+    <li>最大重试次数：<b>3 次</b></li>
+    <li>重试间隔：<b>指数退避</b>（1s → 2s → 4s）</li>
+    <li>超时时间：<b>30s</b>（可配置）</li>
+  </ul>
+
+  <h4 class="subsub"><span class="flow-num-inline">监控指标</span>（联动 D-10 运营监控）</h4>
+  <ul>
+    <li>模型调用成功率</li>
+    <li>平均响应时间</li>
+    <li>降级触发次数</li>
+    <li>Token 消耗量</li>
+  </ul>
+
+  <div class="info warn">
+    <div class="label">⚠️ 流程间约束</div>
+    流程 3（审核）嵌套于流程 1/2 的生成出口：所有 RAG / Agent 对外输出内容同样需经审核链路（输出侧过滤）；流程 4（降级）作用于流程 1/2/3 中的每一次模型调用点（Embedding、生成、审核模型）。审核服务自身失败按策略 5 处理，不得因审核不可用而阻断核心教学功能。
+  </div>
+</section>
+
+<!-- ============ §5 数据模型 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>05 · <em>Data Model</em></h2>
+    <span class="num-tag">§5 数据模型</span>
+  </div>
+
+  <p>D-09 新增 5 张表（<code>ai_infra</code> 模块），复用 <code>ai_gateway</code> 既有 3 张表（<code>ai_providers</code> / <code>ai_models</code> / <code>ai_call_logs</code>）作为模型池与调用观测底座。</p>
+
+  <div class="db-card">
+    <div class="table-name">knowledge_bases</div>
+    <div class="table-desc">知识库主表（FR-1）：名称、拥有者、可见范围、状态。</div>
+    <table>
+      <tr><th>关键字段</th><th>说明</th></tr>
+      <tr><td>id / name / owner_id</td><td>主键 / 知识库名 / 创建者（教师或管理员）</td></tr>
+      <tr><td>scope / status</td><td>可见范围（course / public）· 状态（active / archived）</td></tr>
+    </table>
+  </div>
+
+  <div class="db-card">
+    <div class="table-name">knowledge_chunks</div>
+    <div class="table-desc">知识分块表（流程 1 检索对象）：原文 + 向量 + 元数据，是 RAG 命中的最小单元。</div>
+    <table>
+      <tr><th>关键字段</th><th>说明</th></tr>
+      <tr><td>kb_id / content</td><td>所属知识库 / 分块原文</td></tr>
+      <tr><td>embedding</td><td>百川 Embedding 向量（JSON 序列化，轻量检索）</td></tr>
+      <tr><td>source / token_count</td><td>来源标注（供回答引用）· token 计数</td></tr>
+    </table>
+  </div>
+
+  <div class="db-card">
+    <div class="table-name">agent_tools</div>
+    <div class="table-desc">工具注册表（流程 2 note 中的四类工具）：名称、类型、参数 Schema、风险级别。</div>
+    <table>
+      <tr><th>关键字段</th><th>说明</th></tr>
+      <tr><td>name / tool_type</td><td>工具名 / 类型（kb_search / db_query / api_call / code_exec）</td></tr>
+      <tr><td>params_schema / enabled</td><td>调用参数 JSON Schema · 启停开关</td></tr>
+    </table>
+  </div>
+
+  <div class="db-card">
+    <div class="table-name">agent_sessions</div>
+    <div class="table-desc">Agent 会话表（流程 2 状态机载体）：状态、消息轨迹、工具调用记录。</div>
+    <table>
+      <tr><th>关键字段</th><th>说明</th></tr>
+      <tr><td>user_id / status</td><td>发起人 · created / running / tool_calling / completed / failed（与 §4.2 状态机一致）</td></tr>
+      <tr><td>messages / tool_calls</td><td>JSON 消息轨迹 / 工具调用明细（可追溯审计）</td></tr>
+    </table>
+  </div>
+
+  <div class="db-card">
+    <div class="table-name">moderation_logs</div>
+    <div class="table-desc">审核日志表（流程 3 三个落库点）：每次审核一条记录，管理员复核入口。</div>
+    <table>
+      <tr><th>关键字段</th><th>说明</th></tr>
+      <tr><td>content_hash / content_type</td><td>送审内容摘要（不落原文全量，个人信息最小化）· 类型（homework / discussion / note）</td></tr>
+      <tr><td>result / reason</td><td>passed / blocked / reviewing · 拦截或复核原因</td></tr>
+      <tr><td>stage / reviewer_id</td><td>命中环节（rule / model / human）· 人工复核人</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============ §6 接口清单 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>06 · <em>API Surface</em></h2>
+    <span class="num-tag">§6 接口清单（11 端点）</span>
+  </div>
+
+  <p>路由前缀 <code>/api/v1/ai-infra</code>，认证沿用全局 Bearer Token；权限：知识库按 owner / 课程范围控制，审核日志仅管理员。</p>
+
+  <h3 class="sub">6.1 · <em>知识库与 RAG</em>（流程 1）</h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/knowledge-bases</span><div class="desc">知识库列表（按角色过滤可见范围）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/knowledge-bases</span><div class="desc">创建知识库（教师 / 管理员）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/knowledge-bases/{kb_id}</span><div class="desc">知识库详情</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/knowledge-bases/{kb_id}/chunks</span><div class="desc">知识库分块列表</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/knowledge-bases/{kb_id}/chunks</span><div class="desc">添加分块（入库时生成 Embedding）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/rag/query</span><div class="desc">RAG 查询（向量化 → 检索 → 生成，返回答案 + 引用）</div></div>
+
+  <h3 class="sub">6.2 · <em>Agent</em>（流程 2）</h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/agent/tools</span><div class="desc">Agent 工具列表</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/agent/sessions</span><div class="desc">Agent 会话列表（本人可见）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/agent/chat</span><div class="desc">Agent 对话（驱动工具调用状态机）</div></div>
+
+  <h3 class="sub">6.3 · <em>内容审核</em>（流程 3）</h3>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/moderation/check</span><div class="desc">内容审核检查（规则 → 模型 → 复核决策）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/moderation/logs</span><div class="desc">审核日志列表（管理员，越权 403）</div></div>
+
+  <div class="info note">
+    <div class="label">ℹ️ 契约说明</div>
+    以上端点已在后端 <code>ai_infra</code> 模块实现（11 endpoints）。流程 4（降级）不新增对外端点，逻辑内聚于 <code>ai_gateway</code> 的 <code>/gateway/completions</code> 调用链，参数（超时 / 重试 / 优先级）来自模型池配置。
+  </div>
+</section>
+
+<!-- ============ §7 合规与数据保护 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>07 · <em>Compliance</em></h2>
+    <span class="num-tag">§7 合规与数据保护</span>
+  </div>
+
+  <table>
+    <tr><th>合规域</th><th>适用法规</th><th>本需求落地措施</th></tr>
+    <tr>
+      <td>AI 生成内容</td>
+      <td>《生成式人工智能服务管理暂行办法》</td>
+      <td>RAG / Agent 输出前端显式标注「AI 生成」；回答附带知识库引用来源可核查；训练与推理模型来源在模型池元数据中披露</td>
+    </tr>
+    <tr>
+      <td>内容安全审核</td>
+      <td>同上 · 《网络信息内容生态治理规定》</td>
+      <td>流程 3 三级流水线先审后发；审核日志留存 ≥30 天备查；复核入口管理员可追溯</td>
+    </tr>
+    <tr>
+      <td>个人信息保护</td>
+      <td>《个人信息保护法》</td>
+      <td>提问与会话数据最小化收集，仅用于服务本身；审核日志存内容摘要不落原文全量；支持用户查阅 / 删除自己的会话记录</td>
+    </tr>
+    <tr>
+      <td>未成年人保护</td>
+      <td>《未成年人保护法》《未成年人网络保护条例》</td>
+      <td>学生端内容强制走审核链路；涉未年成人敏感内容强制人工复核（AC13）；防沉迷时段内 AI 问答限流（与平台策略联动）</td>
+    </tr>
+    <tr>
+      <td>算法应用</td>
+      <td>《互联网信息服务算法推荐管理规定》</td>
+      <td>RAG 检索排序逻辑可解释（返回相似度分数与来源）；用户可在设置中关闭个性化知识库推荐</td>
+    </tr>
+  </table>
+
+  <div class="info risk">
+    <div class="label">🔒 安全边界</div>
+    Agent 代码执行工具必须沙箱隔离（无文件系统 / 网络越权，AC8）；数据库查询工具仅只读账号；审核服务自身失败时「默认放行 + 待复核」是<b>可用性权衡</b>，事后必须通过 <code>stage</code> 字段批量回扫。
+  </div>
+</section>
+
+<!-- ============ §8 测试需求分析（RTM） ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>08 · <em>Traceability</em></h2>
+    <span class="num-tag">§8 需求-测试追踪矩阵（RTM）</span>
+  </div>
+
+  <table>
+    <tr><th>AC</th><th>描述</th><th>测试方法</th><th>优先级</th><th>测试数据</th><th>责任方</th></tr>
+    <tr><td>AC1-AC4</td><td>知识库 CRUD / RAG 命中与未命中 / 反馈落库（流程 1）</td><td>🧩 API</td><td>P0</td><td>测试知识库 + 分块样本</td><td>开发+QA</td></tr>
+    <tr><td>AC5</td><td>AI 生成内容标识</td><td>⚖️ Comp + 👁️ VR</td><td>P0</td><td>学生端账号</td><td>QA+合规</td></tr>
+    <tr><td>AC6-AC7</td><td>工具注册与会话状态机流转（流程 2）</td><td>🧩 API + 🖐️ Manual</td><td>P0</td><td>agent_tools 种子数据</td><td>开发+QA</td></tr>
+    <tr><td>AC8</td><td>代码执行沙箱越权</td><td>🔒 Sec</td><td>P0</td><td>恶意 payload 样本</td><td>安全</td></tr>
+    <tr><td>AC9</td><td>危险工具二次确认</td><td>🖐️ Manual</td><td>P1</td><td>写操作工具</td><td>QA</td></tr>
+    <tr><td>AC10-AC11</td><td>审核流水线三分支（流程 3）</td><td>🧩 API</td><td>P0</td><td>敏感词样本 + 边界内容</td><td>开发+QA</td></tr>
+    <tr><td>AC12</td><td>审核日志越权访问 403</td><td>🔒 Sec</td><td>P0</td><td>nouser 账号</td><td>安全</td></tr>
+    <tr><td>AC13</td><td>未成年人敏感内容强制复核</td><td>⚖️ Comp</td><td>P0</td><td>合规样本集</td><td>QA+合规</td></tr>
+    <tr><td>AC14-AC16</td><td>降级链路 / 兜底模板 / 调用日志（流程 4）</td><td>🧩 API + 📊 Perf + 🖐️ Manual</td><td>P1</td><td>Mock 模型故障注入</td><td>开发</td></tr>
+    <tr><td>AC17</td><td>降级指标可采集</td><td>📊 Perf</td><td>P1</td><td>Prometheus 抓取</td><td>运维</td></tr>
+  </table>
+
+  <p>所有 AC 均有对应测试方法，无「不可测试」条目。E2E 关键流程（提问→回答→反馈、发布→审核→拦截提示）纳入发布前 P0 门禁。</p>
+</section>
+
+<!-- ============ §9 原型-开发追踪 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>09 · <em>Prototype Trace</em></h2>
+    <span class="num-tag">§9 原型-开发追踪矩阵</span>
+  </div>
+
+  <p>D-09 为基础设施层需求，界面载体复用既有 AI 模块高保真原型（工作流 1 步骤 2.5 已满足）：</p>
+  <table>
+    <tr><th>原型文件</th><th>对应 AC</th><th>开发模块</th><th>实现状态</th></tr>
+    <tr><td><code>原型/AI/lumina-18-ai-student.html</code></td><td>AC1-AC5（学生问答 / 反馈 / AI 标识）</td><td>ai_chat + ai_infra</td><td><span class="tag done">已落地</span></td></tr>
+    <tr><td><code>原型/AI/lumina-19-ai-teacher.html</code></td><td>AC6-AC9（教师 Agent 备课 / 知识库管理）</td><td>ai_infra</td><td><span class="tag done">已落地</span></td></tr>
+    <tr><td><code>原型/AI/lumina-20-ai-admin.html</code></td><td>AC10-AC13 · AC14-AC17（审核管控 / 模型池降级）</td><td>ai_infra + ai_gateway</td><td><span class="tag done">已落地</span></td></tr>
+  </table>
+  <div class="info success">
+    <div class="label">✅ 实现状态说明</div>
+    后端 <code>ai_infra</code> 模块（5 表 / 11 端点）已按本文档流程实现并通过单测（WBS 记录：2026-09-03 D-09 落地）。本文档 v1.0 为需求侧正式定稿，「业务流程定义」（§4）为后续变更（如 MCP 工具协议、向量库迁移 Milvus）的对齐基线。
+  </div>
+</section>
+
+<!-- ============ §10 版本历史 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>10 · <em>Changelog</em></h2>
+    <span class="num-tag">§10 版本历史</span>
+  </div>
+  <table>
+    <tr><th>版本</th><th>日期</th><th>变更内容</th></tr>
+    <tr><td>v1.0</td><td>2026-09-03</td><td>初版：D-09 AI 基础设施需求定义；核心章节「§4 业务流程定义」含 4 类 Mermaid 流程图（RAG 用户旅程 / Agent 状态机 / 审核流水线时序 / LLM 降级异常流）；合规预检 + RTM + 原型追踪</td></tr>
+  </table>
+</section>
+
+<footer>
+  <div>Lumina · 墨光 — REQ-LUMINA-D09-2026-001 · v1.0 · 2026-09-03</div>
+  <div class="sig">Crafted with <span class="hl">Ink &amp; AI</span></div>
+</footer>
+
+</body>
+</html>

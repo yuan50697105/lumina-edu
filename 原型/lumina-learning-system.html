@@ -92,6 +92,8 @@
   .module-card.reward .card-title em{color:var(--highlighter);}
 
   .flow{background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; margin:18px 0;}
+  .mermaid{display:flex; justify-content:center; background:transparent; font-family:inherit; margin:6px 0;}
+  .diagram-cap{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--inkwell-2); text-align:center; margin-top:10px;}
   .flow-step{display:flex; gap:14px; padding:10px 0; border-bottom:1px dashed var(--line); align-items:flex-start;}
   .flow-step:last-child{border-bottom:none;}
   .flow-num{flex-shrink:0; width:28px; height:28px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-mono); font-size:12px; font-weight:600;}
@@ -139,7 +141,7 @@
     <p class="subtitle">Self-Learning Paths · Gamification · XP/Badge/Leaderboard · Daily Check-in</p>
     <div class="meta">
       Document ID: LUMINA-REQ-D06-001 · Status: Draft<br/>
-      Version: 1.0 · Date: 2026-09-03<br/>
+      Version: 1.1 · Date: 2026-09-03<br/>
       Author: Claude Team Review · Owner: Yuan
     </div>
   </div>
@@ -494,11 +496,124 @@
   </div>
 </section>
 
-<!-- ============ §4 数据模型设计 ============ -->
+<!-- ============ §4 业务流程定义 ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>04 · <em>Data Model</em></h2>
-    <span class="num-tag">§4 数据模型设计（9 张表）</span>
+    <h2>04 · <em>Processes</em></h2>
+    <span class="num-tag">§4 业务流程定义</span>
+  </div>
+
+  <p>本节以 4 类视图固化 D-06 的核心业务语义：<b>用户旅程</b>（学生闯关主链路）、<b>状态机</b>（关卡生命周期）、<b>跨模块时序</b>（打卡与徽章授予）、<b>异常流程</b>（答题失败重试）。后续开发（D-06.2）与测试（§8 验收标准）均以本节流程为对齐基准。</p>
+
+  <h3 class="sub">4.1 · <em>用户旅程</em> 学生闯关主链路</h3>
+  <p>覆盖「登录 → 选路径 → 闯关 → 判分 → 发 XP → 授徽章 → 返回地图」的完整正向链路：</p>
+  <div class="flow">
+    <pre class="mermaid">
+graph TD
+    A[学生登录] --> B[浏览学习广场]
+    B --> C{选择路径}
+    C --> D[进入路径地图]
+    D --> E{关卡状态判断}
+    E -->|已完成| F[查看/复习]
+    E -->|可闯关| G[开始学习]
+    E -->|未解锁| H[提示前置条件]
+    G --> I[完成学习环节<br/>阅读/观看/答题]
+    I --> J{系统判定}
+    J -->|通过 ≥60%| K[发放 XP]
+    J -->|未通过| L[提示重试]
+    K --> M{检查徽章条件}
+    M -->|满足| N[授予新徽章]
+    M -->|不满足| O[返回地图]
+    N --> O
+    L --> I
+    </pre>
+    <div class="diagram-cap">Fig 4-1 · 学生闯关主链路（User Journey）</div>
+  </div>
+
+  <h3 class="sub">4.2 · <em>状态机</em> 学习路径关卡</h3>
+  <p>关卡进度（<code>learning_progress.status</code>）的合法流转如下，与 §3 A.3 解锁规则、§5 数据模型字段一一对应：</p>
+  <div class="flow">
+    <pre class="mermaid">
+stateDiagram-v2
+    [*] --> Locked: 路径创建
+    Locked --> Available: 前置关卡完成
+    Available --> InProgress: 学生开始学习
+    InProgress --> Completed: 答题通过 ≥60%
+    InProgress --> Available: 答题未通过 重试
+    Completed --> [*]
+
+    note right of InProgress
+        记录学习进度
+        支持断点续学
+    end note
+    </pre>
+    <div class="diagram-cap">Fig 4-2 · 关卡状态机（State Machine）</div>
+  </div>
+
+  <h3 class="sub">4.3 · <em>跨模块交互</em> 打卡与徽章授予</h3>
+  <p>通关/打卡动作触发 learning 模块内的积分落库与徽章引擎评估，徽章命中后经 notification 模块触达学生端：</p>
+  <div class="flow">
+    <pre class="mermaid">
+sequenceDiagram
+    participant 学生 as 学生端
+    participant Learning as learning 模块
+    participant Badge as 徽章引擎
+    participant Notification as notification 模块
+    participant DB as MySQL
+
+    学生->>Learning: 完成关卡学习
+    Learning->>DB: 更新 progress (XP += 奖励)
+    Learning->>Learning: 检查打卡条件
+    alt 首次今日学习
+        Learning->>DB: 创建 check_in_record
+        Learning->>Learning: streak += 1
+        Learning->>DB: 更新 streak
+    end
+    Learning->>Badge: 检查徽章条件 (_check_badges)
+    loop 遍历未获得徽章
+        Badge->>Badge: 评估 condition_type
+        alt 满足条件
+            Badge->>DB: 插入 user_badge
+            Badge->>Notification: 发送徽章获得通知
+            Notification->>学生: 弹窗展示新徽章
+        end
+    end
+    Learning-->>学生: 返回 XP + 新徽章列表
+    </pre>
+    <div class="diagram-cap">Fig 4-3 · 打卡与徽章授予时序（Cross-Module Sequence）</div>
+  </div>
+
+  <h3 class="sub">4.4 · <em>异常流程</em> 答题失败重试机制</h3>
+  <div class="info warn">
+    <div class="label">⚠ 触发条件</div>
+    学生答题正确率 &lt; 60%（对应 §4.1 判定分支「未通过」）。
+  </div>
+  <div class="flow">
+    <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="title">系统判定答题未通过</div><div class="desc">正确率 &lt; 60%，关卡状态回退（见 §4.2 InProgress → Available）</div></div></div>
+    <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="title">不发放 XP，不推进关卡</div><div class="desc">point_transactions 不产生流水，下一关保持锁定</div></div></div>
+    <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><div class="title">显示错误题目 + 正确答案 + 解析</div><div class="desc">逐题反馈，帮助学生定位知识盲区</div></div></div>
+    <div class="flow-step"><div class="flow-num">4</div><div class="flow-content"><div class="title">提示「重新挑战本关」</div><div class="desc">重试次数不限，但每次需重新学习本关内容</div></div></div>
+    <div class="flow-step"><div class="flow-num">5</div><div class="flow-content"><div class="title">学生二选一</div><div class="desc">重新答题（重置本关进度）／ 返回路径地图（保留已完成关卡）</div></div></div>
+  </div>
+  <div class="info risk">
+    <div class="label">🛡️ 异常处理</div>
+    <ul style="margin-top:6px;">
+      <li><b>网络中断</b>：本地缓存答题记录 → 恢复后同步服务端</li>
+      <li><b>并发冲突</b>：乐观锁 → 冲突时提示「请稍后重试」</li>
+    </ul>
+  </div>
+
+  <div class="info note">
+    <div class="label">🔗 流程-验收对照</div>
+    流程 4.1 ↔ US-01~06 / AC-01~05；流程 4.2 ↔ AC-02/03/04；流程 4.3 ↔ AC-05/06/08；流程 4.4 ↔ AC-03。开发联调与 QA 用例设计以本映射为准。
+  </div>
+</section>
+
+<!-- ============ §5 数据模型设计 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>05 · <em>Data Model</em></h2>
+    <span class="num-tag">§5 数据模型设计（9 张表）</span>
   </div>
 
   <p>新增模块 <code>learning</code>，共 9 张表。所有主键沿用项目统一的 <code>GUID</code>（CHAR(36)），时区字段统一 <code>DateTime(timezone=True)</code>。</p>
@@ -663,39 +778,39 @@
   </div>
 </section>
 
-<!-- ============ §5 接口设计 ============ -->
+<!-- ============ §6 接口设计 ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>05 · <em>API Design</em></h2>
-    <span class="num-tag">§5 接口设计（~20 端点）</span>
+    <h2>06 · <em>API Design</em></h2>
+    <span class="num-tag">§6 接口设计（~20 端点）</span>
   </div>
 
   <p>新增模块 <code>/api/v1/learning/*</code>，统一前缀 <code>/learning</code>，按子资源分组。所有端点需 <code>Authorization: Bearer {token}</code>。</p>
 
-  <h3 class="sub">5.1 · <em>学习路径</em></h3>
+  <h3 class="sub">6.1 · <em>学习路径</em></h3>
   <div class="api-block"><span class="method get">GET</span><span class="path">/learning/paths?category=&difficulty=&status=&offset=&limit=</span><div class="desc">路径列表（学生默认只看 published，教师/admin 可看全部）</div></div>
   <div class="api-block"><span class="method get">GET</span><span class="path">/learning/paths/{path_id}</span><div class="desc">路径详情（含 stage_count / enrolled_count / my_progress）</div></div>
   <div class="api-block"><span class="method post">POST</span><span class="path">/learning/paths</span><div class="desc">创建路径（teacher/admin）</div></div>
   <div class="api-block"><span class="method put">PUT</span><span class="path">/learning/paths/{path_id}</span><div class="desc">更新路径（owner 或 admin）</div></div>
   <div class="api-block"><span class="method delete">DELETE</span><span class="path">/learning/paths/{path_id}</span><div class="desc">删除路径（级联删关卡/进度）</div></div>
 
-  <h3 class="sub">5.2 · <em>关卡</em></h3>
+  <h3 class="sub">6.2 · <em>关卡</em></h3>
   <div class="api-block"><span class="method get">GET</span><span class="path">/learning/paths/{path_id}/stages</span><div class="desc">关卡列表（含我的进度状态 locked/unlocked/in_progress/completed）</div></div>
   <div class="api-block"><span class="method post">POST</span><span class="path">/learning/paths/{path_id}/stages</span><div class="desc">创建关卡（自动重算路径 total_xp）</div></div>
   <div class="api-block"><span class="method put">PUT</span><span class="path">/learning/stages/{stage_id}</span><div class="desc">更新关卡</div></div>
   <div class="api-block"><span class="method delete">DELETE</span><span class="path">/learning/stages/{stage_id}</span><div class="desc">删除关卡</div></div>
   <div class="api-block"><span class="method post">POST</span><span class="path">/learning/stages/{stage_id}/complete</span><div class="desc">通关关卡（校验前置关 + 测验判分 + 发放 XP + 检查徽章）</div></div>
 
-  <h3 class="sub">5.3 · <em>我的进度</em></h3>
+  <h3 class="sub">6.3 · <em>我的进度</em></h3>
   <div class="api-block"><span class="method get">GET</span><span class="path">/learning/my/progress</span><div class="desc">我的学习进度汇总（按路径聚合，含百分比）</div></div>
 
-  <h3 class="sub">5.4 · <em>每日挑战</em></h3>
+  <h3 class="sub">6.4 · <em>每日挑战</em></h3>
   <div class="api-block"><span class="method get">GET</span><span class="path">/learning/challenges/today</span><div class="desc">今日挑战列表（隐藏答案字段）</div></div>
   <div class="api-block"><span class="method get">GET</span><span class="path">/learning/challenges?offset=&limit=</span><div class="desc">历史挑战列表</div></div>
   <div class="api-block"><span class="method post">POST</span><span class="path">/learning/challenges</span><div class="desc">创建每日挑战（teacher/admin）</div></div>
   <div class="api-block"><span class="method post">POST</span><span class="path">/learning/challenges/{id}/attempt</span><div class="desc">提交挑战答案（判题 + 发 XP + 检查徽章）</div></div>
 
-  <h3 class="sub">5.5 · <em>积分 / 徽章 / 排行榜 / 打卡</em></h3>
+  <h3 class="sub">6.5 · <em>积分 / 徽章 / 排行榜 / 打卡</em></h3>
   <div class="api-block"><span class="method get">GET</span><span class="path">/learning/my/points</span><div class="desc">我的积分/等级/连续天数/排名/徽章数</div></div>
   <div class="api-block"><span class="method get">GET</span><span class="path">/learning/badges</span><div class="desc">徽章列表（含我是否已获得）</div></div>
   <div class="api-block"><span class="method post">POST</span><span class="path">/learning/badges</span><div class="desc">创建徽章（admin）</div></div>
@@ -714,11 +829,11 @@
   </div>
 </section>
 
-<!-- ============ §6 前端页面设计 ============ -->
+<!-- ============ §7 前端页面设计 ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>06 · <em>Frontend</em></h2>
-    <span class="num-tag">§6 前端页面设计（5 页）</span>
+    <h2>07 · <em>Frontend</em></h2>
+    <span class="num-tag">§7 前端页面设计（5 页）</span>
   </div>
 
   <p>Web 端 + 移动端同步补齐，复用既有 Lumina 视觉系统（宣纸色背景、Fraunces 标题、钴蓝强调）。</p>
@@ -768,14 +883,14 @@
   </div>
 </section>
 
-<!-- ============ §7 验收标准 ============ -->
+<!-- ============ §8 验收标准 ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>07 · <em>Acceptance</em></h2>
-    <span class="num-tag">§7 验收标准</span>
+    <h2>08 · <em>Acceptance</em></h2>
+    <span class="num-tag">§8 验收标准</span>
   </div>
 
-  <h3 class="sub">7.1 · <em>功能验收</em></h3>
+  <h3 class="sub">8.1 · <em>功能验收</em></h3>
   <table>
     <tr><th>ID</th><th>验收项</th><th>预期结果</th></tr>
     <tr><td>AC-01</td><td>学生浏览学习路径广场</td><td>仅显示 published 路径；按分类筛选生效</td></tr>
@@ -794,7 +909,7 @@
     <tr><td>AC-14</td><td>学生修改他人路径</td><td>返回 403</td></tr>
   </table>
 
-  <h3 class="sub">7.2 · <em>埋点验收</em></h3>
+  <h3 class="sub">8.2 · <em>埋点验收</em></h3>
   <table>
     <tr><th>事件</th><th>触发时机</th><th>关键字段</th></tr>
     <tr><td><code>learning.path_view</code></td><td>进入路径详情</td><td>path_id</td></tr>
@@ -805,7 +920,7 @@
     <tr><td><code>learning.leaderboard</code></td><td>查看排行榜</td><td>period, count</td></tr>
   </table>
 
-  <h3 class="sub">7.3 · <em>性能验收</em></h3>
+  <h3 class="sub">8.3 · <em>性能验收</em></h3>
   <ul>
     <li>路径列表接口 &lt; 200ms（P95，1000 条路径规模）</li>
     <li>通关关卡接口 &lt; 300ms（含 XP 发放 + 徽章检查）</li>
@@ -814,11 +929,11 @@
   </ul>
 </section>
 
-<!-- ============ §8 任务分解（WBS） ============ -->
+<!-- ============ §9 任务分解（WBS） ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>08 · <em>WBS</em></h2>
-    <span class="num-tag">§8 任务分解</span>
+    <h2>09 · <em>WBS</em></h2>
+    <span class="num-tag">§9 任务分解</span>
   </div>
 
   <p>按 Lumina 标准工作流拆分为 4 个阶段，预估 5 个工作日（不含审核阻塞）。</p>
@@ -894,11 +1009,11 @@
   </div>
 </section>
 
-<!-- ============ §9 里程碑对齐 ============ -->
+<!-- ============ §10 里程碑对齐 ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>09 · <em>Milestones</em></h2>
-    <span class="num-tag">§9 里程碑对齐</span>
+    <h2>10 · <em>Milestones</em></h2>
+    <span class="num-tag">§10 里程碑对齐</span>
   </div>
 
   <p>D-06 纳入 V1.1 演进规划，不阻塞 M4 正式上线，但建议在 M4.1（上线稳定期）前完成，作为首批用户运营抓手。</p>
@@ -926,9 +1041,39 @@
 
 <!-- ============ FOOTER ============ -->
 <footer>
-  <div>Lumina · 墨光 · D-06 · v1.0 · 2026-09-03</div>
+  <div>Lumina · 墨光 · D-06 · v1.1 · 2026-09-03</div>
   <div class="sig">Self-Learning & <span class="hl">Gamification</span></div>
 </footer>
 
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+mermaid.initialize({
+  startOnLoad: true,
+  securityLevel: "loose",
+  theme: "base",
+  themeVariables: {
+    fontFamily: '"Inter", "PingFang SC", system-ui, sans-serif',
+    fontSize: "14px",
+    primaryColor: "#E8EAFB",
+    primaryBorderColor: "#3D46C9",
+    primaryTextColor: "#0F1020",
+    secondaryColor: "#FDE68A",
+    tertiaryColor: "#D4EDDC",
+    lineColor: "#2A2B3D",
+    noteBkgColor: "#FDE68A",
+    noteTextColor: "#0F1020",
+    noteBorderColor: "#F5B800",
+    actorBkg: "#EDE9FE",
+    actorBorder: "#7C3AED",
+    actorTextColor: "#0F1020",
+    signalColor: "#2A2B3D",
+    labelBoxBkgColor: "#E8EAFB",
+    labelBoxBorderColor: "#3D46C9",
+    stateLabelColor: "#0F1020",
+    transitionColor: "#3D46C9",
+    transitionLabelColor: "#2A2B3D"
+  }
+});
+</script>
 </body>
 </html>

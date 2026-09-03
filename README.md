@@ -13,7 +13,7 @@ Lumina（墨光）是一个完整的教育应用 UI 设计系统，覆盖学生�
 - ✅ **AI 原生**：集成国产大模型（通义千问、智谱 GLM、讯飞星火、豆包等）
 - ✅ **双层模型选择**：管理端配置模型池 + 用户端自主选择
 - ✅ **统一设计语言**：荧光笔签名效果、宣纸质感配色、跨端一致体验
-- ✅ **完整技术文档**：PRD v1.3 · TDD v1.7 · API v1.7 · DB v1.7 · OPS v1.7 · QA v1.7 · UG v1.1
+- ✅ **完整技术文档**：PRD v1.3 · TDD v1.8 · API v1.8 · DB v1.8 · OPS v1.8 · QA v1.8 · UG v1.1
 
 ## 📂 项目结构
 
@@ -37,6 +37,7 @@ edu/
 │   ├── lumina-learning-system.html    # 📋 D-06 自主学习与闯关奖励需求 v1.0
 │   ├── lumina-video-system.html       # 📋 D-08 教学视频与录播回放需求 v1.0
 │   ├── lumina-harmony-os.html         # 📋 D-11 鸿蒙硬件平台与操作系统支持需求 v1.0
+│   ├── lumina-operations-monitoring.html # 📋 D-10 运营监控需求 v1.0（含 4 类业务流程图）
 │   │
 │   ├── APP/phone/      (9 文件)       # 📱 手机 APP 原型
 │   ├── APP/tablet/     (6 文件)       # 📲 平板 APP 原型
@@ -53,9 +54,10 @@ edu/
 │   └── README.md                     # 部署使用说明
 │
 ├── 服务/                             # 单体应用 + 前端
-│   ├── lumina-app/                   # ✅ 单体 FastAPI（16 模块 · 141 端点 · 44 表）
+│   ├── lumina-app/                   # ✅ 单体 FastAPI（20 模块 · 174 端点 · 64 表）
 │   ├── web-frontend/                 # ✅ Web 前端（React 18 + TS + Vite）
-│   └── mobile-app/                   # ✅ 移动端前端（React Native / Expo）
+│   ├── mobile-app/                   # ✅ 移动端前端（React Native / Expo）
+│   └── harmony-app/                  # 📟 鸿蒙原生前端（ArkTS / ArkUI · D-11）
 │
 ├── 开发进度.md                       # 📈 WBS 开发进度追踪
 │
@@ -73,10 +75,10 @@ edu/
 | **平台目录** | 6 个（phone/tablet/Web/PC/AI/Harmony）|
 | **界面页面** | 160+ 个 |
 | **设计表面** | 6 个（学生/教师 × 移动/Web/桌面）|
-| **后端模块** | 16 个业务模块（user / course / assignment / grade / live / collab / notif / exam / ai_gateway / ai_chat / ai_grade / analytics / logs / tutoring / admin / settings）|
-| **文档** | PRD v1.3 + TDD v1.7 + API v1.7 + DB v1.7 + OPS v1.7 + QA v1.7 + UG v1.1 + WBS v1.1 + WBS-P v1.3 + STATUS v1.0 + REQ-D06/D08/D11 + 索引 |
-| **API 接口** | 141 paths / 180 ops（16 模块 · JWT · SSE 流式 · 直播课堂 · 协作工具 · 通知中心 · 题库与考试 · 学情分析 · 管理端）|
-| **数据表** | 44 张（单体应用）|
+| **后端模块** | 20 个业务模块（user / course / assignment / grade / live / collab / notif / exam / ai_gateway / ai_chat / ai_grade / analytics / logs / tutoring / admin / settings / learning / video / ai_infra / ops）|
+| **文档** | PRD v1.3 + TDD v1.8 + API v1.8 + DB v1.8 + OPS v1.8 + QA v1.8 + UG v1.1 + WBS v1.1 + WBS-P v1.3 + STATUS v1.2 + REQ-D06/D08/D10/D11 + 索引 |
+| **API 接口** | 174 paths / 215 ops（20 模块 · JWT · SSE 流式 · 直播课堂 · 协作工具 · 通知中心 · 题库与考试 · 学情分析 · 管理端 · 自主学习 · 视频录播 · AI 基建 · 运营监控）|
+| **数据表** | 64 张（单体应用）|
 
 ## 📖 文档体系
 
@@ -84,19 +86,20 @@ edu/
 |------|------|------|
 | 📋 **设计索引** | 原型导航入口，按平台分类 | `lumina-00-index.html` |
 | 📋 **PRD v1.3** | 产品需求文档，18 章 | `lumina-prd.html` |
-| 📋 **TDD v1.7** | 技术设计文档，18 章 · 16 模块 | `lumina-tdd.html` |
-| 📋 **API v1.7** | API 接口文档，14 章 · 141 paths | `lumina-api.html` |
-| 📋 **OpenAPI 3.1** | 机器可读 API 规范（YAML · 101 路径 · 124 ops） | `lumina-api-openapi.yaml` |
-| 📋 **DB v1.7** | 数据库设计文档，13 章 · 44 表 | `lumina-database.html` |
-| 📋 **OPS v1.7** | 部署运维手册，10 章 · 16 模块 | `lumina-operations.html` |
-| 📋 **QA v1.7** | 测试用例文档，10 章 · 251 用例 | `lumina-testcases.html` |
+| 📋 **TDD v1.8** | 技术设计文档，18 章 · 20 模块 | `lumina-tdd.html` |
+| 📋 **API v1.8** | API 接口文档，20 章 · 174 paths | `lumina-api.html` |
+| 📋 **OpenAPI 3.1** | 机器可读 API 规范（YAML · 174 路径 · 215 ops） | `lumina-api-openapi.yaml` |
+| 📋 **DB v1.8** | 数据库设计文档，17 章 · 64 表 | `lumina-database.html` |
+| 📋 **OPS v1.8** | 部署运维手册，12 章 · 20 模块 | `lumina-operations.html` |
+| 📋 **QA v1.8** | 测试用例文档，12 章 · 336 用例 | `lumina-testcases.html` |
 | 📋 **UG v1.1** | 用户手册，10 章 · 3 角色 | `lumina-userguide.html` |
 | 📋 **WBS v1.1** | 上线工作分解结构，10 周轻量方案 | `lumina-launch-wbs.html` |
 | 📋 **WBS-P v1.3** | 未实现内容落地 WBS：M4 上线 + 收口认证 + V1.1 演进 | `lumina-wbs-pending.html` |
 | 📋 **REQ-D06 v1.0** | 自主学习与闯关奖励机制需求规格（路径/关卡/XP/徽章/排行） | `lumina-learning-system.html` |
 | 📋 **REQ-D08 v1.0** | 教学视频与录播回放需求规格（视频管理/录播联动/播放器/AI 字幕检索/统计） | `lumina-video-system.html` |
 | 📋 **REQ-D11 v1.0** | 鸿蒙硬件平台与操作系统支持（HarmonyOS NEXT/6 设备形态/ArkTS/分布式流转） | `lumina-harmony-os.html` |
-| 📋 **STATUS v1.0** | 项目全景状态报告（里程碑/已实现/待实现/模块/技术栈/质量/风险） | `lumina-status-report.html` |
+| 📋 **REQ-D10 v1.0** | 运营监控需求规格（监控大盘/深度健康检查/Prometheus 指标/告警生命周期/采集降级 · 4 类业务流程图） | `lumina-operations-monitoring.html` |
+| 📋 **STATUS v1.2** | 项目全景状态报告（里程碑/已实现/待实现/模块/技术栈/质量/风险） | `lumina-status-report.html` |
 
 ## 🎨 设计系统
 
@@ -199,7 +202,7 @@ cp .env.example .env
 ./scripts/monitor.sh
 ```
 
-已编排服务：MySQL 9.7 · Redis · lumina-app 单体（:8080 · 16 模块 · 141 paths / 180 ops）· Nginx(80/443)
+已编排服务：MySQL 9.7 · Redis · lumina-app 单体（:8080 · 20 模块 · 174 paths / 215 ops）· Nginx(80/443)
 
 详见 `部署/README.md`
 
@@ -221,6 +224,7 @@ cp .env.example .env
 | 自主学习需求 | `原型/lumina-learning-system.html` |
 | 教学视频需求 | `原型/lumina-video-system.html` |
 | 鸿蒙支持需求 | `原型/lumina-harmony-os.html` |
+| 运营监控需求 | `原型/lumina-operations-monitoring.html` |
 | 项目全景状态报告 | `原型/lumina-status-report.html` |
 
 ## 📋 版本历史
@@ -278,6 +282,14 @@ cp .env.example .env
 | **STATUS v1.1** | 2026-09-03 | 状态报告 +D-06 自主学习（需求已产出）· +D-08 教学视频 / D-11 鸿蒙支持（需求产出中）|
 | **REQ-D08 v1.0** | 2026-09-03 | 教学视频与录播回放需求（10 章 · 5 表 · 20 端点 · 6 设备形态）|
 | **REQ-D11 v1.0** | 2026-09-03 | 鸿蒙硬件平台与操作系统支持（10 章 · HarmonyOS NEXT/OpenHarmony · 6 设备形态 · 3 路线）|
+| **REQ-D10 v1.0** | 2026-09-03 | 运营监控需求（9 章 · ops 模块 3 端点 · 4 类业务流程图：用户旅程/告警状态机/健康检查时序/采集降级）|
+| **D-06 自主学习 v1.0** | 2026-09-03 | 自主学习与闯关奖励机制（learning 模块 · 7 表 · 20 端点 · XP/徽章/排行/打卡）|
+| **D-08 视频录播 v1.0** | 2026-09-03 | 教学视频与录播回放（video 模块 · 6 表 · 20 端点 · HLS/ASR/笔记/检索）|
+| **D-09 AI 基建 v1.0** | 2026-09-03 | AI 基础设施（ai_infra 模块 · 4 表 · 15 端点 · RAG/Agent/内容审核）|
+| **D-10 运营监控 v1.0** | 2026-09-03 | 运营监控（ops 模块 · 3 表 · 10 端点 · Prometheus/健康检查/业务指标）|
+| **D-11 鸿蒙骨架 v1.0** | 2026-09-03 | 鸿蒙原生客户端骨架（ArkTS/ArkUI · 6 页面 · 与后端 174 paths 同契约）|
+| **文档联动 v1.8** | 2026-09-03 | TDD/API/DB/OPS/QA/OpenAPI/STATUS 同步至 v1.8 · 20 模块 · 174 paths / 215 ops · 64 表 · 336 用例 |
+| **STATUS v1.2** | 2026-09-03 | 状态报告更新至 D-10 完成 · 20 模块 · 64 表 · 336 单测 |
 
 ## 📄 许可证
 
