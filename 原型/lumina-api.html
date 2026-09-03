@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · API 接口文档 v1.6</title>
+<title>Lumina 墨光 · API 接口文档 v1.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -137,7 +137,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>API Reference</small></div>
     </div>
-    <div class="doc-type">API Reference · v1.6</div>
+    <div class="doc-type">API Reference · v1.7</div>
     <h1>
       <span class="hl">API</span> 接口<br/>
       <em>文档</em>
@@ -151,7 +151,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.6 · 生产基准 · MySQL 9.7</span>
+      <span class="value">v1.7 · 管理端 D-07 · MySQL 9.7</span>
     </div>
     <div class="row">
       <span class="label">基础路径</span>
@@ -170,10 +170,10 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">13</div><div class="lbl">模块</div></div>
-  <div class="stat"><div class="val hl">98</div><div class="lbl">接口数</div></div>
+  <div class="stat"><div class="val hl">16</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val hl">141</div><div class="lbl">接口数</div></div>
   <div class="stat"><div class="val">31</div><div class="lbl">协作+通知端点</div></div>
-  <div class="stat"><div class="val">22</div><div class="lbl">考试端点</div></div>
+  <div class="stat"><div class="val">22</div><div class="lbl">管理端点</div></div>
   <div class="stat"><div class="val">JWT</div><div class="lbl">认证方式</div></div>
   <div class="stat"><div class="val">RFC 7807</div><div class="lbl">错误格式</div></div>
 </div>
@@ -191,10 +191,11 @@
     <a href="#s7"><span class="num">07</span>直播模块</a>
     <a href="#s8"><span class="num">08</span>题库与考试</a>
     <a href="#s9"><span class="num">09</span>协作模块</a>
-    <a href="#s10"><span class="num">10</span>AI 模块</a>
-    <a href="#s11"><span class="num">11</span>错误码</a>
-    <a href="#s12"><span class="num">12</span>限流策略</a>
-    <a href="#s13"><span class="num">13</span>SDK · 示例代码</a>
+    <a href="#s10"><span class="num">10</span>管理端模块</a>
+    <a href="#s11"><span class="num">11</span>AI 模块</a>
+    <a href="#s12"><span class="num">12</span>错误码</a>
+    <a href="#s13"><span class="num">13</span>限流策略</a>
+    <a href="#s14"><span class="num">14</span>SDK · 示例代码</a>
   </div>
 </nav>
 
@@ -214,8 +215,8 @@
 
   <div class="info note">
     <div class="label">单体架构 · 模块清单</div>
-    本接口文档对齐单体应用 <b>lumina-app</b>（FastAPI · 82 业务端点），共 <b>12</b> 个业务模块：
-    <code>user</code> · <code>course</code> · <code>assignment</code> · <code>grade</code> · <code>live</code> · <code>collab</code> · <code>ai_gateway</code> · <code>ai_chat</code> · <code>ai_grade</code> · <code>notif</code> · <code>analytics</code> · <code>logs</code>。<br/>
+    本接口文档对齐单体应用 <b>lumina-app</b>（FastAPI · 141 业务端点），共 <b>16</b> 个业务模块：
+    <code>user</code> · <code>course</code> · <code>assignment</code> · <code>grade</code> · <code>live</code> · <code>collab</code> · <code>ai_gateway</code> · <code>ai_chat</code> · <code>ai_grade</code> · <code>notif</code> · <code>analytics</code> · <code>logs</code> · <code>tutoring</code> · <code>admin</code> · <code>settings</code> · <code>audit</code>。<br/>
     其中 <code>notif</code> 提供 <code>/notifications/my</code> 消息通知中心（D-03 新增，含已读/未读数/全部已读）；<code>analytics</code> 提供 <code>/events</code> 事件上报与统计，<code>logs</code> 提供 <code>/logs/query</code>、<code>/logs/summary</code> 日志检索（均限管理员）；AI 流式响应使用 SSE（<code>text/event-stream</code>）；直播模块（D-01）与协作模块（D-02）采用 REST + 轮询增量，无 WebSocket。
   </div>
 
@@ -1097,10 +1098,268 @@
   </div>
 </section>
 
-<!-- ============ 10 · AI ============ -->
+<!-- ============ 10 · 管理端模块 ============ -->
 <section class="section" id="s10">
   <div class="section-header">
-    <h2>10 · AI 模块 <em>AI-Powered</em></h2>
+    <h2>10 · 管理端模块 <em>Admin · Settings · Audit</em></h2>
+    <div class="num-tag">D-07 · 22 endpoints</div>
+  </div>
+
+  <div class="info note">
+    <div class="label">管理端补齐（D-07 · 2026-09-03）</div>
+    管理端三大子模块：<b>admin</b>（监控大盘 / 课程审批 / 内容举报 · 13 端点）、<b>settings</b>（KV 系统配置 · 5 端点）、<b>audit</b>（审计日志检索/导出/归档 · 4 端点）。所有端点需 admin 角色，审计日志由设置变更/审批/举报处置自动写入。
+  </div>
+
+  <h3 class="sub">10.1 监控大盘 Dashboard</h3>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/admin/dashboard/overview</span>
+      <span class="endpoint-desc">大盘总览（用户/课程/DAU/MAU/待审）</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+    <h4>响应</h4>
+    <pre>{
+  <span class="key">"users_total"</span>: <span class="number">1234</span>,
+  <span class="key">"courses_total"</span>: <span class="number">56</span>,
+  <span class="key">"dau"</span>: <span class="number">320</span>,
+  <span class="key">"mau"</span>: <span class="number">980</span>,
+  <span class="key">"pending_approvals"</span>: <span class="number">3</span>
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/admin/dashboard/growth</span>
+      <span class="endpoint-desc">用户/课程增长（近 12 月）</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/admin/dashboard/health</span>
+      <span class="endpoint-desc">系统健康度/SLA（API/DB/AI）</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/admin/dashboard/recent-activity</span>
+      <span class="endpoint-desc">最近活动（审计+举报+审批合并）</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+  </div>
+
+  <h3 class="sub">10.2 课程审批 Approvals</h3>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/admin/approvals/courses</span>
+      <span class="endpoint-desc">课程审批队列</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/admin/approvals/courses/{approval_id}</span>
+      <span class="endpoint-desc">审批详情</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/admin/approvals/courses/{approval_id}/approve</span>
+      <span class="endpoint-desc">通过审批（draft→published）</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+    <h4>请求体</h4>
+    <pre>{<span class="key">"comment"</span>: <span class="string">"内容符合要求"</span>}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/admin/approvals/courses/{approval_id}/reject</span>
+      <span class="endpoint-desc">驳回审批</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+    <h4>请求体</h4>
+    <pre>{<span class="key">"comment"</span>: <span class="string">"需补充大纲"</span>}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/admin/courses/{course_id}/submit-for-approval</span>
+      <span class="endpoint-desc">教师提交课程审批</span>
+    </div>
+    <h4>权限</h4><p>teacher（授课权）</p>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/admin/courses/{course_id}/approval-status</span>
+      <span class="endpoint-desc">查询审批状态</span>
+    </div>
+    <h4>权限</h4><p>teacher/admin</p>
+  </div>
+
+  <h3 class="sub">10.3 内容举报 Reports</h3>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/admin/reports</span>
+      <span class="endpoint-desc">用户举报内容</span>
+    </div>
+    <h4>权限</h4><p>任意登录用户</p>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"target_type"</span>: <span class="string">"message"</span>,
+  <span class="key">"target_id"</span>: <span class="string">"uuid"</span>,
+  <span class="key">"reason"</span>: <span class="string">"abuse"</span>,
+  <span class="key">"description"</span>: <span class="string">"不当言论"</span>
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/admin/reports</span>
+      <span class="endpoint-desc">举报列表</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/admin/reports/{report_id}/resolve</span>
+      <span class="endpoint-desc">处理举报</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"status"</span>: <span class="string">"resolved"</span>,
+  <span class="key">"resolution"</span>: <span class="string">"已删除违规内容"</span>
+}</pre>
+  </div>
+
+  <h3 class="sub">10.4 系统设置 Settings</h3>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/admin/settings</span>
+      <span class="endpoint-desc">设置列表（可按 category 过滤）</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/admin/settings/categories</span>
+      <span class="endpoint-desc">分类枚举（含各分类 key 数量）</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/admin/settings/{key}</span>
+      <span class="endpoint-desc">获取单个设置</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method put">PUT</span>
+      <span class="endpoint-path">/admin/settings/{key}</span>
+      <span class="endpoint-desc">更新单个设置（不存在则创建）</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"value"</span>: {<span class="key">"enabled"</span>: <span class="keyword">true</span>},
+  <span class="key">"category"</span>: <span class="string">"security"</span>,
+  <span class="key">"description"</span>: <span class="string">"双因素认证开关"</span>
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/admin/settings/batch</span>
+      <span class="endpoint-desc">批量更新设置</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+    <h4>请求体</h4>
+    <pre>{
+  <span class="key">"items"</span>: [
+    {<span class="key">"key"</span>: <span class="string">"site_name"</span>, <span class="key">"value"</span>: <span class="string">"Lumina"</span>},
+    {<span class="key">"key"</span>: <span class="string">"maintenance_mode"</span>, <span class="key">"value"</span>: <span class="keyword">false</span>}
+  ]
+}</pre>
+  </div>
+
+  <h3 class="sub">10.5 审计日志 Audit</h3>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/admin/audit</span>
+      <span class="endpoint-desc">审计日志列表（支持 action/actor/target 过滤）</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method get">GET</span>
+      <span class="endpoint-path">/admin/audit/{log_id}</span>
+      <span class="endpoint-desc">审计日志详情</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/admin/audit/export</span>
+      <span class="endpoint-desc">导出审计日志 CSV</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="endpoint-method post">POST</span>
+      <span class="endpoint-path">/admin/audit/archive</span>
+      <span class="endpoint-desc">软归档旧审计日志</span>
+    </div>
+    <h4>权限</h4><p>admin</p>
+  </div>
+</section>
+
+<!-- ============ 11 · AI ============ -->
+<section class="section" id="s11">
+  <div class="section-header">
+    <h2>11 · AI 模块 <em>AI-Powered</em></h2>
     <div class="num-tag">6 endpoints · 覆盖 ai_gateway / ai_chat / ai_grade</div>
   </div>
 
@@ -1199,10 +1458,10 @@
   </div>
 </section>
 
-<!-- ============ 11 · 错误码 ============ -->
-<section class="section" id="s11">
+<!-- ============ 12 · 错误码 ============ -->
+<section class="section" id="s12">
   <div class="section-header">
-    <h2>11 · 错误码 <em>Errors</em></h2>
+    <h2>12 · 错误码 <em>Errors</em></h2>
     <div class="num-tag">RFC 7807</div>
   </div>
 
@@ -1237,10 +1496,10 @@
   </table>
 </section>
 
-<!-- ============ 12 · 限流 ============ -->
-<section class="section" id="s12">
+<!-- ============ 13 · 限流 ============ -->
+<section class="section" id="s13">
   <div class="section-header">
-    <h2>12 · 限流策略 <em>Rate Limit</em></h2>
+    <h2>13 · 限流策略 <em>Rate Limit</em></h2>
     <div class="num-tag">Token Bucket</div>
   </div>
 
@@ -1260,10 +1519,10 @@
   </div>
 </section>
 
-<!-- ============ 13 · SDK ============ -->
-<section class="section" id="s13">
+<!-- ============ 14 · SDK ============ -->
+<section class="section" id="s14">
   <div class="section-header">
-    <h2>13 · SDK · 示例代码 <em>Examples</em></h2>
+    <h2>14 · SDK · 示例代码 <em>Examples</em></h2>
     <div class="num-tag">TypeScript · Python</div>
   </div>
 
@@ -1327,9 +1586,33 @@ curl -X POST https://api.lumina.edu/api/v1/ai/chat \
   -d <span class="string">'{"message":"解释积分"}'</span></pre>
 </section>
 
+<!-- ============ 修订历史 ============ -->
+<section class="section" id="rev" style="margin-bottom:32px;">
+  <div class="section-header">
+    <h2>修订历史 <em>Revisions</em></h2>
+    <div class="num-tag">Changelog</div>
+  </div>
+
+  <table>
+    <thead><tr><th>版本</th><th>日期</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>v1.7</td>
+        <td>2026-09-03</td>
+        <td>管理端 D-07 落地 · 新增 §10 管理端模块（admin/settings/audit · 22 端点）· 16 模块 · 141 paths</td>
+      </tr>
+      <tr>
+        <td>v1.6</td>
+        <td>2026-09-01</td>
+        <td>生产基准 · D-04 题库与考试文档联动 · 13 模块 · 98 接口</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · API Reference</div>
-  <div>v1.6 · 13 模块 · 98 接口 · 2026-09-01 · 生产基准</div>
+  <div>v1.7 · 16 模块 · 141 接口 · 2026-09-03</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">API-LUMINA-2026-001</div>
 </footer>
 

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Lumina 墨光 · API
-  version: 1.6.0
+  version: 1.7.0
   description: |
     Lumina（墨光）教育应用 RESTful API，覆盖用户、课程、作业、成绩、直播、协作、AI 等模块。
 
@@ -14,6 +14,7 @@ info:
     - 小组协作：课程小组 / 成员 / 项目 / 看板拖拽 / 共享文件 / 组内讨论（D-02）
     - 账户补全：自助注册（POST /auth/register）+ 消息通知中心（/notifications/my · D-03）
     - 题库与考试：题库 CRUD / 试卷编排 / 智能组卷 / 自动评分 + 主观题人工评分 / 统计（D-04）
+    - 管理端 D-07（课程审批/系统设置/审计日志/内容举报/监控大盘 · 22 端点）
 
   contact:
     name: Lumina Team
@@ -50,6 +51,12 @@ tags:
     description: 题库与考试（D-04：题库/试卷/组卷/答卷/评分/统计）
   - name: ai
     description: AI 能力模块
+  - name: admin
+    description: 管理端 · 监控大盘/课程审批/内容举报（D-07）
+  - name: settings
+    description: 系统设置 · KV 配置管理（D-07）
+  - name: audit
+    description: 审计日志 · 检索/导出/归档（D-07）
 
 # ─── 全局安全 ───
 security:
@@ -2349,6 +2356,276 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/StatsOut' }
 
+  # ═══════ ADMIN（D-07 管理端）═══════
+  /admin/dashboard/overview:
+    get:
+      tags: [admin]
+      summary: 监控大盘总览
+      operationId: get_dashboard_overview
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: 大盘数据
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardOverview' }
+
+  /admin/dashboard/growth:
+    get:
+      tags: [admin]
+      summary: 用户/课程增长
+      operationId: get_dashboard_growth
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: 增长曲线
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardGrowth' }
+
+  /admin/dashboard/health:
+    get:
+      tags: [admin]
+      summary: 系统健康度
+      operationId: get_dashboard_health
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: 健康指标
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardHealth' }
+
+  /admin/dashboard/recent-activity:
+    get:
+      tags: [admin]
+      summary: 最近活动
+      operationId: get_dashboard_recent_activity
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: 活动列表
+
+  /admin/approvals/courses:
+    get:
+      tags: [admin]
+      summary: 课程审批队列
+      operationId: list_course_approvals
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: 审批列表
+
+  /admin/approvals/courses/{approval_id}:
+    get:
+      tags: [admin]
+      summary: 审批详情
+      operationId: get_course_approval
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: approval_id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: 审批详情
+
+  /admin/approvals/courses/{approval_id}/approve:
+    post:
+      tags: [admin]
+      summary: 通过审批
+      operationId: approve_course
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: approval_id, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CourseApprovalReview' }
+      responses:
+        '200':
+          description: 审批通过
+
+  /admin/approvals/courses/{approval_id}/reject:
+    post:
+      tags: [admin]
+      summary: 驳回审批
+      operationId: reject_course
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: approval_id, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CourseApprovalReview' }
+      responses:
+        '200':
+          description: 审批驳回
+
+  /admin/courses/{course_id}/submit-for-approval:
+    post:
+      tags: [admin]
+      summary: 教师提交课程审批
+      operationId: submit_course_for_approval
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: course_id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: 提交成功
+
+  /admin/courses/{course_id}/approval-status:
+    get:
+      tags: [admin]
+      summary: 查询审批状态
+      operationId: get_course_approval_status
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: course_id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: 审批状态
+
+  /admin/reports:
+    get:
+      tags: [admin]
+      summary: 举报列表
+      operationId: list_reports
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: 举报列表
+    post:
+      tags: [admin]
+      summary: 用户举报内容
+      operationId: create_report
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReportCreate' }
+      responses:
+        '201':
+          description: 举报成功
+
+  /admin/reports/{report_id}/resolve:
+    post:
+      tags: [admin]
+      summary: 处理举报
+      operationId: resolve_report
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: report_id, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReportResolve' }
+      responses:
+        '200':
+          description: 处理完成
+
+  # ═══════ SETTINGS（D-07 系统设置）═══════
+  /admin/settings:
+    get:
+      tags: [settings]
+      summary: 设置列表
+      operationId: list_settings
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: 设置列表
+
+  /admin/settings/categories:
+    get:
+      tags: [settings]
+      summary: 分类枚举
+      operationId: list_setting_categories
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: 分类列表
+
+  /admin/settings/{key}:
+    get:
+      tags: [settings]
+      summary: 获取单个设置
+      operationId: get_setting
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: key, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: 设置值
+    put:
+      tags: [settings]
+      summary: 更新单个设置
+      operationId: update_setting
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: key, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SettingUpdate' }
+      responses:
+        '200':
+          description: 更新成功
+
+  /admin/settings/batch:
+    post:
+      tags: [settings]
+      summary: 批量更新设置
+      operationId: batch_update_settings
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SettingBatchIn' }
+      responses:
+        '200':
+          description: 批量更新成功
+
+  # ═══════ AUDIT（D-07 审计日志）═══════
+  /admin/audit:
+    get:
+      tags: [audit]
+      summary: 审计日志列表
+      operationId: list_audit_logs
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: 审计列表
+
+  /admin/audit/{log_id}:
+    get:
+      tags: [audit]
+      summary: 审计日志详情
+      operationId: get_audit_log
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: log_id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200':
+          description: 审计详情
+
+  /admin/audit/export:
+    post:
+      tags: [audit]
+      summary: 导出审计日志 CSV
+      operationId: export_audit_logs
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: CSV 文件
+
+  /admin/audit/archive:
+    post:
+      tags: [audit]
+      summary: 软归档旧审计日志
+      operationId: archive_audit_logs
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200':
+          description: 归档成功
+
 # ─── 组件 ───
 components:
 
@@ -3716,3 +3993,74 @@ components:
               manual_average:
                 type: number
                 description: 主观题人工均分（未评分则按 0 计）
+
+    # --- 管理端 D-07 ---
+    DashboardOverview:
+      type: object
+      properties:
+        users_total: { type: integer }
+        courses_total: { type: integer }
+        dau: { type: integer }
+        mau: { type: integer }
+        pending_approvals: { type: integer }
+
+    DashboardGrowth:
+      type: object
+      properties:
+        users: { type: array, items: { $ref: '#/components/schemas/GrowthPoint' } }
+        courses: { type: array, items: { $ref: '#/components/schemas/GrowthPoint' } }
+
+    GrowthPoint:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        count: { type: integer }
+
+    DashboardHealth:
+      type: object
+      properties:
+        api_uptime: { type: number }
+        db_connections: { type: integer }
+        ai_available: { type: boolean }
+
+    CourseApprovalReview:
+      type: object
+      properties:
+        comment: { type: string }
+      required: [comment]
+
+    ReportCreate:
+      type: object
+      properties:
+        target_type: { type: string }
+        target_id: { type: string, format: uuid }
+        reason: { type: string, enum: [spam, abuse, harassment, copyright, other] }
+        description: { type: string }
+      required: [target_type, target_id, reason]
+
+    ReportResolve:
+      type: object
+      properties:
+        status: { type: string, enum: [resolved, dismissed] }
+        resolution: { type: string }
+      required: [status]
+
+    SettingUpdate:
+      type: object
+      properties:
+        value: {}
+        category: { type: string }
+        description: { type: string }
+
+    SettingBatchIn:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              key: { type: string }
+              value: {}
+            required: [key, value]
+      required: [items]

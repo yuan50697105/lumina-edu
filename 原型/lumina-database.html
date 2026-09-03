@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 数据库设计文档 v1.6</title>
+<title>Lumina 墨光 · 数据库设计文档 v1.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -120,7 +120,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Database Design</small></div>
     </div>
-    <div class="doc-type">Database Design · v1.6</div>
+    <div class="doc-type">Database Design · v1.7</div>
     <h1>
       <span class="hl">数据</span>库<br/>
       <em>设计文档</em>
@@ -134,7 +134,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.6 · MySQL 9.7 · 35 表 · 13 模块</span>
+      <span class="value">v1.7 · MySQL 9.7 · 44 表 · 16 模块</span>
     </div>
     <div class="row">
       <span class="label">数据库</span>
@@ -153,8 +153,8 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">35</div><div class="lbl">数据表</div></div>
-  <div class="stat"><div class="val hl">13</div><div class="lbl">模块</div></div>
+  <div class="stat"><div class="val hl">44</div><div class="lbl">数据表</div></div>
+  <div class="stat"><div class="val hl">16</div><div class="lbl">模块</div></div>
   <div class="stat"><div class="val">3</div><div class="lbl">分区策略</div></div>
   <div class="stat"><div class="val">1</div><div class="lbl">数据库引擎</div></div>
   <div class="stat"><div class="val">14+</div><div class="lbl">索引策略</div></div>
@@ -176,6 +176,7 @@
     <a href="#s10"><span class="num">10</span>分区策略</a>
     <a href="#s11"><span class="num">11</span>索引策略</a>
     <a href="#s12"><span class="num">12</span>数据迁移</a>
+    <a href="#s13"><span class="num">13</span>管理端模块</a>
   </div>
 </nav>
 
@@ -194,7 +195,7 @@
       <tr><td><b>本地 uploads/</b></td><td>临时上传目录（替代对象存储）</td><td>—</td><td>单体本地目录</td></tr>
     </tbody>
   </table>
-  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：单体架构仅依赖 MySQL 9.7 单库，业务 / AI / 日志数据统一落 MySQL（InnoDB · utf8mb4）；表由 <code>Base.metadata.create_all</code> 自动创建（development 模式），生产初始化脚本见 <code>部署/config/mysql/init.sql</code>。缓存 / 消息队列 / 对象存储等中间件已从单体移除。单体包含 13 个业务模块：user / course / assignment / grade / live / collab / notif / exam / ai_gateway / ai_chat / ai_grade / analytics / logs。</p>
+  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：单体架构仅依赖 MySQL 9.7 单库，业务 / AI / 日志数据统一落 MySQL（InnoDB · utf8mb4）；表由 <code>Base.metadata.create_all</code> 自动创建（development 模式），生产初始化脚本见 <code>部署/config/mysql/init.sql</code>。缓存 / 消息队列 / 对象存储等中间件已从单体移除。单体包含 16 个业务模块：user / course / assignment / grade / live / collab / notif / exam / ai_gateway / ai_chat / ai_grade / analytics / logs。</p>
 
   <h3 class="sub">1.2 数据规模预估</h3>
   <table>
@@ -1397,9 +1398,111 @@ alembic/
   </div>
 </section>
 
+<!-- ============ 13 · 管理端模块 ============ -->
+<section class="section" id="s13">
+  <div class="section-header">
+    <h2>13 · 管理端模块 <em>Admin / Settings / Audit</em></h2>
+    <div class="num-tag">4 tables · D-07</div>
+  </div>
+
+  <p style="font-size:13px; color:var(--inkwell-2);"><b>说明</b>：D-07 管理端已落地 4 张表：<code>course_approvals</code> / <code>system_settings</code> / <code>audit_logs</code> / <code>content_reports</code>，覆盖课程发布审批、全局配置 KV、操作审计与内容举报处理。审批一课一申请（<code>UNIQUE(course_id)</code>）；<code>audit_logs</code> 采用自增 BIGINT 主键（高写入友好）并按 <code>actor_id</code> / <code>action</code> / <code>created_at</code> 建索引，支持 <code>archived</code> 软归档；举报按 <code>pending → reviewing → resolved / dismissed</code> 状态机流转。</p>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">course_approvals</span>
+      <span class="table-desc">课程审批（教师提交发布审批 · 一课一申请）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>CHAR(36)</td><td><span class="tag pk">PK</span></td><td>GUID</td></tr>
+          <tr><td><code>course_id</code></td><td>CHAR(36)</td><td><span class="tag fk">FK</span> → courses · <span class="tag uq">UNIQUE</span></td><td>被审课程</td></tr>
+          <tr><td><code>submitted_by</code></td><td>CHAR(36)</td><td><span class="tag fk">FK</span> → users</td><td>提交教师</td></tr>
+          <tr><td><code>reviewer_id</code></td><td>CHAR(36)</td><td><span class="tag fk">FK</span> → users · NULL</td><td>审核管理员</td></tr>
+          <tr><td><code>status</code></td><td>VARCHAR(20)</td><td>DEFAULT 'pending'</td><td>pending / approved / rejected</td></tr>
+          <tr><td><code>comment</code></td><td>TEXT</td><td>NULL</td><td>审批意见</td></tr>
+          <tr><td><code>submitted_at</code></td><td>TIMESTAMP</td><td><span class="tag nn">NOT NULL</span></td><td>提交时间</td></tr>
+          <tr><td><code>reviewed_at</code></td><td>TIMESTAMP</td><td>NULL</td><td>审核时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">system_settings</span>
+      <span class="table-desc">系统设置 KV（全局配置 · 按 category 分类）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>CHAR(36)</td><td><span class="tag pk">PK</span></td><td>GUID</td></tr>
+          <tr><td><code>key</code></td><td>VARCHAR(100)</td><td><span class="tag uq">UNIQUE</span></td><td>配置键</td></tr>
+          <tr><td><code>value</code></td><td>JSON</td><td><span class="tag nn">NOT NULL</span></td><td>配置值（JSON）</td></tr>
+          <tr><td><code>category</code></td><td>VARCHAR(50)</td><td>DEFAULT 'general'</td><td>general / security / notify / ai</td></tr>
+          <tr><td><code>description</code></td><td>VARCHAR(300)</td><td>NULL</td><td>描述</td></tr>
+          <tr><td><code>updated_by</code></td><td>CHAR(36)</td><td><span class="tag fk">FK</span> → users · NULL</td><td>最后修改人</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">audit_logs</span>
+      <span class="table-desc">审计日志（操作审计 · 自增 BIGINT 主键）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>BIGINT</td><td><span class="tag pk">PK</span> AUTO</td><td>自增 ID</td></tr>
+          <tr><td><code>actor_id</code></td><td>CHAR(36)</td><td><span class="tag idx">IDX</span></td><td>操作人</td></tr>
+          <tr><td><code>action</code></td><td>VARCHAR(50)</td><td><span class="tag idx">IDX</span></td><td>动作（如 setting.update / approval.approve）</td></tr>
+          <tr><td><code>target_type</code></td><td>VARCHAR(30)</td><td>NULL</td><td>目标类型</td></tr>
+          <tr><td><code>target_id</code></td><td>CHAR(36)</td><td>NULL</td><td>目标 ID</td></tr>
+          <tr><td><code>details</code></td><td>JSON</td><td>NULL</td><td>操作细节</td></tr>
+          <tr><td><code>ip_address</code></td><td>VARCHAR(45)</td><td>NULL</td><td>IP（含 IPv6）</td></tr>
+          <tr><td><code>user_agent</code></td><td>TEXT</td><td>NULL</td><td>UA</td></tr>
+          <tr><td><code>status</code></td><td>VARCHAR(10)</td><td>DEFAULT 'success'</td><td>success / failed</td></tr>
+          <tr><td><code>archived</code></td><td>BOOLEAN</td><td>DEFAULT 0</td><td>软归档</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td><span class="tag idx">IDX</span></td><td>操作时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">content_reports</span>
+      <span class="table-desc">内容举报（状态机 pending → reviewing → resolved / dismissed）</span>
+    </div>
+    <div class="table-body">
+      <table>
+        <thead><tr><th>字段</th><th>类型</th><th>约束</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code></td><td>CHAR(36)</td><td><span class="tag pk">PK</span></td><td>GUID</td></tr>
+          <tr><td><code>reporter_id</code></td><td>CHAR(36)</td><td><span class="tag fk">FK</span> → users</td><td>举报人</td></tr>
+          <tr><td><code>target_type</code></td><td>VARCHAR(30)</td><td><span class="tag nn">NOT NULL</span></td><td>目标类型</td></tr>
+          <tr><td><code>target_id</code></td><td>CHAR(36)</td><td><span class="tag nn">NOT NULL</span></td><td>目标 ID</td></tr>
+          <tr><td><code>reason</code></td><td>VARCHAR(30)</td><td>DEFAULT 'other'</td><td>spam / abuse / harassment / copyright / other</td></tr>
+          <tr><td><code>description</code></td><td>TEXT</td><td>NULL</td><td>举报描述</td></tr>
+          <tr><td><code>status</code></td><td>VARCHAR(20)</td><td>DEFAULT 'pending'</td><td>pending / reviewing / resolved / dismissed</td></tr>
+          <tr><td><code>reviewer_id</code></td><td>CHAR(36)</td><td><span class="tag fk">FK</span> → users · NULL</td><td>处理管理员</td></tr>
+          <tr><td><code>resolution</code></td><td>TEXT</td><td>NULL</td><td>处理结论</td></tr>
+          <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td><span class="tag nn">NOT NULL</span></td><td>举报时间</td></tr>
+          <tr><td><code>reviewed_at</code></td><td>TIMESTAMP</td><td>NULL</td><td>处理时间</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Database Design</div>
-  <div>v1.6 · 35 表 · 13 模块 · MySQL 9.7</div>
+  <div>v1.7 · 44 表 · 16 模块 · MySQL 9.7</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">DB-LUMINA-2026-001</div>
 </footer>
 

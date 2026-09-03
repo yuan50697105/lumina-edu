@@ -186,7 +186,7 @@
     <tbody>
       <tr><td><b>① 单元测试</b></td><td>函数/方法级别（security · models · queries · live · collab · notif · exam · logging_json · adapters · media_proxy · openapi · d05_analytics · d07_admin 13 个测试文件）</td><td>251</td><td>pytest</td><td>&lt; 30s</td></tr>
       <tr><td><b>② 集成测试</b></td><td>模块间交互</td><td>100+（需 MySQL，未就绪自动跳过）</td><td>pytest · --include-api</td><td>~2 min</td></tr>
-      <tr><td><b>③ API 测试</b></td><td>接口契约</td><td>98 端点 / 60 前端调用</td><td>api_contract_check.py</td><td>~5 min</td></tr>
+      <tr><td><b>③ API 测试</b></td><td>接口契约</td><td>141 端点 / 60 前端调用</td><td>api_contract_check.py</td><td>~5 min</td></tr>
       <tr><td><b>④ E2E 测试</b></td><td>用户流程</td><td>smoke_test.py 15 步 + smoke_collab.py 21 步 + smoke_notif.py 12 步 + smoke_exam.py 28 步</td><td>smoke_test.py · smoke_collab.py · smoke_notif.py · smoke_exam.py</td><td>~20 min</td></tr>
       <tr><td><b>⑤ 性能测试</b></td><td>压力/负载</td><td>3 场景</td><td>load_test.py</td><td>~30 min</td></tr>
     </tbody>
