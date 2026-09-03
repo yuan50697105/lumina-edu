@@ -28,7 +28,7 @@ class TestTableDefinitions:
     """表定义测试"""
 
     def test_all_tables_exist(self, tables):
-        """所有 44 张表已定义"""
+        """所有 57 张表已定义"""
         expected = {
             "users", "sessions", "courses", "enrollments", "chapters",
             "announcements", "assignments", "submissions", "grade_records",
@@ -37,14 +37,23 @@ class TestTableDefinitions:
             "ai_models", "ai_providers", "grades",
             "live_rooms", "live_attendees", "live_messages",
             "live_quizzes", "live_quiz_answers",
+            # D-05 学情
+            "student_groups", "student_group_members", "tutoring_sessions",
+            "risk_alerts", "learning_insights",
             # D-07 管理端
             "course_approvals", "system_settings", "audit_logs", "content_reports",
+            # D-06 自主学习
+            "learning_paths", "learning_path_nodes", "learning_path_progress",
+            "user_xp", "check_in_records", "badges", "user_badges",
+            "challenges", "challenge_attempts",
+            # D-08 视频录播
+            "videos", "video_chapters", "video_notes", "video_watch_history",
         }
         assert expected.issubset(tables), f"缺少表: {expected - tables}"
 
     def test_table_count(self, tables):
-        """表数量为 44（17 业务 + 5 直播 + 8 协作 + 1 消息通知 + 4 题库考试 D-04 + 5 学情 D-05 + 4 管理端 D-07/D-08）"""
-        assert len(tables) == 44
+        """表数量为 57（17 业务 + 5 直播 + 8 协作 + 1 消息通知 + 4 题库考试 D-04 + 5 学情 D-05 + 4 管理端 D-07/D-08 + 13 学习/视频 D-06/D-08）"""
+        assert len(tables) == 57
 
 
 class TestUserModel:

@@ -35,6 +35,8 @@ from app.modules.exam import routers as exam_routers
 from app.modules.tutoring import routers as tutoring_routers
 from app.modules.admin import routers as admin_routers
 from app.modules.settings import routers as settings_routers
+from app.modules.learning import routers as learning_routers
+from app.modules.video import routers as video_routers
 
 install_json_logging()
 logger = logging.getLogger("lumina.app")
@@ -161,6 +163,10 @@ app.include_router(settings_routers.router, prefix="/api/v1")
 # 审计日志子路由（D-07/D-08）
 if hasattr(logs_routers, "audit_router"):
     app.include_router(logs_routers.audit_router, prefix="/api/v1")
+# 自主学习（D-06）
+app.include_router(learning_routers.router, prefix="/api/v1")
+# 视频录播（D-08）
+app.include_router(video_routers.router, prefix="/api/v1")
 
 
 @app.exception_handler(Exception)

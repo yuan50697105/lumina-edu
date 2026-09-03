@@ -748,4 +748,229 @@ class ContentReport(Base):
     reviewed_at = Column(DateTime(timezone=True), nullable=True)
 
 
+# ═══════════════════════════════════════════════════════════════════
+# D-06 · 自主学习与闯关奖励
+# ═══════════════════════════════════════════════════════════════════
+class LearningPath(Base):
+    """学习路径（闯关地图）"""
+    __tablename__ = "learning_paths"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    category = Column(String(50), nullable=False)            # 编程/设计/语言/数学 ...
+    difficulty = Column(String(20), default="入门")           # 入门/进阶/硬核
+    cover_emoji = Column(String(10), nullable=True)
+    cover_gradient = Column(String(100), nullable=True)       # CSS gradient
+    total_nodes = Column(Integer, default=0)                  # 关卡总数
+    total_xp = Column(Integer, default=0)                     # 路径总 XP
+    learner_count = Column(Integer, default=0)                # 在学人数
+    published = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
+
+
+class LearningPathNode(Base):
+    """路径节点（关卡）"""
+    __tablename__ = "learning_path_nodes"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    path_id = Column(GUID, ForeignKey("learning_paths.id", ondelete="CASCADE"), nullable=False, index=True)
+    sequence = Column(Integer, nullable=False)                 # 顺序（1, 2, 3...）
+    node_type = Column(String(20), nullable=False)             # reading / video / quiz / challenge
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    duration_min = Column(Integer, nullable=True)              # 预计时长
+    xp_reward = Column(Integer, default=0)                     # 通关 XP
+    content = Column(JSON, nullable=True)                      # 内容数据（视频 ID / 题目列表 / 文本）
+    prerequisites = Column(JSON, nullable=True)                # 前置节点 ID 列表
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("path_id", "sequence", name="uq_path_node_seq"),
+    )
+
+
+class LearningPathProgress(Base):
+    """路径学习进度（每用户每节点一行）"""
+    __tablename__ = "learning_path_progress"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID, nullable=False, index=True)
+    path_id = Column(GUID, ForeignKey("learning_paths.id", ondelete="CASCADE"), nullable=False)
+    node_id = Column(GUID, ForeignKey("learning_path_nodes.id", ondelete="CASCADE"), nullable=False)
+    status = Column(String(20), default="locked")              # locked / current / done
+    xp_earned = Column(Integer, default=0)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "node_id", name="uq_user_node_progress"),
+        Index("ix_progress_user_path", "user_id", "path_id"),
+    )
+
+
+class UserXP(Base):
+    """用户经验值汇总（聚合表）"""
+    __tablename__ = "user_xp"
+
+    user_id = Column(GUID, primary_key=True)
+    total_xp = Column(Integer, default=0, nullable=False)
+    level = Column(Integer, default=1, nullable=False)
+    streak_days = Column(Integer, default=0, nullable=False)   # 连续打卡天数
+    last_checkin_date = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
+
+
+class CheckInRecord(Base):
+    """打卡记录（每日一次）"""
+    __tablename__ = "check_in_records"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID, nullable=False, index=True)
+    checkin_date = Column(DateTime(timezone=True), nullable=False)    # 打卡日期（UTC 当天 00:00）
+    xp_awarded = Column(Integer, default=10)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "checkin_date", name="uq_user_checkin_date"),
+    )
+
+
+class Badge(Base):
+    """徽章定义（系统预置）"""
+    __tablename__ = "badges"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    code = Column(String(50), unique=True, nullable=False)     # streak_7 / first_challenge / ...
+    name = Column(String(100), nullable=False)
+    description = Column(String(300), nullable=True)
+    icon = Column(String(10), nullable=False)                  # emoji
+    condition_type = Column(String(50), nullable=False)        # streak / xp / path_complete / ...
+    condition_value = Column(Integer, default=0)               # 触发阈值
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
+class UserBadge(Base):
+    """用户已获得徽章"""
+    __tablename__ = "user_badges"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID, nullable=False, index=True)
+    badge_id = Column(GUID, ForeignKey("badges.id", ondelete="CASCADE"), nullable=False)
+    earned_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "badge_id", name="uq_user_badge"),
+    )
+
+
+class Challenge(Base):
+    """闯关挑战（题目集合）"""
+    __tablename__ = "challenges"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    node_id = Column(GUID, ForeignKey("learning_path_nodes.id", ondelete="SET NULL"), nullable=True, index=True)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    time_limit_min = Column(Integer, nullable=True)            # 限时（分钟）
+    questions = Column(JSON, nullable=False)                   # 题目列表 [{q, options, answer}]
+    max_attempts = Column(Integer, default=3)                  # 最大尝试次数
+    pass_score = Column(Integer, default=60)                   # 及格分（百分制）
+    xp_reward = Column(Integer, default=0)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
+class ChallengeAttempt(Base):
+    """闯关尝试记录"""
+    __tablename__ = "challenge_attempts"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID, nullable=False, index=True)
+    challenge_id = Column(GUID, ForeignKey("challenges.id", ondelete="CASCADE"), nullable=False)
+    answers = Column(JSON, nullable=True)                      # 用户答案
+    score = Column(Integer, default=0)                         # 得分（百分制）
+    passed = Column(Boolean, default=False)
+    xp_earned = Column(Integer, default=0)
+    started_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    submitted_at = Column(DateTime(timezone=True), nullable=True)
+
+
+# ═══════════════════════════════════════════════════════════════════
+# D-08 · 教学视频与录播回放
+# ═══════════════════════════════════════════════════════════════════
+class Video(Base):
+    """录播视频"""
+    __tablename__ = "videos"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="SET NULL"), nullable=True, index=True)
+    title = Column(String(300), nullable=False)
+    description = Column(Text, nullable=True)
+    category = Column(String(50), nullable=True)               # 编程/数学/设计/语言 ...
+    tags = Column(JSON, nullable=True)                         # 标签列表
+    duration_sec = Column(Integer, default=0)                  # 时长（秒）
+    video_url = Column(String(500), nullable=True)             # HLS/MP4 地址
+    thumbnail_url = Column(String(500), nullable=True)
+    cover_emoji = Column(String(10), nullable=True)
+    cover_gradient = Column(String(100), nullable=True)
+    view_count = Column(Integer, default=0)
+    published = Column(Boolean, default=False)
+    created_by = Column(GUID, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
+
+
+class VideoChapter(Base):
+    """视频章节（时间戳）"""
+    __tablename__ = "video_chapters"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    video_id = Column(GUID, ForeignKey("videos.id", ondelete="CASCADE"), nullable=False, index=True)
+    sequence = Column(Integer, nullable=False)
+    title = Column(String(200), nullable=False)
+    start_sec = Column(Integer, nullable=False)                # 章节起始秒数
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("video_id", "sequence", name="uq_video_chapter_seq"),
+    )
+
+
+class VideoNote(Base):
+    """视频笔记（时间戳绑定）"""
+    __tablename__ = "video_notes"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID, nullable=False, index=True)
+    video_id = Column(GUID, ForeignKey("videos.id", ondelete="CASCADE"), nullable=False)
+    timestamp_sec = Column(Integer, nullable=False)            # 笔记绑定的时间点
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index("ix_video_notes_user_video", "user_id", "video_id"),
+    )
+
+
+class VideoWatchHistory(Base):
+    """视频观看历史"""
+    __tablename__ = "video_watch_history"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID, nullable=False, index=True)
+    video_id = Column(GUID, ForeignKey("videos.id", ondelete="CASCADE"), nullable=False)
+    watched_sec = Column(Integer, default=0)                   # 已观看秒数
+    total_sec = Column(Integer, default=0)                     # 视频总时长
+    progress_pct = Column(Integer, default=0)                  # 进度百分比
+    last_watched_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "video_id", name="uq_user_video_history"),
+    )
+
+
 # ─── 监控共享表 ───

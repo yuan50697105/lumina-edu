@@ -14,6 +14,11 @@ import CourseDetail from './src/pages/CourseDetail'
 import AIChat from './src/pages/AIChat'
 import Grades from './src/pages/Grades'
 import LiveRoom from './src/pages/LiveRoom'
+import Learning from './src/pages/Learning'
+import Videos from './src/pages/Videos'
+import Achievements from './src/pages/Achievements'
+import History from './src/pages/History'
+import Profile from './src/pages/Profile'
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
@@ -38,6 +43,11 @@ export default function App() {
           <Stack.Screen name="AIChat" component={AIChat} options={{ title: 'AI 导师' }} />
           <Stack.Screen name="Grades" component={Grades} options={{ title: '我的成绩单' }} />
           <Stack.Screen name="LiveRoom" component={LiveRoom} options={{ title: '直播课堂' }} />
+          <Stack.Screen name="Learning" component={Learning} options={{ title: '学习' }} />
+          <Stack.Screen name="Videos" component={Videos} options={{ title: '视频' }} />
+          <Stack.Screen name="Achievements" component={Achievements} options={{ title: '成就' }} />
+          <Stack.Screen name="History" component={History} options={{ title: '历史' }} />
+          <Stack.Screen name="Profile" component={Profile} options={{ title: '我的' }} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

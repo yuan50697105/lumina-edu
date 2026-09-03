@@ -1441,3 +1441,230 @@ class ReportOut(BaseModel):
         from_attributes = True
 
 
+# ═══════════════════════════════════════════════════════════════════
+# D-06 · 自主学习与闯关奖励
+# ═══════════════════════════════════════════════════════════════════
+
+# ─── 学习路径 ───
+class LearningPathOut(BaseModel):
+    id: uuid.UUID
+    title: str
+    description: Optional[str] = None
+    category: str
+    difficulty: str
+    cover_emoji: Optional[str] = None
+    cover_gradient: Optional[str] = None
+    total_nodes: int
+    total_xp: int
+    learner_count: int
+    progress_pct: Optional[float] = None     # 当前用户进度（0-100）
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class LearningPathNodeOut(BaseModel):
+    id: uuid.UUID
+    path_id: uuid.UUID
+    sequence: int
+    node_type: str                           # reading / video / quiz / challenge
+    title: str
+    description: Optional[str] = None
+    duration_min: Optional[int] = None
+    xp_reward: int
+    status: str                              # locked / current / done
+    xp_earned: int = 0
+    completed_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+# ─── 经验值 / 等级 ───
+class UserXPOut(BaseModel):
+    user_id: uuid.UUID
+    total_xp: int
+    level: int
+    streak_days: int
+    last_checkin_date: Optional[datetime] = None
+    xp_to_next_level: int                    # 距下一级还需 XP
+    level_progress_pct: float                # 当前等级进度（0-100）
+
+    class Config:
+        from_attributes = True
+
+# ─── 打卡 ───
+class CheckInOut(BaseModel):
+    success: bool
+    message: str
+    xp_awarded: int = 0
+    streak_days: int = 0
+    already_checked: bool = False
+
+class CheckInCalendarOut(BaseModel):
+    """打卡日历（近 N 天）"""
+    days: list[dict]                         # [{date, checked, xp}]
+    total_checked: int
+    current_streak: int
+
+# ─── 徽章 ───
+class BadgeOut(BaseModel):
+    id: uuid.UUID
+    code: str
+    name: str
+    description: Optional[str] = None
+    icon: str
+    condition_type: str
+    condition_value: int
+    earned: bool = False                     # 当前用户是否已获得
+    earned_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+# ─── 闯关挑战 ───
+class ChallengeOut(BaseModel):
+    id: uuid.UUID
+    node_id: Optional[uuid.UUID] = None
+    title: str
+    description: Optional[str] = None
+    time_limit_min: Optional[int] = None
+    question_count: int                      # 题目数量
+    max_attempts: int
+    pass_score: int
+    xp_reward: int
+    attempts_left: int = 0                   # 剩余尝试次数
+
+    class Config:
+        from_attributes = True
+
+class ChallengeStartOut(BaseModel):
+    """开始闯关：返回题目（不含答案）"""
+    challenge_id: uuid.UUID
+    title: str
+    time_limit_min: Optional[int] = None
+    questions: list[dict]                    # [{index, q, options}]（无 answer）
+    attempt_id: uuid.UUID
+
+class ChallengeSubmitIn(BaseModel):
+    attempt_id: uuid.UUID
+    answers: list[dict]                      # [{index, answer}]
+
+class ChallengeResultOut(BaseModel):
+    attempt_id: uuid.UUID
+    score: int
+    passed: bool
+    xp_earned: int
+    correct_count: int
+    total_count: int
+    answers_review: list[dict]               # [{index, q, your_answer, correct_answer, is_correct}]
+
+# ─── 排行榜 ───
+class LeaderboardEntry(BaseModel):
+    rank: int
+    user_id: uuid.UUID
+    name: str
+    avatar_emoji: Optional[str] = None
+    total_xp: int
+    level: int
+    streak_days: int
+
+class LeaderboardOut(BaseModel):
+    entries: list[LeaderboardEntry]
+    my_rank: Optional[int] = None
+    total_users: int
+
+
+# ═══════════════════════════════════════════════════════════════════
+# D-08 · 教学视频与录播回放
+# ═══════════════════════════════════════════════════════════════════
+
+# ─── 视频 ───
+class VideoOut(BaseModel):
+    id: uuid.UUID
+    course_id: Optional[uuid.UUID] = None
+    title: str
+    description: Optional[str] = None
+    category: Optional[str] = None
+    tags: Optional[list[str]] = None
+    duration_sec: int
+    duration_display: Optional[str] = None   # "40:12" 格式
+    video_url: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    cover_emoji: Optional[str] = None
+    cover_gradient: Optional[str] = None
+    view_count: int
+    progress_pct: int = 0                    # 当前用户观看进度
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class VideoDetailOut(VideoOut):
+    """视频详情（含章节、笔记）"""
+    chapters: list["VideoChapterOut"] = []
+    notes: list["VideoNoteOut"] = []
+
+# ─── 视频章节 ───
+class VideoChapterOut(BaseModel):
+    id: uuid.UUID
+    video_id: uuid.UUID
+    sequence: int
+    title: str
+    start_sec: int
+    start_display: Optional[str] = None      # "12:36" 格式
+
+    class Config:
+        from_attributes = True
+
+# ─── 视频笔记 ───
+class VideoNoteCreate(BaseModel):
+    video_id: uuid.UUID
+    timestamp_sec: int = Field(..., ge=0)
+    content: str = Field(..., min_length=1, max_length=2000)
+
+class VideoNoteOut(BaseModel):
+    id: uuid.UUID
+    video_id: uuid.UUID
+    timestamp_sec: int
+    timestamp_display: Optional[str] = None  # "12:36" 格式
+    content: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# ─── 观看历史 ───
+class VideoWatchHistoryOut(BaseModel):
+    video_id: uuid.UUID
+    title: str
+    cover_emoji: Optional[str] = None
+    cover_gradient: Optional[str] = None
+    duration_sec: int
+    duration_display: Optional[str] = None
+    watched_sec: int
+    progress_pct: int
+    last_watched_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class VideoProgressIn(BaseModel):
+    """上报播放进度"""
+    video_id: uuid.UUID
+    watched_sec: int = Field(..., ge=0)
+    total_sec: int = Field(..., ge=0)
+
+
+# ─── 学习统计（成就页） ───
+class LearningStatsOut(BaseModel):
+    """成就页统计汇总"""
+    total_xp: int
+    level: int
+    streak_days: int
+    paths_completed: int
+    paths_total: int
+    badges_earned: int
+    badges_total: int
+    challenges_passed: int
+    videos_watched: int
+    videos_total: int

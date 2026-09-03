@@ -6,4 +6,9 @@ export type RootStackParamList = {
   AIChat: { conversationId?: string }
   Grades: undefined
   LiveRoom: { roomId: string }
+  Learning: undefined   // D-06
+  Videos: undefined     // D-08
+  Achievements: undefined
+  History: undefined
+  Profile: undefined
 }
