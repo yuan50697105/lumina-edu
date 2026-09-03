@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · 鸿蒙硬件平台与操作系统支持需求文档</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding:56px 64px; max-width:1280px; margin:0 auto;}
+
+  .cover{padding:64px 0 56px; border-bottom:1px solid var(--line); margin-bottom:48px;}
+  .cover .brand{display:flex; align-items:center; gap:14px; margin-bottom:28px;}
+  .cover .brand .logo{width:56px; height:56px; border-radius:14px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:28px; font-weight:500; font-style:italic;}
+  .cover .brand .name{font-family:var(--f-display); font-size:20px; font-weight:500;}
+  .cover .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:4px;}
+  .cover .doc-type{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--ai); background:var(--ai-soft); padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:18px;}
+  .cover h1{font-family:var(--f-display); font-weight:300; font-size:66px; letter-spacing:-0.04em; line-height:1;}
+  .cover h1 em{font-style:italic; color:var(--correction);}
+  .cover h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .cover .subtitle{font-size:18px; color:var(--inkwell-2); margin-top:18px; font-weight:300;}
+  .cover .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:22px; line-height:2;}
+
+  .stats{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:48px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px;}
+  .stat{text-align:center; padding:6px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .val{font-family:var(--f-display); font-size:26px; font-weight:300;}
+  .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  .section{margin-bottom:56px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:22px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:34px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  h3.sub{font-family:var(--f-display); font-size:22px; font-weight:400; margin:28px 0 14px; letter-spacing:-0.01em;}
+  h3.sub em{font-style:italic; color:var(--cobalt);}
+
+  p{margin-bottom:12px; line-height:1.7;}
+  ul,ol{margin:0 0 16px 20px; line-height:1.8;}
+  li{margin-bottom:4px;}
+  b{font-weight:600;}
+  code{font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px; font-size:13px; border:1px solid var(--line);}
+
+  table{width:100%; border-collapse:collapse; margin:14px 0 22px; font-size:13px;}
+  th{background:var(--ricepaper); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-strong);}
+  td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  tr:hover td{background:rgba(250,246,236,0.5);}
+  .tag{display:inline-block; font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; padding:2px 7px; border-radius:4px;}
+  .tag.p0{background:var(--correction); color:#fff;}
+  .tag.p1{background:var(--highlighter); color:var(--inkwell);}
+  .tag.p2{background:var(--cobalt-soft); color:var(--cobalt);}
+  .tag.p3{background:var(--ricepaper-2); color:var(--inkwell-2);}
+  .tag.done{background:var(--growth-soft); color:var(--growth);}
+  .tag.todo{background:var(--ai-soft); color:var(--ai);}
+  .tag.student{background:#E0F2FE; color:#0369A1;}
+  .tag.teacher{background:#FEF3C7; color:#92400E;}
+  .tag.admin{background:var(--correction-soft); color:var(--correction);}
+  .tag.reco{background:var(--growth); color:#fff;}
+
+  .info{padding:16px 20px; border-radius:10px; margin:16px 0 20px; font-size:13px; line-height:1.7;}
+  .info .label{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; font-weight:600;}
+  .info.note{background:var(--cobalt-soft); border:1px solid var(--cobalt);}
+  .info.warn{background:var(--highlighter-soft); border:1px solid var(--highlighter);}
+  .info.success{background:var(--growth-soft); border:1px solid var(--growth);}
+  .info.ai{background:var(--ai-soft); border:1px solid var(--ai);}
+  .info.risk{background:var(--correction-soft); border:1px solid var(--correction);}
+
+  .module-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:22px 24px; margin:14px 0; position:relative; overflow:hidden;}
+  .module-card:before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--cobalt);}
+  .module-card.gamification:before{background:var(--ai);}
+  .module-card.reward:before{background:var(--highlighter);}
+  .module-card .card-header{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+  .module-card .card-icon{width:36px; height:36px; border-radius:10px; background:var(--cobalt-soft); color:var(--cobalt); display:flex; align-items:center; justify-content:center; font-size:18px;}
+  .module-card.gamification .card-icon{background:var(--ai-soft); color:var(--ai);}
+  .module-card.reward .card-icon{background:var(--highlighter-soft); color:var(--inkwell);}
+  .module-card .card-title{font-family:var(--f-display); font-size:20px; font-weight:400;}
+  .module-card .card-title em{font-style:italic; color:var(--cobalt);}
+  .module-card.gamification .card-title em{color:var(--ai);}
+  .module-card.reward .card-title em{color:var(--highlighter);}
+
+  .dev-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin:16px 0 22px;}
+  .dev-card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px 18px;}
+  .dev-card .dev-name{font-family:var(--f-display); font-size:17px; font-weight:500; display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+  .dev-card .dev-name .sz{font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); font-weight:400;}
+  .dev-card ul{margin:8px 0 0 18px; font-size:12.5px; line-height:1.7;}
+
+  .flow{background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; margin:18px 0;}
+  .flow-step{display:flex; gap:14px; padding:10px 0; border-bottom:1px dashed var(--line); align-items:flex-start;}
+  .flow-step:last-child{border-bottom:none;}
+  .flow-num{flex-shrink:0; width:28px; height:28px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-mono); font-size:12px; font-weight:600;}
+  .flow-content{flex:1;}
+  .flow-content .title{font-weight:600; margin-bottom:4px;}
+  .flow-content .desc{font-size:13px; color:var(--inkwell-2); line-height:1.6;}
+
+  .persona{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 22px; margin:14px 0; display:grid; grid-template-columns:80px 1fr; gap:18px; align-items:center;}
+  .persona .avatar{width:72px; height:72px; border-radius:50%; background:var(--cobalt-soft); display:flex; align-items:center; justify-content:center; font-size:32px;}
+  .persona .info-block .name{font-family:var(--f-display); font-size:18px; font-weight:500; margin-bottom:4px;}
+  .persona .info-block .role{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--cobalt); margin-bottom:8px;}
+  .persona .info-block .quote{font-style:italic; color:var(--inkwell-2); font-size:13px; line-height:1.6;}
+
+  .api-block{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 18px; margin:10px 0; font-family:var(--f-mono); font-size:12px;}
+  .api-block .method{display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600; margin-right:8px;}
+  .api-block .method.get{background:var(--growth-soft); color:var(--growth);}
+  .api-block .method.post{background:var(--cobalt-soft); color:var(--cobalt);}
+  .api-block .method.put{background:var(--highlighter-soft); color:var(--inkwell);}
+  .api-block .method.delete{background:var(--correction-soft); color:var(--correction);}
+  .api-block .path{color:var(--inkwell);}
+  .api-block .desc{color:var(--inkwell-2); font-size:11px; margin-top:4px; font-family:var(--f-body);}
+
+  footer{margin-top:56px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div>
+    <div class="brand">
+      <div class="logo">墨</div>
+      <div class="name">Lumina · 墨光<small>Requirements Document · D-11</small></div>
+    </div>
+    <div class="doc-type">Requirement Specification · v1.0</div>
+    <h1><span class="hl">鸿蒙支持</span><br/><em>Hardware</em> & OS</h1>
+    <p class="subtitle">HarmonyOS NEXT · ArkTS / ArkUI · 分布式能力 · 原子化服务 · 校园信创</p>
+    <div class="meta">
+      Document ID: REQ-LUMINA-D11-2026-001 · Status: Draft<br/>
+      Version: 1.0 · Date: 2026-09-03<br/>
+      Author: Claude Team Review · Owner: Yuan · WBS-P: D-11（平台覆盖 / 国产化）
+    </div>
+  </div>
+</header>
+
+<!-- ============ STATS ============ -->
+<div class="stats">
+  <div class="stat">
+    <div class="val hl">6</div>
+    <div class="lbl">设备形态 Device Forms</div>
+  </div>
+  <div class="stat">
+    <div class="val">3</div>
+    <div class="lbl">OS 版本 HarmonyOS Editions</div>
+  </div>
+  <div class="stat">
+    <div class="val">3</div>
+    <div class="lbl">开发路线 Migration Routes</div>
+  </div>
+  <div class="stat">
+    <div class="val">8</div>
+    <div class="lbl">周排期 Weeks</div>
+  </div>
+</div>
+
+<!-- ============ §1 战略定位 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>01 · <em>Strategic Positioning</em></h2>
+    <span class="num-tag">§1 战略定位</span>
+  </div>
+
+  <h3 class="sub">1.1 · <em>背景</em></h3>
+  <p>近年来高校信息化采购中<b>信创（信息技术应用创新）诉求持续上升</b>，国产操作系统与终端设备进入合规目录成为诸多高校的招标硬性条件。与此同时，<b>HarmonyOS NEXT（纯血鸿蒙）生态自 2024 年快速崛起</b>，华为 / 荣耀新机型装机量高速增长，高校师生群体中的鸿蒙设备持有比例已成规模。</p>
+  <p>但<b>Expo 官方不支持鸿蒙</b>——Lumina 现有移动端（React Native / Expo SDK 52）无法直接输出鸿蒙版本，鸿蒙端是当前跨端矩阵中的<b>空白</b>。</p>
+
+  <h3 class="sub">1.2 · <em>Lumina 跨端矩阵现状</em></h3>
+  <table>
+    <tr><th>端</th><th>技术栈</th><th>状态</th><th>说明</th></tr>
+    <tr><td><b>iOS / Android</b></td><td>React Native / Expo SDK 52</td><td><span class="tag done">✅ 已实现</span></td><td><code>服务/mobile-app/</code>，功能对齐 Web</td></tr>
+    <tr><td><b>Web</b></td><td>React 18 + TS + Vite</td><td><span class="tag done">✅ 已实现</span></td><td><code>服务/web-frontend/</code></td></tr>
+    <tr><td><b>桌面</b></td><td>Electron（规划中）</td><td><span class="tag p1">🟡 原型</span></td><td><code>原型/PC/</code>，TDD §3.2</td></tr>
+    <tr><td><b>鸿蒙 HarmonyOS</b></td><td>—</td><td><span class="tag p0">⏳ 空白（本文档补齐）</span></td><td>Expo 不支持，需独立技术路线（见 §6）</td></tr>
+  </table>
+
+  <h3 class="sub">1.3 · <em>定位与价值</em></h3>
+  <div class="info ai">
+    <div class="label">🎯 定位</div>
+    鸿蒙作为<b>第五端</b>纳入 Lumina 跨端矩阵，与 iOS / Android / Web / 桌面并列；复用现有后端 API（同接口契约，见 §7/§8），客户端以 <b>ArkTS + ArkUI 原生开发</b>为主路线。
+  </div>
+  <ul>
+    <li><b>目标用户</b>：高校师生中的鸿蒙设备用户（华为 / 荣耀新机型，HarmonyOS NEXT 5.0+）</li>
+    <li><b>商业价值</b>：进入信创市场 · 满足高校采购合规要求 · 以「分布式跨端体验」形成差异化竞争</li>
+    <li><b>节奏约束</b>：对齐 WBS-P D-11「演进评估，不阻塞 M4」，作为 M4 之后的平台扩展批次</li>
+  </ul>
+
+  <div class="persona">
+    <div class="avatar">👨‍🏫</div>
+    <div class="info-block">
+      <div class="name">周老师 · 某高校教务处信息化负责人</div>
+      <div class="role">Driver Persona · <span class="tag admin">信创采购</span></div>
+      <div class="quote">"今年智慧教室招标要求终端与操作系统进入信创目录，教室里的 MatePad 和智慧屏都跑鸿蒙——教学平台如果没有鸿蒙客户端，采购评分直接扣分。"</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ §2 硬件平台矩阵 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>02 · <em>Hardware Matrix</em></h2>
+    <span class="num-tag">§2 硬件平台矩阵（6 类设备形态）</span>
+  </div>
+
+  <p>鸿蒙生态覆盖 6 类设备形态，Lumina 按<b>教学场景价值 × 装机规模 × 适配成本</b>排出优先级：</p>
+
+  <table>
+    <tr><th>设备形态</th><th>屏幕尺寸</th><th>使用场景</th><th>优先级</th></tr>
+    <tr><td><b>📱 鸿蒙手机</b></td><td>6.1" ~ 6.9"</td><td>移动学习 / 直播观看 / 答题 / 打卡</td><td><span class="tag p0">P0</span></td></tr>
+    <tr><td><b>📲 鸿蒙平板</b></td><td>10.4" ~ 12.6"</td><td>深度学习 / 笔记 / 小组协作 / 考试</td><td><span class="tag p0">P0</span></td></tr>
+    <tr><td><b>💻 鸿蒙 PC</b></td><td>13" ~ 14.2"</td><td>教师备课 / 作业批阅 / 管理后台</td><td><span class="tag p1">P1</span></td></tr>
+    <tr><td><b>📺 智慧屏</b></td><td>65" ~ 98"</td><td>教室直播投屏 / 课堂互动展示</td><td><span class="tag p2">P2</span></td></tr>
+    <tr><td><b>⌚ 穿戴设备</b></td><td>1.4" ~ 1.8"</td><td>通知 / 快捷签到 / 学习计时</td><td><span class="tag p3">P3</span></td></tr>
+    <tr><td><b>🚗 车机</b></td><td>12" ~ 17"</td><td>通勤学习 / 音频课程</td><td><span class="tag p3">P3</span></td></tr>
+  </table>
+
+  <h3 class="sub">2.1 · <em>各形态适配要点</em></h3>
+  <div class="dev-grid">
+    <div class="dev-card">
+      <div class="dev-name">📱 鸿蒙手机 <span class="tag p0">P0</span></div>
+      <ul>
+        <li><b>UI</b>：单列纵向布局，对齐 mobile-app 6 页面信息架构</li>
+        <li><b>交互</b>：触控 + 手势返回，答题选项大按钮（≥44vp）</li>
+        <li><b>性能</b>：中低端芯片保帧，直播走 HLS 自适应码率</li>
+      </ul>
+    </div>
+    <div class="dev-card">
+      <div class="dev-name">📲 鸿蒙平板 <span class="tag p0">P0</span></div>
+      <ul>
+        <li><b>UI</b>：双栏（列表 + 详情），直播/笔记分屏并显</li>
+        <li><b>交互</b>：支持 M-Pencil 手写批注、键盘快捷操作</li>
+        <li><b>性能</b>：高分屏渲染，视频硬解 + 后台小窗播放</li>
+      </ul>
+    </div>
+    <div class="dev-card">
+      <div class="dev-name">💻 鸿蒙 PC <span class="tag p1">P1</span></div>
+      <ul>
+        <li><b>UI</b>：三栏布局，向 Web 端信息密度看齐（批阅工作台）</li>
+        <li><b>交互</b>：鼠标/快捷键优先，多窗口并行（直播 + 名单）</li>
+        <li><b>性能</b>：批量导入/导出大表格虚拟滚动</li>
+      </ul>
+    </div>
+    <div class="dev-card">
+      <div class="dev-name">📺 智慧屏 <span class="tag p2">P2</span></div>
+      <ul>
+        <li><b>UI</b>：演示模式（大字距、去导航），仅投屏 + 答题统计视图</li>
+        <li><b>交互</b>：遥控器方向键 / 手机端遥控，无触控假设</li>
+        <li><b>性能</b>：1080P/4K 拉流稳定，长时间开机内存回收</li>
+      </ul>
+    </div>
+    <div class="dev-card">
+      <div class="dev-name">⌚ 穿戴设备 <span class="tag p3">P3</span></div>
+      <ul>
+        <li><b>UI</b>：卡片式极简：今日课表 / 待办作业 / 签到按钮</li>
+        <li><b>交互</b>：抬腕即看 + 一键签到，消息快捷回复</li>
+        <li><b>性能</b>：轻应用（Atomic Service）形态，低电耗轮询</li>
+      </ul>
+    </div>
+    <div class="dev-card">
+      <div class="dev-name">🚗 车机 <span class="tag p3">P3</span></div>
+      <ul>
+        <li><b>UI</b>：音频课程模式，行中禁止视频/答题交互</li>
+        <li><b>交互</b>：语音播报 + 大控件，接入鸿蒙座舱音频焦点</li>
+        <li><b>性能</b>：弱网断点续播，后台音频常驻</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info note">
+    <div class="label">📘 一次开发 · 多端部署</div>
+    手机 / 平板 / PC 三形态依托 ArkUI <b>断点响应式布局（sm/md/lg）</b>共用一套代码交付；智慧屏 / 穿戴 / 车机为独立轻量形态，Phase 3 起逐项评估，不摊入 P0 成本。
+  </div>
+</section>
+
+<!-- ============ §3 操作系统支持 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>03 · <em>OS Support</em></h2>
+    <span class="num-tag">§3 操作系统支持（三大鸿蒙形态）</span>
+  </div>
+
+  <div class="module-card">
+    <div class="card-header">
+      <div class="card-icon">🚀</div>
+      <div class="card-title">1 · <em>HarmonyOS NEXT</em>（华为商用 · 2024+）<span class="tag reco">主目标</span></div>
+    </div>
+    <ul>
+      <li><b>纯鸿蒙内核</b>，不兼容 Android APK，必须原生 ArkTS/ArkUI 应用</li>
+      <li>应用开发：ArkTS + ArkUI（DevEco Studio）</li>
+      <li><b>Lumina 鸿蒙版的主要目标平台</b>，新版本设备与上架渠道均以此为准</li>
+    </ul>
+  </div>
+
+  <div class="module-card gamification">
+    <div class="card-header">
+      <div class="card-icon">🎓</div>
+      <div class="card-title">2 · <em>OpenHarmony</em>（开源版本 · 教育 / 政企定制）</div>
+    </div>
+    <ul>
+      <li>开放原子基金会开源项目，支持<b>定制发行版</b>（如校园信创教育定制版）</li>
+      <li>目标：高校信创专属设备（定制智慧教室终端、校园平板）</li>
+      <li>Lumina 侧承诺：通过 OpenHarmony 兼容性认证（见 §9 AC-12），纳入信创目录适配证明</li>
+    </ul>
+  </div>
+
+  <div class="module-card reward">
+    <div class="card-header">
+      <div class="card-icon">🌉</div>
+      <div class="card-title">3 · <em>HarmonyOS 4.x 及更早</em>（兼容期 · 2024 前设备）</div>
+    </div>
+    <ul>
+      <li>兼容 Android APK（方舟编译器），现有 mobile-app（Expo RN）构建产物<b>可直接安装</b></li>
+      <li><b>过渡期方案</b>：存量用户先用 Android 版顶替，不发鸿蒙原生功能</li>
+      <li><b>长期策略</b>：引导逐步迁移到 NEXT 原生客户端，Android 兼容通道维护至 2027 后评估下线</li>
+    </ul>
+  </div>
+
+  <h3 class="sub">3.1 · <em>开发栈决策</em></h3>
+  <table>
+    <tr><th>层面</th><th>选型</th><th>说明</th></tr>
+    <tr><td><b>主栈</b></td><td>ArkTS + ArkUI Stage 模型</td><td>鸿蒙官方主推应用模型，替代 FA 模型</td></tr>
+    <tr><td><b>UI 框架</b></td><td>ArkUI 声明式 + 组件化</td><td>与 React 声明式心智一致，TS 团队可迁移经验</td></tr>
+    <tr><td><b>状态管理</b></td><td>AppStorage / LocalStorage</td><td>应用级与页面级状态，替代 RN 侧 Zustand 职责</td></tr>
+    <tr><td><b>网络</b></td><td><code>@ohos.net.http</code></td><td>统一封装 API Client，Bearer Token 与 Web/移动端一致</td></tr>
+    <tr><td><b>存储</b></td><td><code>@ohos.data.preferences</code> / 关系型数据库</td><td>轻量配置 + 离线缓存（见 §7）</td></tr>
+    <tr><td><b>跨端策略</b></td><td>一次开发多端部署</td><td>手机 / 平板 / PC 共用一套代码，断点响应式</td></tr>
+  </table>
+</section>
+
+<!-- ============ §4 分布式能力 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>04 · <em>Distributed Features</em></h2>
+    <span class="num-tag">§4 分布式能力（鸿蒙独有卖点）</span>
+  </div>
+
+  <p>分布式软总线是鸿蒙区别于 iOS/Android 的<b>结构性差异</b>，也是 Lumina 打入智慧教室场景的核心抓手。落地场景如下：</p>
+
+  <table>
+    <tr><th>分布式能力</th><th>Lumina 应用场景</th></tr>
+    <tr>
+      <td><b>🔄 跨设备流转</b></td>
+      <td>手机上看到一半的直播 → 流转到平板继续；课堂答题 → 一键流转到智慧屏展示统计结果</td>
+    </tr>
+    <tr>
+      <td><b>👥 多端协同</b></td>
+      <td>教师 PC 开播 → 学生平板 / 手机 / 教室智慧屏多端同步观看，课堂状态（举手/答题）跨端一致</td>
+    </tr>
+    <tr>
+      <td><b>🗂️ 分布式数据</b></td>
+      <td>学习进度 / 笔记 / 播放记录在多设备间实时同步（分布式数据对象，见 §7）</td>
+    </tr>
+    <tr>
+      <td><b>📡 软总线</b></td>
+      <td>教室场景：教师设备自动发现同课堂学生设备 · 一键投屏 · 无网也能近场互联</td>
+    </tr>
+    <tr>
+      <td><b>🃏 原子化服务</b></td>
+      <td>课程通知 / 作业提醒 / 今日课表以<b>服务卡片</b>形式直达桌面，无需打开 App 即可触达</td>
+    </tr>
+  </table>
+
+  <div class="info warn">
+    <div class="label">⚠ 交付边界</div>
+    分布式能力依赖<b>同华为账号 + 同局域网/近场</b>条件，且智慧屏 / 穿戴设备需独立轻量端配合。Phase 1-2（§5）不承诺上述体验，统一归入 <b>Phase 3 差异化批次</b>，避免核心教学链路被拖慢。
+  </div>
+</section>
+
+<!-- ============ §5 功能模块 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>05 · <em>Features</em></h2>
+    <span class="num-tag">§5 功能模块（分三阶段交付）</span>
+  </div>
+
+  <div class="module-card">
+    <div class="card-header">
+      <div class="card-icon">🧱</div>
+      <div class="card-title">Phase 1 · <em>核心教学</em>（P0）</div>
+    </div>
+    <ul>
+      <li>登录 / 注册（手机号 / 学号 / 工号，复用 <code>/auth/*</code>）</li>
+      <li>课程列表 / 详情 / 选课退课</li>
+      <li>直播观看（HLS）+ 举手 / 聊天 / 课堂答题</li>
+      <li>作业查看 / 提交</li>
+      <li>成绩查询</li>
+      <li>AI 苏格拉底对话（SSE 流式）</li>
+    </ul>
+  </div>
+
+  <div class="module-card gamification">
+    <div class="card-header">
+      <div class="card-icon">🤝</div>
+      <div class="card-title">Phase 2 · <em>协作与管理</em>（P1）</div>
+    </div>
+    <ul>
+      <li>小组协作 / 看板 / 讨论（collab 模块对齐）</li>
+      <li>题库与考试（exam 模块：客观题自动评分，主观题教师端仅查看）</li>
+      <li>学情分析查看（analytics 模块，学生看自己 / 教师看班级）</li>
+      <li>消息通知中心</li>
+    </ul>
+  </div>
+
+  <div class="module-card reward">
+    <div class="card-header">
+      <div class="card-icon">✨</div>
+      <div class="card-title">Phase 3 · <em>差异化体验</em>（P2）</div>
+    </div>
+    <ul>
+      <li>分布式跨设备流转（直播 / 任务续播，§4）</li>
+      <li>原子化服务卡片（课表 / 作业提醒 / 打卡卡片直达桌面）</li>
+      <li>智慧屏课堂投屏模式（教师端一键投屏 + 答题统计大屏）</li>
+      <li>穿戴设备快捷签到（轻应用形态）</li>
+    </ul>
+  </div>
+
+  <div class="info note">
+    <div class="label">📐 功能基线</div>
+    功能对齐原则：<b>Phase 1+2 达到 mobile-app（iOS/Android）当前能力面</b>，Phase 3 为鸿蒙独有增量。不在鸿蒙端首创后端未支持的功能。
+  </div>
+</section>
+
+<!-- ============ §6 迁移策略 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>06 · <em>Migration Strategy</em></h2>
+    <span class="num-tag">§6 与现有移动端的迁移策略（三条路线）</span>
+  </div>
+
+  <p>WBS-P 已就鸿蒙路线做过预评估（Expo 官方不支持鸿蒙），本节固化三条路线的对比结论。</p>
+
+  <div class="module-card">
+    <div class="card-header">
+      <div class="card-icon">🅰️</div>
+      <div class="card-title">路线 A · <em>原生 ArkTS / ArkUI 独立客户端</em><span class="tag reco">推荐</span></div>
+    </div>
+    <ul>
+      <li><b>优势</b>：性能最优 · 完整鸿蒙特性（分布式 / 原子化服务均可用）· 可上华为应用市场</li>
+      <li><b>劣势</b>：独立代码库 · 长期双端（RN + ArkTS）维护成本</li>
+      <li><b>适用判断</b>：Lumina 移动端<b>仅 6 页面</b>，信息架构简单，独立开发可控</li>
+    </ul>
+  </div>
+
+  <div class="module-card gamification">
+    <div class="card-header">
+      <div class="card-icon">🅱️</div>
+      <div class="card-title">路线 B · <em>RNOH</em>（React Native OpenHarmony）</div>
+    </div>
+    <ul>
+      <li><b>优势</b>：复用现有 React Native 代码 · 团队熟悉</li>
+      <li><b>劣势</b>：需从 Expo managed 迁移到 bare workflow（改动大）· RN 三方依赖需逐个替换鸿蒙适配版 · 生态不成熟</li>
+      <li><b>适用判断</b>：大型 RN 项目渐进迁移场景，对 6 页面体量性价比低</li>
+    </ul>
+  </div>
+
+  <div class="module-card reward">
+    <div class="card-header">
+      <div class="card-icon">🅲</div>
+      <div class="card-title">路线 C · <em>uni-app</em> 跨端</div>
+    </div>
+    <ul>
+      <li><b>优势</b>：一套代码编译到多端（iOS / Android / 鸿蒙 / H5 / 小程序）</li>
+      <li><b>劣势</b>：性能损耗 · 鸿蒙特性（分布式、原子化服务）受限 · 现有 RN 资产全部作废重写为 Vue</li>
+      <li><b>适用判断</b>：快速铺开、不追求极致体验的新项目，不适配 Lumina 现状</li>
+    </ul>
+  </div>
+
+  <h3 class="sub">6.1 · <em>路线对比矩阵</em></h3>
+  <table>
+    <tr><th>维度</th><th>路线 A 原生 ArkTS</th><th>路线 B RNOH</th><th>路线 C uni-app</th></tr>
+    <tr><td><b>代码复用率</b></td><td>低（仅复用 API 契约）</td><td>高（复用 RN 组件逻辑）</td><td>无（需重写为 Vue）</td></tr>
+    <tr><td><b>运行时性能</b></td><td>⭐⭐⭐⭐⭐ 原生</td><td>⭐⭐⭐ 桥接损耗</td><td>⭐⭐⭐ Web 渲染损耗</td></tr>
+    <tr><td><b>鸿蒙特性支持</b></td><td>完整（分布式 / 卡片 / 流转）</td><td>部分（原生模块可桥接）</td><td>受限</td></tr>
+    <tr><td><b>维护成本</b></td><td>中（新增一套代码库，页面少）</td><td>中（依赖升级双重跟踪）</td><td>中（全家桶绑定）</td></tr>
+    <tr><td><b>生态成熟度</b></td><td>高（官方主推）</td><td>低（社区早期）</td><td>中（鸿蒙编译持续完善）</td></tr>
+    <tr><td><b>结论</b></td><td><span class="tag reco">✅ 采用</span></td><td><span class="tag p3">落选</span></td><td><span class="tag p3">落选</span></td></tr>
+  </table>
+
+  <div class="info success">
+    <div class="label">🎯 决策结论</div>
+    采用<b>路线 A：ArkTS / ArkUI 原生独立客户端</b>（工程目录规划为 <code>服务/harmony-app/</code>，落地时随开发工作流创建）。同时保留 HarmonyOS 4.x 用户经 Android 兼容通道过渡（§3-3），两条腿走路。
+  </div>
+</section>
+
+<!-- ============ §7 数据模型 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>07 · <em>Data Model</em></h2>
+    <span class="num-tag">§7 数据模型（后端零新增表）</span>
+  </div>
+
+  <div class="info note">
+    <div class="label">🗄️ 后端</div>
+    <b>不新增任何后端表</b>——鸿蒙版完全复用现有 API 与数据库（与 iOS / Android 同接口契约），服务端对客户端形态无感知（除设备注册信息外）。
+  </div>
+
+  <h3 class="sub">7.1 · <em>客户端本地存储</em></h3>
+  <table>
+    <tr><th>存储机制</th><th>鸿蒙 API</th><th>承载数据</th><th>生命周期</th></tr>
+    <tr>
+      <td><b>Preferences（轻量配置）</b></td>
+      <td><code>@ohos.data.preferences</code></td>
+      <td>用户偏好 / 主题 / 通知开关 / 登录态缓存</td>
+      <td>持久，卸载清除</td>
+    </tr>
+    <tr>
+      <td><b>关系型数据库</b></td>
+      <td><code>@ohos.data.relationalStore</code></td>
+      <td>离线课程缓存 / 本地笔记草稿 / 直播播放记录 / 待同步操作队列</td>
+      <td>持久，LRU 清理（上限 500MB）</td>
+    </tr>
+    <tr>
+      <td><b>分布式数据对象</b></td>
+      <td><code>@ohos.data.distributedDataObject</code></td>
+      <td>跨设备同步的会话状态（当前播放位置 / 草稿 / 阅读进度）</td>
+      <td>会话级，冲突以服务端时间戳仲裁</td>
+    </tr>
+  </table>
+
+  <div class="info warn">
+    <div class="label">⚠ 一致性原则</div>
+    客户端本地存储仅作<b>缓存与体验加速</b>，不作为事实源；服务端为唯一权威（single source of truth），离线写入需在恢复联网后按时间戳回放同步，冲突展示服务端版本并保留本地副本供用户确认。
+  </div>
+</section>
+
+<!-- ============ §8 接口设计 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>08 · <em>API Preview</em></h2>
+    <span class="num-tag">§8 接口设计（复用 141 paths / 180 ops · 新增 2 端点）</span>
+  </div>
+
+  <p>鸿蒙客户端<b>复用现有全部 API</b>（141 paths / 180 ops · 14 模块，与 lumina-api.html v1.7 快照一致），认证、分页、错误结构、SSE 流式均与 Web / RN 端同契约，不产生分叉。</p>
+
+  <h3 class="sub">8.1 · <em>新增鸿蒙专属端点</em>（可选，随 Phase 3 落地）</h3>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/devices/register</span><div class="desc">设备注册：上报推送 Push Token · 设备类型（phone/tablet/pc/tv/watch）· OS 版本 · 机型，用于分端推送与信创设备统计</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/devices/harmony/card-refresh</span><div class="desc">原子化服务卡片数据刷新：为桌面卡片拉取今日课表 / 待交作业 / 打卡状态的聚合快照（轻量只读）</div></div>
+
+  <div class="info note">
+    <div class="label">🔒 契约约束</div>
+    新增 2 端点归属 <code>user</code> 模块（设备子资源），不新增业务模块；请求 / 响应 Schema 落地时需同步 OpenAPI YAML 与 API 文档（届时走开发 + 变更工作流联动）。
+  </div>
+</section>
+
+<!-- ============ §9 验收标准 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>09 · <em>Acceptance Criteria</em></h2>
+    <span class="num-tag">§9 验收标准</span>
+  </div>
+
+  <table>
+    <tr><th>ID</th><th>验收项</th><th>预期结果</th></tr>
+    <tr><td>AC-01</td><td>HarmonyOS NEXT 5.0+ 真机安装运行</td><td>华为 Mate 60 系列安装、登录、核心链路无崩溃</td></tr>
+    <tr><td>AC-02</td><td>手机 / 平板 / PC 三形态响应式布局</td><td>断点 sm/md/lg 自动切换，单套代码包覆盖三形态</td></tr>
+    <tr><td>AC-03</td><td>登录 / 注册</td><td>手机号 / 学号 / 工号 + 密码登录成功，Token 持久化，过期自动刷新</td></tr>
+    <tr><td>AC-04</td><td>直播观看延迟</td><td>HLS 拉流端到端延迟 &lt; 3s，断流自动重连</td></tr>
+    <tr><td>AC-05</td><td>课堂互动</td><td>举手 / 聊天 / 答题在直播房间内实时收发，与 Web 端状态一致</td></tr>
+    <tr><td>AC-06</td><td>作业与成绩</td><td>查看作业列表、提交文本/附件作业、查询成绩，全流程可用</td></tr>
+    <tr><td>AC-07</td><td>AI 对话流式</td><td>SSE 流式渲染逐字输出，中断可续，与 ai_chat 契约一致</td></tr>
+    <tr><td>AC-08</td><td>跨设备流转</td><td>直播 / 长文阅读在手机 ↔ 平板间流转接续 &lt; 2s</td></tr>
+    <tr><td>AC-09</td><td>原子化服务卡片</td><td>桌面卡片展示今日课表 + 待交作业，点击进入对应页面</td></tr>
+    <tr><td>AC-10</td><td>华为应用市场上架</td><td>通过审核并公开发布（预留约 1 周审核周期）</td></tr>
+    <tr><td>AC-11</td><td>性能指标</td><td>冷启动 &lt; 2s · 运行内存占用 &lt; 200MB · 列表滚动 ≥ 55fps</td></tr>
+    <tr><td>AC-12</td><td>信创合规</td><td>通过 OpenHarmony 兼容性认证，出具认证报告供高校采购举证</td></tr>
+    <tr><td>AC-13</td><td>离线缓存</td><td>断网可浏览已缓存课程 / 笔记，恢复联网后自动同步待提交操作</td></tr>
+    <tr><td>AC-14</td><td>安全基线</td><td>Token 存于 HUKS 加密区，HTTPS 强制，证书校验不可关闭</td></tr>
+  </table>
+
+  <h3 class="sub">9.1 · <em>埋点事件（鸿蒙端）</em></h3>
+  <table>
+    <tr><th>事件</th><th>触发时机</th><th>关键字段</th></tr>
+    <tr><td><code>harmony.app_launch</code></td><td>冷启动完成</td><td>device_type, cold_start_ms</td></tr>
+    <tr><td><code>harmony.device_flow</code></td><td>跨设备流转成功/失败</td><td>from_type, to_type, latency_ms, result</td></tr>
+    <tr><td><code>harmony.card_view</code></td><td>原子化卡片曝光/点击</td><td>card_type, action</td></tr>
+    <tr><td><code>harmony.live_watch</code></td><td>直播心跳（30s）</td><td>room_id, buffer_ms, device_type</td></tr>
+  </table>
+</section>
+
+<!-- ============ §10 里程碑与排期 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>10 · <em>Milestones</em></h2>
+    <span class="num-tag">§10 里程碑与排期（8 周分阶段）</span>
+  </div>
+
+  <table>
+    <tr><th>里程碑</th><th>周期</th><th>交付内容</th><th>退出标准</th></tr>
+    <tr>
+      <td><b>D-11.M1</b> 基建</td>
+      <td>W1-2</td>
+      <td>DevEco Studio 环境 · ArkTS 工程脚手架 · API Client 封装 · 登录 / 首页</td>
+      <td>真机跑通登录，工程模板冻结</td>
+    </tr>
+    <tr>
+      <td><b>D-11.M2</b> 核心</td>
+      <td>W3-4</td>
+      <td>课程 / 直播（HLS + 互动）/ 作业 / 成绩（Phase 1 收口）</td>
+      <td>AC-01 ~ AC-07 通过</td>
+    </tr>
+    <tr>
+      <td><b>D-11.M3</b> 协同</td>
+      <td>W5-6</td>
+      <td>协作 / 考试 / 通知（Phase 2）· 分布式跨设备流转</td>
+      <td>AC-08 通过，Phase 2 功能对齐移动端</td>
+    </tr>
+    <tr>
+      <td><b>D-11.M4</b> 差异化</td>
+      <td>W7-8</td>
+      <td>原子化服务卡片 · 智慧屏投屏模式 · 穿戴快捷签到 · 华为应用市场上架</td>
+      <td>AC-09 ~ AC-14 通过，商店发布</td>
+    </tr>
+  </table>
+
+  <h3 class="sub">10.1 · <em>资源需求</em></h3>
+  <ul>
+    <li><b>人力</b>：ArkTS 开发工程师 2 人（现有 TS 团队转型，需培训周期约 2 周）</li>
+    <li><b>环境</b>：DevEco Studio 开发环境 · 华为开发者账号（企业认证）· 上架服务费</li>
+    <li><b>测试设备</b>：华为 Mate 60 系列（手机）· MatePad（平板）· MateBook（鸿蒙 PC）各 ≥1 台；智慧屏 / 手表借用学校信创教室设备</li>
+  </ul>
+
+  <h3 class="sub">10.2 · <em>风险清单</em></h3>
+  <div class="info risk">
+    <div class="label">🛡️ 三大风险与对策</div>
+    <ul style="margin-top:6px;">
+      <li><b>ArkTS 学习曲线</b>：TS 背景团队约 2 周可上手，M1 内置培训缓冲；脚手架由 1 人先行探路 1 周</li>
+      <li><b>鸿蒙生态成熟度</b>：部分 SDK（播放器 / 分享 / 推送）仍在演进，选型时优先官方 Kit，三方库需评估 NEXT 适配状态</li>
+      <li><b>应用市场审核周期</b>：约 1 周，M4 第一周即提交初审，预留一轮驳回整改时间</li>
+      <li><b>排期弹性</b>：本计划不阻塞 M4 正式上线（对齐 WBS-P 原则「演进评估」）；Phase 3 任一子项可顺延不伤主链路</li>
+    </ul>
+  </div>
+
+  <div class="info ai">
+    <div class="label">🔗 文档联动预告（落地时执行，本文档不变更其它文件）</div>
+    进入开发阶段后需联动：<code>lumina-tdd.html</code>（§3.2 平台矩阵 · 鸿蒙章节）· <code>lumina-api.html</code> + OpenAPI（2 新端点）· <code>lumina-wbs-pending.html</code>（D-11 状态推进）· <code>CLAUDE.md</code> 支持矩阵 · 索引页 / README。
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div>REQ-LUMINA-D11-2026-001 · Lumina · 墨光 · D-11 · v1.0 · 2026-09-03</div>
+  <div class="sig">HarmonyOS <span class="hl">第五端</span></div>
+</footer>
+
+</body>
+</html>
