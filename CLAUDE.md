@@ -22,7 +22,7 @@ edu/
 │   ├── lumina-userguide.html   # 用户手册 v1.0
 │   ├── lumina-launch-wbs.html  # 上线 WBS v1.1
 │   ├── lumina-learning-system.html  # D-06 自主学习与闯关奖励需求 v1.3（Web 前端 4 页面已落地 · 种子数据 · 27 单测）
-│   ├── lumina-status-report.html    # 项目全景状态报告 v1.0（里程碑/模块/技术栈/质量/风险）
+│   ├── lumina-status-report.html    # 项目全景状态报告 v1.3（里程碑/模块/技术栈/质量/风险）
 │   │
 │   ├── APP/phone/  (9 files)   # 手机 APP 原型
 │   ├── APP/tablet/ (6 files)   # 平板 APP 原型
