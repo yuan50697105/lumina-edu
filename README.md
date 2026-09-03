@@ -77,7 +77,7 @@ edu/
 | **界面页面** | 160+ 个 |
 | **设计表面** | 6 个（学生/教师 × 移动/Web/桌面）|
 | **后端模块** | 20 个业务模块（user / course / assignment / grade / live / collab / notif / exam / ai_gateway / ai_chat / ai_grade / analytics / logs / tutoring / admin / settings / learning / video / ai_infra / ops）|
-| **文档** | PRD v1.3 + TDD v1.8 + API v1.8 + DB v1.8 + OPS v1.8 + QA v1.8 + UG v1.1 + WBS v1.1 + WBS-P v1.3 + STATUS v1.2 + REQ-D06/D08/D09/D10/D11 + 索引 |
+| **文档** | PRD v1.3 + TDD v1.8 + API v1.8 + DB v1.8 + OPS v1.8 + QA v1.8 + UG v1.1 + WBS v1.1 + WBS-P v1.3 + STATUS v1.3 + REQ-D06/D08/D09/D10/D11 + 索引 |
 | **API 接口** | 174 paths / 215 ops（20 模块 · JWT · SSE 流式 · 直播课堂 · 协作工具 · 通知中心 · 题库与考试 · 学情分析 · 管理端 · 自主学习 · 视频录播 · AI 基建 · 运营监控）|
 | **数据表** | 64 张（单体应用）|
 
@@ -101,7 +101,7 @@ edu/
 | 📋 **REQ-D09 v1.0** | AI 基础设施需求规格（RAG 知识问答/Agent 工具调用/内容审核流水线/LLM 降级 · 4 类 Mermaid 业务流程图） | `lumina-ai-infra.html` |
 | 📋 **REQ-D11 v1.0** | 鸿蒙硬件平台与操作系统支持（HarmonyOS NEXT/6 设备形态/ArkTS/分布式流转） | `lumina-harmony-os.html` |
 | 📋 **REQ-D10 v1.0** | 运营监控需求规格（监控大盘/深度健康检查/Prometheus 指标/告警生命周期/采集降级 · 4 类业务流程图） | `lumina-operations-monitoring.html` |
-| 📋 **STATUS v1.2** | 项目全景状态报告（里程碑/已实现/待实现/模块/技术栈/质量/风险） | `lumina-status-report.html` |
+| 📋 **STATUS v1.3** | 项目全景状态报告（里程碑/已实现/待实现/模块/技术栈/质量/风险） | `lumina-status-report.html` |
 
 ## 🎨 设计系统
 
@@ -295,6 +295,7 @@ cp .env.example .env
 | **D-11 鸿蒙骨架 v1.0** | 2026-09-03 | 鸿蒙原生客户端骨架（ArkTS/ArkUI · 6 页面 · 与后端 174 paths 同契约）|
 | **文档联动 v1.8** | 2026-09-03 | TDD/API/DB/OPS/QA/OpenAPI/STATUS 同步至 v1.8 · 20 模块 · 174 paths / 215 ops · 64 表 · 336 用例 |
 | **STATUS v1.2** | 2026-09-03 | 状态报告更新至 D-10 完成 · 20 模块 · 64 表 · 336 单测 |
+| **STATUS v1.3** | 2026-09-03 | 状态报告更新至 D-11 全部落地 · D-06~D-11 实施状态同步 · 数据源引用更新（索引 v2.0 / API v1.8 / TDD v1.8）|
 
 ## 📄 许可证
 
