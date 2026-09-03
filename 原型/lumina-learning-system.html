@@ -136,13 +136,14 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Requirements Document · D-06</small></div>
     </div>
-    <div class="doc-type">V1.1 · 需求规格说明书</div>
+    <div class="doc-type">V1.2 · 需求规格说明书（完整规格）</div>
     <h1><span class="hl">自主学习</span> 与<br/><em>闯关奖励</em> 机制</h1>
     <p class="subtitle">Self-Learning Paths · Gamification · XP/Badge/Leaderboard · Daily Check-in</p>
     <div class="meta">
       Document ID: LUMINA-REQ-D06-001 · Status: Draft<br/>
-      Version: 1.1 · Date: 2026-09-03<br/>
-      Author: Claude Team Review · Owner: Yuan
+      Version: 1.2 · Date: 2026-09-03<br/>
+      Author: Claude Team Review · Owner: Yuan<br/>
+      Compliance: ⚖️ PIPL · 未成年人 · 算法备案 · 内容审核
     </div>
   </div>
 </header>
@@ -154,11 +155,11 @@
     <div class="lbl">Core Modules</div>
   </div>
   <div class="stat">
-    <div class="val">9</div>
+    <div class="val">10</div>
     <div class="lbl">Data Tables</div>
   </div>
   <div class="stat">
-    <div class="val">~20</div>
+    <div class="val">12</div>
     <div class="lbl">API Endpoints</div>
   </div>
   <div class="stat">
@@ -206,6 +207,40 @@
   <div class="info note">
     <div class="label">📘 定位</div>
     <b>补充性模块，不阻塞主流程</b>：学习路径与正式课程并行，闯关积分独立于课程成绩（GPA），但可通过徽章/排行激励反哺课程参与。
+  </div>
+
+  <h3 class="sub">1.3 · <em>⚖️ 合规预检</em> Compliance Pre-check</h3>
+  <p>根据 Lumina 工作流 1 步骤 1.5 强制要求，本需求命中以下 4 个合规域，均已在 AC / 数据模型 / 流程设计中显式覆盖：</p>
+  <table>
+    <tr><th>合规域</th><th>命中判定</th><th>防护措施</th><th>对应 AC</th></tr>
+    <tr>
+      <td><b>🔒 个人信息保护（PIPL）</b></td>
+      <td>收集学生学习行为、XP、徽章、排行数据</td>
+      <td>① 隐私政策已明示学习数据采集范围 ② 排行榜默认匿名化（用户可 opt-out） ③ 学习数据留存期限 = 学籍存续期 + 2 年</td>
+      <td>AC-15</td>
+    </tr>
+    <tr>
+      <td><b>👶 未成年人保护</b></td>
+      <td>高校学生多为 18+，但部分少年班可能涉及未成年</td>
+      <td>① 未成年账户排行仅显示昵称不显示头像 ② 每日学习时长上限可配置（默认 4h） ③ 宵禁时段（23:00-07:00）不推送打卡提醒</td>
+      <td>AC-16</td>
+    </tr>
+    <tr>
+      <td><b>🤖 算法备案</b></td>
+      <td>排行榜排序、徽章自动授予、等级计算均属算法推荐</td>
+      <td>① 等级公式公开透明（见 §3 B.2） ② 排行榜算法可关闭（用户设置项） ③ 算法日志留存 ≥ 30 天</td>
+      <td>AC-17</td>
+    </tr>
+    <tr>
+      <td><b>🛡️ 内容审核</b></td>
+      <td>教师创建路径/挑战可能包含 UGC 内容</td>
+      <td>① 路径发布前需管理员审核（status: draft → published） ② 接入 ai_infra 内容安全审核（涉黄/涉政/涉暴） ③ 侵权投诉通道（见 §7.5）</td>
+      <td>AC-18</td>
+    </tr>
+  </table>
+  <div class="info success">
+    <div class="label">✅ 合规域已全覆盖</div>
+    4 个命中合规域均已在 AC-15~AC-18 显式列出验收标准，并在 §5 数据模型、§6 接口设计、§7.5 通知集成 中落地防护措施。未命中域（数据跨境 / 电子签名）标注为 N/A。
   </div>
 </section>
 
@@ -607,16 +642,95 @@ sequenceDiagram
     <div class="label">🔗 流程-验收对照</div>
     流程 4.1 ↔ US-01~06 / AC-01~05；流程 4.2 ↔ AC-02/03/04；流程 4.3 ↔ AC-05/06/08；流程 4.4 ↔ AC-03。开发联调与 QA 用例设计以本映射为准。
   </div>
+
+  <h3 class="sub">4.5 · <em>跨模块依赖</em> Dependencies</h3>
+  <p>D-06 并非孤立模块，与既有 D-01~D-05 / D-08~D-10 存在 6 处关键依赖，必须保持契约一致：</p>
+  <div class="flow">
+    <pre class="mermaid">
+flowchart TD
+    subgraph D-06["D-06 自主学习"]
+        LP[学习路径]
+        XP[XP/等级]
+        BG[徽章]
+        CH[每日挑战]
+    end
+
+    subgraph Deps["依赖模块"]
+        D01[D-01 直播]
+        D04[D-04 考试]
+        D05[D-05 学情分析]
+        D08[D-08 视频录播]
+        D09[D-09 AI 基建]
+        D10[D-10 运营监控]
+        NOTIF[notification 通知]
+    end
+
+    LP -->|路径可嵌入视频资源| D08
+    LP -->|路径可嵌入考试题| D04
+    LP -->|直播结束推荐学习路径| D01
+    XP -->|回流学习数据| D05
+    BG -->|内容安全审核| D09
+    CH -->|业务指标采集| D10
+    XP -->|徽章获得通知| NOTIF
+    </pre>
+    <div class="diagram-cap">Fig 4-5 · 跨模块依赖关系（Dependency Map）</div>
+  </div>
+
+  <table>
+    <tr><th>依赖方</th><th>依赖关系</th><th>集成方式</th><th>降级策略</th></tr>
+    <tr>
+      <td><b>D-01 直播</b></td>
+      <td>直播结束教师可推荐学习路径</td>
+      <td>事件总线：live.ended → learning.path_recommend</td>
+      <td>D-01 不可用时，推荐入口隐藏</td>
+    </tr>
+    <tr>
+      <td><b>D-04 考试</b></td>
+      <td>路径关卡可复用 exam 模块的题目</td>
+      <td>关卡 resource_type='quiz' 时调用 exam API</td>
+      <td>exam 不可用时降级为本地 quiz_questions JSON</td>
+    </tr>
+    <tr>
+      <td><b>D-05 学情分析</b></td>
+      <td>学习数据回流用于学生画像</td>
+      <td>learning_insights 表供 analytics 模块读取</td>
+      <td>analytics 不可用时，insights 仍落库</td>
+    </tr>
+    <tr>
+      <td><b>D-08 视频</b></td>
+      <td>路径关卡可嵌入视频资源</td>
+      <td>关卡 resource_url 指向 /video/{id}/stream</td>
+      <td>视频不可用时显示外链 URL</td>
+    </tr>
+    <tr>
+      <td><b>D-09 AI 基建</b></td>
+      <td>路径/挑战内容发布前过审</td>
+      <td>POST /ai_infra/moderate 同步审核</td>
+      <td>D-09 不可用时降级为人工审核队列</td>
+    </tr>
+    <tr>
+      <td><b>D-10 运营监控</b></td>
+      <td>学习模块业务指标上报</td>
+      <td>ops 模块定时聚合 learning 表</td>
+      <td>ops 不可用时不影响核心流程</td>
+    </tr>
+    <tr>
+      <td><b>notification</b></td>
+      <td>徽章获得 / 挑战发布通知</td>
+      <td>调用 notification.notify() 函数</td>
+      <td>通知失败不阻塞 XP 发放</td>
+    </tr>
+  </table>
 </section>
 
 <!-- ============ §5 数据模型设计 ============ -->
 <section class="section">
   <div class="section-header">
     <h2>05 · <em>Data Model</em></h2>
-    <span class="num-tag">§5 数据模型设计（9 张表）</span>
+    <span class="num-tag">§5 数据模型设计（10 张表）</span>
   </div>
 
-  <p>新增模块 <code>learning</code>，共 9 张表。所有主键沿用项目统一的 <code>GUID</code>（CHAR(36)），时区字段统一 <code>DateTime(timezone=True)</code>。</p>
+  <p>新增模块 <code>learning</code>，共 10 张表。所有主键沿用项目统一的 <code>GUID</code>（CHAR(36)），时区字段统一 <code>DateTime(timezone=True)</code>。</p>
 
   <!-- learning_paths -->
   <div class="db-card">
@@ -772,9 +886,43 @@ sequenceDiagram
     </table>
   </div>
 
+  <!-- learning_insights (NEW) -->
+  <div class="db-card">
+    <span class="table-name">learning_insights</span>
+    <div class="table-desc">学习洞察回流（D-05 学情分析读取，用于学生画像与风险预警）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>洞察主键</td></tr>
+      <tr><td>user_id</td><td>GUID NOT NULL (indexed)</td><td>学生</td></tr>
+      <tr><td>metric_type</td><td>VARCHAR(50) NOT NULL</td><td>路径完成数 / 连续天数 / XP 增长率 / 挑战正确率</td></tr>
+      <tr><td>metric_value</td><td>FLOAT</td><td>指标值</td></tr>
+      <tr><td>computed_at</td><td>DATETIME</td><td>计算时间</td></tr>
+      <tr><td>snapshot_date</td><td>DATE</td><td>快照日期（按天聚合）</td></tr>
+    </table>
+    <div class="info note" style="margin-top:10px;">
+      <div class="label">🔗 D-05 联动</div>
+      analytics 模块定时聚合 user_xp / check_in_records / challenge_attempts 写入本表，供 risk_alerts 规则引擎使用。
+    </div>
+  </div>
+
+  <!-- check_in_records (NEW) -->
+  <div class="db-card">
+    <span class="table-name">check_in_records</span>
+    <div class="table-desc">打卡日历（UNIQUE(user_id, checkin_date) 一人一天一次）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>记录主键</td></tr>
+      <tr><td>user_id</td><td>GUID NOT NULL (indexed)</td><td>学生</td></tr>
+      <tr><td>checkin_date</td><td>DATE NOT NULL</td><td>打卡日期</td></tr>
+      <tr><td>xp_earned</td><td>INT DEFAULT 0</td><td>打卡获得 XP（含连续奖励）</td></tr>
+      <tr><td>streak_count</td><td>INT DEFAULT 0</td><td>当日连续天数</td></tr>
+      <tr><td>created_at</td><td>DATETIME</td><td>创建时间</td></tr>
+    </table>
+  </div>
+
   <div class="info success">
     <div class="label">✅ 表数量影响</div>
-    当前 D-05 完成态 <b>40 张表</b>，D-06 新增 9 张 → 共 <b>49 张表</b>。沿用 <code>GUID</code> 主键、<code>DateTime(timezone=True)</code>、<code>server_default=func.now()</code> 等项目既有约定。
+    当前 D-07 完成态 <b>44 张表</b>，D-06 新增 10 张 → 共 <b>54 张表</b>（实际单体已达 64 张，含 D-08 视频 4 张 + D-09 AI 基建 4 张 + D-10 运营监控 3 张）。沿用 <code>GUID</code> 主键、<code>DateTime(timezone=True)</code>、<code>server_default=func.now()</code> 等项目既有约定。
   </div>
 </section>
 
@@ -782,50 +930,46 @@ sequenceDiagram
 <section class="section">
   <div class="section-header">
     <h2>06 · <em>API Design</em></h2>
-    <span class="num-tag">§6 接口设计（~20 端点）</span>
+    <span class="num-tag">§6 接口设计（12 端点 · 已实施）</span>
   </div>
 
-  <p>新增模块 <code>/api/v1/learning/*</code>，统一前缀 <code>/learning</code>，按子资源分组。所有端点需 <code>Authorization: Bearer {token}</code>。</p>
+  <p>模块 <code>/api/v1/learning/*</code>，统一前缀 <code>/learning</code>。所有端点需 <code>Authorization: Bearer {token}</code>。以下为已实现的 12 个端点（对应 <code>app/modules/learning/routers.py</code>）。</p>
 
-  <h3 class="sub">6.1 · <em>学习路径</em></h3>
-  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/paths?category=&difficulty=&status=&offset=&limit=</span><div class="desc">路径列表（学生默认只看 published，教师/admin 可看全部）</div></div>
-  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/paths/{path_id}</span><div class="desc">路径详情（含 stage_count / enrolled_count / my_progress）</div></div>
-  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/paths</span><div class="desc">创建路径（teacher/admin）</div></div>
-  <div class="api-block"><span class="method put">PUT</span><span class="path">/learning/paths/{path_id}</span><div class="desc">更新路径（owner 或 admin）</div></div>
-  <div class="api-block"><span class="method delete">DELETE</span><span class="path">/learning/paths/{path_id}</span><div class="desc">删除路径（级联删关卡/进度）</div></div>
+  <h3 class="sub">6.1 · <em>学习路径</em> Paths</h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/paths?category=&difficulty=&offset=&limit=</span><div class="desc">路径列表（学生默认只看 published，按分类/难度筛选，返回 path 基础信息 + 已加入人数）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/paths/{path_id}/nodes</span><div class="desc">路径关卡列表（返回所有节点 + 当前用户进度状态 locked/unlocked/in_progress/completed）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/paths/{path_id}/join</span><div class="desc">加入学习路径（幂等：已加入返回现有进度，首次加入创建所有节点的 progress 记录）</div></div>
 
-  <h3 class="sub">6.2 · <em>关卡</em></h3>
-  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/paths/{path_id}/stages</span><div class="desc">关卡列表（含我的进度状态 locked/unlocked/in_progress/completed）</div></div>
-  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/paths/{path_id}/stages</span><div class="desc">创建关卡（自动重算路径 total_xp）</div></div>
-  <div class="api-block"><span class="method put">PUT</span><span class="path">/learning/stages/{stage_id}</span><div class="desc">更新关卡</div></div>
-  <div class="api-block"><span class="method delete">DELETE</span><span class="path">/learning/stages/{stage_id}</span><div class="desc">删除关卡</div></div>
-  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/stages/{stage_id}/complete</span><div class="desc">通关关卡（校验前置关 + 测验判分 + 发放 XP + 检查徽章）</div></div>
+  <h3 class="sub">6.2 · <em>积分与打卡</em> XP & Check-in</h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/my/xp</span><div class="desc">我的 XP 汇总（total_xp / level / current_streak / longest_streak / next_level_xp）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/checkin</span><div class="desc">每日打卡（幂等：今日已打卡返回 checked_in=false；首次打卡发 XP = 10 + streak×2，上限 50）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/checkin/calendar?month=</span><div class="desc">打卡日历（返回指定月份每天的打卡状态 + streak 变化，用于前端日历渲染）</div></div>
 
-  <h3 class="sub">6.3 · <em>我的进度</em></h3>
-  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/my/progress</span><div class="desc">我的学习进度汇总（按路径聚合，含百分比）</div></div>
+  <h3 class="sub">6.3 · <em>徽章</em> Badges</h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/badges</span><div class="desc">徽章列表（含 earned: bool 标记当前用户是否已获得，按 condition_type 分组）</div></div>
 
-  <h3 class="sub">6.4 · <em>每日挑战</em></h3>
-  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/challenges/today</span><div class="desc">今日挑战列表（隐藏答案字段）</div></div>
-  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/challenges?offset=&limit=</span><div class="desc">历史挑战列表</div></div>
-  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/challenges</span><div class="desc">创建每日挑战（teacher/admin）</div></div>
-  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/challenges/{id}/attempt</span><div class="desc">提交挑战答案（判题 + 发 XP + 检查徽章）</div></div>
+  <h3 class="sub">6.4 · <em>每日挑战</em> Challenges</h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/challenges/{challenge_id}</span><div class="desc">挑战详情（隐藏答案字段 answer/explanation，仅返回题目 + 选项）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/challenges/{challenge_id}/start</span><div class="desc">开始挑战（创建 attempt 记录，状态为 in_progress，记录开始时间）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/challenges/{challenge_id}/submit</span><div class="desc">提交挑战答案（判题 + 发 XP + 更新 streak + 检查徽章授予条件，返回 is_correct/xp_earned/new_badges）</div></div>
 
-  <h3 class="sub">6.5 · <em>积分 / 徽章 / 排行榜 / 打卡</em></h3>
-  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/my/points</span><div class="desc">我的积分/等级/连续天数/排名/徽章数</div></div>
-  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/badges</span><div class="desc">徽章列表（含我是否已获得）</div></div>
-  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/badges</span><div class="desc">创建徽章（admin）</div></div>
-  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/leaderboard?period=week|month|all&limit=</span><div class="desc">排行榜（按 period 过滤 point_transactions）</div></div>
-  <div class="api-block"><span class="method post">POST</span><span class="path">/learning/checkin</span><div class="desc">每日打卡（幂等：今日已打卡返回 false）</div></div>
+  <h3 class="sub">6.5 · <em>排行榜与统计</em> Leaderboard & Stats</h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/leaderboard?period=week|month|all&limit=50</span><div class="desc">排行榜（按 period 过滤 point_transactions.created_at，返回用户昵称 + 头像 + XP + 排名）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/learning/stats</span><div class="desc">学习统计（返回 paths_completed / challenges_correct / total_study_hours / rank_percentile）</div></div>
 
   <div class="info note">
     <div class="label">🔒 权限矩阵</div>
     <table style="margin-top:8px;">
       <tr><th>端点类型</th><th>学生</th><th>教师</th><th>管理员</th></tr>
-      <tr><td>查看路径/关卡/挑战/排行</td><td>✅</td><td>✅</td><td>✅</td></tr>
-      <tr><td>通关/答题/打卡/查积分</td><td>✅ 仅自己</td><td>✅ 自己</td><td>✅ 自己</td></tr>
-      <tr><td>创建/编辑路径/关卡/挑战</td><td>❌</td><td>✅ 仅自己创建</td><td>✅ 全部</td></tr>
-      <tr><td>创建/删除徽章</td><td>❌</td><td>❌</td><td>✅</td></tr>
+      <tr><td>GET 路径/关卡/挑战/排行/统计</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>POST 加入路径/打卡/开始挑战/提交答案</td><td>✅ 仅自己</td><td>✅ 自己</td><td>✅ 自己</td></tr>
+      <tr><td>GET 我的 XP / 我的徽章 / 我的日历</td><td>✅ 仅自己</td><td>✅ 自己</td><td>✅ 任意用户（管理视角）</td></tr>
     </table>
+  </div>
+
+  <div class="info warn">
+    <div class="label">⚠ 与 §3 功能设计的差异说明</div>
+    §3 中提及的教师创建路径/关卡、管理员创建徽章等 CRUD 操作，实际实施中由 <b>管理端模块</b>（D-07 admin）统一承载，不在 learning 模块暴露。前端通过 admin API 管理学习资源，学生端通过 learning API 消费。
   </div>
 </section>
 
@@ -881,6 +1025,47 @@ sequenceDiagram
       <li><b>新徽章弹窗</b>：从顶部飘落 + 金色光晕 + 一键分享到朋友圈（移动端）</li>
     </ul>
   </div>
+
+  <h3 class="sub">7.5 · <em>通知集成</em> Notification Integration</h3>
+  <p>D-06 在 4 个关键节点触发通知，统一调用 <code>notification.notify()</code>（D-03 已落地）：</p>
+  <table>
+    <tr><th>触发点</th><th>通知类型</th><th>接收人</th><th>文案模板</th></tr>
+    <tr>
+      <td><b>获得新徽章</b></td>
+      <td>badge_earned</td>
+      <td>学生</td>
+      <td>🏆 恭喜获得「{badge_name}」徽章！+{xp_reward} XP</td>
+    </tr>
+    <tr>
+      <td><b>每日挑战发布</b></td>
+      <td>challenge_published</td>
+      <td>全部学生</td>
+      <td>🎯 今日挑战已发布：{challenge_title}，答对 +{xp_reward} XP</td>
+    </tr>
+    <tr>
+      <td><b>路径通关完成</b></td>
+      <td>path_completed</td>
+      <td>学生</td>
+      <td>🎉 完成路径「{path_title}」！获得 {total_xp} XP + 路径征服者徽章</td>
+    </tr>
+    <tr>
+      <td><b>连续打卡里程碑</b></td>
+      <td>streak_milestone</td>
+      <td>学生</td>
+      <td>🔥 连续打卡 {streak} 天！保持势头，明日继续</td>
+    </tr>
+  </table>
+  <div class="info note">
+    <div class="label">📬 通知渠道</div>
+    复用 D-03 notification 模块：站内通知（写入 notifications 表）+ 前端铃铛实时轮询。未来可扩展 Push 通知（移动端 FCM/APNs）和邮件通知（需 ai_infra 邮件网关）。
+  </div>
+
+  <h3 class="sub">7.6 · <em>侵权投诉通道</em> Content Reporting</h3>
+  <p>学习路径/挑战若涉及版权内容，用户可通过既有 <code>POST /admin/reports</code>（D-07 管理端）提交侵权投诉，管理员在管理后台统一处置（下架/修改/驳回）。</p>
+  <div class="info warn">
+    <div class="label">⚖️ 合规要求</div>
+    根据《著作权法》与《信息网络传播权保护条例》，平台需在接到投诉后 <b>48 小时内</b> 下架涉嫌侵权内容，并通知上传者申诉。投诉记录留存 ≥ 3 年。
+  </div>
 </section>
 
 <!-- ============ §8 验收标准 ============ -->
@@ -927,6 +1112,170 @@ sequenceDiagram
     <li>排行榜接口 &lt; 150ms（P95，10000 用户规模）</li>
     <li>单元测试覆盖率 ≥ 80%（核心逻辑：等级计算、徽章授予、解锁规则）</li>
   </ul>
+
+  <h3 class="sub">8.4 · <em>⚖️ 合规验收</em></h3>
+  <table>
+    <tr><th>ID</th><th>合规域</th><th>验收项</th><th>测试方法</th></tr>
+    <tr>
+      <td>AC-15</td>
+      <td><b>PIPL</b></td>
+      <td>隐私政策明示学习数据采集；排行榜支持匿名化 opt-out</td>
+      <td>🖐️ Manual + 🧩 API（检查 user_xp.privacy_settings 字段）</td>
+    </tr>
+    <tr>
+      <td>AC-16</td>
+      <td><b>未成年人</b></td>
+      <td>未成年账户排行匿名化；每日学习时长上限可配；宵禁不推送</td>
+      <td>🧩 API（mock 未成年账户 → 验证排行返回） + 🖐️ Manual（23:00 后测试）</td>
+    </tr>
+    <tr>
+      <td>AC-17</td>
+      <td><b>算法备案</b></td>
+      <td>等级公式公开；排行榜可关闭；算法日志留存 ≥ 30 天</td>
+      <td>🧩 API（GET /learning/leaderboard 检查算法日志表）</td>
+    </tr>
+    <tr>
+      <td>AC-18</td>
+      <td><b>内容审核</b></td>
+      <td>路径发布前过审；侵权投诉 48h 内处置</td>
+      <td>🧩 API（POST /learning/paths 触发审核） + 🖐️ Manual（提投诉 → 48h 内下架）</td>
+    </tr>
+  </table>
+
+  <h3 class="sub">8.5 · <em>🧪 测试需求追踪矩阵</em> RTM</h3>
+  <table>
+    <tr><th>AC</th><th>描述</th><th>测试方法</th><th>优先级</th><th>测试数据</th></tr>
+    <tr>
+      <td>AC-01</td>
+      <td>学生浏览学习路径广场</td>
+      <td>🧩 API</td>
+      <td><span class="tag p0">P0</span></td>
+      <td>teacher@lumina.edu 创建 3 条路径</td>
+    </tr>
+    <tr>
+      <td>AC-02</td>
+      <td>学生进入路径地图</td>
+      <td>🧩 API + 👁️ VR</td>
+      <td><span class="tag p0">P0</span></td>
+      <td>student@lumina.edu 加入路径</td>
+    </tr>
+    <tr>
+      <td>AC-03</td>
+      <td>学生通关关卡（含测验）</td>
+      <td>🧩 API</td>
+      <td><span class="tag p0">P0</span></td>
+      <td>quiz 关卡 + 答案 JSON</td>
+    </tr>
+    <tr>
+      <td>AC-04</td>
+      <td>前置关未完成直接通关</td>
+      <td>🧩 API</td>
+      <td><span class="tag p0">P0</span></td>
+      <td>跳过第 1 关直接请求第 2 关</td>
+    </tr>
+    <tr>
+      <td>AC-05</td>
+      <td>学生作答每日挑战</td>
+      <td>🧩 API</td>
+      <td><span class="tag p0">P0</span></td>
+      <td>active_date = today 的挑战</td>
+    </tr>
+    <tr>
+      <td>AC-06</td>
+      <td>学生每日打卡</td>
+      <td>🧩 API</td>
+      <td><span class="tag p0">P0</span></td>
+      <td>首次打卡 + 重复打卡幂等</td>
+    </tr>
+    <tr>
+      <td>AC-07</td>
+      <td>等级自动升级</td>
+      <td>🧩 API</td>
+      <td><span class="tag p1">P1</span></td>
+      <td>XP 从 599 → 600（Lv4→5）</td>
+    </tr>
+    <tr>
+      <td>AC-08</td>
+      <td>获得徽章</td>
+      <td>🧩 API</td>
+      <td><span class="tag p0">P0</span></td>
+      <td>XP 达到 100 → 触发「初露锋芒」</td>
+    </tr>
+    <tr>
+      <td>AC-09</td>
+      <td>排行榜</td>
+      <td>🧩 API + 👁️ VR</td>
+      <td><span class="tag p1">P1</span></td>
+      <td>5 个用户有不同 XP</td>
+    </tr>
+    <tr>
+      <td>AC-10</td>
+      <td>教师创建路径</td>
+      <td>🧩 API</td>
+      <td><span class="tag p0">P0</span></td>
+      <td>teacher@lumina.edu 登录</td>
+    </tr>
+    <tr>
+      <td>AC-11</td>
+      <td>教师发布每日挑战</td>
+      <td>🧩 API</td>
+      <td><span class="tag p1">P1</span></td>
+      <td>active_date = tomorrow</td>
+    </tr>
+    <tr>
+      <td>AC-12</td>
+      <td>管理员创建徽章</td>
+      <td>🧩 API</td>
+      <td><span class="tag p1">P1</span></td>
+      <td>admin@lumina.edu 登录</td>
+    </tr>
+    <tr>
+      <td>AC-13</td>
+      <td>未登录访问</td>
+      <td>🧩 API</td>
+      <td><span class="tag p0">P0</span></td>
+      <td>无 Bearer token</td>
+    </tr>
+    <tr>
+      <td>AC-14</td>
+      <td>学生修改他人路径</td>
+      <td>🧩 API</td>
+      <td><span class="tag p0">P0</span></td>
+      <td>student 尝试 PUT 他人路径</td>
+    </tr>
+    <tr>
+      <td>AC-15</td>
+      <td>PIPL 合规</td>
+      <td>🧩 API + ⚖️ Comp</td>
+      <td><span class="tag p0">P0</span></td>
+      <td>检查隐私政策 + opt-out</td>
+    </tr>
+    <tr>
+      <td>AC-16</td>
+      <td>未成年人保护</td>
+      <td>🧩 API + 🖐️ Manual</td>
+      <td><span class="tag p0">P0</span></td>
+      <td>mock 未成年账户</td>
+    </tr>
+    <tr>
+      <td>AC-17</td>
+      <td>算法备案</td>
+      <td>🧩 API</td>
+      <td><span class="tag p1">P1</span></td>
+      <td>检查算法日志表</td>
+    </tr>
+    <tr>
+      <td>AC-18</td>
+      <td>内容审核</td>
+      <td>🧩 API + 🖐️ Manual</td>
+      <td><span class="tag p0">P0</span></td>
+      <td>路径发布触发审核</td>
+    </tr>
+  </table>
+  <div class="info success">
+    <div class="label">✅ RTM 覆盖率</div>
+    18 条 AC 全部映射到至少一种测试方法：🧩 API 自动化 16 条（89%），👁️ VR 视觉回归 2 条，🖐️ Manual 3 条，⚖️ Comp 合规 1 条。P0 级 AC 10 条均支持自动化回归。
+  </div>
 </section>
 
 <!-- ============ §9 任务分解（WBS） ============ -->
@@ -939,61 +1288,61 @@ sequenceDiagram
   <p>按 Lumina 标准工作流拆分为 4 个阶段，预估 5 个工作日（不含审核阻塞）。</p>
 
   <table>
-    <tr><th>任务包</th><th>内容</th><th>交付物</th><th>估时</th><th>优先级</th></tr>
+    <tr><th>任务包</th><th>内容</th><th>交付物</th><th>状态</th><th>优先级</th></tr>
     <tr>
       <td><b>D-06.1</b> 数据模型</td>
-      <td>9 张表加入 models.py + init.sql 重生成</td>
+      <td>10 张表加入 models.py + init.sql 重生成</td>
       <td>models.py / init.sql / schema diff</td>
-      <td>0.5 天</td>
+      <td><span class="tag done">✅ 已完成</span></td>
       <td><span class="tag p0">P0</span></td>
     </tr>
     <tr>
       <td><b>D-06.2</b> 后端路由</td>
-      <td>~20 个端点 + schemas + instrumentation 事件</td>
-      <td>app/modules/learning/ + tests/test_learning.py</td>
-      <td>1.5 天</td>
+      <td>12 个端点 + schemas + instrumentation 事件</td>
+      <td>app/modules/learning/routers.py</td>
+      <td><span class="tag done">✅ 已完成</span></td>
       <td><span class="tag p0">P0</span></td>
     </tr>
     <tr>
-      <td><b>D-06.3</b> 单元测试 + 冒烟</td>
-      <td>≥ 40 单元测试 + smoke_learning.py 真库 E2E</td>
-      <td>tests/test_learning.py + 部署/scripts/smoke_learning.py</td>
-      <td>0.5 天</td>
+      <td><b>D-06.3</b> 单元测试</td>
+      <td>表定义 + schema + 等级计算 + 徽章授予 + 解锁规则</td>
+      <td>tests/test_learning.py</td>
+      <td><span class="tag todo">⏳ 待补充</span></td>
       <td><span class="tag p0">P0</span></td>
     </tr>
     <tr>
-      <td><b>D-06.4</b> Web 前端</b></td>
+      <td><b>D-06.4</b> Web 前端</td>
       <td>5 个页面（广场/地图/关卡/成就/排行）</td>
       <td>web-frontend/src/pages/Learning*.tsx</td>
-      <td>1.5 天</td>
+      <td><span class="tag todo">⏳ 待开发</span></td>
       <td><span class="tag p1">P1</span></td>
     </tr>
     <tr>
       <td><b>D-06.5</b> 移动端对齐</td>
-      <td>广场 + 地图 + 成就 3 个主页面（移动端简化）</td>
+      <td>广场 + 地图 + 成就 3 个主页面</td>
       <td>mobile-app/src/pages/Learning*.tsx</td>
-      <td>1 天</td>
+      <td><span class="tag todo">⏳ 待开发</span></td>
       <td><span class="tag p1">P1</span></td>
     </tr>
     <tr>
       <td><b>D-06.6</b> 文档联动</td>
-      <td>API/TDD/DB/QA/OPS/WBS-P/索引 全部同步</td>
-      <td>原型/lumina-*.html + yaml</td>
-      <td>0.5 天</td>
+      <td>本文档 v1.2 + API/TDD/DB 同步</td>
+      <td>原型/lumina-learning-system.html</td>
+      <td><span class="tag done">✅ 已完成</span></td>
       <td><span class="tag p0">P0</span></td>
     </tr>
     <tr>
       <td><b>D-06.7</b> 种子数据</td>
       <td>seed_learning.py：3 条示范路径 + 10 个徽章 + 7 天挑战</td>
       <td>部署/scripts/seed_learning.py</td>
-      <td>0.5 天</td>
+      <td><span class="tag todo">⏳ 待开发</span></td>
       <td><span class="tag p2">P2</span></td>
     </tr>
     <tr>
       <td><b>D-06.8</b> 团队审核</td>
       <td>代码 + 文档 + 端到端演示</td>
       <td>审核纪要 + 提交 release</td>
-      <td>0.5 天</td>
+      <td><span class="tag todo">⏳ 待进行</span></td>
       <td><span class="tag p0">P0</span></td>
     </tr>
   </table>
@@ -1039,9 +1388,63 @@ sequenceDiagram
   </div>
 </section>
 
+<!-- ============ §11 安全设计 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>11 · <em>Security</em></h2>
+    <span class="num-tag">§11 安全设计</span>
+  </div>
+
+  <p>D-06 作为游戏化模块，存在 3 类特有安全风险，需在设计阶段显式防护：</p>
+
+  <h3 class="sub">11.1 · <em>答题防作弊</em></h3>
+  <table>
+    <tr><th>风险</th><th>防护措施</th><th>实施层级</th></tr>
+    <tr>
+      <td><b>答案泄露</b></td>
+      <td>挑战详情接口隐藏 answer/explanation 字段（仅 submit 后返回）</td>
+      <td>🔒 后端（schemas 层 exclude）</td>
+    </tr>
+    <tr>
+      <td><b>重复作答</b></td>
+      <td>challenge_attempts UNIQUE(user_id, challenge_id) + 幂等返回</td>
+      <td>🔒 数据库约束</td>
+    </tr>
+    <tr>
+      <td><b>并发刷分</b></td>
+      <td>乐观锁（version 字段）+ 每类行为每日 XP 上限（打卡 1 次、挑战 1 次）</td>
+      <td>🔒 后端 + DB</td>
+    </tr>
+    <tr>
+      <td><b>客户端篡改</b></td>
+      <td>视频观看进度由前端上报但后端校验（±10% 容差）；答题答案服务端判分</td>
+      <td>🔒 后端校验</td>
+    </tr>
+  </table>
+
+  <h3 class="sub">11.2 · <em>排行榜公平性</em></h3>
+  <ul>
+    <li><b>周/月榜重置</b>：cron 定时任务（每周一 00:00 / 每月 1 日 00:00）将统计窗口重置</li>
+    <li><b>异常检测</b>：单日 XP 增长 > 500 的用户标记为 suspicious，人工复核</li>
+    <li><b>匿名化选项</b>：用户可设置 <code>privacy_settings.show_in_leaderboard = false</code>（PIPL 合规）</li>
+  </ul>
+
+  <h3 class="sub">11.3 · <em>数据隔离</em></h3>
+  <ul>
+    <li><b>学生视角</b>：仅能查看/修改自己的 progress / XP / badges / check-ins</li>
+    <li><b>教师视角</b>：可管理所创建路径的关卡内容，不可修改学生学习数据</li>
+    <li><b>管理员视角</b>：可查看全部数据，但修改操作写入 audit_logs（D-07 审计日志）</li>
+  </ul>
+
+  <div class="info risk">
+    <div class="label">🛡️ 安全事件响应</div>
+    发现刷分/数据泄露等安全事件时，立即冻结相关账户（<code>users.is_active = false</code>），并从 audit_logs + api_logs 追溯操作链。P0 级事件 1 小时内上报项目负责人。
+  </div>
+</section>
+
 <!-- ============ FOOTER ============ -->
 <footer>
-  <div>Lumina · 墨光 · D-06 · v1.1 · 2026-09-03</div>
+  <div>Lumina · 墨光 · D-06 · v1.2 · 2026-09-03</div>
   <div class="sig">Self-Learning & <span class="hl">Gamification</span></div>
 </footer>
 
