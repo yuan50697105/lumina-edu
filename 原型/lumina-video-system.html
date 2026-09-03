@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumina 墨光 · 教学视频与录播回放需求文档</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ricepaper:#FAF6EC; --ricepaper-2:#F2EBD8; --inkwell:#0F1020; --inkwell-2:#2A2B3D;
+    --cobalt:#3D46C9; --cobalt-soft:#E8EAFB; --highlighter:#F5B800; --highlighter-soft:#FDE68A;
+    --correction:#E85D3A; --correction-soft:#FDE0D4; --growth:#2A7F4F; --growth-soft:#D4EDDC;
+    --ai:#7C3AED; --ai-soft:#EDE9FE;
+    --line:rgba(15,16,32,0.12); --line-strong:rgba(15,16,32,0.22);
+    --f-display:"Fraunces", "Songti SC", serif;
+    --f-body:"Inter", "PingFang SC", system-ui, sans-serif;
+    --f-mono:"JetBrains Mono", ui-monospace, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ricepaper); color:var(--inkwell); font-family:var(--f-body); font-size:15px; line-height:1.6;}
+  body{padding:56px 64px; max-width:1280px; margin:0 auto;}
+
+  .cover{padding:64px 0 56px; border-bottom:1px solid var(--line); margin-bottom:48px;}
+  .cover .brand{display:flex; align-items:center; gap:14px; margin-bottom:28px;}
+  .cover .brand .logo{width:56px; height:56px; border-radius:14px; background:var(--inkwell); color:var(--highlighter); display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:28px; font-weight:500; font-style:italic;}
+  .cover .brand .name{font-family:var(--f-display); font-size:20px; font-weight:500;}
+  .cover .brand .name small{display:block; font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2); letter-spacing:0.14em; text-transform:uppercase; margin-top:4px;}
+  .cover .doc-type{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.2em; color:var(--ai); background:var(--ai-soft); padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:18px;}
+  .cover h1{font-family:var(--f-display); font-weight:300; font-size:66px; letter-spacing:-0.04em; line-height:1;}
+  .cover h1 em{font-style:italic; color:var(--correction);}
+  .cover h1 .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 6px; display:inline-block;}
+  .cover .subtitle{font-size:18px; color:var(--inkwell-2); margin-top:18px; font-weight:300;}
+  .cover .meta{font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:22px; line-height:2;}
+
+  .stats{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:48px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px;}
+  .stat{text-align:center; padding:6px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .val{font-family:var(--f-display); font-size:26px; font-weight:300;}
+  .stat .val.hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 88%, transparent 88%); padding:0 4px; display:inline-block;}
+  .stat .lbl{font-family:var(--f-mono); font-size:9px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em; margin-top:2px;}
+
+  .section{margin-bottom:56px;}
+  .section-header{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:22px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+  .section-header h2{font-family:var(--f-display); font-weight:380; font-size:34px; letter-spacing:-0.02em;}
+  .section-header h2 em{font-style:italic; color:var(--cobalt);}
+  .section-header .num-tag{font-family:var(--f-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--inkwell-2);}
+
+  h3.sub{font-family:var(--f-display); font-size:22px; font-weight:400; margin:28px 0 14px; letter-spacing:-0.01em;}
+  h3.sub em{font-style:italic; color:var(--cobalt);}
+
+  p{margin-bottom:12px; line-height:1.7;}
+  ul,ol{margin:0 0 16px 20px; line-height:1.8;}
+  li{margin-bottom:4px;}
+  b{font-weight:600;}
+  code{font-family:var(--f-mono); background:#fff; padding:2px 6px; border-radius:4px; font-size:13px; border:1px solid var(--line);}
+
+  table{width:100%; border-collapse:collapse; margin:14px 0 22px; font-size:13px;}
+  th{background:var(--ricepaper); font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--inkwell-2); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-strong);}
+  td{padding:10px 12px; border-bottom:1px dashed var(--line); vertical-align:top;}
+  tr:hover td{background:rgba(250,246,236,0.5);}
+  .tag{display:inline-block; font-family:var(--f-mono); font-size:9px; text-transform:uppercase; letter-spacing:0.1em; padding:2px 7px; border-radius:4px;}
+  .tag.p0{background:var(--correction); color:#fff;}
+  .tag.p1{background:var(--highlighter); color:var(--inkwell);}
+  .tag.p2{background:var(--cobalt-soft); color:var(--cobalt);}
+  .tag.done{background:var(--growth-soft); color:var(--growth);}
+  .tag.todo{background:var(--ai-soft); color:var(--ai);}
+  .tag.student{background:#E0F2FE; color:#0369A1;}
+  .tag.teacher{background:#FEF3C7; color:#92400E;}
+  .tag.admin{background:var(--correction-soft); color:var(--correction);}
+
+  .info{padding:16px 20px; border-radius:10px; margin:16px 0 20px; font-size:13px; line-height:1.7;}
+  .info .label{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; font-weight:600;}
+  .info.note{background:var(--cobalt-soft); border:1px solid var(--cobalt);}
+  .info.warn{background:var(--highlighter-soft); border:1px solid var(--highlighter);}
+  .info.success{background:var(--growth-soft); border:1px solid var(--growth);}
+  .info.ai{background:var(--ai-soft); border:1px solid var(--ai);}
+  .info.risk{background:var(--correction-soft); border:1px solid var(--correction);}
+
+  .module-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:22px 24px; margin:14px 0; position:relative; overflow:hidden;}
+  .module-card:before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--cobalt);}
+  .module-card.gamification:before{background:var(--ai);}
+  .module-card.reward:before{background:var(--highlighter);}
+  .module-card .card-header{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+  .module-card .card-icon{width:36px; height:36px; border-radius:10px; background:var(--cobalt-soft); color:var(--cobalt); display:flex; align-items:center; justify-content:center; font-size:18px;}
+  .module-card.gamification .card-icon{background:var(--ai-soft); color:var(--ai);}
+  .module-card.reward .card-icon{background:var(--highlighter-soft); color:var(--inkwell);}
+  .module-card .card-title{font-family:var(--f-display); font-size:20px; font-weight:400;}
+  .module-card .card-title em{font-style:italic; color:var(--cobalt);}
+  .module-card.gamification .card-title em{color:var(--ai);}
+  .module-card.reward .card-title em{color:var(--highlighter);}
+
+  .flow{background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; margin:18px 0;}
+  .flow-step{display:flex; gap:14px; padding:10px 0; border-bottom:1px dashed var(--line); align-items:flex-start;}
+  .flow-step:last-child{border-bottom:none;}
+  .flow-num{flex-shrink:0; width:28px; height:28px; border-radius:50%; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--f-mono); font-size:12px; font-weight:600;}
+  .flow-content{flex:1;}
+  .flow-content .title{font-weight:600; margin-bottom:4px;}
+  .flow-content .desc{font-size:13px; color:var(--inkwell-2); line-height:1.6;}
+
+  .persona{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 22px; margin:14px 0; display:grid; grid-template-columns:80px 1fr; gap:18px; align-items:center;}
+  .persona .avatar{width:72px; height:72px; border-radius:50%; background:var(--cobalt-soft); display:flex; align-items:center; justify-content:center; font-size:32px;}
+  .persona .info-block .name{font-family:var(--f-display); font-size:18px; font-weight:500; margin-bottom:4px;}
+  .persona .info-block .role{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--cobalt); margin-bottom:8px;}
+  .persona .info-block .quote{font-style:italic; color:var(--inkwell-2); font-size:13px; line-height:1.6;}
+
+  .api-block{background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 18px; margin:10px 0; font-family:var(--f-mono); font-size:12px;}
+  .api-block .method{display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600; margin-right:8px;}
+  .api-block .method.get{background:var(--growth-soft); color:var(--growth);}
+  .api-block .method.post{background:var(--cobalt-soft); color:var(--cobalt);}
+  .api-block .method.put{background:var(--highlighter-soft); color:var(--inkwell);}
+  .api-block .method.delete{background:var(--correction-soft); color:var(--correction);}
+  .api-block .path{color:var(--inkwell);}
+  .api-block .desc{color:var(--inkwell-2); font-size:11px; margin-top:4px; font-family:var(--f-body);}
+
+  .db-card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin:14px 0;}
+  .db-card .table-name{font-family:var(--f-mono); font-size:13px; color:var(--cobalt); background:var(--cobalt-soft); padding:3px 10px; border-radius:6px; display:inline-block; margin-bottom:10px;}
+  .db-card .table-desc{font-size:13px; color:var(--inkwell-2); margin-bottom:10px; line-height:1.6;}
+  .db-card table{font-size:12px; margin:0;}
+  .db-card td:first-child{font-family:var(--f-mono); color:var(--inkwell);}
+
+  footer{margin-top:56px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; font-family:var(--f-mono); font-size:11px; color:var(--inkwell-2); text-transform:uppercase; letter-spacing:0.12em;}
+  footer .sig{font-family:var(--f-display); font-style:italic; font-size:14px; color:var(--inkwell); text-transform:none;}
+  footer .sig .hl{background:linear-gradient(180deg, transparent 62%, var(--highlighter) 62%, var(--highlighter) 92%, transparent 92%); padding:0 4px;}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<header class="cover">
+  <div>
+    <div class="brand">
+      <div class="logo">墨</div>
+      <div class="name">Lumina · 墨光<small>Requirements Document · D-08</small></div>
+    </div>
+    <div class="doc-type">Requirement Specification · v1.0</div>
+    <h1><span class="hl">教学视频</span> 与<br/><em>录播回放</em> 体系</h1>
+    <p class="subtitle">Video Management · Live Recording Replay · Adaptive Player · AI Subtitles &amp; Knowledge Search</p>
+    <div class="meta">
+      Document ID: REQ-LUMINA-D08-2026-001 · Status: Draft<br/>
+      Version: 1.0 · Date: 2026-09-03<br/>
+      WBS-P: D-08（V1.1 演进） · Author: Claude Team Review · Owner: Yuan
+    </div>
+  </div>
+</header>
+
+<!-- ============ STATS ============ -->
+<div class="stats">
+  <div class="stat">
+    <div class="val hl">5</div>
+    <div class="lbl">Data Tables</div>
+  </div>
+  <div class="stat">
+    <div class="val">~20</div>
+    <div class="lbl">API Endpoints</div>
+  </div>
+  <div class="stat">
+    <div class="val">3</div>
+    <div class="lbl">User Roles</div>
+  </div>
+  <div class="stat">
+    <div class="val">8</div>
+    <div class="lbl">Weeks Plan</div>
+  </div>
+</div>
+
+<!-- ============ §1 产品概览 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>01 · <em>Overview</em></h2>
+    <span class="num-tag">§1 产品概览</span>
+  </div>
+
+  <h3 class="sub">1.1 · <em>产品定位</em></h3>
+  <p>Lumina 墨光已完成 M1-M3 阶段核心教学链路（课程 / 直播 / 作业 / 考试 / 学情分析）。但当前「课堂内容」是<b>消耗型</b>的——直播结束即流失，课后无法系统回看；教师自制视频资料散落在网盘 / 群文件，缺少统一管理与学习行为数据。本需求为平台补齐<b>教学视频管理与录播回放</b>能力，支撑「<b>直播 + 录播</b>」双模式教学，让每一堂课都可沉淀、可检索、可度量。</p>
+
+  <h3 class="sub">1.2 · <em>目标用户</em></h3>
+  <table>
+    <tr><th>角色</th><th>核心诉求</th><th>典型场景</th></tr>
+    <tr>
+      <td><span class="tag teacher">教师</span></td>
+      <td>上传 / 管理视频，直播课后一键沉淀录播</td>
+      <td>翻转课堂预习资料、直播课回放、精品课建设</td>
+    </tr>
+    <tr>
+      <td><span class="tag student">学生</span></td>
+      <td>随时观看、断点续播、做时间戳学习笔记</td>
+      <td>课后复习回看、补课回看直播、按知识点定位难点</td>
+    </tr>
+    <tr>
+      <td><span class="tag admin">管理员</span></td>
+      <td>存储治理、UGC 内容审核、成本监控</td>
+      <td>审核待发布视频、查看存储占用、配置转码策略</td>
+    </tr>
+  </table>
+
+  <h3 class="sub">1.3 · <em>核心价值</em></h3>
+  <table>
+    <tr><th>价值</th><th>说明</th><th>量化指标</th></tr>
+    <tr>
+      <td><b>📼 直播自动转录播</b></td>
+      <td>直播结束自动触发录制→转码→发布，零人工干预沉淀回放</td>
+      <td>课后 10 分钟内生成可回看草稿</td>
+    </tr>
+    <tr>
+      <td><b>📥 离线学习支持</b></td>
+      <td>移动端下载缓存，通勤 / 弱网场景可学习</td>
+      <td>移动端离线视频打开成功率 ≥ 99%</td>
+    </tr>
+    <tr>
+      <td><b>🔍 知识点切片检索</b></td>
+      <td>AI 字幕转写 + 关键帧索引，按知识点直达视频片段</td>
+      <td>检索命中直达时间点误差 ≤ 5s</td>
+    </tr>
+    <tr>
+      <td><b>📊 学习进度追踪</b></td>
+      <td>观看时长 / 完播率 / 笔记沉淀，反哺 D-05 学情分析</td>
+      <td>课程视频完播率可视化覆盖 100% 已发布视频</td>
+    </tr>
+  </table>
+
+  <div class="info note">
+    <div class="label">📘 与 D-01 直播课堂的关系</div>
+    <ul style="margin-top:6px;">
+      <li><b>直播 → 录播自动沉淀</b>：D-01 直播房间结束后，录制流自动转入本模块转码流水线，生成录播并回关联原房间与课程（<code>videos.source_type='live_record'</code>）</li>
+      <li><b>独立视频预上传</b>：非直播场景（微课 / 预习资料）可提前上传发布，不依赖 D-01</li>
+      <li><b>播放底座复用</b>：录播分发复用 D-01 已有的 HLS 播放链路（含 <code>/media</code> 同源反代），避免第二套播放器体系</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ §2 功能模块 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>02 · <em>Features</em></h2>
+    <span class="num-tag">§2 功能模块（A~E）</span>
+  </div>
+
+  <p>本需求拆为 5 个内聚模块，分别对应「<b>资源管理 / 录播沉淀 / 播放交互 / 智能检索 / 数据度量</b>」五条能力主线。</p>
+
+  <!-- 模块 A -->
+  <div class="module-card">
+    <div class="card-header">
+      <div class="card-icon">🎬</div>
+      <div class="card-title">A · <em>视频资源管理</em> Video Management（教师端）</div>
+    </div>
+    <p>教师把视频作为一等教学资源纳入课程：上传、组织、编辑、送审全流程自助。</p>
+
+    <h3 class="sub">A.1 · <em>上传规格</em></h3>
+    <table>
+      <tr><th>项</th><th>约定</th></tr>
+      <tr><td>容器/编码</td><td><code>mp4</code> / <code>webm</code> / <code>avi</code>（源文件统一转码为 H.264 + AAC）</td></tr>
+      <tr><td>分片上传</td><td>默认 8MB/片，并行 ≤ 4 片；服务端按 <code>upload_id</code> 合并</td></tr>
+      <tr><td>断点续传</td><td>暂停/网络中断后凭 <code>upload_id</code> + 已传分片清单续传；MD5 校验完整性</td></tr>
+      <tr><td>大小上限</td><td>单文件 <b>4 GB</b>（超限返回 413，可配置）</td></tr>
+      <tr><td>数量限制</td><td>单课程默认 200 个视频 / 200 GB 配额，admin 可调整</td></tr>
+    </table>
+
+    <h3 class="sub">A.2 · <em>元信息</em></h3>
+    <ul>
+      <li><b>必填</b>：标题、所属课程（<code>course_id</code>）</li>
+      <li><b>可选</b>：简介、封面（缺省自动抽帧第 60s）、标签数组、章节关联（<code>chapter_id</code>）</li>
+      <li>元信息随创建请求提交，转码完成后状态方可流转为可发布</li>
+    </ul>
+
+    <h3 class="sub">A.3 · <em>列表 / 搜索 / 筛选</em></h3>
+    <ul>
+      <li>维度：按课程 / 章节 / 标签 / 状态 / 时长区间 / 上传时间排序</li>
+      <li>关键词：标题 + 简介模糊匹配；学生视角仅见已发布且自己已选课程的视频</li>
+    </ul>
+
+    <h3 class="sub">A.4 · <em>编辑与删除</em></h3>
+    <ul>
+      <li>修改元信息即时生效；<b>替换源文件</b>重新走转码流水线（旧文件保留 7 天可回滚）</li>
+      <li><b>软删除</b>：状态置 <code>archived</code>，30 天内可恢复，到期物理清理存储</li>
+    </ul>
+
+    <h3 class="sub">A.5 · <em>视频审核</em></h3>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="title">上传完成 → 转码</div><div class="desc">状态 draft → processing，多码率产物就绪后进入待审核</div></div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="title">管理员审核 UGC 内容</div><div class="desc">通过 / 驳回（驳回必填原因，通知上传者）；审核策略可按课程开关</div></div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><div class="title">发布可见</div><div class="desc">状态 published，学生端按权限可见；支持下架回 draft</div></div></div>
+    </div>
+  </div>
+
+  <!-- 模块 B -->
+  <div class="module-card reward">
+    <div class="card-header">
+      <div class="card-icon">📼</div>
+      <div class="card-title">B · <em>录播回放</em> Recording Replay（与 D-01 联动）</div>
+    </div>
+    <p>直播即资产：课堂结束自动沉淀为录播，教师自助剪辑与定时发布。</p>
+
+    <h3 class="sub">B.1 · <em>直播自动录制</em></h3>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="title">直播结束事件</div><div class="desc">D-01 房间 status→ended，触发录制归档 webhook（携带 room_id / course_id / 录制源地址）</div></div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="title">自动转码</div><div class="desc">录制文件进入模块 A 同一转码流水线（多码率 + 封面 + 关键帧）</div></div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><div class="title">生成录播草稿</div><div class="desc">videos.source_type='live_record'，默认标题「{课程}·{日期} 直播回放」，关联原房间</div></div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-content"><div class="title">教师确认发布</div><div class="desc">可先剪辑再发布；发布后在原直播房间入口显示「回看」</div></div></div>
+    </div>
+
+    <h3 class="sub">B.2 · <em>录播剪辑</em>（教师自助）</h3>
+    <ul>
+      <li><b>裁剪</b>：设置入点/出点去掉片头等待、下课尾段；预览确认后异步生成新文件</li>
+      <li><b>静音段切除</b>：基于音量检测列出静音区间，一键剔除（如网络卡顿空白）</li>
+      <li><b>非破坏式</b>：源文件保留（<code>is_original=1</code>），剪辑产物为新版本，可回退</li>
+    </ul>
+
+    <h3 class="sub">B.3 · <em>发布控制</em></h3>
+    <ul>
+      <li>手动发布 / 下架；<b>定时发布</b>（<code>publish_at</code>，到点自动上架，配合教学日历）</li>
+      <li>下架不删除数据，观看记录保留，学生端入口隐藏</li>
+    </ul>
+
+    <h3 class="sub">B.4 · <em>观看权限</em></h3>
+    <table>
+      <tr><th>权限模式</th><th>可见范围</th><th>说明</th></tr>
+      <tr><td><code>course</code>（默认）</td><td>已选该课程的学生 + 授课教师 + 管理员</td><td>选课关系实时校验</td></tr>
+      <tr><td><code>public</code></td><td>全站登录用户</td><td>精品公开课场景，需强制审核</td></tr>
+      <tr><td><code>password</code></td><td>输入访问密码者</td><td>密码为 4-8 位，分享链接带 <code>?v=</code> 校验</td></tr>
+    </table>
+  </div>
+
+  <!-- 模块 C -->
+  <div class="module-card">
+    <div class="card-header">
+      <div class="card-icon">▶️</div>
+      <div class="card-title">C · <em>视频播放器</em> Player（学生端）</div>
+    </div>
+    <p>面向学习场景优化的 HTML5 播放器：流畅、可续播、可批注。</p>
+
+    <h3 class="sub">C.1 · <em>播放能力</em></h3>
+    <ul>
+      <li><b>自适应码率</b>：HLS 多码率阶梯（4K/1080p/720p/360p）按网络自动切换，支持手动锁画质</li>
+      <li><b>倍速</b>：0.5x ~ 2x（步进 0.25），记忆用户偏好</li>
+      <li><b>断点续播</b>：进度每 15s 服务端上报（<code>progress_seconds</code>），换设备可续</li>
+      <li><b>历史列表</b>：我的最近观看（跨课程聚合），观看时长统计入口</li>
+    </ul>
+
+    <h3 class="sub">C.2 · <em>视频笔记</em></h3>
+    <ul>
+      <li>暂停时可插入<b>时间戳笔记</b>（文字），列表按时间轴排列，点击笔记 seek 到对应秒</li>
+      <li><b>截图标记</b>：一键截取当前帧存入笔记（<code>screenshot_url</code>），板书/PPT 场景刚需</li>
+      <li>笔记私有可见（本人）；后续版本可选共享给同课同学</li>
+    </ul>
+
+    <h3 class="sub">C.3 · <em>弹幕 / 评论</em></h3>
+    <ul>
+      <li>按视频开关（教师端配置，默认关）；评论与<b>时间轴关联</b>，形成「共学」氛围</li>
+      <li>复用 D-01 直播弹幕的敏感词过滤与举报链路</li>
+    </ul>
+
+    <h3 class="sub">C.4 · <em>字幕支持</em></h3>
+    <ul>
+      <li><b>SRT/VTT 上传</b>：教师/管理员手动挂字幕</li>
+      <li><b>AI 自动字幕</b>：语音转写（讯飞 / 通义听悟），转码后异步生成，教师可校对修正</li>
+      <li><b>多语言</b>：一视频多轨（zh/en/…），播放器字幕轨切换</li>
+    </ul>
+  </div>
+
+  <!-- 模块 D -->
+  <div class="module-card gamification">
+    <div class="card-header">
+      <div class="card-icon">🔍</div>
+      <div class="card-title">D · <em>知识点与检索</em> Knowledge &amp; Search</div>
+    </div>
+    <p>让 90 分钟的回放不再「拖进度条碰运气」：切片、索引、直达。</p>
+
+    <h3 class="sub">D.1 · <em>知识点切片</em></h3>
+    <ul>
+      <li>教师按章节/知识点为视频打标签段（时间点区间 + 知识点名），学生端「目录式」跳转</li>
+      <li>与课程章节树（<code>chapters</code>）对齐，直播转录播可继承课堂「答题/点名」时间标记</li>
+    </ul>
+
+    <h3 class="sub">D.2 · <em>关键帧索引</em>（AI）</h3>
+    <ul>
+      <li>转码流水线并行提取关键帧：<b>PPT 切换点</b>（画面突变检测）、<b>板书重点</b>（黑屏/书写区域变化）</li>
+      <li>关键帧生成缩略图时间轴，悬停预览定位</li>
+    </ul>
+
+    <h3 class="sub">D.3 · <em>全文检索</em></h3>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="title">语音转文字</div><div class="desc">字幕转写产物（video_transcripts，含每句时间戳）入库</div></div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="title">建立检索索引</div><div class="desc">MySQL 全文索引起步（ngram 中文分词）；数据量增长后评估 ES</div></div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><div class="title">搜索命中时间点</div><div class="desc">返回视频 + 命中句 + 时间戳片段高亮，点击进入播放并 seek</div></div></div>
+    </div>
+
+    <h3 class="sub">D.4 · <em>学习路径推荐</em></h3>
+    <ul>
+      <li>课程内推荐：未看视频 + 章节进度驱动（「下一章预习」）</li>
+      <li>与 D-06 学习路径协同：视频可作为路径关卡资源（<code>resource_type='video'</code>）挂载</li>
+    </ul>
+
+    <div class="info ai">
+      <div class="label">🤖 AI 能力边界</div>
+      关键帧提取与语音转写为<b>离线流水线任务</b>（不产生推理网关实时调用费用）；推荐 v1 采用规则策略（进度 + 选课关系），LLM 语义推荐列为 V2 评估项，避免首期引入 ai_gateway 配额风险。
+    </div>
+  </div>
+
+  <!-- 模块 E -->
+  <div class="module-card">
+    <div class="card-header">
+      <div class="card-icon">📊</div>
+      <div class="card-title">E · <em>数据分析</em> Analytics</div>
+    </div>
+    <p>观看行为沉淀为教学度量：教师看学情，管理员看成本。</p>
+
+    <table>
+      <tr><th>报表</th><th>指标</th><th>视角</th></tr>
+      <tr>
+        <td><b>视频观看统计</b></td>
+        <td>播放量 · 完播率（progress ≥ 90%）· 平均观看时长 · 观看高峰时段（小时分布）</td>
+        <td><span class="tag teacher">教师</span> <span class="tag admin">管理员</span></td>
+      </tr>
+      <tr>
+        <td><b>学生观看报告</b></td>
+        <td>个人：累计时长/完播数/笔记数；班级：覆盖率、未看名单（督学清单）</td>
+        <td><span class="tag teacher">教师</span></td>
+      </tr>
+      <tr>
+        <td><b>热门视频排行</b></td>
+        <td>课程内 / 全站 Top N（按播放量、完播率双口径）</td>
+        <td><span class="tag teacher">教师</span> <span class="tag admin">管理员</span></td>
+      </tr>
+      <tr>
+        <td><b>存储占用统计</b></td>
+        <td>总容量 / 课程分布 / TOP10 大文件 / 配额告警（≥80% 提醒）</td>
+        <td><span class="tag admin">管理员</span></td>
+      </tr>
+    </table>
+    <ul>
+      <li>数据口径以 <code>video_views</code> 为准，聚合任务每日凌晨增量汇总（复用 analytics 模块定时框架）</li>
+      <li>支持 CSV 导出；学生观看报告可回流 D-05 学情分析作为「课外学习投入」信号</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ §3 用户故事 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>03 · <em>User Stories</em></h2>
+    <span class="num-tag">§3 用户故事与验收标准</span>
+  </div>
+
+  <table>
+    <tr><th>ID</th><th>角色</th><th>作为…我希望…</th><th>验收标准（AC）</th><th>优先级</th></tr>
+    <tr>
+      <td>US-01</td>
+      <td><span class="tag student">学生</span></td>
+      <td>关闭播放页后回来自动续播，换手机也能接上进度</td>
+      <td>再次打开自动 seek 到最后进度 ±5s；跨设备续播一致（进度服务端存储）</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td>US-02</td>
+      <td><span class="tag student">学生</span></td>
+      <td>自由倍速和切换画质</td>
+      <td>0.5x~2x 每档 0.25 即时生效；手动切画质不重置播放位置与倍速</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td>US-03</td>
+      <td><span class="tag student">学生</span></td>
+      <td>边看边记带时间戳的笔记和截图</td>
+      <td>当前秒生成笔记；笔记列表点击跳转到对应时间点；截图可回看</td>
+      <td><span class="tag p1">P1</span></td>
+    </tr>
+    <tr>
+      <td>US-04</td>
+      <td><span class="tag student">学生</span></td>
+      <td>搜关键词直接定位到讲这句话的视频片段</td>
+      <td>命中字幕原文 → 返回视频 + 时间点；点击进播放自动 seek</td>
+      <td><span class="tag p1">P1</span></td>
+    </tr>
+    <tr>
+      <td>US-05</td>
+      <td><span class="tag teacher">教师</span></td>
+      <td>把 4GB 的课程大视频上传到指定章节</td>
+      <td>分片上传成功；断网后继续传从缺口续；合并后 MD5 一致并自动转码</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td>US-06</td>
+      <td><span class="tag teacher">教师</span></td>
+      <td>直播结束后自动生成回放，我剪掉前 5 分钟等待时间再发布</td>
+      <td>直播结束 ≤10 分钟生成草稿并关联原房间；裁剪后生成新文件、源文件保留</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td>US-07</td>
+      <td><span class="tag teacher">教师</span></td>
+      <td>看到班级每个人每个视频的完播情况</td>
+      <td>班级报表：覆盖率 + 未看名单；支持 CSV 导出</td>
+      <td><span class="tag p1">P1</span></td>
+    </tr>
+    <tr>
+      <td>US-08</td>
+      <td><span class="tag teacher">教师</span></td>
+      <td>给回放挂上字幕，让听不清的同学拖字幕学习</td>
+      <td>SRT 上传即显；AI 转写生成可校对，保存后 source 由 ai 改为 manual</td>
+      <td><span class="tag p1">P1</span></td>
+    </tr>
+    <tr>
+      <td>US-09</td>
+      <td><span class="tag admin">管理员</span></td>
+      <td>审核教师上传的公开视频，防止不当内容外泄</td>
+      <td>待审队列可查；驳回需填原因并通知上传者；未过审视频学生端不可见</td>
+      <td><span class="tag p0">P0</span></td>
+    </tr>
+    <tr>
+      <td>US-10</td>
+      <td><span class="tag admin">管理员</span></td>
+      <td>掌握存储占用并控制成本</td>
+      <td>占用/课程分布/TOP10 大文件可见；配额 ≥80% 触发告警通知</td>
+      <td><span class="tag p2">P2</span></td>
+    </tr>
+  </table>
+
+  <div class="info note">
+    <div class="label">📐 优先级口径</div>
+    P0 = M1/M2 必须交付（上传、播放、录播联动、审核）；P1 = M3/M4 智能与度量增强；P2 = 运营治理项，可后置。<b>整体功能包优先级：P1（核心教学功能）</b>，对齐 WBS-P D-08。
+  </div>
+</section>
+
+<!-- ============ §4 数据模型 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>04 · <em>Data Model</em></h2>
+    <span class="num-tag">§4 数据模型设计（5 张表）</span>
+  </div>
+
+  <p>新增模块 <code>video</code>，共 5 张表。所有主键沿用项目统一的 <code>GUID</code>（CHAR(36)），时区字段统一 <code>DateTime(timezone=True)</code>。</p>
+
+  <!-- videos -->
+  <div class="db-card">
+    <span class="table-name">videos</span>
+    <div class="table-desc">视频主表（上传 + 直播转录播统一入口）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>视频主键</td></tr>
+      <tr><td>course_id</td><td>GUID FK → courses NOT NULL</td><td>所属课程</td></tr>
+      <tr><td>chapter_id</td><td>GUID FK → chapters</td><td>关联章节（可选）</td></tr>
+      <tr><td>uploader_id</td><td>GUID FK → users NOT NULL</td><td>上传者（教师/管理员）</td></tr>
+      <tr><td>title</td><td>VARCHAR(200) NOT NULL</td><td>标题</td></tr>
+      <tr><td>description</td><td>TEXT</td><td>简介</td></tr>
+      <tr><td>cover_url</td><td>VARCHAR(500)</td><td>封面（缺省自动抽帧）</td></tr>
+      <tr><td>tags</td><td>JSON</td><td>标签数组（知识点切片用）</td></tr>
+      <tr><td>source_type</td><td>VARCHAR(20) DEFAULT 'upload'</td><td>upload / live_record</td></tr>
+      <tr><td>source_room_id</td><td>GUID</td><td>来源直播房间（live_record 时回指 D-01）</td></tr>
+      <tr><td>duration</td><td>INT</td><td>时长（秒）</td></tr>
+      <tr><td>size</td><td>BIGINT</td><td>源文件字节数</td></tr>
+      <tr><td>status</td><td>VARCHAR(20) DEFAULT 'draft'</td><td>draft / processing / published / archived</td></tr>
+      <tr><td>access_type</td><td>VARCHAR(20) DEFAULT 'course'</td><td>course / public / password</td></tr>
+      <tr><td>access_password</td><td>VARCHAR(100)</td><td>访问密码哈希（password 模式）</td></tr>
+      <tr><td>view_count</td><td>INT DEFAULT 0</td><td>累计播放量（冗余计数）</td></tr>
+      <tr><td>published_at</td><td>DATETIME</td><td>（定时）发布时间</td></tr>
+      <tr><td>created_at / updated_at</td><td>DATETIME</td><td>时间戳</td></tr>
+    </table>
+  </div>
+
+  <!-- video_files -->
+  <div class="db-card">
+    <span class="table-name">video_files</span>
+    <div class="table-desc">视频文件表（多码率产物 · 一个视频 N 个文件）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>文件主键</td></tr>
+      <tr><td>video_id</td><td>GUID FK → videos</td><td>所属视频（级联删除）</td></tr>
+      <tr><td>file_url</td><td>VARCHAR(500) NOT NULL</td><td>存储对象路径（本地/MinIO/OSS 统一 URI）</td></tr>
+      <tr><td>resolution</td><td>VARCHAR(10)</td><td>original / 4k / 1080p / 720p / 360p</td></tr>
+      <tr><td>codec</td><td>VARCHAR(20) DEFAULT 'h264'</td><td>编码（h264/h265/vp9）</td></tr>
+      <tr><td>bitrate_kbps</td><td>INT</td><td>码率（阶梯档位）</td></tr>
+      <tr><td>size</td><td>BIGINT</td><td>文件字节数</td></tr>
+      <tr><td>is_original</td><td>BOOLEAN DEFAULT FALSE</td><td>是否源文件（剪辑回退依据）</td></tr>
+      <tr><td>created_at</td><td>DATETIME</td><td>产物生成时间</td></tr>
+    </table>
+  </div>
+
+  <!-- video_views -->
+  <div class="db-card">
+    <span class="table-name">video_views</span>
+    <div class="table-desc">观看记录（UNIQUE(video_id, user_id) 一人一行、服务端续播真相）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>记录主键</td></tr>
+      <tr><td>video_id</td><td>GUID FK → videos</td><td>视频</td></tr>
+      <tr><td>user_id</td><td>GUID NOT NULL (indexed)</td><td>观看者</td></tr>
+      <tr><td>progress_seconds</td><td>INT DEFAULT 0</td><td>最后观看位置（秒）</td></tr>
+      <tr><td>watched_seconds</td><td>INT DEFAULT 0</td><td>累计有效观看时长（防拖拽刷时长）</td></tr>
+      <tr><td>completed</td><td>BOOLEAN DEFAULT FALSE</td><td>是否完播（≥90% 置真）</td></tr>
+      <tr><td>last_watched_at</td><td>DATETIME</td><td>最近观看时间（历史列表排序）</td></tr>
+      <tr><td>device_type</td><td>VARCHAR(20)</td><td>web / ios / android / desktop</td></tr>
+    </table>
+  </div>
+
+  <!-- video_notes -->
+  <div class="db-card">
+    <span class="table-name">video_notes</span>
+    <div class="table-desc">视频笔记（时间戳锚点 · 本人私有）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>笔记主键</td></tr>
+      <tr><td>video_id</td><td>GUID FK → videos</td><td>视频（级联删除）</td></tr>
+      <tr><td>user_id</td><td>GUID NOT NULL (indexed)</td><td>作者</td></tr>
+      <tr><td>timestamp_seconds</td><td>INT NOT NULL</td><td>锚定时间点（秒）</td></tr>
+      <tr><td>content</td><td>TEXT NOT NULL</td><td>笔记正文</td></tr>
+      <tr><td>screenshot_url</td><td>VARCHAR(500)</td><td>截图标记（可选）</td></tr>
+      <tr><td>created_at</td><td>DATETIME</td><td>创建时间</td></tr>
+    </table>
+  </div>
+
+  <!-- video_transcripts -->
+  <div class="db-card">
+    <span class="table-name">video_transcripts</span>
+    <div class="table-desc">字幕 / 转写（一视频多语言多轨；全文检索数据源）</div>
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>GUID PK</td><td>字幕主键</td></tr>
+      <tr><td>video_id</td><td>GUID FK → videos</td><td>视频（级联删除）</td></tr>
+      <tr><td>language</td><td>VARCHAR(10) DEFAULT 'zh'</td><td>语言代码 zh/en/…</td></tr>
+      <tr><td>format</td><td>VARCHAR(10) DEFAULT 'srt'</td><td>srt / vtt / json（json 含逐句时间戳）</td></tr>
+      <tr><td>content</td><td>LONGTEXT NOT NULL</td><td>字幕内容（检索索引由此构建）</td></tr>
+      <tr><td>source</td><td>VARCHAR(10) DEFAULT 'manual'</td><td>manual（人工上传/校对）/ ai（自动转写）</td></tr>
+      <tr><td>created_at</td><td>DATETIME</td><td>创建时间</td></tr>
+    </table>
+  </div>
+
+  <div class="info note">
+    <div class="label">🗂️ ER 关系</div>
+    <ul style="margin-top:6px;">
+      <li><code>videos</code> 1 --- N <code>video_files</code> / <code>video_views</code> / <code>video_notes</code> / <code>video_transcripts</code>（均级联删除）</li>
+      <li><code>videos</code> N --- 1 <code>courses</code> / <code>chapters</code> / <code>users</code>(uploader)</li>
+      <li><code>videos.source_room_id</code> 弱关联 D-01 <code>live_rooms</code>（直播转录播溯源，不建外键，房间归档不影响视频）</li>
+    </ul>
+  </div>
+
+  <div class="info success">
+    <div class="label">✅ 表数量影响</div>
+    当前 D-05 完成态 <b>40 张表</b>；D-06 规划新增 9 张、D-08 规划新增 5 张，全部落地后共 <b>54 张表</b>（video 模块 5 表）。沿用 <code>GUID</code> 主键、<code>DateTime(timezone=True)</code>、<code>server_default=func.now()</code> 等项目既有约定。
+  </div>
+</section>
+
+<!-- ============ §5 接口设计 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>05 · <em>API Preview</em></h2>
+    <span class="num-tag">§5 接口设计（~20 端点）</span>
+  </div>
+
+  <p>新增模块 <code>/api/v1/video/*</code>，统一前缀 <code>/video</code>，按子资源分组。所有端点需 <code>Authorization: Bearer {token}</code>。</p>
+
+  <h3 class="sub">5.1 · <em>视频管理</em>（7）</h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/video/videos?course_id=&chapter_id=&tag=&status=&sort=&offset=&limit=</span><div class="desc">视频列表（学生默认仅 published + 已选课程；教师看自己课程全部）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/video/videos/{video_id}</span><div class="desc">视频详情（含 file 档位、我的进度、笔记数、字幕轨列表）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/video/videos</span><div class="desc">创建视频记录 + 返回 <code>upload_id</code> 分片上传凭证（teacher 课程内/admin 全局）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/video/videos/{video_id}/upload</span><div class="desc">分片上传/断点续传（part 序号 + MD5；complete 动作触发转码流水线）</div></div>
+  <div class="api-block"><span class="method put">PUT</span><span class="path">/video/videos/{video_id}</span><div class="desc">更新元信息 / 替换源文件（owner 或 admin）</div></div>
+  <div class="api-block"><span class="method delete">DELETE</span><span class="path">/video/videos/{video_id}</span><div class="desc">软删除（status→archived，30 天恢复窗口）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/video/videos/{video_id}/audit</span><div class="desc">管理员审核：approve / reject（reject 带 reason → 通知上传者）</div></div>
+
+  <h3 class="sub">5.2 · <em>录播回放</em>（4）</h3>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/video/recordings/from-live</span><div class="desc">直播转录播：D-01 结束事件内部调用，body {room_id, recording_url} → 创建 videos 草稿并入转码队列</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/video/videos/{video_id}/trim</span><div class="desc">录播剪辑：入点/出点秒 + 静音区间数组 → 异步生成新文件（源保留）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/video/videos/{video_id}/publish</span><div class="desc">发布 / 下架（action=publish|unpublish；权限校验 + 审核状态校验）</div></div>
+  <div class="api-block"><span class="method put">PUT</span><span class="path">/video/videos/{video_id}/schedule</span><div class="desc">定时发布：设定 <code>publish_at</code>（到点由调度任务自动上架）</div></div>
+
+  <h3 class="sub">5.3 · <em>播放交互</em>（5）</h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/video/videos/{video_id}/play</span><div class="desc">播放凭证：校验选课/密码/审核 → 返回 m3u8 地址（含时效签名）+ 续播位置</div></div>
+  <div class="api-block"><span class="method put">PUT</span><span class="path">/video/videos/{video_id}/progress</span><div class="desc">观看进度上报 {progress_seconds, watched_seconds, device_type}（UPSERT video_views，幂等）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/video/videos/{video_id}/notes</span><div class="desc">我的笔记列表（按 timestamp_seconds 排序；DELETE /video/notes/{note_id} 删除）</div></div>
+  <div class="api-block"><span class="method post">POST</span><span class="path">/video/videos/{video_id}/notes</span><div class="desc">创建时间戳笔记（content + timestamp_seconds，可选 screenshot_url 先传截图对象）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="method post">POST</span><span class="path">/video/videos/{video_id}/transcripts?language=zh</span><div class="desc">取字幕轨（播放器渲染）；POST 上传 SRT 或触发 AI 转写（body {source:"ai", language}）</div></div>
+
+  <h3 class="sub">5.4 · <em>检索分析</em>（4）</h3>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/video/search?q=&course_id=&offset=&limit=</span><div class="desc">字幕全文检索：返回视频 + 命中句片段 + 时间戳（权限过滤）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/video/videos/{video_id}/keyframes</span><div class="desc">关键帧索引 + 知识点切片目录（AI 提取产物，缩略图 URL + 时间点）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/video/stats?course_id=&dimension=video|class|storage</span><div class="desc">统计：播放量/完播率/平均时长/高峰时段、班级未看名单、存储占用（CSV 导出 export=1）</div></div>
+  <div class="api-block"><span class="method get">GET</span><span class="path">/video/recommend?course_id=&limit=</span><div class="desc">学习路径推荐：按我的进度/选课推荐未看视频（规则策略 v1）</div></div>
+
+  <div class="info note">
+    <div class="label">🔒 权限矩阵</div>
+    <table style="margin-top:8px;">
+      <tr><th>端点类型</th><th>学生</th><th>教师</th><th>管理员</th></tr>
+      <tr><td>播放/进度/笔记/字幕读取</td><td>✅ 有权限的视频</td><td>✅</td><td>✅</td></tr>
+      <tr><td>上传/编辑/删除/剪辑/发布</td><td>❌</td><td>✅ 仅自己课程</td><td>✅ 全部</td></tr>
+      <tr><td>审核 / 存储统计 / 配额配置</td><td>❌</td><td>❌（仅看自己视频统计）</td><td>✅</td></tr>
+      <tr><td>检索 / 推荐</td><td>✅（结果限权限内）</td><td>✅</td><td>✅</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============ §6 存储与转码策略 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>06 · <em>Storage &amp; Transcoding</em></h2>
+    <span class="num-tag">§6 存储与转码策略</span>
+  </div>
+
+  <h3 class="sub">6.1 · <em>存储方案（可插拔驱动）</em></h3>
+  <table>
+    <tr><th>后端</th><th>定位</th><th>说明</th></tr>
+    <tr><td><b>本地磁盘</b></td><td>开发 / 演示</td><td>与 Docker 卷挂载配合，默认驱动，零依赖起步</td></tr>
+    <tr><td><b>MinIO 自建</b></td><td>校园内私有化部署</td><td>S3 协议，数据不出校；docker-compose 增加 1 服务即可</td></tr>
+    <tr><td><b>阿里云 OSS / 腾讯云 COS</b></td><td>生产 + CDN 加速</td><td>生命周期规则（archived 30 天转低频/冷存），配 RAM 子账号</td></tr>
+  </table>
+  <div class="info warn">
+    <div class="label">⚠ 驱动抽象</div>
+    统一 <code>StorageDriver</code> 接口（put / presign_upload / presign_get / delete），<code>file_url</code> 存逻辑对象键而非物理地址——换后端不动数据。密钥全部环境变量注入（如 <code>STORAGE_BACKEND</code> / <code>OSS_ENDPOINT</code>）。
+  </div>
+
+  <h3 class="sub">6.2 · <em>转码流水线</em></h3>
+  <div class="flow">
+    <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="title">分片合并 + 校验</div><div class="desc">MD5 校验 → 源文件落对象存储（is_original）→ 状态 processing</div></div></div>
+    <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="title">FFmpeg 多码率转码</div><div class="desc">1080p(4M)/720p(2M)/360p(800k) H.264+AAC，任务队列（Redis）串行 worker 防打满 CPU；4K 源仅保留降采样档位</div></div></div>
+    <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><div class="title">封面 + 雪碧图</div><div class="desc">默认抽第 60s 帧；按 10s/格生成进度条预览雪碧图</div></div></div>
+    <div class="flow-step"><div class="flow-num">4</div><div class="flow-content"><div class="title">关键帧提取（AI）</div><div class="desc">PPT 切换点 / 板书变化检测 → keyframes 产物（模块 D）</div></div></div>
+    <div class="flow-step"><div class="flow-num">5</div><div class="flow-content"><div class="title">语音转写（ASR）</div><div class="desc">讯飞/通义听悟 → video_transcripts(source=ai, format=json)</div></div></div>
+    <div class="flow-step"><div class="flow-num">6</div><div class="flow-content"><div class="title">HLS 切片 + 入库就绪</div><div class="desc">m3u8/ts 分片 → 通知上传者：可审核/可发布；任一步失败可重跑且不产生脏产物</div></div></div>
+  </div>
+
+  <h3 class="sub">6.3 · <em>CDN 分发</em></h3>
+  <ul>
+    <li>热点视频（高峰并发）边缘缓存 m3u8 + ts 分片；回源走对象存储内网</li>
+    <li>播放凭证带<b>时效签名</b>（默认 2h），防盗链；无 CDN 环境回退 Nginx <code>/media</code> 同源反代（复用 D-01 已验证链路）</li>
+  </ul>
+
+  <h3 class="sub">6.4 · <em>存储成本预估</em></h3>
+  <table>
+    <tr><th>参数</th><th>估算</th></tr>
+    <tr><td>单位体积</td><td>1 小时 1080p ≈ <b>1.5 GB</b>（4 Mbps 码率）</td></tr>
+    <tr><td>内容规模</td><td>100 门课 × 15 周 × 2 小时/周 = <b>3000 小时</b></td></tr>
+    <tr><td>多码率冗余</td><td>1080p + 720p + 360p + 源保留 ≈ 2.0~2.2×</td></tr>
+    <tr><td><b>总占用</b></td><td>裸体积 4.5 TB × 冗余 ≈ <b>6 TB</b>（学期峰值），归档清理后稳态约 4~5 TB</td></tr>
+    <tr><td>成本参考</td><td>OSS 标准存储 ≈ ¥0.12/GB/月 → 6 TB ≈ ¥740/月；MinIO 自建按磁盘一次性投入 + 运维</td></tr>
+  </table>
+</section>
+
+<!-- ============ §7 平台适配 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>07 · <em>Platform Matrix</em></h2>
+    <span class="num-tag">§7 平台适配</span>
+  </div>
+
+  <table>
+    <tr><th>端</th><th>支持度</th><th>功能范围</th><th>技术方案</th></tr>
+    <tr>
+      <td><b>🌐 Web</b></td>
+      <td><span class="tag done">✅ 完整</span></td>
+      <td>上传/管理/审核 · 播放器 · 笔记 · 检索 · 统计报表（教师/管理端全量）</td>
+      <td>hls.js 播放器 + 分片上传（Web API）</td>
+    </tr>
+    <tr>
+      <td><b>📱 移动端（iOS/Android）</b></td>
+      <td><span class="tag done">✅ 学习侧</span></td>
+      <td>播放/倍速/断点 · 笔记（截图）· 历史 · <b>离线下载</b></td>
+      <td>expo-video 原生播放；下载缓存 + 加密沙盒存储</td>
+    </tr>
+    <tr>
+      <td><b>🖥️ 桌面端</b></td>
+      <td><span class="tag done">✅ 同 Web</span></td>
+      <td>与 Web 完全一致（Electron 壳规划中，见 TDD §3.2）</td>
+      <td>复用 Web 端</td>
+    </tr>
+    <tr>
+      <td><b>📟 鸿蒙 HarmonyOS</b></td>
+      <td><span class="tag todo">⏳ 评估中（D-10）</span></td>
+      <td>跟随多端鸿蒙路线（ArkTS 原生 / RNOH），不阻塞本需求</td>
+      <td>待 WBS-P D-09/D-10 演进评估结论</td>
+    </tr>
+  </table>
+
+  <div class="info warn">
+    <div class="label">⚠ 移动端离线下载边界</div>
+    仅 <code>course</code>/<code>public</code> 权限且教师允许下载的视频可离线；下载文件加密存应用沙盒、退出课程即失效清理，避免课件外泄。
+  </div>
+</section>
+
+<!-- ============ §8 验收标准 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>08 · <em>Acceptance</em></h2>
+    <span class="num-tag">§8 验收标准</span>
+  </div>
+
+  <table>
+    <tr><th>ID</th><th>验收项</th><th>预期结果</th></tr>
+    <tr><td>AC-01</td><td>教师上传 4GB 视频（分片）</td><td>上传成功；中断后凭 upload_id 续传补缺口；合并后 MD5 一致</td></tr>
+    <tr><td>AC-02</td><td>上传后自动转码流水线</td><td>status: processing→可发布；产出 3 档码率 + 封面 + 关键帧 + AI 字幕；任一步失败给出可读原因并可重跑</td></tr>
+    <tr><td>AC-03</td><td>D-01 直播结束自动转录播</td><td>房间结束后 ≤10 分钟生成 live_record 草稿，关联原房间与课程，教师端收到通知</td></tr>
+    <tr><td>AC-04</td><td>录播剪辑（去片头/静音段）</td><td>设入/出点异步生成新文件；源文件保留可回退；时长/duration 同步更新</td></tr>
+    <tr><td>AC-05</td><td>播放器断点续播 + 倍速 + 画质</td><td>续播误差 ≤ ±5s（含换设备）；0.5x~2x 即时生效；切画质不重置位置</td></tr>
+    <tr><td>AC-06</td><td>视频笔记（时间戳 + 截图）</td><td>笔记锚定当前秒、列表点击 seek；截图笔记内可查看</td></tr>
+    <tr><td>AC-07</td><td>观看权限控制</td><td>未选课学生访问 course 视频 403；password 模式密码错误不可取播放凭证；public 仍需登录</td></tr>
+    <tr><td>AC-08</td><td>UGC 审核闭环</td><td>未过审视频学生端不可见；驳回后上传者收到通知与原因；重新提交回到待审</td></tr>
+    <tr><td>AC-09</td><td>字幕：SRT 上传 / AI 生成</td><td>播放器字幕轨可切换显示；AI 转写完成生成 source=ai 记录，校对保存后 source=manual</td></tr>
+    <tr><td>AC-10</td><td>字幕全文检索</td><td>命中句返回视频 + 时间戳，点击直达播放；结果不泄露无权限视频</td></tr>
+    <tr><td>AC-11</td><td>数据统计一致性</td><td>view_count / 完播率 / 班级未看名单与 video_views 明细一致；CSV 导出可用</td></tr>
+    <tr><td>AC-12</td><td>性能：1000 并发播放</td><td>CDN 边缘命中下首帧 P95 &lt; 2s；播放凭证接口 P95 &lt; 200ms；进度上报（15s 心跳 ×1000 用户）无积压</td></tr>
+    <tr><td>AC-13</td><td>存储驱动可插拔</td><td>local ↔ MinIO 切换仅改环境变量，历史文件可读、新上传落新后端</td></tr>
+    <tr><td>AC-14</td><td>软删除与恢复</td><td>archived 视频 30 天内可恢复，到期物理清理对象存储且记录脱敏留痕</td></tr>
+  </table>
+
+  <h3 class="sub">8.1 · <em>埋点事件</em></h3>
+  <table>
+    <tr><th>事件</th><th>触发时机</th><th>关键字段</th></tr>
+    <tr><td><code>video.play</code></td><td>取得播放凭证开始播放</td><td>video_id, from_resume, device_type</td></tr>
+    <tr><td><code>video.progress</code></td><td>进度心跳落库（采样上报）</td><td>video_id, progress_seconds</td></tr>
+    <tr><td><code>video.completed</code></td><td>完播（≥90%）</td><td>video_id, watched_seconds</td></tr>
+    <tr><td><code>video.note_create</code></td><td>创建时间戳笔记</td><td>video_id, timestamp_seconds, has_screenshot</td></tr>
+    <tr><td><code>video.search_hit</code></td><td>检索结果被点击</td><td>query, video_id, seek_to</td></tr>
+    <tr><td><code>video.record_generated</code></td><td>直播转录播草稿生成</td><td>room_id, video_id, delay_seconds</td></tr>
+  </table>
+</section>
+
+<!-- ============ §9 技术依赖 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>09 · <em>Dependencies</em></h2>
+    <span class="num-tag">§9 技术依赖</span>
+  </div>
+
+  <table>
+    <tr><th>类别</th><th>选型</th><th>用途 / 说明</th></tr>
+    <tr><td><b>视频转码</b></td><td>FFmpeg（worker 容器）</td><td>多码率转码 / HLS 切片 / 封面抽帧 / 静音检测；GPU 非必需</td></tr>
+    <tr><td><b>流媒体协议</b></td><td>HLS（主）· DASH（评估）</td><td>与 D-01 直播 HLS 播放链路统一；DASH 待低延迟需求出现再评估</td></tr>
+    <tr><td><b>对象存储</b></td><td>MinIO / 阿里云 OSS / 腾讯云 COS</td><td>StorageDriver 可插拔抽象（见 §6.1）</td></tr>
+    <tr><td><b>任务队列</b></td><td>Redis 队列 + worker 池</td><td>转码/关键帧/ASR 异步化；复用既有 Redis 实例，新增队列前缀</td></tr>
+    <tr><td><b>AI 字幕</b></td><td>讯飞语音 / 通义听悟</td><td>ASR 转写；密钥环境变量，失败降级「无字幕可发布」</td></tr>
+    <tr><td><b>前端播放器</b></td><td>hls.js（Web）· expo-video（移动端）</td><td>video.js 作为 Web 备选评估；桌面复用 Web</td></tr>
+    <tr><td><b>D-01 集成点</b></td><td>直播结束事件 → from-live 接口</td><td>依赖房间录制产物地址可访问；录制源格式待直播平台选型确定（见风险）</td></tr>
+    <tr><td><b>D-05/D-06 协同</b></td><td>analytics 定时聚合 · learning 关卡挂载</td><td>观看报告回流学情；视频可作为学习路径关卡资源</td></tr>
+  </table>
+
+  <div class="info risk">
+    <div class="label">🛡️ 关键风险</div>
+    <ul style="margin-top:6px;">
+      <li><b>R1 · 直播平台未定（继承 D-01 未决项）</b>：mock:// 占位链路无真实录制产物，from-live 需按「录制文件可访问」假设先行，接口留适配层；上线前必须锁定云厂商并验证录制导出格式</li>
+      <li><b>R2 · 转码算力</b>：单机 FFmpeg worker 吞吐有限（1080p 约 1~1.5x 实时），需队列削峰 + 多 worker 水平扩；避免直播集中下课导致转录播排队超 10 分钟（AC-03）</li>
+      <li><b>R3 · 大文件存储成本</b>：以配额 + 归档清理（AC-14）+ 生命周期降冷控制；成本模型见 §6.4</li>
+      <li><b>R4 · 中文全文检索精度</b>：MySQL ngram 起步满足首期，命中质量不足时引入 ES（独立评估，不阻塞交付）</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ §10 里程碑与排期 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>10 · <em>Milestones</em></h2>
+    <span class="num-tag">§10 里程碑与排期（8 周 · 优先级 P1）</span>
+  </div>
+
+  <p>D-08 纳入 V1.1 演进规划（WBS-P），不阻塞 M4 正式上线；整体功能包优先级 <span class="tag p1">P1（核心教学功能）</span>，预估 8 周 / 4 个内部里程碑。</p>
+
+  <table>
+    <tr><th>阶段</th><th>周次</th><th>交付内容</th><th>退出标准</th></tr>
+    <tr>
+      <td><b>M1 基座</b></td>
+      <td>W1-W2</td>
+      <td>5 张表 + 分片上传/断点续传 + 转码流水线 + 基础播放器（HLS/续播/进度上报）</td>
+      <td>AC-01 / AC-02 / AC-05 / AC-07 通过</td>
+    </tr>
+    <tr>
+      <td><b>M2 录播联动</b></td>
+      <td>W3-W4</td>
+      <td>D-01 直播转录播（from-live）+ 剪辑 + 发布/定时 + 审核闭环</td>
+      <td>AC-03 / AC-04 / AC-08 / AC-14 通过</td>
+    </tr>
+    <tr>
+      <td><b>M3 智能增强</b></td>
+      <td>W5-W6</td>
+      <td>AI 字幕（上传 + 转写）· 关键帧提取 · 知识点切片 · 全文检索 · 推荐 v1</td>
+      <td>AC-09 / AC-10 通过；检索 P95 &lt; 500ms</td>
+    </tr>
+    <tr>
+      <td><b>M4 数据分析</b></td>
+      <td>W7-W8</td>
+      <td>观看统计 / 班级报告 / 热门排行 / 存储统计 + 埋点接入 + 1000 并发压测 + 文档联动</td>
+      <td>AC-11 / AC-12 / AC-13 通过；QA 全量无回归</td>
+    </tr>
+  </table>
+
+  <div class="info success">
+    <div class="label">🎯 推荐执行顺序</div>
+    <ol style="margin-top:6px;">
+      <li>M1 后端（表 + 上传 + 转码 worker）与 Web 播放器<b>并行</b>推进，stub 联调</li>
+      <li>M2 依赖 D-01 房间结束事件契约，先以「外部录制文件 URL 投递」兜底，云平台锁定后切换</li>
+      <li>M3 AI 任务全部走异步队列，失败不阻塞发布主流程</li>
+      <li>M4 收口：压测（AC-12）必须在 CDN/反代拓扑确定后执行；文档联动走既有变更工作流</li>
+    </ol>
+  </div>
+
+  <div class="info note">
+    <div class="label">🧩 与其他任务包的关系</div>
+    <ul style="margin-top:6px;">
+      <li><b>前置</b>：D-01 直播（事件与播放底座）· 存储基线（部署手册 OPS）</li>
+      <li><b>协同</b>：D-05 学情分析（观看行为回流）· D-06 学习路径（video 关卡资源）</li>
+      <li><b>后续</b>：DRM 版权保护、多音轨、H.265 降本 → V1.2 评估池</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div>Lumina · 墨光 · REQ-LUMINA-D08-2026-001 · v1.0 · 2026-09-03</div>
+  <div class="sig">Teaching Video &amp; <span class="hl">Replay</span></div>
+</footer>
+
+</body>
+</html>

@@ -35,6 +35,7 @@ edu/
 │   ├── lumina-launch-wbs.html         # 📋 上线 WBS v1.0
 │   ├── lumina-wbs-pending.html        # 📋 未实现内容落地 WBS v1.1
 │   ├── lumina-learning-system.html    # 📋 D-06 自主学习与闯关奖励需求 v1.0
+│   ├── lumina-video-system.html       # 📋 D-08 教学视频与录播回放需求 v1.0
 │   │
 │   ├── APP/phone/      (8 文件)       # 📱 手机 APP 原型
 │   ├── APP/tablet/     (6 文件)       # 📲 平板 APP 原型
@@ -91,6 +92,7 @@ edu/
 | 📋 **WBS v1.1** | 上线工作分解结构，10 周轻量方案 | `lumina-launch-wbs.html` |
 | 📋 **WBS-P v1.3** | 未实现内容落地 WBS：M4 上线 + 收口认证 + V1.1 演进 | `lumina-wbs-pending.html` |
 | 📋 **REQ-D06 v1.0** | 自主学习与闯关奖励机制需求规格（路径/关卡/XP/徽章/排行） | `lumina-learning-system.html` |
+| 📋 **REQ-D08 v1.0** | 教学视频与录播回放需求规格（视频管理/录播联动/播放器/AI 字幕检索/统计） | `lumina-video-system.html` |
 | 📋 **STATUS v1.0** | 项目全景状态报告（里程碑/已实现/待实现/模块/技术栈/质量/风险） | `lumina-status-report.html` |
 
 ## 🎨 设计系统
@@ -214,6 +216,7 @@ cp .env.example .env
 | 上线 WBS | `原型/lumina-launch-wbs.html` |
 | 未实现内容 WBS | `原型/lumina-wbs-pending.html` |
 | 自主学习需求 | `原型/lumina-learning-system.html` |
+| 教学视频需求 | `原型/lumina-video-system.html` |
 | 项目全景状态报告 | `原型/lumina-status-report.html` |
 
 ## 📋 版本历史

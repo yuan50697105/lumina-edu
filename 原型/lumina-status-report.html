@@ -186,7 +186,7 @@
 <section class="section" id="s2">
   <div class="section-header">
     <h2>02 · 已实现功能清单 <em>Implemented Features</em></h2>
-    <div class="num-tag">D-01 ~ D-07 · 7 大模块</div>
+    <div class="num-tag">D-01 ~ D-07 · 6 已实施 + 1 需求产出</div>
   </div>
 
   <table>
@@ -256,6 +256,15 @@
         <td><span class="tag done">✅ 已实施</span></td>
         <td>2026-09-03</td>
       </tr>
+      <tr style="background:var(--ai-soft);">
+        <td><b>D-06</b></td>
+        <td><b>自主学习与闯关奖励</b><br/><small>学习路径/关卡闯关/XP 等级/每日挑战/徽章/排行榜/打卡（需求文档已产出，待后端实施）</small></td>
+        <td>D-06 专项</td>
+        <td>20 端点<br/>9 表</td>
+        <td>—</td>
+        <td><span class="tag" style="background:var(--ai-soft); color:var(--ai);">📋 需求已产出</span></td>
+        <td>2026-09-03</td>
+      </tr>
     </tbody>
   </table>
 
@@ -270,7 +279,7 @@
 <section class="section" id="s3">
   <div class="section-header">
     <h2>03 · 待实现需求规划 <em>Pending Requirements</em></h2>
-    <div class="num-tag">D-06 ~ D-10 · M4/M4.1/M5</div>
+    <div class="num-tag">D-08 ~ D-11 · M4/M4.1/M5</div>
   </div>
 
   <h3 class="sub">3.1 V1.1 演进任务（D 阶段）</h3>
@@ -287,23 +296,15 @@
     </thead>
     <tbody>
       <tr>
-        <td><b>D-06</b></td>
-        <td><b>自主学习与闯关奖励</b><br/><small>学习路径/关卡/XP 等级/每日挑战/徽章/排行榜/打卡</small></td>
-        <td>D-06 专项</td>
-        <td><span class="tag milestone">P1</span></td>
-        <td>需求文档已产出（lumina-learning-system.html v1.0），待后端实现（3 模块 · 9 表 · 20 端点）</td>
-        <td><span class="tag pending">⬜ 待实施</span></td>
-      </tr>
-      <tr>
-        <td><b>D-07</b></td>
-        <td><b>课程审批 + 系统设置 + 审计日志</b><br/><small>管理端补齐（含监控大盘）</small></td>
-        <td>14 · 16 · 17 · P1</td>
-        <td><span class="tag milestone">P2</span></td>
-        <td>管理端功能补齐</td>
-        <td><span class="tag done">✅ 已实施</span></td>
-      </tr>
-      <tr>
         <td><b>D-08</b></td>
+        <td><b>教学视频与录播回放</b><br/><small>视频上传/转码/播放/笔记/录播回放/知识点检索</small></td>
+        <td>04 延伸 · P1</td>
+        <td><span class="tag milestone">P1</span></td>
+        <td>需求文档产出中（lumina-video-system.html v1.0）· 5 表 · 20 端点 · 与 D-01 直播联动</td>
+        <td><span class="tag" style="background:var(--ai-soft); color:var(--ai);">📋 需求产出中</span></td>
+      </tr>
+      <tr>
+        <td><b>D-09</b></td>
         <td><b>AI 基础设施</b><br/><small>RAG 向量检索/Agent 编排/MCP/内容审核</small></td>
         <td>18-20 · 规划中</td>
         <td><span class="tag milestone">P1</span></td>
@@ -311,7 +312,7 @@
         <td><span class="tag pending">⬜ 待实施</span></td>
       </tr>
       <tr>
-        <td><b>D-09</b></td>
+        <td><b>D-10</b></td>
         <td><b>运营演进</b><br/><small>独立监控 + CI/CD</small></td>
         <td>—</td>
         <td><span class="tag milestone">P2</span></td>
@@ -319,7 +320,7 @@
         <td><span class="tag pending">⬜ 待实施</span></td>
       </tr>
       <tr>
-        <td><b>D-10</b></td>
+        <td><b>D-11</b></td>
         <td><b>规模演进 + 平台覆盖</b><br/><small>K8s 集群（用户>5000）· 鸿蒙适配评估</small></td>
         <td>—</td>
         <td><span class="tag milestone">P2</span></td>
@@ -622,7 +623,8 @@
   <h3 class="sub">9.1 立即可执行（无外部依赖）</h3>
   <ol>
     <li><b>D-06 自主学习与闯关奖励</b>（P1）——需求文档已产出，后端实现（3 模块 · 9 表 · 20 端点）</li>
-    <li><b>D-08 AI 基础设施</b>（P1）——RAG/Agent 编排/MCP，提升 AI 能力深度</li>
+    <li><b>D-08 教学视频与录播回放</b>（P1）——需求文档产出中（5 表 · 20 端点 · 与 D-01 直播联动）</li>
+    <li><b>D-09 AI 基础设施</b>（P1）——RAG/Agent 编排/MCP，提升 AI 能力深度</li>
   </ol>
 
   <h3 class="sub">9.2 待环境就绪后执行（M4 上线）</h3>
@@ -636,13 +638,13 @@
 
   <h3 class="sub">9.3 演进规划（M4 后滚动）</h3>
   <ol>
-    <li><b>D-09 运营演进</b>——独立监控（Prometheus+Grafana）+ CI/CD</li>
-    <li><b>D-10 规模演进 + 鸿蒙</b>——K8s 集群（用户>5000 触发）· 三路线评审</li>
+    <li><b>D-10 运营演进</b>——独立监控（Prometheus+Grafana）+ CI/CD</li>
+    <li><b>D-11 规模演进 + 鸿蒙</b>——K8s 集群（用户>5000 触发）· 三路线评审</li>
   </ol>
 
   <div class="info note">
     <div class="label">💡 建议优先级</div>
-    若<b>生产环境短期无法就绪</b>，建议先推进 D-06/D-08 功能迭代，保持开发节奏；若<b>云资源已到位</b>，则优先 M4 上线执行，功能迭代后置。
+    若<b>生产环境短期无法就绪</b>，建议先推进 D-06/D-08/D-09 功能迭代，保持开发节奏；若<b>云资源已到位</b>，则优先 M4 上线执行，功能迭代后置。
   </div>
 </section>
 
