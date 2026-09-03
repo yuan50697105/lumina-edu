@@ -104,7 +104,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Project Status Report</small></div>
     </div>
-    <div class="doc-type">Comprehensive Status Report · v1.2</div>
+    <div class="doc-type">Comprehensive Status Report · v1.3</div>
     <h1>
       <span class="hl">项目全景</span>状态报告<br/>
       <em>需求 · 规划 · 进度</em>
@@ -113,8 +113,8 @@
   </div>
   <div class="meta">
     报告生成时间：2026-09-03<br/>
-    数据源：开发进度.md · lumina-wbs-pending.html v1.3 · lumina-00-index.html v1.6<br/>
-    依据：WBS v1.1 · WBS-P v1.3 · PRD v1.4 · TDD v1.7 · API v1.7<br/>
+    数据源：开发进度.md · lumina-wbs-pending.html v1.3 · lumina-00-index.html v2.0<br/>
+    依据：WBS v1.1 · WBS-P v1.3 · PRD v1.4 · TDD v1.8 · API v1.8<br/>
     单体快照：174 paths / 215 ops · 20 模块 · 64 表 · 336 单测
   </div>
 </header>
@@ -258,11 +258,11 @@
       </tr>
       <tr style="background:var(--ai-soft);">
         <td><b>D-06</b></td>
-        <td><b>自主学习与闯关奖励</b><br/><small>学习路径/关卡闯关/XP 等级/每日挑战/徽章/排行榜/打卡（需求文档已产出，待后端实施）</small></td>
+        <td><b>自主学习与闯关奖励</b><br/><small>学习路径/关卡闯关/XP 等级/每日挑战/徽章/排行榜/打卡（✅ 后端+前端+种子+单测）</small></td>
         <td>D-06 专项</td>
-        <td>20 端点<br/>9 表</td>
-        <td>—</td>
-        <td><span class="tag" style="background:var(--ai-soft); color:var(--ai);">🎨 原型已产出</span></td>
+        <td>12 端点<br/>10 表</td>
+        <td>4 页面<br/>27 单测</td>
+        <td><span class="tag done">✅ 已实施</span></td>
         <td>2026-09-03</td>
       </tr>
     </tbody>
@@ -300,32 +300,32 @@
         <td><b>教学视频与录播回放</b><br/><small>视频上传/转码/播放/笔记/录播回放/知识点检索</small></td>
         <td>04 延伸 · P1</td>
         <td><span class="tag milestone">P1</span></td>
-        <td>需求+原型已产出（lumina-video-system.html v1.0 + lumina-22-video-system.html）· 5 表 · 20 端点 · 与 D-01 直播联动</td>
-        <td><span class="tag" style="background:var(--ai-soft); color:var(--ai);">🎨 原型已产出</span></td>
+        <td>✅ 已完成：video 模块 9 端点 · 4 表 · 移动端视频页 · 与 D-01 直播联动</td>
+        <td><span class="tag done">✅ 已实施</span></td>
       </tr>
       <tr>
         <td><b>D-09</b></td>
         <td><b>AI 基础设施</b><br/><small>RAG 向量检索/Agent 编排/MCP/内容审核</small></td>
         <td>18-20 · 规划中</td>
         <td><span class="tag milestone">P1</span></td>
-        <td>Milvus/AgentScope/知网 AIGC · 含学习路径/知识图谱、课件生成/课堂 Copilot/学情预测</td>
-        <td><span class="tag pending">⬜ 待实施</span></td>
+        <td>✅ 已完成：ai_infra 模块 11 端点 · 5 表（知识库/RAG/Agent/审核日志）· 含内容审核</td>
+        <td><span class="tag done">✅ 已实施</span></td>
       </tr>
       <tr>
         <td><b>D-10</b></td>
         <td><b>运营演进</b><br/><small>独立监控 + CI/CD</small></td>
         <td>—</td>
         <td><span class="tag milestone">P2</span></td>
-        <td>Prometheus + Grafana · GitHub Actions</td>
-        <td><span class="tag pending">⬜ 待实施</span></td>
+        <td>✅ 已完成：ops 模块 3 端点（Prometheus 指标 / 深度健康检查 / 业务指标聚合）</td>
+        <td><span class="tag done">✅ 已实施</span></td>
       </tr>
       <tr>
         <td><b>D-11</b></td>
         <td><b>鸿蒙硬件平台与操作系统支持</b><br/><small>HarmonyOS NEXT · OpenHarmony · 6 设备形态 · ArkTS 原生 · 分布式流转</small></td>
         <td>—</td>
         <td><span class="tag milestone">P2</span></td>
-        <td>需求+原型已产出（lumina-harmony-os.html + Harmony/lumina-01-harmony-overview.html）· 信创合规 · 三路线评估</td>
-        <td><span class="tag" style="background:var(--ai-soft); color:var(--ai);">🎨 原型已产出</span></td>
+        <td>✅ 已完成：harmony-app 原生 ArkTS/ArkUI · 6 页面（登录/主页/直播/学习/视频/我的）· DevEco Stage 模型 · 与后端 174 paths 同契约</td>
+        <td><span class="tag done">✅ 已实施</span></td>
       </tr>
     </tbody>
   </table>
@@ -445,13 +445,13 @@
       <tr><td><b>lumina-userguide.html</b></td><td>v1.1</td><td>2026-08-31</td><td>用户手册（10 章 · 3 角色）</td><td><span class="tag done">✅ 最新</span></td></tr>
       <tr><td><b>lumina-launch-wbs.html</b></td><td>v1.1</td><td>2026-08-26</td><td>上线 WBS（10 周 · 4 阶段 · 48 任务包）</td><td><span class="tag done">✅ 最新</span></td></tr>
       <tr><td><b>lumina-wbs-pending.html</b></td><td>v1.3</td><td>2026-09-01</td><td>未实现内容落地 WBS（M4+收口+演进 · 33 任务包）</td><td><span class="tag done">✅ 最新</span></td></tr>
-      <tr><td><b>lumina-learning-system.html</b></td><td>v1.0</td><td>2026-09-03</td><td>D-06 自主学习与闯关奖励需求（3 模块 · 9 表 · 20 端点）</td><td><span class="tag done">✅ 最新</span></td></tr>
+      <tr><td><b>lumina-learning-system.html</b></td><td>v1.3</td><td>2026-09-03</td><td>D-06 自主学习与闯关奖励需求（✅ 后端 12 端点 + 前端 4 页面 + 种子数据 + 单测 27）</td><td><span class="tag done">✅ 最新</span></td></tr>
     </tbody>
   </table>
 
   <div class="info success">
     <div class="label">✅ 文档同步状态</div>
-    所有文档已同步至 D-10 完成状态（2026-09-03）：174 paths / 215 ops · 20 模块 · 64 表 · 336 单测。D-06~D-10 全部落地，文档版本号与内容一致，无过期信息。
+    所有文档已同步至 D-10 完成状态（2026-09-03）：174 paths / 215 ops · 20 模块 · 64 表 · 336 单测。D-06~D-10 全部落地，D-06 学习系统前端 4 页面 + 种子数据 + 单测 27 用例已交付。文档版本号与内容一致，无过期信息。
   </div>
 </section>
 
@@ -622,7 +622,7 @@
 
   <h3 class="sub">9.1 立即可执行（无外部依赖）</h3>
   <ol>
-    <li><b>D-06 自主学习与闯关奖励</b>（P1）——需求文档已产出，后端实现（3 模块 · 9 表 · 20 端点）</li>
+    <li><b>D-06 自主学习与闯关奖励</b>（P1）——✅ 已完成：后端 12 端点 + 前端 4 页面 + 种子数据（18 徽章 + 3 路径 29 关卡 + 7 挑战）+ 单测 27 用例</li>
     <li><b>D-08 教学视频与录播回放</b>（P1）——需求文档产出中（5 表 · 20 端点 · 与 D-01 直播联动）</li>
     <li><b>D-09 AI 基础设施</b>（P1）——RAG/Agent 编排/MCP，提升 AI 能力深度</li>
   </ol>
@@ -644,7 +644,7 @@
 
   <div class="info note">
     <div class="label">💡 建议优先级</div>
-    若<b>生产环境短期无法就绪</b>，建议先推进 D-06/D-08/D-09 功能迭代，保持开发节奏；若<b>云资源已到位</b>，则优先 M4 上线执行，功能迭代后置。
+    若<b>生产环境短期无法就绪</b>，建议先推进 D-06 移动端对齐/D-08 视频前端/D-11 鸿蒙真机冒烟 等已实施模块的体验迭代，保持开发节奏；若<b>云资源已到位</b>，则优先 M4 上线执行，功能迭代后置。
   </div>
 </section>
 
@@ -686,7 +686,7 @@
       <tr><td>UG</td><td>lumina-userguide.html</td><td>v1.1</td><td>—</td></tr>
       <tr><td>WBS</td><td>lumina-launch-wbs.html</td><td>v1.1</td><td>—</td></tr>
       <tr><td>WBS-P</td><td>lumina-wbs-pending.html</td><td>v1.3</td><td>—</td></tr>
-      <tr><td>REQ-D06</td><td>lumina-learning-system.html</td><td>v1.0</td><td>—</td></tr>
+      <tr><td>REQ-D06</td><td>lumina-learning-system.html</td><td>v1.3</td><td>✅ 前端+种子+单测</td></tr>
     </tbody>
   </table>
 
