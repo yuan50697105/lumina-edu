@@ -381,13 +381,13 @@
     <pre class="mermaid">
 graph TD
     A[用户提问] --> B[ai_chat 接收问题]
-    B --> C[问题向量化<br/>百川 Embedding]
-    C --> D[检索知识库<br/>knowledge_chunks]
+    B --> C[问题向量化&lt;br/&gt;百川 Embedding]
+    C --> D[检索知识库&lt;br/&gt;knowledge_chunks]
     D --> E{"相似度 > 阈值?"}
     E -->|是| F[取 Top-K 上下文]
     E -->|否| G[提示无相关知识]
-    F --> H["构建 Prompt<br/>问题 + 上下文"]
-    H --> I["调用 LLM<br/>通义千问/智谱 GLM"]
+    F --> H["构建 Prompt&lt;br/&gt;问题 + 上下文"]
+    H --> I["调用 LLM&lt;br/&gt;通义千问/智谱 GLM"]
     I --> J[流式返回 SSE]
     J --> K[用户查看回答]
     K --> L{用户反馈}
@@ -440,14 +440,14 @@ sequenceDiagram
 
     User->>Gateway: 提交内容（作业/讨论/笔记）
     Gateway->>Moderation: POST /moderation/check
-    Moderation->>Moderation: 规则引擎预审<br/>敏感词/正则/黑名单
+    Moderation->>Moderation: 规则引擎预审&lt;br/&gt;敏感词/正则/黑名单
     alt 规则命中
         Moderation->>DB: 记录 moderation_log (blocked)
         Moderation-->>Gateway: {passed: false, reason: "违规内容"}
         Gateway->>Notification: 通知用户内容被拦截
         Gateway-->>User: 返回错误提示
     else 规则未命中
-        Moderation->>LLM: 调用内容审核模型<br/>通义/智谱 内容安全
+        Moderation->>LLM: 调用内容审核模型&lt;br/&gt;通义/智谱 内容安全
         LLM-->>Moderation: {safe: true/false, confidence}
         alt 模型判定安全
             Moderation->>DB: 记录 moderation_log (passed)
@@ -472,21 +472,21 @@ sequenceDiagram
     <pre class="mermaid">
 flowchart TD
     A[业务侧发起 LLM 调用] --> B{调用结果}
-    B -->|成功| C[正常返回<br/>记录 ai_call_logs]
+    B -->|成功| C[正常返回&lt;br/&gt;记录 ai_call_logs]
     B -->|异常| D{错误类型判定}
-    D -->|"服务失败 / 5xx"| E["重试 ≤3 次<br/>指数退避 1s/2s/4s"]
+    D -->|"服务失败 / 5xx"| E["重试 ≤3 次&lt;br/&gt;指数退避 1s/2s/4s"]
     E --> F{主模型恢复?}
     F -->|是| C
-    F -->|否| G["切换备用模型<br/>通义 → 智谱 → 讯飞 → 豆包"]
+    F -->|否| G["切换备用模型&lt;br/&gt;通义 → 智谱 → 讯飞 → 豆包"]
     G --> H{备用模型可用?}
     H -->|是| C
-    H -->|否| I["返回预设模板回答<br/>提示「服务暂时不可用」"]
-    D -->|"超时 30s+"| J["中断请求<br/>提示「响应超时 请重试」"]
+    H -->|否| I["返回预设模板回答&lt;br/&gt;提示「服务暂时不可用」"]
+    D -->|"超时 30s+"| J["中断请求&lt;br/&gt;提示「响应超时 请重试」"]
     D -->|"限流 429"| K[排队等待]
     K --> L{等待内恢复?}
     L -->|是| C
     L -->|否| I
-    D -->|"内容审核失败"| M["默认放行 + 标记「待复核」<br/>通知管理员"]
+    D -->|"内容审核失败"| M["默认放行 + 标记「待复核」&lt;br/&gt;通知管理员"]
     </pre>
   </div>
   <div class="flow-caption">Flow 4 · LLM Fallback Strategy — Exception Flow（flowchart TD）</div>

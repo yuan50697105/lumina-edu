@@ -36,6 +36,7 @@ edu/
 │   ├── lumina-wbs-pending.html        # 📋 未实现内容落地 WBS v1.1
 │   ├── lumina-learning-system.html    # 📋 D-06 自主学习与闯关奖励需求 v1.0
 │   ├── lumina-video-system.html       # 📋 D-08 教学视频与录播回放需求 v1.0
+│   ├── lumina-ai-infra.html           # 📋 D-09 AI 基础设施需求 v1.0（RAG/Agent/审核 · 4 类流程图）
 │   ├── lumina-harmony-os.html         # 📋 D-11 鸿蒙硬件平台与操作系统支持需求 v1.0
 │   ├── lumina-operations-monitoring.html # 📋 D-10 运营监控需求 v1.0（含 4 类业务流程图）
 │   │
@@ -76,7 +77,7 @@ edu/
 | **界面页面** | 160+ 个 |
 | **设计表面** | 6 个（学生/教师 × 移动/Web/桌面）|
 | **后端模块** | 20 个业务模块（user / course / assignment / grade / live / collab / notif / exam / ai_gateway / ai_chat / ai_grade / analytics / logs / tutoring / admin / settings / learning / video / ai_infra / ops）|
-| **文档** | PRD v1.3 + TDD v1.8 + API v1.8 + DB v1.8 + OPS v1.8 + QA v1.8 + UG v1.1 + WBS v1.1 + WBS-P v1.3 + STATUS v1.2 + REQ-D06/D08/D10/D11 + 索引 |
+| **文档** | PRD v1.3 + TDD v1.8 + API v1.8 + DB v1.8 + OPS v1.8 + QA v1.8 + UG v1.1 + WBS v1.1 + WBS-P v1.3 + STATUS v1.2 + REQ-D06/D08/D09/D10/D11 + 索引 |
 | **API 接口** | 174 paths / 215 ops（20 模块 · JWT · SSE 流式 · 直播课堂 · 协作工具 · 通知中心 · 题库与考试 · 学情分析 · 管理端 · 自主学习 · 视频录播 · AI 基建 · 运营监控）|
 | **数据表** | 64 张（单体应用）|
 
@@ -97,6 +98,7 @@ edu/
 | 📋 **WBS-P v1.3** | 未实现内容落地 WBS：M4 上线 + 收口认证 + V1.1 演进 | `lumina-wbs-pending.html` |
 | 📋 **REQ-D06 v1.0** | 自主学习与闯关奖励机制需求规格（路径/关卡/XP/徽章/排行） | `lumina-learning-system.html` |
 | 📋 **REQ-D08 v1.0** | 教学视频与录播回放需求规格（视频管理/录播联动/播放器/AI 字幕检索/统计） | `lumina-video-system.html` |
+| 📋 **REQ-D09 v1.0** | AI 基础设施需求规格（RAG 知识问答/Agent 工具调用/内容审核流水线/LLM 降级 · 4 类 Mermaid 业务流程图） | `lumina-ai-infra.html` |
 | 📋 **REQ-D11 v1.0** | 鸿蒙硬件平台与操作系统支持（HarmonyOS NEXT/6 设备形态/ArkTS/分布式流转） | `lumina-harmony-os.html` |
 | 📋 **REQ-D10 v1.0** | 运营监控需求规格（监控大盘/深度健康检查/Prometheus 指标/告警生命周期/采集降级 · 4 类业务流程图） | `lumina-operations-monitoring.html` |
 | 📋 **STATUS v1.2** | 项目全景状态报告（里程碑/已实现/待实现/模块/技术栈/质量/风险） | `lumina-status-report.html` |
@@ -223,6 +225,7 @@ cp .env.example .env
 | 未实现内容 WBS | `原型/lumina-wbs-pending.html` |
 | 自主学习需求 | `原型/lumina-learning-system.html` |
 | 教学视频需求 | `原型/lumina-video-system.html` |
+| AI 基础设施需求 | `原型/lumina-ai-infra.html` |
 | 鸿蒙支持需求 | `原型/lumina-harmony-os.html` |
 | 运营监控需求 | `原型/lumina-operations-monitoring.html` |
 | 项目全景状态报告 | `原型/lumina-status-report.html` |
@@ -281,6 +284,7 @@ cp .env.example .env
 | **文档联动 v1.7** | 2026-09-03 | TDD/API/DB/OPS/QA/OpenAPI 同步至 v1.7 · 16 模块 · 141 paths / 180 ops · 44 表 · 251 用例 |
 | **STATUS v1.1** | 2026-09-03 | 状态报告 +D-06 自主学习（需求已产出）· +D-08 教学视频 / D-11 鸿蒙支持（需求产出中）|
 | **REQ-D08 v1.0** | 2026-09-03 | 教学视频与录播回放需求（10 章 · 5 表 · 20 端点 · 6 设备形态）|
+| **REQ-D09 v1.0** | 2026-09-03 | AI 基础设施需求（10 章 · 5 表 · 11 端点 · 4 类业务流程图：RAG 用户旅程/Agent 状态机/审核流水线时序/LLM 降级异常流 · Mermaid 内嵌渲染）|
 | **REQ-D11 v1.0** | 2026-09-03 | 鸿蒙硬件平台与操作系统支持（10 章 · HarmonyOS NEXT/OpenHarmony · 6 设备形态 · 3 路线）|
 | **REQ-D10 v1.0** | 2026-09-03 | 运营监控需求（9 章 · ops 模块 3 端点 · 4 类业务流程图：用户旅程/告警状态机/健康检查时序/采集降级）|
 | **D-06 自主学习 v1.0** | 2026-09-03 | 自主学习与闯关奖励机制（learning 模块 · 7 表 · 20 端点 · XP/徽章/排行/打卡）|
