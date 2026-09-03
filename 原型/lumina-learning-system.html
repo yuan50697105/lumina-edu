@@ -136,14 +136,15 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Requirements Document · D-06</small></div>
     </div>
-    <div class="doc-type">V1.2 · 需求规格说明书（完整规格）</div>
+    <div class="doc-type">V1.3 · 需求规格说明书（原型对齐版）</div>
     <h1><span class="hl">自主学习</span> 与<br/><em>闯关奖励</em> 机制</h1>
     <p class="subtitle">Self-Learning Paths · Gamification · XP/Badge/Leaderboard · Daily Check-in</p>
     <div class="meta">
-      Document ID: LUMINA-REQ-D06-001 · Status: Draft<br/>
-      Version: 1.2 · Date: 2026-09-03<br/>
+      Document ID: LUMINA-REQ-D06-001 · Status: Reviewed<br/>
+      Version: 1.3 · Date: 2026-09-03<br/>
       Author: Claude Team Review · Owner: Yuan<br/>
-      Compliance: ⚖️ PIPL · 未成年人 · 算法备案 · 内容审核
+      Compliance: ⚖️ PIPL · 未成年人 · 算法备案 · 内容审核<br/>
+      Prototype: 🎨 Web 原型 v1.0 已对齐（lumina-21-learning-system.html）
     </div>
   </div>
 </header>
@@ -393,12 +394,16 @@
 
     <h3 class="sub">A.2 · <em>资源类型</em></h3>
     <table>
-      <tr><th>类型</th><th>承载形式</th><th>通关条件</th></tr>
-      <tr><td><code>article</code></td><td>富文本内容内嵌</td><td>点"我读完了"即通过</td></tr>
-      <tr><td><code>video</code></td><td>外链 / 内嵌播放器</td><td>观看 ≥ 80% 时长（前端上报）</td></tr>
-      <tr><td><code>quiz</code></td><td>多道客观题</td><td>答题正确率 ≥ 60%</td></tr>
-      <tr><td><code>challenge</code></td><td>综合挑战（多题型）</td><td>得分 ≥ 阈值 + 时间限制</td></tr>
+      <tr><th>类型</th><th>承载形式</th><th>通关条件</th><th>原型图标</th></tr>
+      <tr><td><code>article</code></td><td>富文本内容内嵌</td><td>点"我读完了"即通过</td><td>📖</td></tr>
+      <tr><td><code>video</code></td><td>外链 / 内嵌播放器</td><td>观看 ≥ 80% 时长（前端上报）</td><td>🎬</td></tr>
+      <tr><td><code>quiz</code></td><td>多道客观题</td><td>答题正确率 ≥ 60%</td><td>📝</td></tr>
+      <tr><td><code>challenge</code></td><td>综合挑战（多题型）</td><td>得分 ≥ 阈值 + 时间限制</td><td>⚔️</td></tr>
     </table>
+    <div class="info note">
+      <div class="label">🎨 原型示例</div>
+      Web 原型 Mock 了一条 12 关的「Python 入门闯关」路径，包含 4 种类型：5 篇文章 + 2 个视频 + 2 个测验 + 3 个挑战，总奖励 600 XP。
+    </div>
 
     <h3 class="sub">A.3 · <em>解锁规则</em></h3>
     <div class="info note">
@@ -977,56 +982,228 @@ flowchart TD
 <section class="section">
   <div class="section-header">
     <h2>07 · <em>Frontend</em></h2>
-    <span class="num-tag">§7 前端页面设计（5 页）</span>
+    <span class="num-tag">§7 前端页面设计（4 页 · 原型 v1.0 已对齐）</span>
   </div>
 
-  <p>Web 端 + 移动端同步补齐，复用既有 Lumina 视觉系统（宣纸色背景、Fraunces 标题、钴蓝强调）。</p>
+  <p>Web 端 + 移动端同步设计，复用 Lumina 视觉系统（宣纸色背景、Fraunces 标题、钴蓝强调、荧光黄高亮）。<b>本节已与 <code>原型/Web/lumina-21-learning-system.html</code> v1.0 原型完全对齐</b>。</p>
+
+  <div class="info success">
+    <div class="label">🎨 原型已落地</div>
+    Web 响应式原型 4 页面已完成（Tab 切换演示 · Mock 数据 · 响应式 4 断点适配）：<br/>
+    ✅ 学习广场 <code>/learning</code> · ✅ 路径地图 <code>/learning/paths/:id</code> · ✅ 成就中心 <code>/learning/profile</code> · ✅ 排行榜 <code>/learning/leaderboard</code>
+  </div>
 
   <table>
     <tr><th>页面</th><th>路由</th><th>核心元素</th><th>平台</th></tr>
     <tr>
       <td><b>🗺️ 学习广场</b></td>
       <td><code>/learning</code></td>
-      <td>路径卡片网格 · 分类/难度筛选 · 我的进度条 · 每日挑战入口 · 今日打卡按钮</td>
+      <td>Hero 横幅（XP + 连续打卡 + 打卡按钮）· 分类/难度/排序筛选 · 路径卡片网格（封面渐变 + XP 高亮 + 进度条）· 侧栏（今日挑战 + 继续学习）</td>
       <td><span class="tag student">Web</span> <span class="tag student">Mobile</span></td>
     </tr>
     <tr>
       <td><b>🎯 路径地图</b></td>
       <td><code>/learning/paths/:id</code></td>
-      <td>节点式关卡地图（横向时间线或纵向阶梯）· 当前关高亮 · 每关显示资源类型图标 + XP</td>
-      <td><span class="tag student">Web</span> <span class="tag student">Mobile</span></td>
-    </tr>
-    <tr>
-      <td><b>📖 关卡学习</b></td>
-      <td><code>/learning/stages/:id</code></td>
-      <td>富文本/视频播放器/答题面板 · "完成并获取 XP" 按钮 · 完成动画 + 新徽章弹窗</td>
+      <td>节点式纵向关卡地图（SVG 连接线 · done=current=locked 三态）· 右侧详情面板（预览 + 开始闯关按钮）· 完成弹窗（XP 滚动 + 新徽章）</td>
       <td><span class="tag student">Web</span> <span class="tag student">Mobile</span></td>
     </tr>
     <tr>
       <td><b>🏆 成就中心</b></td>
       <td><code>/learning/profile</code></td>
-      <td>我的等级徽章框 · 进度环 · 连续打卡日历 · 徽章墙（已获得点亮/未获得灰色）</td>
+      <td>头像 + 等级称号条（6 档材质）· 4 卡统计（XP/连续/路径/徽章）· 30 天打卡日历（荧光黄高亮）· 徽章墙（已获得点亮/未获得灰色）</td>
       <td><span class="tag student">Web</span> <span class="tag student">Mobile</span></td>
     </tr>
     <tr>
       <td><b>📊 排行榜</b></td>
       <td><code>/learning/leaderboard</code></td>
-      <td>周/月/总 Tab 切换 · Top 10 头像墙 · 我的排名悬浮提示 · 教师/管理视角可导出</td>
+      <td>周/月/总分段切换 · Top 3 领奖台（金银铜）· 排行列表（头像 + XP + 等级）· 我的排名悬浮条 · CSV 导出</td>
       <td><span class="tag student">Web</span> <span class="tag student">Mobile</span></td>
     </tr>
   </table>
 
-  <div class="info ai">
-    <div class="label">🎨 视觉亮点</div>
-    <ul style="margin-top:6px;">
-      <li><b>关卡地图</b>：采用 Lumina 荧光黄高亮当前关，已完成关卡用成长绿✓ 标记</li>
-      <li><b>等级徽章框</b>：根据等级显示不同材质（灰/青铜/白银/黄金/铂金/钻石）</li>
-      <li><b>打卡日历</b>：30 天网格，打卡日用荧光黄圆形高亮，连续区间连线</li>
-      <li><b>新徽章弹窗</b>：从顶部飘落 + 金色光晕 + 一键分享到朋友圈（移动端）</li>
-    </ul>
+  <h3 class="sub">7.1 · <em>P1 学习广场</em> Learning Plaza</h3>
+  <div class="module-card">
+    <div class="card-header">
+      <div class="card-icon">🗺️</div>
+      <div class="card-title">学习广场 · <em>入口页</em></div>
+    </div>
+
+    <h4 class="sub">页面结构</h4>
+    <table>
+      <tr><th>区域</th><th>元素</th><th>交互</th></tr>
+      <tr>
+        <td><b>Hero 横幅</b></td>
+        <td>左侧：标题「学习<em>广场</em>」+ 副标题<br/>右侧：累计 XP 徽章 + 连续打卡天数 + 📅 今日打卡按钮</td>
+        <td>打卡按钮点击 → 动画反馈 + XP +10 + streak +1</td>
+      </tr>
+      <tr>
+        <td><b>筛选栏</b></td>
+        <td>3 组 Chip：分类（全部/编程/设计/语言/通识）· 难度（全部/入门/进阶/挑战）· 排序（热门/最新/推荐）</td>
+        <td>点击 Chip 切换筛选 · 路径网格实时刷新</td>
+      </tr>
+      <tr>
+        <td><b>路径卡片网格</b></td>
+        <td>3 列卡片：封面渐变 + emoji 图标 + 难度 Pill · 标题 + 描述 · 分类/难度/关卡数 Pill · XP 荧光高亮 + 学习人数 · 进度条（已加入显示）</td>
+        <td>点击卡片 → 进入路径地图 · hover 上浮 4px</td>
+      </tr>
+      <tr>
+        <td><b>侧栏</b></td>
+        <td>① 今日挑战卡（⏳ 倒计时 · 题目预览 · +20 XP）② 继续学习卡（当前路径 + 进度条 + 继续按钮）</td>
+        <td>立即作答 → 答题面板 · 继续 → 路径地图</td>
+      </tr>
+    </table>
+
+    <div class="info note">
+      <div class="label">⚖️ 合规标识</div>
+      页面底部显示：「学习路径推荐基于你的学习行为生成，可在「设置 → 隐私」中关闭个性化推荐」（算法备案合规）
+    </div>
   </div>
 
-  <h3 class="sub">7.5 · <em>通知集成</em> Notification Integration</h3>
+  <h3 class="sub">7.2 · <em>P2 路径地图</em> Path Map</h3>
+  <div class="module-card gamification">
+    <div class="card-header">
+      <div class="card-icon">🎯</div>
+      <div class="card-title">路径地图 · <em>关卡导航</em></div>
+    </div>
+
+    <h4 class="sub">页面结构</h4>
+    <table>
+      <tr><th>区域</th><th>元素</th><th>交互</th></tr>
+      <tr>
+        <td><b>地图头部</b></td>
+        <td>路径标题 · 元信息（N 关 · 总 XP · 学习人数 · 完成进度）· 分类 Pill</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <td><b>节点列表</b></td>
+        <td>起点大圆点 → 12 个关卡节点（圆点 + 卡片）→ 终点奖杯 🏆<br/>每个节点：序号 + 类型图标 + 标题 + 状态 Pill（✅ 已完成/🎯 当前关/🔒 未解锁）+ XP + 预计时长</td>
+        <td>点击节点 → 右侧详情面板刷新 · 未解锁节点 alert 提示</td>
+      </tr>
+      <tr>
+        <td><b>SVG 连接线</b></td>
+        <td>节点间曲线连接：已完成段（绿色实线）+ 未完成段（灰色虚线）+ 箭头</td>
+        <td>随滚动自适应重绘</td>
+      </tr>
+      <tr>
+        <td><b>右侧详情面板</b></td>
+        <td>当前关卡详情：类型 Pill + 标题 + 时长/XP/状态 · 预览区（文章正文/视频播放器/测验题目/挑战任务）· 操作按钮（开始闯关/下一关/稍后再学）</td>
+        <td>开始闯关 → 完成弹窗</td>
+      </tr>
+    </table>
+
+    <h4 class="sub">关卡状态三态</h4>
+    <table>
+      <tr><th>状态</th><th>视觉</th><th>交互</th></tr>
+      <tr><td><span class="tag done">✅ done</span></td><td>绿底 ✓ · 绿色实线连接</td><td>可查看/重新学习</td></tr>
+      <tr><td><span class="tag p0">🎯 current</span></td><td>钴蓝底 + 脉冲动画 · 黄色高亮边框</td><td>可开始闯关</td></tr>
+      <tr><td><span class="tag p2">🔒 locked</span></td><td>灰底锁图标 · 灰色虚线连接</td><td>点击提示「请先完成前置关卡」</td></tr>
+    </table>
+
+    <div class="info warn">
+      <div class="label">✨ 完成弹窗</div>
+      闯关成功 → 弹出模态框：🎉 图标 + 「关卡完成！」+ XP 数字滚动动画（900ms 缓动）+ 用时 + 新徽章展示 + 「分享战绩」+「下一关 →」按钮
+    </div>
+  </div>
+
+  <h3 class="sub">7.3 · <em>P3 成就中心</em> Achievement Profile</h3>
+  <div class="module-card reward">
+    <div class="card-header">
+      <div class="card-icon">🏆</div>
+      <div class="card-title">成就中心 · <em>成长档案</em></div>
+    </div>
+
+    <h4 class="sub">页面结构</h4>
+    <table>
+      <tr><th>区域</th><th>元素</th><th>交互</th></tr>
+      <tr>
+        <td><b>个人信息条</b></td>
+        <td>头像（钴蓝底 + 荧光黄圈）· 昵称 + 等级称号 Pill（6 档材质：灰/青铜/白银/黄金/铂金/钻石）· 等级进度条（钴蓝→AI 紫渐变）· 编辑资料按钮</td>
+        <td>等级条动画加载</td>
+      </tr>
+      <tr>
+        <td><b>统计卡网格</b></td>
+        <td>4 卡：累计 XP（荧光黄高亮）· 连续打卡 🔥 · 完成路径 · 获得徽章（X/Y 格式）</td>
+        <td>打卡后实时刷新</td>
+      </tr>
+      <tr>
+        <td><b>打卡日历</b></td>
+        <td>30 天网格（7 列）· 打卡日荧光黄圆形高亮 · 今日钴蓝描边 · 连续打卡区间阴影 · 未来日期半透明</td>
+        <td>hover 显示日期 + 打卡状态</td>
+      </tr>
+      <tr>
+        <td><b>徽章墙</b></td>
+        <td>6 列网格 · 已获得：白底 + 荧光黄圈 + 光晕 · 未获得：灰度 + 虚线边框 · hover 显示徽章详情（名称/描述/获得日期 or 解锁条件）</td>
+        <td>18 枚徽章 · 12 已获得 / 6 待解锁</td>
+      </tr>
+    </table>
+
+    <div class="info note">
+      <div class="label">⚖️ 合规标识</div>
+      页面底部显示：「你的成就数据仅本人、授课教师与管理员可见；成绩信息受《个人信息保护法》保护，可在个人中心 → 隐私查看与更正」
+    </div>
+  </div>
+
+  <h3 class="sub">7.4 · <em>P4 排行榜</em> Leaderboard</h3>
+  <div class="module-card">
+    <div class="card-header">
+      <div class="card-icon">📊</div>
+      <div class="card-title">排行榜 · <em>竞争激励</em></div>
+    </div>
+
+    <h4 class="sub">页面结构</h4>
+    <table>
+      <tr><th>区域</th><th>元素</th><th>交互</th></tr>
+      <tr>
+        <td><b>头部控制栏</b></td>
+        <td>标题「排行榜」+ 副标题「按本周期获得 XP 排名 · 每 10 分钟刷新」· 周/月/总分段按钮 · ⬇ 导出 CSV 按钮</td>
+        <td>分段切换 → 榜单刷新动画（180ms 淡入）</td>
+      </tr>
+      <tr>
+        <td><b>Top 3 领奖台</b></td>
+        <td>3 列卡片：亚军（银）· <b>冠军（金 · 放大）</b> · 季军（铜）· 头像环（渐变色）+ 奖牌 emoji + 昵称 + XP 荧光高亮 + 等级 Pill</td>
+        <td>hover 上浮 4px</td>
+      </tr>
+      <tr>
+        <td><b>排行列表</b></td>
+        <td>4~10 名列表：排名 + 头像 + 昵称 + 学号 + XP 荧光高亮 + 等级 Pill</td>
+        <td>我的行高亮（钴蓝底）+ 显示「（我）」</td>
+      </tr>
+      <tr>
+        <td><b>我的排名悬浮条</b></td>
+        <td>固定底部：#排名 + 昵称 + XP + 等级（仅排行榜页显示）</td>
+        <td>进入页面时滑入动画</td>
+      </tr>
+    </table>
+
+    <div class="info risk">
+      <div class="label">⚖️ 合规标识</div>
+      页面底部显示：「排行榜展示昵称与 XP，不展示真实姓名与学号；可在「设置 → 隐私」中关闭排行榜参与（关闭后不影响 XP 与徽章获取）」（PIPL 合规）
+    </div>
+  </div>
+
+  <h3 class="sub">7.5 · <em>视觉规范</em> Design Tokens</h3>
+  <div class="info ai">
+    <div class="label">🎨 原型视觉亮点</div>
+    <table style="margin-top:8px;">
+      <tr><th>元素</th><th>视觉规范</th></tr>
+      <tr><td><b>XP 高亮</b></td><td>Fraunces Italic · 荧光黄下划线（62%~88% 渐变）· 颜色 #4A3600</td></tr>
+      <tr><td><b>关卡节点</b></td><td>56×56 圆角矩形（16px）· 状态色：绿/钴蓝/灰 · 当前关脉冲动画（1.8s）</td></tr>
+      <tr><td><b>等级材质</b></td><td>6 档配色：灰(#E5E2D8) / 青铜(#F3D9BE) / 白银(#E8E8EE) / 黄金(#FDE68A) / 铂金(#DCEFF2) / 钻石(#EDE9FE)</td></tr>
+      <tr><td><b>打卡日历</b></td><td>30 天网格 · 打卡日荧光黄圆 · 今日钴蓝描边 · 连续区间内阴影</td></tr>
+      <tr><td><b>完成弹窗</b></td><td>金色光晕背景 · XP 数字 900ms 缓动滚动 · 升起动画（cubic-bezier）</td></tr>
+      <tr><td><b>SVG 连接线</b></td><td>已完成段：成长绿实线（2.5px）· 未完成段：灰色虚线（dasharray 5 6）</td></tr>
+    </table>
+  </div>
+
+  <h3 class="sub">7.6 · <em>响应式适配</em> Responsive</h3>
+  <table>
+    <tr><th>断点</th><th>布局调整</th></tr>
+    <tr><td><b>≤ 1100px</b></td><td>路径网格 3→2 列 · 徽章墙 6→5 列 · 成就中心改为单列</td></tr>
+    <tr><td><b>≤ 900px</b></td><td>路径网格/地图改为单列 · 统计卡 4→2 列 · 页头标题缩小</td></tr>
+    <tr><td><b>≤ 560px</b></td><td>路径网格单列 · 徽章墙 3 列 · 领奖台垂直堆叠（冠军置顶）· 排行列表隐藏等级列</td></tr>
+  </table>
+
+  <h3 class="sub">7.7 · <em>通知集成</em> Notification Integration</h3>
   <p>D-06 在 4 个关键节点触发通知，统一调用 <code>notification.notify()</code>（D-03 已落地）：</p>
   <table>
     <tr><th>触发点</th><th>通知类型</th><th>接收人</th><th>文案模板</th></tr>
@@ -1060,12 +1237,29 @@ flowchart TD
     复用 D-03 notification 模块：站内通知（写入 notifications 表）+ 前端铃铛实时轮询。未来可扩展 Push 通知（移动端 FCM/APNs）和邮件通知（需 ai_infra 邮件网关）。
   </div>
 
-  <h3 class="sub">7.6 · <em>侵权投诉通道</em> Content Reporting</h3>
+  <h3 class="sub">7.8 · <em>侵权投诉通道</em> Content Reporting</h3>
   <p>学习路径/挑战若涉及版权内容，用户可通过既有 <code>POST /admin/reports</code>（D-07 管理端）提交侵权投诉，管理员在管理后台统一处置（下架/修改/驳回）。</p>
   <div class="info warn">
     <div class="label">⚖️ 合规要求</div>
     根据《著作权法》与《信息网络传播权保护条例》，平台需在接到投诉后 <b>48 小时内</b> 下架涉嫌侵权内容，并通知上传者申诉。投诉记录留存 ≥ 3 年。
   </div>
+
+  <h3 class="sub">7.9 · <em>原型-开发追踪矩阵</em></h3>
+  <table>
+    <tr><th>原型文件</th><th>对应页面</th><th>开发模块</th><th>实现状态</th></tr>
+    <tr>
+      <td><code>原型/Web/lumina-21-learning-system.html</code></td>
+      <td>学习广场 / 路径地图 / 成就中心 / 排行榜</td>
+      <td>learning 模块 · web-frontend</td>
+      <td><span class="tag done">✅ 原型完成</span></td>
+    </tr>
+    <tr>
+      <td><code>原型/APP/phone/lumina-19-learning-video-mobile.html</code></td>
+      <td>移动端学习 + 视频</td>
+      <td>mobile-app</td>
+      <td><span class="tag todo">⏳ 待开发</span></td>
+    </tr>
+  </table>
 </section>
 
 <!-- ============ §8 验收标准 ============ -->
@@ -1311,8 +1505,15 @@ flowchart TD
       <td><span class="tag p0">P0</span></td>
     </tr>
     <tr>
-      <td><b>D-06.4</b> Web 前端</td>
-      <td>5 个页面（广场/地图/关卡/成就/排行）</td>
+      <td><b>D-06.4</b> Web 原型</td>
+      <td>4 页面（广场/地图/成就/排行）· Tab 切换 · Mock 数据 · 响应式</td>
+      <td>原型/Web/lumina-21-learning-system.html</td>
+      <td><span class="tag done">✅ 已完成 v1.0</span></td>
+      <td><span class="tag p1">P1</span></td>
+    </tr>
+    <tr>
+      <td><b>D-06.4.1</b> Web 前端实现</td>
+      <td>基于原型实现 React 组件（对接 learning API）</td>
       <td>web-frontend/src/pages/Learning*.tsx</td>
       <td><span class="tag todo">⏳ 待开发</span></td>
       <td><span class="tag p1">P1</span></td>
@@ -1326,9 +1527,9 @@ flowchart TD
     </tr>
     <tr>
       <td><b>D-06.6</b> 文档联动</td>
-      <td>本文档 v1.2 + API/TDD/DB 同步</td>
+      <td>本文档 v1.3（原型对齐版）+ API/TDD/DB 同步</td>
       <td>原型/lumina-learning-system.html</td>
-      <td><span class="tag done">✅ 已完成</span></td>
+      <td><span class="tag done">✅ 已完成 v1.3</span></td>
       <td><span class="tag p0">P0</span></td>
     </tr>
     <tr>
@@ -1444,7 +1645,7 @@ flowchart TD
 
 <!-- ============ FOOTER ============ -->
 <footer>
-  <div>Lumina · 墨光 · D-06 · v1.2 · 2026-09-03</div>
+  <div>Lumina · 墨光 · D-06 · v1.3 · 2026-09-03 · 原型对齐版</div>
   <div class="sig">Self-Learning & <span class="hl">Gamification</span></div>
 </footer>
 
