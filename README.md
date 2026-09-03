@@ -34,7 +34,7 @@ edu/
 │   ├── lumina-userguide.html          # 📋 用户手册 v1.0
 │   ├── lumina-launch-wbs.html         # 📋 上线 WBS v1.0
 │   ├── lumina-wbs-pending.html        # 📋 未实现内容落地 WBS v1.1
-│   ├── lumina-learning-system.html    # 📋 D-06 自主学习与闯关奖励需求 v1.0
+│   ├── lumina-learning-system.html    # 📋 D-06 自主学习与闯关奖励需求 v1.3（Web 前端 4 页面已落地 · 种子数据 · 27 单测）
 │   ├── lumina-video-system.html       # 📋 D-08 教学视频与录播回放需求 v1.0
 │   ├── lumina-ai-infra.html           # 📋 D-09 AI 基础设施需求 v1.0（RAG/Agent/审核 · 4 类流程图）
 │   ├── lumina-harmony-os.html         # 📋 D-11 鸿蒙硬件平台与操作系统支持需求 v1.0
@@ -96,7 +96,7 @@ edu/
 | 📋 **UG v1.1** | 用户手册，10 章 · 3 角色 | `lumina-userguide.html` |
 | 📋 **WBS v1.1** | 上线工作分解结构，10 周轻量方案 | `lumina-launch-wbs.html` |
 | 📋 **WBS-P v1.3** | 未实现内容落地 WBS：M4 上线 + 收口认证 + V1.1 演进 | `lumina-wbs-pending.html` |
-| 📋 **REQ-D06 v1.2** | 自主学习与闯关奖励机制需求规格（路径/关卡/XP/徽章/排行 · 10 表 · 12 端点 · 合规/RTM/安全完整规格） | `lumina-learning-system.html` |
+| 📋 **REQ-D06 v1.3** | 自主学习与闯关奖励机制需求规格（路径/关卡/XP/徽章/排行 · 10 表 · 12 端点 · ✅ Web 前端 4 页面 · ✅ 种子数据 · ✅ 单测 27） | `lumina-learning-system.html` |
 | 📋 **REQ-D08 v1.0** | 教学视频与录播回放需求规格（视频管理/录播联动/播放器/AI 字幕检索/统计） | `lumina-video-system.html` |
 | 📋 **REQ-D09 v1.0** | AI 基础设施需求规格（RAG 知识问答/Agent 工具调用/内容审核流水线/LLM 降级 · 4 类 Mermaid 业务流程图） | `lumina-ai-infra.html` |
 | 📋 **REQ-D11 v1.0** | 鸿蒙硬件平台与操作系统支持（HarmonyOS NEXT/6 设备形态/ArkTS/分布式流转） | `lumina-harmony-os.html` |
@@ -287,6 +287,7 @@ cp .env.example .env
 | **REQ-D09 v1.0** | 2026-09-03 | AI 基础设施需求（10 章 · 5 表 · 11 端点 · 4 类业务流程图：RAG 用户旅程/Agent 状态机/审核流水线时序/LLM 降级异常流 · Mermaid 内嵌渲染）|
 | **REQ-D11 v1.0** | 2026-09-03 | 鸿蒙硬件平台与操作系统支持（10 章 · HarmonyOS NEXT/OpenHarmony · 6 设备形态 · 3 路线）|
 | **REQ-D10 v1.0** | 2026-09-03 | 运营监控需求（9 章 · ops 模块 3 端点 · 4 类业务流程图：用户旅程/告警状态机/健康检查时序/采集降级）|
+| **D-06 学习系统 v1.3 + 前端落地** | 2026-09-03 | 需求文档 §7 重写 · Web 前端 4 页面（LearningPlaza/Path/Profile/Leaderboard）· 种子数据脚本（18 徽章 + 3 路径 29 关卡 + 7 挑战）· 前端单测 27 用例全通过 |
 | **D-06 自主学习 v1.2** | 2026-09-03 | 自主学习与闯关奖励机制完整规格（10 章 · 10 表 · 12 端点 · 合规预检/跨模块依赖/通知集成/RTM/安全设计 · 467 行补充）|
 | **D-08 视频录播 v1.0** | 2026-09-03 | 教学视频与录播回放（video 模块 · 6 表 · 20 端点 · HLS/ASR/笔记/检索）|
 | **D-09 AI 基建 v1.0** | 2026-09-03 | AI 基础设施（ai_infra 模块 · 4 表 · 15 端点 · RAG/Agent/内容审核）|
