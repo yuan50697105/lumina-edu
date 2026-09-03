@@ -6603,8 +6603,575 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/ai-infra/knowledge-bases:
+    get:
+      tags:
+      - AI 基础设施（D-09）
+      summary: 知识库列表
+      description: 获取知识库列表
+      operationId: list_knowledge_bases_api_v1_ai_infra_knowledge_bases_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: course_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Course Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KnowledgeBaseOut'
+                title: Response List Knowledge Bases Api V1 Ai Infra Knowledge Bases
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - AI 基础设施（D-09）
+      summary: 创建知识库
+      description: 创建新知识库
+      operationId: create_knowledge_base_api_v1_ai_infra_knowledge_bases_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KnowledgeBaseCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/ai-infra/knowledge-bases/{kb_id}:
+    get:
+      tags:
+      - AI 基础设施（D-09）
+      summary: 知识库详情
+      description: 获取知识库详情
+      operationId: get_knowledge_base_api_v1_ai_infra_knowledge_bases__kb_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: kb_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Kb Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/ai-infra/knowledge-bases/{kb_id}/chunks:
+    get:
+      tags:
+      - AI 基础设施（D-09）
+      summary: 知识库分块列表
+      description: 获取知识库下的分块
+      operationId: list_chunks_api_v1_ai_infra_knowledge_bases__kb_id__chunks_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: kb_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Kb Id
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KnowledgeChunkOut'
+                title: Response List Chunks Api V1 Ai Infra Knowledge Bases  Kb Id  Chunks
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - AI 基础设施（D-09）
+      summary: 添加分块
+      description: 添加分块并生成嵌入向量（Mock）
+      operationId: add_chunk_api_v1_ai_infra_knowledge_bases__kb_id__chunks_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: kb_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Kb Id
+      - name: content
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          title: Content
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeChunkOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/ai-infra/rag/query:
+    post:
+      tags:
+      - AI 基础设施（D-09）
+      summary: RAG 查询
+      description: RAG 检索增强生成：检索相关分块 → 增强 prompt → LLM 生成答案
+      operationId: rag_query_api_v1_ai_infra_rag_query_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RAGQueryIn'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RAGQueryOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - HTTPBearer: []
+  /api/v1/ai-infra/agent/tools:
+    get:
+      tags:
+      - AI 基础设施（D-09）
+      summary: Agent 工具列表
+      description: 获取可用工具列表
+      operationId: list_agent_tools_api_v1_ai_infra_agent_tools_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AgentToolOut'
+                type: array
+                title: Response List Agent Tools Api V1 Ai Infra Agent Tools Get
+      security:
+      - HTTPBearer: []
+  /api/v1/ai-infra/agent/sessions:
+    get:
+      tags:
+      - AI 基础设施（D-09）
+      summary: Agent 会话列表
+      description: 获取当前用户的 Agent 会话列表
+      operationId: list_agent_sessions_api_v1_ai_infra_agent_sessions_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentSessionOut'
+                title: Response List Agent Sessions Api V1 Ai Infra Agent Sessions
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/ai-infra/agent/chat:
+    post:
+      tags:
+      - AI 基础设施（D-09）
+      summary: Agent 对话（工具调用）
+      description: Agent 对话：支持多轮工具调用
+      operationId: agent_chat_api_v1_ai_infra_agent_chat_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentMessageIn'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentMessageOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - HTTPBearer: []
+  /api/v1/ai-infra/moderation/check:
+    post:
+      tags:
+      - AI 基础设施（D-09）
+      summary: 内容审核检查
+      description: 检查内容是否违规
+      operationId: moderation_check_api_v1_ai_infra_moderation_check_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerationCheckIn'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModerationCheckOut'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - HTTPBearer: []
+  /api/v1/ai-infra/moderation/logs:
+    get:
+      tags:
+      - AI 基础设施（D-09）
+      summary: 审核日志列表（管理员）
+      description: 获取审核日志（仅管理员）
+      operationId: list_moderation_logs_api_v1_ai_infra_moderation_logs_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: content_type
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Content Type
+      - name: flagged_only
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Flagged Only
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModerationLogOut'
+                title: Response List Moderation Logs Api V1 Ai Infra Moderation Logs
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/ops/health/deep:
+    get:
+      tags:
+      - 运营监控（D-10）
+      summary: 深度健康检查
+      description: 深度健康检查：检查 DB / Redis（预留）等依赖服务状态
+      operationId: deep_health_check_api_v1_ops_health_deep_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeepHealthCheckOut'
+  /api/v1/ops/metrics:
+    get:
+      tags:
+      - 运营监控（D-10）
+      summary: Prometheus 指标导出
+      description: 导出 Prometheus 格式指标（文本格式）
+      operationId: prometheus_metrics_api_v1_ops_metrics_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/v1/ops/metrics/business:
+    get:
+      tags:
+      - 运营监控（D-10）
+      summary: 业务指标汇总（管理员）
+      description: 获取业务指标汇总（仅管理员）
+      operationId: business_metrics_api_v1_ops_metrics_business_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessMetricsOut'
+      security:
+      - HTTPBearer: []
 components:
   schemas:
+    AgentMessageIn:
+      properties:
+        session_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Session Id
+        message:
+          type: string
+          maxLength: 5000
+          minLength: 1
+          title: Message
+        tools_enabled:
+          type: boolean
+          title: Tools Enabled
+          default: true
+      type: object
+      required:
+      - message
+      title: AgentMessageIn
+      description: Agent 对话输入
+    AgentMessageOut:
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          title: Session Id
+        message:
+          type: string
+          title: Message
+        tool_calls:
+          items:
+            $ref: '#/components/schemas/AgentToolCall'
+          type: array
+          title: Tool Calls
+        model_used:
+          type: string
+          title: Model Used
+        total_tokens:
+          type: integer
+          title: Total Tokens
+      type: object
+      required:
+      - session_id
+      - message
+      - tool_calls
+      - model_used
+      - total_tokens
+      title: AgentMessageOut
+      description: Agent 响应
+    AgentSessionOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        user_id:
+          type: string
+          format: uuid
+          title: User Id
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+        message_count:
+          type: integer
+          title: Message Count
+        tool_call_count:
+          type: integer
+          title: Tool Call Count
+        status:
+          type: string
+          title: Status
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - id
+      - user_id
+      - message_count
+      - tool_call_count
+      - status
+      - created_at
+      - updated_at
+      title: AgentSessionOut
+    AgentToolCall:
+      properties:
+        tool_name:
+          type: string
+          title: Tool Name
+        parameters:
+          additionalProperties: true
+          type: object
+          title: Parameters
+        result:
+          title: Result
+        duration_ms:
+          type: integer
+          title: Duration Ms
+      type: object
+      required:
+      - tool_name
+      - parameters
+      - result
+      - duration_ms
+      title: AgentToolCall
+    AgentToolOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        name:
+          type: string
+          title: Name
+        description:
+          type: string
+          title: Description
+        parameters_schema:
+          additionalProperties: true
+          type: object
+          title: Parameters Schema
+        enabled:
+          type: boolean
+          title: Enabled
+      type: object
+      required:
+      - id
+      - name
+      - description
+      - parameters_schema
+      - enabled
+      title: AgentToolOut
     AlertRuleIn:
       properties:
         absent_threshold:
@@ -7298,6 +7865,65 @@ components:
       - count
       - distinct_users
       title: BreakdownRow
+    BusinessMetricsOut:
+      properties:
+        total_users:
+          type: integer
+          title: Total Users
+        active_users_today:
+          type: integer
+          title: Active Users Today
+        total_courses:
+          type: integer
+          title: Total Courses
+        active_courses:
+          type: integer
+          title: Active Courses
+        total_videos:
+          type: integer
+          title: Total Videos
+        videos_watched_today:
+          type: integer
+          title: Videos Watched Today
+        total_assignments:
+          type: integer
+          title: Total Assignments
+        submissions_today:
+          type: integer
+          title: Submissions Today
+        total_exams:
+          type: integer
+          title: Total Exams
+        exam_attempts_today:
+          type: integer
+          title: Exam Attempts Today
+        ai_calls_today:
+          type: integer
+          title: Ai Calls Today
+        checkins_today:
+          type: integer
+          title: Checkins Today
+        timestamp:
+          type: string
+          format: date-time
+          title: Timestamp
+      type: object
+      required:
+      - total_users
+      - active_users_today
+      - total_courses
+      - active_courses
+      - total_videos
+      - videos_watched_today
+      - total_assignments
+      - submissions_today
+      - total_exams
+      - exam_attempts_today
+      - ai_calls_today
+      - checkins_today
+      - timestamp
+      title: BusinessMetricsOut
+      description: 业务指标汇总
     CallRecordRequest:
       properties:
         model_id:
@@ -8530,6 +9156,35 @@ components:
       required:
       - items
       title: DashboardRecentActivity
+    DeepHealthCheckOut:
+      properties:
+        status:
+          type: string
+          title: Status
+        timestamp:
+          type: string
+          format: date-time
+          title: Timestamp
+        services:
+          items:
+            $ref: '#/components/schemas/ServiceHealth'
+          type: array
+          title: Services
+        version:
+          type: string
+          title: Version
+        uptime_seconds:
+          type: integer
+          title: Uptime Seconds
+      type: object
+      required:
+      - status
+      - timestamp
+      - services
+      - version
+      - uptime_seconds
+      title: DeepHealthCheckOut
+      description: 深度健康检查（含依赖服务）
     DistributionBucket:
       properties:
         range_label:
@@ -9184,6 +9839,100 @@ components:
       - content
       - created_at
       title: InsightOut
+    KnowledgeBaseCreate:
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        course_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Course Id
+      type: object
+      required:
+      - name
+      title: KnowledgeBaseCreate
+    KnowledgeBaseOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        course_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Course Id
+        name:
+          type: string
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        chunk_count:
+          type: integer
+          title: Chunk Count
+        embedding_model:
+          type: string
+          title: Embedding Model
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - name
+      - chunk_count
+      - embedding_model
+      - created_at
+      title: KnowledgeBaseOut
+    KnowledgeChunkOut:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        kb_id:
+          type: string
+          format: uuid
+          title: Kb Id
+        content:
+          type: string
+          title: Content
+        token_count:
+          type: integer
+          title: Token Count
+        metadata_json:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Metadata Json
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - kb_id
+      - content
+      - token_count
+      - created_at
+      title: KnowledgeChunkOut
     LeaderboardEntry:
       properties:
         rank:
@@ -10115,6 +10864,93 @@ components:
           description: 协议风格变更
       type: object
       title: ModelUpdate
+    ModerationCheckIn:
+      properties:
+        content_type:
+          type: string
+          pattern: ^(chat|note|discussion|file|profile)$
+          title: Content Type
+        content_text:
+          type: string
+          maxLength: 10000
+          minLength: 1
+          title: Content Text
+        content_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Content Id
+      type: object
+      required:
+      - content_type
+      - content_text
+      title: ModerationCheckIn
+    ModerationCheckOut:
+      properties:
+        flagged:
+          type: boolean
+          title: Flagged
+        reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reason
+        action:
+          type: string
+          title: Action
+        confidence:
+          type: number
+          title: Confidence
+      type: object
+      required:
+      - flagged
+      - action
+      - confidence
+      title: ModerationCheckOut
+    ModerationLogOut:
+      properties:
+        id:
+          type: integer
+          title: Id
+        user_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: User Id
+        content_type:
+          type: string
+          title: Content Type
+        content_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Content Id
+        flagged:
+          type: boolean
+          title: Flagged
+        reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reason
+        action:
+          type: string
+          title: Action
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - id
+      - content_type
+      - flagged
+      - action
+      - created_at
+      title: ModerationLogOut
     MyCourseGrade:
       properties:
         course_id:
@@ -10922,6 +11758,86 @@ components:
           title: Chapter Id
       type: object
       title: QuestionUpdate
+    RAGChunkResult:
+      properties:
+        chunk_id:
+          type: string
+          format: uuid
+          title: Chunk Id
+        content:
+          type: string
+          title: Content
+        score:
+          type: number
+          title: Score
+        metadata_json:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Metadata Json
+      type: object
+      required:
+      - chunk_id
+      - content
+      - score
+      title: RAGChunkResult
+    RAGQueryIn:
+      properties:
+        kb_id:
+          type: string
+          format: uuid
+          title: Kb Id
+        query:
+          type: string
+          maxLength: 2000
+          minLength: 1
+          title: Query
+        top_k:
+          type: integer
+          maximum: 20.0
+          minimum: 1.0
+          title: Top K
+          default: 5
+        model_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model Name
+      type: object
+      required:
+      - kb_id
+      - query
+      title: RAGQueryIn
+      description: RAG 查询输入
+    RAGQueryOut:
+      properties:
+        query:
+          type: string
+          title: Query
+        answer:
+          type: string
+          title: Answer
+        sources:
+          items:
+            $ref: '#/components/schemas/RAGChunkResult'
+          type: array
+          title: Sources
+        model_used:
+          type: string
+          title: Model Used
+        total_tokens:
+          type: integer
+          title: Total Tokens
+      type: object
+      required:
+      - query
+      - answer
+      - sources
+      - model_used
+      - total_tokens
+      title: RAGQueryOut
+      description: RAG 查询结果
     RecentActivityItem:
       properties:
         id:
@@ -11339,6 +12255,31 @@ components:
       - max
       - comment
       title: ScoreItem
+    ServiceHealth:
+      properties:
+        name:
+          type: string
+          title: Name
+        status:
+          type: string
+          title: Status
+        latency_ms:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Latency Ms
+        details:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Details
+      type: object
+      required:
+      - name
+      - status
+      title: ServiceHealth
+      description: 单个服务健康状态
     SettingBatchIn:
       properties:
         items:
@@ -12596,44 +13537,3 @@ components:
     HTTPBearer:
       type: http
       scheme: bearer
-tags:
-- name: 认证
-  description: 登录/注册/令牌
-- name: 用户
-  description: 用户管理
-- name: 课程
-  description: 课程/章节/选课
-- name: 作业
-  description: 作业/提交/批阅
-- name: 成绩
-  description: 成绩录入/查询
-- name: AI 网关
-  description: 模型池/路由/调用
-- name: AI 对话
-  description: 苏格拉底导师
-- name: AI 批阅
-  description: LLM 辅助批阅
-- name: 直播
-  description: 直播课堂（D-01）
-- name: 协作
-  description: 小组/看板/文件/讨论（D-02）
-- name: 消息通知
-  description: 通知中心（D-03）
-- name: 题库与考试
-  description: 题库/试卷/考试（D-04）
-- name: 学情分析
-  description: 驾驶舱/档案/辅导/分组/批量（D-05）
-- name: 管理端（D-07/D-08）
-  description: 大盘/审批/举报
-- name: 系统设置（D-07/D-08）
-  description: KV 配置
-- name: 审计日志（D-07/D-08）
-  description: 审计列表/导出/归档
-- name: 自主学习（D-06）
-  description: 路径/闯关/XP/打卡/徽章
-- name: 视频录播（D-08）
-  description: 视频/笔记/章节/历史
-- name: 基础日志系统
-  description: API 日志检索
-- name: 埋点
-  description: 事件收集

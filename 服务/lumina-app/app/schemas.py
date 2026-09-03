@@ -1792,3 +1792,43 @@ class ModerationLogOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ═══════════════════════════════════════════════════════════════════
+# D-10 · 运营监控（Prometheus / 健康检查 / 业务指标）
+# ═══════════════════════════════════════════════════════════════════
+
+class ServiceHealth(BaseModel):
+    """单个服务健康状态"""
+    name: str
+    status: str                            # healthy / degraded / down
+    latency_ms: Optional[float] = None
+    details: Optional[dict] = None
+
+class DeepHealthCheckOut(BaseModel):
+    """深度健康检查（含依赖服务）"""
+    status: str                            # healthy / degraded / down
+    timestamp: datetime
+    services: list[ServiceHealth]
+    version: str
+    uptime_seconds: int
+
+class PrometheusMetricsOut(BaseModel):
+    """Prometheus 格式指标（文本）"""
+    content: str                           # Prometheus text format
+
+class BusinessMetricsOut(BaseModel):
+    """业务指标汇总"""
+    total_users: int
+    active_users_today: int
+    total_courses: int
+    active_courses: int
+    total_videos: int
+    videos_watched_today: int
+    total_assignments: int
+    submissions_today: int
+    total_exams: int
+    exam_attempts_today: int
+    ai_calls_today: int
+    checkins_today: int
+    timestamp: datetime

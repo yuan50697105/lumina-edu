@@ -38,6 +38,7 @@ from app.modules.settings import routers as settings_routers
 from app.modules.learning import routers as learning_routers
 from app.modules.video import routers as video_routers
 from app.modules.ai_infra import routers as ai_infra_routers
+from app.modules.ops import routers as ops_routers
 
 install_json_logging()
 logger = logging.getLogger("lumina.app")
@@ -170,6 +171,8 @@ app.include_router(learning_routers.router, prefix="/api/v1")
 app.include_router(video_routers.router, prefix="/api/v1")
 # AI 基础设施（D-09）
 app.include_router(ai_infra_routers.router, prefix="/api/v1")
+
+app.include_router(ops_routers.router, prefix="/api/v1")
 
 
 @app.exception_handler(Exception)

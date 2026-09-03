@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Lumina (墨光) 教育应用 UI 设计系统 - 面向高校师生的跨端教学协作平台。本项目为设计原型 + 技术文档 + FastAPI 单体应用（`服务/lumina-app/`）。单体快照：171 paths / 212 ops · 19 模块 · 62 表（模块：user / course / assignment / grade / live / collab / notif / exam / ai_gateway / ai_chat / ai_grade / analytics / logs / tutoring / admin / settings / learning / video / ai_infra）。
+Lumina (墨光) 教育应用 UI 设计系统 - 面向高校师生的跨端教学协作平台。本项目为设计原型 + 技术文档 + FastAPI 单体应用（`服务/lumina-app/`）。单体快照：174 paths / 215 ops · 20 模块 · 62 表（模块：user / course / assignment / grade / live / collab / notif / exam / ai_gateway / ai_chat / ai_grade / analytics / logs / tutoring / admin / settings / learning / video / ai_infra / ops）。
 
 ## Directory Structure
 
@@ -32,7 +32,7 @@ edu/
 │   └── Harmony/    (1 file)    # 📟 鸿蒙生态原型（D-11 六设备形态）
 │
 ├── 服务/                   # 单体应用 + 前端
-│   ├── lumina-app/             # ✅ 单体 FastAPI（19 模块 · 171 paths · 62 表）
+│   ├── lumina-app/             # ✅ 单体 FastAPI（20 模块 · 174 paths · 62 表）
 │   │   ├── app/                # 应用代码（main.py / models.py / security.py ...）
 │   │   │   └── modules/        # 14 业务模块：user/course/assignment/grade/live/collab/notif/exam/ai_gateway/ai_chat/ai_grade/analytics/logs/tutoring
 │   │   ├── tests/              # 单元测试（215 passed）
@@ -191,7 +191,7 @@ background: linear-gradient(
 项目包含 9 个核心文档，形成完整文档体系：
 
 1. **PRD** (产品需求) - 用户画像、功能模块、验收标准
-2. **TDD** (技术设计) - 架构、单体应用（19 模块）、数据库、API 规范
+2. **TDD** (技术设计) - 架构、单体应用（20 模块）、数据库、API 规范
 3. **API** (接口文档) - 122 paths / 159 ops
 4. **OpenAPI** (机器可读) - YAML 格式 API 规范
 5. **Database** (数据库) - 62 表、ER 模型、分区策略
@@ -202,7 +202,7 @@ background: linear-gradient(
 
 所有文档使用统一的 Lumina 视觉风格，可直接在浏览器中打开查看。
 
-单体应用 `服务/lumina-app/` 快照：171 paths · 212 ops · 19 模块 · 62 表 · 单元测试 321 通过。
+单体应用 `服务/lumina-app/` 快照：174 paths · 215 ops · 20 模块 · 62 表 · 单元测试 336 通过。
 
 ## Platform Coverage
 
