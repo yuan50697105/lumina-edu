@@ -459,3 +459,132 @@ export interface PaperStats {
   lowest_score: number
   question_stats: QuestionStat[]
 }
+
+// ─── 自主学习与闯关奖励（D-06）───
+export type PathCategory = '编程' | '设计' | '语言' | '通识'
+export type PathDifficulty = '入门' | '进阶' | '挑战'
+export type StageResourceType = 'article' | 'video' | 'quiz' | 'challenge'
+export type StageStatus = 'locked' | 'unlocked' | 'in_progress' | 'completed'
+
+export interface LearningPath {
+  id: string
+  title: string
+  description?: string | null
+  cover_image?: string | null
+  category: PathCategory
+  difficulty: PathDifficulty
+  total_xp: number
+  tags?: string[] | null
+  stage_count: number
+  learner_count: number
+  my_progress?: number | null // 0-100
+  created_by: string
+}
+
+export interface LearningStage {
+  id: string
+  path_id: string
+  title: string
+  description?: string | null
+  order_num: number
+  resource_type: StageResourceType
+  resource_url?: string | null
+  resource_content?: string | null
+  xp_reward: number
+  estimated_minutes: number
+  status: StageStatus
+  quiz_questions?: QuizQuestion[] | null
+}
+
+export interface QuizQuestion {
+  q: string
+  options: string[]
+  answer: string
+  explanation?: string | null
+}
+
+export interface LearningProgress {
+  id: string
+  user_id: string
+  stage_id: string
+  status: StageStatus
+  xp_earned: number
+  quiz_score?: number | null
+  started_at?: string | null
+  completed_at?: string | null
+}
+
+export interface MyXpSummary {
+  total_xp: number
+  level: number
+  current_streak: number
+  longest_streak: number
+  next_level_xp: number
+  tier_name: string
+}
+
+export interface CheckInResult {
+  checked_in: boolean
+  xp_earned: number
+  new_streak: number
+}
+
+export interface CheckInDay {
+  date: string
+  checked: boolean
+  xp_earned: number
+  streak_count: number
+}
+
+export interface Badge {
+  id: string
+  name: string
+  description?: string | null
+  icon: string
+  condition_type: string
+  condition_value: number
+  xp_reward: number
+  earned: boolean
+  earned_at?: string | null
+}
+
+export interface DailyChallenge {
+  id: string
+  title: string
+  description?: string | null
+  challenge_type: string
+  question: QuizQuestion
+  xp_reward: number
+  active_date: string
+  expires_at: string
+  answered: boolean
+}
+
+export interface ChallengeSubmitResult {
+  is_correct: boolean
+  xp_earned: number
+  new_badges: Badge[]
+}
+
+export interface LeaderboardEntry {
+  rank: number
+  user_id: string
+  name: string
+  avatar_url?: string | null
+  xp: number
+  level: number
+  tier_name: string
+}
+
+export interface LeaderboardResp {
+  period: 'week' | 'month' | 'all'
+  entries: LeaderboardEntry[]
+  my_rank?: number | null
+}
+
+export interface LearningStats {
+  paths_completed: number
+  challenges_correct: number
+  total_study_hours: number
+  rank_percentile: number
+}

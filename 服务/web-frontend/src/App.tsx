@@ -12,6 +12,10 @@ import Groups from './pages/Groups'
 import GroupDetail from './pages/GroupDetail'
 import Exam from './pages/Exam'
 import ExamTaking from './pages/ExamTaking'
+import LearningPlaza from './pages/LearningPlaza'
+import LearningPath from './pages/LearningPath'
+import LearningProfile from './pages/LearningProfile'
+import LearningLeaderboard from './pages/LearningLeaderboard'
 import type { ReactNode } from 'react'
 
 function Protected({ children }: { children: ReactNode }) {
@@ -42,6 +46,10 @@ export default function App() {
         <Route path="ai" element={<AIChat />} />
         <Route path="grades" element={<Grades />} />
         <Route path="admin/models" element={<AdminModels />} />
+        <Route path="learning" element={<LearningPlaza />} />
+        <Route path="learning/paths/:id" element={<LearningPath />} />
+        <Route path="learning/profile" element={<LearningProfile />} />
+        <Route path="learning/leaderboard" element={<LearningLeaderboard />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
