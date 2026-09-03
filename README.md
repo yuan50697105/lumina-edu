@@ -86,7 +86,7 @@ edu/
 | 📋 **OpenAPI 3.1** | 机器可读 API 规范（YAML · 81 路径） | `lumina-api-openapi.yaml` |
 | 📋 **DB v1.6** | 数据库设计文档，12 章 · 35 表 | `lumina-database.html` |
 | 📋 **OPS v1.5** | 部署运维手册，10 章 | `lumina-operations.html` |
-| 📋 **QA v1.5** | 测试用例文档，10 章 · 173 用例 | `lumina-testcases.html` |
+| 📋 **QA v1.7** | 测试用例文档，10 章 · 251 用例 | `lumina-testcases.html` |
 | 📋 **UG v1.1** | 用户手册，10 章 · 3 角色 | `lumina-userguide.html` |
 | 📋 **WBS v1.1** | 上线工作分解结构，10 周轻量方案 | `lumina-launch-wbs.html` |
 | 📋 **WBS-P v1.3** | 未实现内容落地 WBS：M4 上线 + 收口认证 + V1.1 演进 | `lumina-wbs-pending.html` |
@@ -265,6 +265,7 @@ cp .env.example .env
 | **QA v1.5** | 2026-09-01 | 单测 173 用例（考试 +35 · 全部通过）· 考试冒烟 28/28（smoke_exam.py） |
 | **WBS-P v1.3** | 2026-09-01 | D-04 题库与考试已实施 · 后续 P0 缺口顺延 D-05~D-10 |
 | **STATUS v1.0** | 2026-09-03 | 项目全景状态报告：里程碑/已实现/待实现/模块/技术栈/质量/风险 · 10 章节 |
+| **QA v1.7** | 2026-09-03 | 单测 173→251（D-05 学情分析 +42 · D-07 管理端 +36）· 16 模块 · 测试文件 13 · 覆盖率表补 tutoring / admin（含 settings/audit） |
 
 ## 📄 许可证
 

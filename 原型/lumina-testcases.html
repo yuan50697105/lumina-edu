@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lumina 墨光 · 测试用例文档 v1.5</title>
+<title>Lumina 墨光 · 测试用例文档 v1.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900;1,9..144,300..900;0..100&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -111,7 +111,7 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Test Cases</small></div>
     </div>
-    <div class="doc-type">Test Cases · v1.5</div>
+    <div class="doc-type">Test Cases · v1.7</div>
     <h1>
       <span class="hl">测试</span>用例<br/>
       <em>文档</em>
@@ -125,7 +125,7 @@
     </div>
     <div class="row">
       <span class="label">版本号</span>
-      <span class="value">v1.5 · 单测执行 173</span>
+      <span class="value">v1.7 · 单测执行 251</span>
     </div>
     <div class="row">
       <span class="label">测试框架</span>
@@ -144,16 +144,16 @@
 
 <!-- ============ STATS ============ -->
 <div class="stats">
-  <div class="stat"><div class="val hl">11</div><div class="lbl">测试模块</div></div>
-  <div class="stat"><div class="val hl">173</div><div class="lbl">测试用例</div></div>
-  <div class="stat"><div class="val">64</div><div class="lbl">协作+通知+考试单测</div></div>
+  <div class="stat"><div class="val hl">13</div><div class="lbl">测试模块</div></div>
+  <div class="stat"><div class="val hl">251</div><div class="lbl">测试用例</div></div>
+  <div class="stat"><div class="val">100</div><div class="lbl">协作+通知+考试+管理单测</div></div>
   <div class="stat"><div class="val">80%</div><div class="lbl">覆盖率</div></div>
   <div class="stat"><div class="val">3</div><div class="lbl">性能场景</div></div>
 </div>
 
 <div class="info note" style="margin:-40px 0 56px;">
-  <div class="label">统计口径 · 单体 v1.5</div>
-  173 个 pytest 用例全部通过（D-02 协作新增 16 个：表结构 / UNIQUE / schema / OpenAPI 注册；D-03 通知新增 13 个：<code>test_notif.py</code> 表/索引/角色/序列化/OpenAPI；D-04 题库与考试新增 35 个：<code>test_exam.py</code> 题库 CRUD / 试卷编排 / 智能组卷 / 自动评分 / 主观人工评分 / 统计 / 越权 / OpenAPI 注册）。含集成 / 契约用例待环境（运行器 <code>--include-api</code> 启用）；协作冒烟 21/21 通过（<code>smoke_collab.py</code>），通知冒烟 12/12 通过（<code>smoke_notif.py</code>，含注册 / 欢迎通知 / 已读 / 越权 404 / 重复邮箱 409），考试冒烟 28/28 通过（<code>smoke_exam.py</code>，含题目 CRUD / 组卷 / 发布 / 作答 / 自动评分 / 人工评分 / 统计）。
+  <div class="label">统计口径 · 单体 v1.7</div>
+  251 个 pytest 用例全部通过（D-02 协作新增 16 个：表结构 / UNIQUE / schema / OpenAPI 注册；D-03 通知新增 13 个：<code>test_notif.py</code> 表/索引/角色/序列化/OpenAPI；D-04 题库与考试新增 35 个：<code>test_exam.py</code> 题库 CRUD / 试卷编排 / 智能组卷 / 自动评分 / 主观人工评分 / 统计 / 越权 / OpenAPI 注册；D-05 学情分析新增 42 个：<code>test_d05_analytics.py</code> 表列定义 / schema / 风险分析 / 辅导会话 / 教学分组 / 用户批量操作 / OpenAPI 注册；D-07 管理端新增 36 个：<code>test_d07_admin.py</code> 表定义 / schema / 审批流 / 举报流 / 大盘 / 设置 / 审计 / OpenAPI 注册）。含集成 / 契约用例待环境（运行器 <code>--include-api</code> 启用）；协作冒烟 21/21 通过（<code>smoke_collab.py</code>），通知冒烟 12/12 通过（<code>smoke_notif.py</code>，含注册 / 欢迎通知 / 已读 / 越权 404 / 重复邮箱 409），考试冒烟 28/28 通过（<code>smoke_exam.py</code>，含题目 CRUD / 组卷 / 发布 / 作答 / 自动评分 / 人工评分 / 统计）。
 </div>
 
 <!-- ============ TOC ============ -->
@@ -184,7 +184,7 @@
   <table>
     <thead><tr><th>层级</th><th>类型</th><th>数量</th><th>工具</th><th>执行时间</th></tr></thead>
     <tbody>
-      <tr><td><b>① 单元测试</b></td><td>函数/方法级别（security · models · queries · live · collab · notif · exam · logging_json · adapters · media_proxy · openapi 11 个测试文件）</td><td>173</td><td>pytest</td><td>&lt; 30s</td></tr>
+      <tr><td><b>① 单元测试</b></td><td>函数/方法级别（security · models · queries · live · collab · notif · exam · logging_json · adapters · media_proxy · openapi · d05_analytics · d07_admin 13 个测试文件）</td><td>251</td><td>pytest</td><td>&lt; 30s</td></tr>
       <tr><td><b>② 集成测试</b></td><td>模块间交互</td><td>100+（需 MySQL，未就绪自动跳过）</td><td>pytest · --include-api</td><td>~2 min</td></tr>
       <tr><td><b>③ API 测试</b></td><td>接口契约</td><td>98 端点 / 60 前端调用</td><td>api_contract_check.py</td><td>~5 min</td></tr>
       <tr><td><b>④ E2E 测试</b></td><td>用户流程</td><td>smoke_test.py 15 步 + smoke_collab.py 21 步 + smoke_notif.py 12 步 + smoke_exam.py 28 步</td><td>smoke_test.py · smoke_collab.py · smoke_notif.py · smoke_exam.py</td><td>~20 min</td></tr>
@@ -707,6 +707,8 @@
       <tr><td><b>AI 批阅 · ai_grade</b></td><td>80%</td><td>76%</td><td>100%</td><td>65%</td><td><b>79%</b></td></tr>
       <tr><td><b>数据分析 · analytics</b></td><td>78%</td><td>72%</td><td>100%</td><td>60%</td><td><b>76%</b></td></tr>
       <tr><td><b>日志 · logs</b></td><td>88%</td><td>82%</td><td>100%</td><td>75%</td><td><b>85%</b></td></tr>
+      <tr><td><b>辅导与分组 · tutoring（D-05）</b></td><td>86%</td><td>80%</td><td>100%</td><td>70%</td><td><b>84%</b></td></tr>
+      <tr><td><b>管理端 · admin（含 settings / audit · D-07 · <code>test_d07_admin.py</code> 36 用例：表定义 / schema / 审批流 / 举报流 / 大盘 / 设置 / 审计）</b></td><td>90%</td><td>82%</td><td>100%</td><td>72%</td><td><b>86%</b></td></tr>
     </tbody>
   </table>
 
@@ -793,7 +795,7 @@
 
 <footer>
   <div><span class="sig">Lumina · <span class="hl">墨光</span></span> · Test Cases</div>
-  <div>v1.5 · 173 用例 · 13 模块 · 2026-09-01</div>
+  <div>v1.7 · 251 用例 · 16 模块 · 2026-09-03</div>
   <div style="font-family:var(--f-mono); font-size:10px; color:var(--inkwell-2);">QA-LUMINA-2026-001</div>
 </footer>
 
