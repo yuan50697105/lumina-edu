@@ -91,6 +91,7 @@ edu/
 | 📋 **WBS v1.1** | 上线工作分解结构，10 周轻量方案 | `lumina-launch-wbs.html` |
 | 📋 **WBS-P v1.3** | 未实现内容落地 WBS：M4 上线 + 收口认证 + V1.1 演进 | `lumina-wbs-pending.html` |
 | 📋 **REQ-D06 v1.0** | 自主学习与闯关奖励机制需求规格（路径/关卡/XP/徽章/排行） | `lumina-learning-system.html` |
+| 📋 **STATUS v1.0** | 项目全景状态报告（里程碑/已实现/待实现/模块/技术栈/质量/风险） | `lumina-status-report.html` |
 
 ## 🎨 设计系统
 
@@ -212,6 +213,8 @@ cp .env.example .env
 | 用户手册 | `原型/lumina-userguide.html` |
 | 上线 WBS | `原型/lumina-launch-wbs.html` |
 | 未实现内容 WBS | `原型/lumina-wbs-pending.html` |
+| 自主学习需求 | `原型/lumina-learning-system.html` |
+| 项目全景状态报告 | `原型/lumina-status-report.html` |
 
 ## 📋 版本历史
 
@@ -261,6 +264,7 @@ cp .env.example .env
 | **OPS v1.5** | 2026-09-01 | 题库与考试快照 · 13 模块 · 35 表 |
 | **QA v1.5** | 2026-09-01 | 单测 173 用例（考试 +35 · 全部通过）· 考试冒烟 28/28（smoke_exam.py） |
 | **WBS-P v1.3** | 2026-09-01 | D-04 题库与考试已实施 · 后续 P0 缺口顺延 D-05~D-10 |
+| **STATUS v1.0** | 2026-09-03 | 项目全景状态报告：里程碑/已实现/待实现/模块/技术栈/质量/风险 · 10 章节 |
 
 ## 📄 许可证
 

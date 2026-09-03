@@ -682,4 +682,70 @@ class LearningInsight(Base):
     created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
 
 
+# ─── 管理端（V1.1 · D-07/D-08 · WBS-P 阶段 D）───
+# 课程审批 / 系统设置 / 审计日志 / 内容举报
+class CourseApproval(Base):
+    """课程审批记录：教师提交 → 管理员审核（通过/驳回）"""
+    __tablename__ = "course_approvals"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False, unique=True)
+    submitted_by = Column(GUID, nullable=False)             # 提交教师
+    reviewer_id = Column(GUID, nullable=True)               # 审核管理员
+    status = Column(String(20), default="pending", nullable=False)  # pending | approved | rejected
+    comment = Column(Text, nullable=True)                   # 审核意见
+    submitted_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
+
+
+class SystemSetting(Base):
+    """系统设置（KV 结构，按 category 分组）"""
+    __tablename__ = "system_settings"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    key = Column(String(100), unique=True, nullable=False)    # e.g. "site.name"
+    value = Column(JSON, nullable=True)                       # 任意 JSON（字符串/数字/对象/数组）
+    category = Column(String(50), default="general", nullable=False)  # general/security/notify/ai
+    description = Column(String(300), nullable=True)
+    updated_by = Column(GUID, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
+
+
+class AuditLog(Base):
+    """审计日志：记录业务操作（独立于 api_logs 的请求级日志）"""
+    __tablename__ = "audit_logs"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    actor_id = Column(GUID, nullable=True, index=True)        # 操作人（系统操作可空）
+    action = Column(String(50), nullable=False, index=True)   # user.login / course.approve / setting.update ...
+    target_type = Column(String(30), nullable=True)           # user / course / assignment / setting / report
+    target_id = Column(GUID, nullable=True)
+    details = Column(JSON, nullable=True)                     # 操作细节
+    ip_address = Column(String(45), nullable=True)
+    user_agent = Column(Text, nullable=True)
+    status = Column(String(10), default="success")            # success | failed
+    archived = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False, index=True)
+
+
+class ContentReport(Base):
+    """内容举报：用户对违规内容的举报（讨论/公告/文件等）"""
+    __tablename__ = "content_reports"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    reporter_id = Column(GUID, nullable=False)                # 举报人
+    target_type = Column(String(30), nullable=False)          # discussion / announcement / file / message
+    target_id = Column(GUID, nullable=False)
+    reason = Column(String(30), default="other", nullable=False)  # spam/abuse/harassment/copyright/other
+    description = Column(Text, nullable=True)
+    status = Column(String(20), default="pending", nullable=False)  # pending | reviewing | resolved | dismissed
+    reviewer_id = Column(GUID, nullable=True)
+    resolution = Column(Text, nullable=True)                  # 处理说明
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
+
+
 # ─── 监控共享表 ───

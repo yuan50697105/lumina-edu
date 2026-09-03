@@ -1271,3 +1271,173 @@ class BatchResultOut(BaseModel):
     failed: int
     errors: list[dict] = []              # [{user_id/email, message}]
 
+
+# ═══════════════════════════════════════════════════════════════════
+# D-07/D-08 · 管理端补齐 · 监控大盘 / 课程审批 / 系统设置 / 审计 / 举报
+# ═══════════════════════════════════════════════════════════════════
+
+# ─── 监控大盘 ───
+class DashboardOverview(BaseModel):
+    """监控大盘总览"""
+    total_users: int
+    total_students: int
+    total_teachers: int
+    total_courses: int
+    active_courses: int                  # 近 30 天有活动
+    dau: int                             # 日活跃用户
+    mau: int                             # 月活跃用户
+    pending_approvals: int
+    pending_reports: int
+    today_registrations: int
+
+class GrowthPoint(BaseModel):
+    month: str                           # "2026-01"
+    new_users: int
+    new_courses: int
+    active_users: int
+
+class DashboardGrowth(BaseModel):
+    months: list[GrowthPoint]
+
+class HealthMetric(BaseModel):
+    name: str                            # "api" / "db" / "ai"
+    status: str                          # healthy / degraded / down
+    uptime_pct: Optional[float] = None
+    avg_latency_ms: Optional[float] = None
+    error_rate: Optional[float] = None
+
+class DashboardHealth(BaseModel):
+    metrics: list[HealthMetric]
+    sla_target: float = 99.9             # 目标 SLA %
+    overall_status: str                  # healthy / degraded / down
+
+class RecentActivityItem(BaseModel):
+    id: uuid.UUID
+    type: str                            # audit / report / approval
+    action: str
+    actor_name: Optional[str] = None
+    target: Optional[str] = None
+    created_at: datetime
+
+class DashboardRecentActivity(BaseModel):
+    items: list[RecentActivityItem]
+
+# ─── 课程审批 ───
+class CourseApprovalSubmit(BaseModel):
+    """教师提交课程审批（可带备注）"""
+    note: Optional[str] = Field(None, max_length=500)
+
+class CourseApprovalReview(BaseModel):
+    """管理员审核（通过/驳回）"""
+    comment: Optional[str] = Field(None, max_length=1000)
+
+class CourseApprovalOut(BaseModel):
+    id: uuid.UUID
+    course_id: uuid.UUID
+    course_title: Optional[str] = None
+    course_code: Optional[str] = None
+    submitted_by: uuid.UUID
+    submitter_name: Optional[str] = None
+    reviewer_id: Optional[uuid.UUID] = None
+    reviewer_name: Optional[str] = None
+    status: str                          # pending | approved | rejected
+    comment: Optional[str] = None
+    note: Optional[str] = None           # 提交时的备注（存 details 或单独字段）
+    submitted_at: datetime
+    reviewed_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+class CourseApprovalStatusOut(BaseModel):
+    """课程当前审批状态"""
+    course_id: uuid.UUID
+    has_approval: bool
+    status: Optional[str] = None         # pending | approved | rejected
+    approval_id: Optional[uuid.UUID] = None
+    submitted_at: Optional[datetime] = None
+    reviewed_at: Optional[datetime] = None
+    comment: Optional[str] = None
+
+# ─── 系统设置 ───
+class SettingOut(BaseModel):
+    key: str
+    value: Optional[Any] = None
+    category: str
+    description: Optional[str] = None
+    updated_by: Optional[uuid.UUID] = None
+    updater_name: Optional[str] = None
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SettingUpdate(BaseModel):
+    value: Any
+    description: Optional[str] = None
+
+class SettingBatchItem(BaseModel):
+    key: str
+    value: Any
+
+class SettingBatchIn(BaseModel):
+    items: list[SettingBatchItem] = Field(..., min_length=1, max_length=100)
+
+class SettingCategoryOut(BaseModel):
+    category: str
+    count: int
+    keys: list[str]
+
+# ─── 审计日志 ───
+class AuditLogOut(BaseModel):
+    id: int
+    actor_id: Optional[uuid.UUID] = None
+    actor_name: Optional[str] = None
+    action: str
+    target_type: Optional[str] = None
+    target_id: Optional[uuid.UUID] = None
+    details: Optional[dict] = None
+    ip_address: Optional[str] = None
+    status: str
+    archived: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AuditExportOut(BaseModel):
+    """审计导出结果"""
+    total: int
+    exported: int
+    download_url: Optional[str] = None   # V1 直接返回 CSV 内容，此字段保留
+
+# ─── 内容举报 ───
+class ReportCreate(BaseModel):
+    target_type: str = Field(..., pattern="^(discussion|announcement|file|message|course|user)$")
+    target_id: uuid.UUID
+    reason: str = Field("other", pattern="^(spam|abuse|harassment|copyright|nsfw|other)$")
+    description: Optional[str] = Field(None, max_length=1000)
+
+class ReportResolve(BaseModel):
+    status: str = Field(..., pattern="^(resolved|dismissed)$")
+    resolution: Optional[str] = Field(None, max_length=1000)
+
+class ReportOut(BaseModel):
+    id: uuid.UUID
+    reporter_id: uuid.UUID
+    reporter_name: Optional[str] = None
+    target_type: str
+    target_id: uuid.UUID
+    reason: str
+    description: Optional[str] = None
+    status: str                          # pending | reviewing | resolved | dismissed
+    reviewer_id: Optional[uuid.UUID] = None
+    reviewer_name: Optional[str] = None
+    resolution: Optional[str] = None
+    created_at: datetime
+    reviewed_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
