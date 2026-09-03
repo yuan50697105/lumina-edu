@@ -99,6 +99,18 @@
   .flow-content .title{font-weight:600; margin-bottom:4px;}
   .flow-content .desc{font-size:13px; color:var(--inkwell-2); line-height:1.6;}
 
+  .diagram-card{background:#fff; border:1px solid var(--line); border-radius:14px; padding:22px 24px; margin:16px 0 26px; position:relative; overflow:hidden;}
+  .diagram-card:before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--growth);}
+  .diagram-card.seq:before{background:var(--cobalt);}
+  .diagram-card.err:before{background:var(--correction);}
+  .diagram-card .diagram-head{display:flex; align-items:baseline; gap:12px; margin-bottom:16px;}
+  .diagram-card .diagram-kind{font-family:var(--f-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--growth); background:var(--growth-soft); padding:3px 9px; border-radius:6px; white-space:nowrap;}
+  .diagram-card.seq .diagram-kind{color:var(--cobalt); background:var(--cobalt-soft);}
+  .diagram-card.err .diagram-kind{color:var(--correction); background:var(--correction-soft);}
+  .diagram-card .diagram-caption{font-size:12.5px; color:var(--inkwell-2); line-height:1.7;}
+  .mermaid{display:flex; justify-content:center; overflow-x:auto; padding:8px 0 2px;}
+  .mermaid svg{max-width:100%; height:auto;}
+
   .persona{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 22px; margin:14px 0; display:grid; grid-template-columns:80px 1fr; gap:18px; align-items:center;}
   .persona .avatar{width:72px; height:72px; border-radius:50%; background:var(--cobalt-soft); display:flex; align-items:center; justify-content:center; font-size:32px;}
   .persona .info-block .name{font-family:var(--f-display); font-size:18px; font-weight:500; margin-bottom:4px;}
@@ -134,12 +146,12 @@
       <div class="logo">墨</div>
       <div class="name">Lumina · 墨光<small>Requirements Document · D-08</small></div>
     </div>
-    <div class="doc-type">Requirement Specification · v1.0</div>
+    <div class="doc-type">Requirement Specification · v1.1</div>
     <h1><span class="hl">教学视频</span> 与<br/><em>录播回放</em> 体系</h1>
     <p class="subtitle">Video Management · Live Recording Replay · Adaptive Player · AI Subtitles &amp; Knowledge Search</p>
     <div class="meta">
       Document ID: REQ-LUMINA-D08-2026-001 · Status: Draft<br/>
-      Version: 1.0 · Date: 2026-09-03<br/>
+      Version: 1.1 · Date: 2026-09-03 · Changelog: v1.1 新增 §3 业务流程定义（4 类 Mermaid 流程图），后续章节顺延重编号<br/>
       WBS-P: D-08（V1.1 演进） · Author: Claude Team Review · Owner: Yuan
     </div>
   </div>
@@ -436,11 +448,161 @@
   </div>
 </section>
 
-<!-- ============ §3 用户故事 ============ -->
+<!-- ============ §3 业务流程定义 ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>03 · <em>User Stories</em></h2>
-    <span class="num-tag">§3 用户故事与验收标准</span>
+    <h2>03 · <em>Business Flows</em></h2>
+    <span class="num-tag">§3 业务流程定义</span>
+  </div>
+
+  <p>本章固化 D-08 的 4 条核心业务流：<b>教师上传发布主流程</b>（用户旅程）、<b>视频生命周期状态机</b>、<b>D-01 → D-08 直播转录播跨模块时序</b>、<b>播放器断点续播</b>（含异常降级）。图形由 Mermaid 渲染（需联网加载渲染库）；离线环境下可阅读每张图旁的文字说明与 §4~§7 对应章节。</p>
+
+  <h3 class="sub">3.1 · <em>用户旅程</em> 教师上传视频并发布</h3>
+  <div class="diagram-card">
+    <div class="diagram-head">
+      <span class="diagram-kind">Flowchart · 流程 1</span>
+      <span class="diagram-caption">覆盖「登录 → 分片上传（断点续传）→ 转码（失败重试 3 次）→ 送审 → 发布 / 驳回」全链路，与 §2 模块 A、§7.2 转码流水线、AC-01 / AC-02 / AC-08 对应。</span>
+    </div>
+    <div class="mermaid">
+graph TD
+    A[教师登录] --> B[进入视频管理台]
+    B --> C[点击上传视频]
+    C --> D[填写元信息&lt;br/&gt;标题/课程/章节/标签]
+    D --> E[创建视频记录&lt;br/&gt;status=draft]
+    E --> F[分片上传&lt;br/&gt;8MB/片 × 4 并行]
+    F --> G{上传完成?}
+    G -->|中断| H[断点续传]
+    H --> F
+    G -->|完成| I[触发转码任务]
+    I --> J[FFmpeg 处理&lt;br/&gt;多码率 HLS + 封面 + 关键帧 + ASR]
+    J --> K{转码成功?}
+    K -->|失败 重试 3 次| J
+    K -->|成功| L[status=pending_review]
+    L --> M[通知管理员审核]
+    M --> N{管理员审核}
+    N -->|通过| O[status=published]
+    O --> P[通知教师 + 学生可见]
+    N -->|驳回| Q[status=draft + 原因]
+    Q --> R[通知教师修改]
+    </div>
+  </div>
+
+  <h3 class="sub">3.2 · <em>状态机</em> 视频生命周期</h3>
+  <div class="diagram-card">
+    <div class="diagram-head">
+      <span class="diagram-kind">State Diagram · 流程 2</span>
+      <span class="diagram-caption">六态闭环：draft / processing / pending_review / published / archived。对应 <code>videos.status</code> 字段（§5）与 AC-02 / AC-08 / AC-14；<code>pending_review</code> 为转码成功后、审核通过前的中间态。</span>
+    </div>
+    <div class="mermaid">
+stateDiagram-v2
+    [*] --> Draft: 创建视频记录
+    Draft --> Processing: 上传完成 触发转码
+    Processing --> PendingReview: 转码成功
+    Processing --> Draft: 转码失败 重试 3 次后
+    PendingReview --> Published: 管理员审核通过
+    PendingReview --> Draft: 管理员审核驳回
+    Published --> Archived: 软删除 30 天后
+    Archived --> [*]: 物理清理
+
+    note right of Processing
+        异步转码流水线
+        FFmpeg 多码率 + 封面 + 关键帧 + ASR
+    end note
+
+    note right of Published
+        学生可观看
+        支持断点续播
+    end note
+    </div>
+    <div class="info warn" style="margin-bottom:0;">
+      <div class="label">⚠ 与 §5 数据模型的一致性备注</div>
+      §5 数据模型 <code>videos.status</code> 当前枚举为 <code>draft / processing / published / archived</code>，本状态机要求补充 <code>pending_review</code>（审核策略开启时的待审中间态）；实现阶段以本状态机为准扩展枚举，开发时同步修订 §5 数据模型。
+    </div>
+  </div>
+
+  <h3 class="sub">3.3 · <em>跨模块交互</em> 直播自动转录播（D-01 → D-08）</h3>
+  <div class="diagram-card seq">
+    <div class="diagram-head">
+      <span class="diagram-kind">Sequence · 流程 3</span>
+      <span class="diagram-caption">直播结束事件驱动，video 模块内部创建草稿 → 异步转码 → 回写状态 → 通知教师，对应 §2 模块 B.1、§6.2 端点 <code>from-live</code> 与 AC-03（≤10 分钟生成草稿）。</span>
+    </div>
+    <div class="mermaid">
+sequenceDiagram
+    participant Live as live 模块 (D-01)
+    participant Video as video 模块 (D-08)
+    participant Worker as 转码 Worker
+    participant Notification as notification 模块
+    participant DB as MySQL
+    participant OSS as 对象存储
+    participant Teacher as 教师
+
+    Live->>Live: 直播结束 status=ended
+    Live->>Video: POST /video/recordings/from-live&lt;br/&gt;{room_id, course_id, recording_url}
+    Video->>DB: INSERT video&lt;br/&gt;(source_type=live_record, status=draft)
+    Video-->>Live: {video_id}
+    Video->>Worker: 异步转码任务
+    Worker->>OSS: 下载直播录制文件
+    Worker->>Worker: FFmpeg 转码&lt;br/&gt;生成 HLS 多码率 + 封面 + 关键帧
+    Worker->>OSS: 上传转码后文件
+    Worker->>Video: POST /video/{id}/transcode-complete
+    Video->>DB: UPDATE status=pending_review
+    Video->>Notification: 通知教师"录播已生成 请审核"
+    Notification->>Teacher: 推送通知 + 邮件
+    Note over Teacher: 教师可剪辑后发布
+    </div>
+  </div>
+
+  <h3 class="sub">3.4 · <em>异常流程</em> 播放器断点续播</h3>
+  <div class="diagram-card err">
+    <div class="diagram-head">
+      <span class="diagram-kind">Flowchart · 流程 4</span>
+      <span class="diagram-caption"><b>触发条件</b>：学生再次观看已看过的视频。正常路径为「取进度 → seek 续播 → 15s 心跳上报 → 关闭时落库」，四类异常均有降级策略（见下方表）；对应 §2 模块 C.1、AC-05、US-01。</span>
+    </div>
+    <div class="mermaid">
+flowchart TD
+    A["学生点击视频进入播放器"] --> B["请求 GET /video/{id}/progress"]
+    B -->|"接口超时"| F["显示「进度同步中」&lt;br/&gt;从头播放"]
+    B --> C{"存在观看记录?"}
+    C -->|"无记录"| E["从头播放"]
+    C -->|"有记录"| D["读取 progress_seconds / watched_seconds"]
+    D --> G["播放器自动 seek 到&lt;br/&gt;progress_seconds ± 5s"]
+    E --> H["开始播放"]
+    F --> H
+    G --> H
+    H --> I["每 15s 上报进度"]
+    I --> J["后端 UPSERT video_watch_history"]
+    J -->|"上报失败"| K["本地缓存&lt;br/&gt;下次合并上报"]
+    K --> I
+    J -->|"成功"| L{"跨设备进度冲突?"}
+    L -->|"是"| M["以服务端最新进度为准"]
+    L -->|"否"| N["关闭视频时保存最终进度"]
+    M --> N
+    </div>
+    <table style="margin-bottom:0;">
+      <tr><th>异常场景</th><th>处理策略</th></tr>
+      <tr><td>无观看记录</td><td>从头播放</td></tr>
+      <tr><td>进度接口超时</td><td>显示「进度同步中」→ 从头播放</td></tr>
+      <tr><td>上报失败</td><td>本地缓存 → 下次合并上报</td></tr>
+      <tr><td>跨设备冲突</td><td>以服务端最新进度为准</td></tr>
+    </table>
+  </div>
+
+  <div class="info note">
+    <div class="label">📌 流程与验收的追踪关系</div>
+    <ul style="margin-top:6px;">
+      <li><b>流程 1</b> ↔ AC-01（分片/续传）· AC-02（转码流水线）· AC-08（审核闭环）</li>
+      <li><b>流程 2</b> ↔ AC-02 / AC-08 / AC-14（软删除 30 天窗口与物理清理）</li>
+      <li><b>流程 3</b> ↔ AC-03（≤10 分钟生成草稿并通知教师）</li>
+      <li><b>流程 4</b> ↔ AC-05（续播误差 ≤ ±5s、跨设备一致）· US-01</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ §4 用户故事 ============ -->
+<section class="section">
+  <div class="section-header">
+    <h2>04 · <em>User Stories</em></h2>
+    <span class="num-tag">§4 用户故事与验收标准</span>
   </div>
 
   <table>
@@ -523,11 +685,11 @@
   </div>
 </section>
 
-<!-- ============ §4 数据模型 ============ -->
+<!-- ============ §5 数据模型 ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>04 · <em>Data Model</em></h2>
-    <span class="num-tag">§4 数据模型设计（5 张表）</span>
+    <h2>05 · <em>Data Model</em></h2>
+    <span class="num-tag">§5 数据模型设计（5 张表）</span>
   </div>
 
   <p>新增模块 <code>video</code>，共 5 张表。所有主键沿用项目统一的 <code>GUID</code>（CHAR(36)），时区字段统一 <code>DateTime(timezone=True)</code>。</p>
@@ -641,16 +803,16 @@
   </div>
 </section>
 
-<!-- ============ §5 接口设计 ============ -->
+<!-- ============ §6 接口设计 ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>05 · <em>API Preview</em></h2>
-    <span class="num-tag">§5 接口设计（~20 端点）</span>
+    <h2>06 · <em>API Preview</em></h2>
+    <span class="num-tag">§6 接口设计（~20 端点）</span>
   </div>
 
   <p>新增模块 <code>/api/v1/video/*</code>，统一前缀 <code>/video</code>，按子资源分组。所有端点需 <code>Authorization: Bearer {token}</code>。</p>
 
-  <h3 class="sub">5.1 · <em>视频管理</em>（7）</h3>
+  <h3 class="sub">6.1 · <em>视频管理</em>（7）</h3>
   <div class="api-block"><span class="method get">GET</span><span class="path">/video/videos?course_id=&chapter_id=&tag=&status=&sort=&offset=&limit=</span><div class="desc">视频列表（学生默认仅 published + 已选课程；教师看自己课程全部）</div></div>
   <div class="api-block"><span class="method get">GET</span><span class="path">/video/videos/{video_id}</span><div class="desc">视频详情（含 file 档位、我的进度、笔记数、字幕轨列表）</div></div>
   <div class="api-block"><span class="method post">POST</span><span class="path">/video/videos</span><div class="desc">创建视频记录 + 返回 <code>upload_id</code> 分片上传凭证（teacher 课程内/admin 全局）</div></div>
@@ -659,20 +821,20 @@
   <div class="api-block"><span class="method delete">DELETE</span><span class="path">/video/videos/{video_id}</span><div class="desc">软删除（status→archived，30 天恢复窗口）</div></div>
   <div class="api-block"><span class="method post">POST</span><span class="path">/video/videos/{video_id}/audit</span><div class="desc">管理员审核：approve / reject（reject 带 reason → 通知上传者）</div></div>
 
-  <h3 class="sub">5.2 · <em>录播回放</em>（4）</h3>
+  <h3 class="sub">6.2 · <em>录播回放</em>（4）</h3>
   <div class="api-block"><span class="method post">POST</span><span class="path">/video/recordings/from-live</span><div class="desc">直播转录播：D-01 结束事件内部调用，body {room_id, recording_url} → 创建 videos 草稿并入转码队列</div></div>
   <div class="api-block"><span class="method post">POST</span><span class="path">/video/videos/{video_id}/trim</span><div class="desc">录播剪辑：入点/出点秒 + 静音区间数组 → 异步生成新文件（源保留）</div></div>
   <div class="api-block"><span class="method post">POST</span><span class="path">/video/videos/{video_id}/publish</span><div class="desc">发布 / 下架（action=publish|unpublish；权限校验 + 审核状态校验）</div></div>
   <div class="api-block"><span class="method put">PUT</span><span class="path">/video/videos/{video_id}/schedule</span><div class="desc">定时发布：设定 <code>publish_at</code>（到点由调度任务自动上架）</div></div>
 
-  <h3 class="sub">5.3 · <em>播放交互</em>（5）</h3>
+  <h3 class="sub">6.3 · <em>播放交互</em>（5）</h3>
   <div class="api-block"><span class="method get">GET</span><span class="path">/video/videos/{video_id}/play</span><div class="desc">播放凭证：校验选课/密码/审核 → 返回 m3u8 地址（含时效签名）+ 续播位置</div></div>
   <div class="api-block"><span class="method put">PUT</span><span class="path">/video/videos/{video_id}/progress</span><div class="desc">观看进度上报 {progress_seconds, watched_seconds, device_type}（UPSERT video_views，幂等）</div></div>
   <div class="api-block"><span class="method get">GET</span><span class="path">/video/videos/{video_id}/notes</span><div class="desc">我的笔记列表（按 timestamp_seconds 排序；DELETE /video/notes/{note_id} 删除）</div></div>
   <div class="api-block"><span class="method post">POST</span><span class="path">/video/videos/{video_id}/notes</span><div class="desc">创建时间戳笔记（content + timestamp_seconds，可选 screenshot_url 先传截图对象）</div></div>
   <div class="api-block"><span class="method get">GET</span><span class="method post">POST</span><span class="path">/video/videos/{video_id}/transcripts?language=zh</span><div class="desc">取字幕轨（播放器渲染）；POST 上传 SRT 或触发 AI 转写（body {source:"ai", language}）</div></div>
 
-  <h3 class="sub">5.4 · <em>检索分析</em>（4）</h3>
+  <h3 class="sub">6.4 · <em>检索分析</em>（4）</h3>
   <div class="api-block"><span class="method get">GET</span><span class="path">/video/search?q=&course_id=&offset=&limit=</span><div class="desc">字幕全文检索：返回视频 + 命中句片段 + 时间戳（权限过滤）</div></div>
   <div class="api-block"><span class="method get">GET</span><span class="path">/video/videos/{video_id}/keyframes</span><div class="desc">关键帧索引 + 知识点切片目录（AI 提取产物，缩略图 URL + 时间点）</div></div>
   <div class="api-block"><span class="method get">GET</span><span class="path">/video/stats?course_id=&dimension=video|class|storage</span><div class="desc">统计：播放量/完播率/平均时长/高峰时段、班级未看名单、存储占用（CSV 导出 export=1）</div></div>
@@ -690,14 +852,14 @@
   </div>
 </section>
 
-<!-- ============ §6 存储与转码策略 ============ -->
+<!-- ============ §7 存储与转码策略 ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>06 · <em>Storage &amp; Transcoding</em></h2>
-    <span class="num-tag">§6 存储与转码策略</span>
+    <h2>07 · <em>Storage &amp; Transcoding</em></h2>
+    <span class="num-tag">§7 存储与转码策略</span>
   </div>
 
-  <h3 class="sub">6.1 · <em>存储方案（可插拔驱动）</em></h3>
+  <h3 class="sub">7.1 · <em>存储方案（可插拔驱动）</em></h3>
   <table>
     <tr><th>后端</th><th>定位</th><th>说明</th></tr>
     <tr><td><b>本地磁盘</b></td><td>开发 / 演示</td><td>与 Docker 卷挂载配合，默认驱动，零依赖起步</td></tr>
@@ -709,7 +871,7 @@
     统一 <code>StorageDriver</code> 接口（put / presign_upload / presign_get / delete），<code>file_url</code> 存逻辑对象键而非物理地址——换后端不动数据。密钥全部环境变量注入（如 <code>STORAGE_BACKEND</code> / <code>OSS_ENDPOINT</code>）。
   </div>
 
-  <h3 class="sub">6.2 · <em>转码流水线</em></h3>
+  <h3 class="sub">7.2 · <em>转码流水线</em></h3>
   <div class="flow">
     <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><div class="title">分片合并 + 校验</div><div class="desc">MD5 校验 → 源文件落对象存储（is_original）→ 状态 processing</div></div></div>
     <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><div class="title">FFmpeg 多码率转码</div><div class="desc">1080p(4M)/720p(2M)/360p(800k) H.264+AAC，任务队列（Redis）串行 worker 防打满 CPU；4K 源仅保留降采样档位</div></div></div>
@@ -719,13 +881,13 @@
     <div class="flow-step"><div class="flow-num">6</div><div class="flow-content"><div class="title">HLS 切片 + 入库就绪</div><div class="desc">m3u8/ts 分片 → 通知上传者：可审核/可发布；任一步失败可重跑且不产生脏产物</div></div></div>
   </div>
 
-  <h3 class="sub">6.3 · <em>CDN 分发</em></h3>
+  <h3 class="sub">7.3 · <em>CDN 分发</em></h3>
   <ul>
     <li>热点视频（高峰并发）边缘缓存 m3u8 + ts 分片；回源走对象存储内网</li>
     <li>播放凭证带<b>时效签名</b>（默认 2h），防盗链；无 CDN 环境回退 Nginx <code>/media</code> 同源反代（复用 D-01 已验证链路）</li>
   </ul>
 
-  <h3 class="sub">6.4 · <em>存储成本预估</em></h3>
+  <h3 class="sub">7.4 · <em>存储成本预估</em></h3>
   <table>
     <tr><th>参数</th><th>估算</th></tr>
     <tr><td>单位体积</td><td>1 小时 1080p ≈ <b>1.5 GB</b>（4 Mbps 码率）</td></tr>
@@ -736,11 +898,11 @@
   </table>
 </section>
 
-<!-- ============ §7 平台适配 ============ -->
+<!-- ============ §8 平台适配 ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>07 · <em>Platform Matrix</em></h2>
-    <span class="num-tag">§7 平台适配</span>
+    <h2>08 · <em>Platform Matrix</em></h2>
+    <span class="num-tag">§8 平台适配</span>
   </div>
 
   <table>
@@ -777,11 +939,11 @@
   </div>
 </section>
 
-<!-- ============ §8 验收标准 ============ -->
+<!-- ============ §9 验收标准 ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>08 · <em>Acceptance</em></h2>
-    <span class="num-tag">§8 验收标准</span>
+    <h2>09 · <em>Acceptance</em></h2>
+    <span class="num-tag">§9 验收标准</span>
   </div>
 
   <table>
@@ -802,7 +964,7 @@
     <tr><td>AC-14</td><td>软删除与恢复</td><td>archived 视频 30 天内可恢复，到期物理清理对象存储且记录脱敏留痕</td></tr>
   </table>
 
-  <h3 class="sub">8.1 · <em>埋点事件</em></h3>
+  <h3 class="sub">9.1 · <em>埋点事件</em></h3>
   <table>
     <tr><th>事件</th><th>触发时机</th><th>关键字段</th></tr>
     <tr><td><code>video.play</code></td><td>取得播放凭证开始播放</td><td>video_id, from_resume, device_type</td></tr>
@@ -814,18 +976,18 @@
   </table>
 </section>
 
-<!-- ============ §9 技术依赖 ============ -->
+<!-- ============ §10 技术依赖 ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>09 · <em>Dependencies</em></h2>
-    <span class="num-tag">§9 技术依赖</span>
+    <h2>10 · <em>Dependencies</em></h2>
+    <span class="num-tag">§10 技术依赖</span>
   </div>
 
   <table>
     <tr><th>类别</th><th>选型</th><th>用途 / 说明</th></tr>
     <tr><td><b>视频转码</b></td><td>FFmpeg（worker 容器）</td><td>多码率转码 / HLS 切片 / 封面抽帧 / 静音检测；GPU 非必需</td></tr>
     <tr><td><b>流媒体协议</b></td><td>HLS（主）· DASH（评估）</td><td>与 D-01 直播 HLS 播放链路统一；DASH 待低延迟需求出现再评估</td></tr>
-    <tr><td><b>对象存储</b></td><td>MinIO / 阿里云 OSS / 腾讯云 COS</td><td>StorageDriver 可插拔抽象（见 §6.1）</td></tr>
+    <tr><td><b>对象存储</b></td><td>MinIO / 阿里云 OSS / 腾讯云 COS</td><td>StorageDriver 可插拔抽象（见 §7.1）</td></tr>
     <tr><td><b>任务队列</b></td><td>Redis 队列 + worker 池</td><td>转码/关键帧/ASR 异步化；复用既有 Redis 实例，新增队列前缀</td></tr>
     <tr><td><b>AI 字幕</b></td><td>讯飞语音 / 通义听悟</td><td>ASR 转写；密钥环境变量，失败降级「无字幕可发布」</td></tr>
     <tr><td><b>前端播放器</b></td><td>hls.js（Web）· expo-video（移动端）</td><td>video.js 作为 Web 备选评估；桌面复用 Web</td></tr>
@@ -838,17 +1000,17 @@
     <ul style="margin-top:6px;">
       <li><b>R1 · 直播平台未定（继承 D-01 未决项）</b>：mock:// 占位链路无真实录制产物，from-live 需按「录制文件可访问」假设先行，接口留适配层；上线前必须锁定云厂商并验证录制导出格式</li>
       <li><b>R2 · 转码算力</b>：单机 FFmpeg worker 吞吐有限（1080p 约 1~1.5x 实时），需队列削峰 + 多 worker 水平扩；避免直播集中下课导致转录播排队超 10 分钟（AC-03）</li>
-      <li><b>R3 · 大文件存储成本</b>：以配额 + 归档清理（AC-14）+ 生命周期降冷控制；成本模型见 §6.4</li>
+      <li><b>R3 · 大文件存储成本</b>：以配额 + 归档清理（AC-14）+ 生命周期降冷控制；成本模型见 §7.4</li>
       <li><b>R4 · 中文全文检索精度</b>：MySQL ngram 起步满足首期，命中质量不足时引入 ES（独立评估，不阻塞交付）</li>
     </ul>
   </div>
 </section>
 
-<!-- ============ §10 里程碑与排期 ============ -->
+<!-- ============ §11 里程碑与排期 ============ -->
 <section class="section">
   <div class="section-header">
-    <h2>10 · <em>Milestones</em></h2>
-    <span class="num-tag">§10 里程碑与排期（8 周 · 优先级 P1）</span>
+    <h2>11 · <em>Milestones</em></h2>
+    <span class="num-tag">§11 里程碑与排期（8 周 · 优先级 P1）</span>
   </div>
 
   <p>D-08 纳入 V1.1 演进规划（WBS-P），不阻塞 M4 正式上线；整体功能包优先级 <span class="tag p1">P1（核心教学功能）</span>，预估 8 周 / 4 个内部里程碑。</p>
@@ -903,9 +1065,48 @@
 
 <!-- ============ FOOTER ============ -->
 <footer>
-  <div>Lumina · 墨光 · REQ-LUMINA-D08-2026-001 · v1.0 · 2026-09-03</div>
+  <div>Lumina · 墨光 · REQ-LUMINA-D08-2026-001 · v1.1 · 2026-09-03</div>
   <div class="sig">Teaching Video &amp; <span class="hl">Replay</span></div>
 </footer>
 
 </body>
+<script type="module">
+  // Mermaid 渲染（§3 业务流程定义）；沿用 Lumina 设计 token 定制主题
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    securityLevel: 'loose',
+    fontFamily: '"Inter", "PingFang SC", system-ui, sans-serif',
+    themeVariables: {
+      background: '#ffffff',
+      primaryColor: '#E8EAFB',
+      primaryTextColor: '#0F1020',
+      primaryBorderColor: '#3D46C9',
+      secondaryColor: '#D4EDDC',
+      secondaryBorderColor: '#2A7F4F',
+      tertiaryColor: '#FAF6EC',
+      lineColor: '#2A2B3D',
+      noteBkgColor: '#FDE68A',
+      noteTextColor: '#0F1020',
+      noteBorderColor: '#F5B800',
+      actorBkg: '#E8EAFB',
+      actorBorder: '#3D46C9',
+      actorTextColor: '#0F1020',
+      signalColor: '#2A2B3D',
+      signalTextColor: '#0F1020',
+      labelBoxBkgColor: '#EDE9FE',
+      labelBoxBorderColor: '#7C3AED',
+      stateColorStart: '#E8EAFB',
+      stateColorEnd: '#F2EBD8',
+      stateBorderColor: '#3D46C9',
+      stateFontColor: '#0F1020',
+      clusterBkg: '#FAF6EC',
+      edgeLabelBackground: '#FAF6EC'
+    },
+    flowchart: { curve: 'linear', htmlLabels: true, padding: 12 },
+    sequence: { showSequenceNumbers: false, actorMargin: 60, boxMargin: 12 },
+    stateDiagram: { htmlLabels: true }
+  });
+</script>
 </html>
