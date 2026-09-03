@@ -180,8 +180,8 @@
   <table>
     <thead><tr><th>维度</th><th>基线</th><th>未实现差距</th></tr></thead>
     <tbody>
-      <tr><td><b>功能</b></td><td>单体 162 paths / 201 ops · 18 模块 · 57 表 · 直播（D-01）· 协作（D-02）· 账户补全（D-03）· 题库与考试（D-04）· 学情分析/辅导/分组/批量（D-05）· <b style="color:var(--growth);">管理端（D-07/D-08）已落地</b> · <b style="color:var(--growth);">自主学习（D-06）+ 视频录播（D-08）后端已落地</b> · 移动端 5 Tab 已落地</td><td>PRD P1 AI 基础设施（RAG/Agent/MCP/内容审核）未实现；真库冒烟待补</td></tr>
-      <tr><td><b>测试</b></td><td>单测 288/0 · 契约三层一致 · OpenAPI 162 paths · 移动端 tsc 0 错误</td><td>UAT 人工签字未完成 · AI 真批阅未跑真实模型</td></tr>
+      <tr><td><b>功能</b></td><td>单体 171 paths / 212 ops · 19 模块 · 62 表 · 直播（D-01）· 协作（D-02）· 账户补全（D-03）· 题库与考试（D-04）· 学情分析/辅导/分组/批量（D-05）· <b style="color:var(--growth);">管理端（D-07/D-08）已落地</b> · <b style="color:var(--growth);">自主学习（D-06）+ 视频录播（D-08）后端+移动端已落地</b> · <b style="color:var(--growth);">AI 基础设施（D-09 RAG/Agent/审核）已落地</b></td><td>PRD P1 AI 应用层（MCP 协议 / 课件生成 / 课堂 Copilot / 学情预测）未实现；真库冒烟待补</td></tr>
+      <tr><td><b>测试</b></td><td>单测 321/0 · 契约三层一致 · OpenAPI 171 paths / 201 ops（YAML 已同步）· 移动端 tsc 0 错误</td><td>UAT 人工签字未完成 · AI 真批阅未跑真实模型</td></tr>
       <tr><td><b>部署</b></td><td>离线资产生产化（init.sql/seed 幂等/监控/文档 v1.2）</td><td>真实生产环境（MySQL + Docker + TLS + 域名）未就绪</td></tr>
       <tr><td><b>前端</b></td><td>Web 构建通过 · 埋点链路闭合</td><td>移动端 typecheck 待 RN 工具链 · 未真机冒烟</td></tr>
     </tbody>
@@ -291,7 +291,7 @@
       <tr><td><b>D-04</b></td><td>题库与考试（组卷/在线考试/评分）</td><td>07 · P1</td><td><span class="tag done">✅ 已实施</span></td><td>exam 模块 22 端点 · 4 表（题库/试卷/组卷/作答自动评分）· Web 教师题库试卷管理 + 学生在线考试（2026-09-01，冒烟 28/28）；可接 AI 组卷</td></tr>
       <tr><td><b>D-05</b></td><td>学情分析 + 学生档案 + 辅导记录 + 教学分组 + 用户批量操作</td><td>06 · 08 · 10 · 13 · P1</td><td><span class="tag done">✅ 已实施</span></td><td>analytics 模块扩展 12 端点 + tutoring 模块 5 端点 + course 模块 6 端点 + user 模块 3 端点 · 5 新表（35→40，D-06 并行 49）· 风险规则引擎（AlertRuleIn 可配）· 单测 173→215（+42 test_d05_analytics.py）（2026-09-03）</td></tr>
       <tr><td><b>D-06</b></td><td>课程审批 + 系统设置 + 审计日志（含账户管理/批量操作、监控大盘）</td><td>14 · 16 · 17 · P1</td><td><span class="tag medium">P2</span></td><td>管理端补齐</td></tr>
-      <tr><td><b>D-07</b></td><td>管理端补齐（课程审批/系统设置/审计日志/内容举报/监控大盘）✅ 已实施；AI 基础设施：RAG 向量检索 / Agent 编排 / MCP / 内容审核（含学习路径/知识图谱、课件生成/课堂 Copilot/学情预测）</td><td>18-20 · 管理端已落地 · AI 规划中</td><td><span class="tag high">P1</span></td><td>Milvus / AgentScope / 知网 AIGC</td></tr>
+      <tr><td><b>D-07</b></td><td>管理端补齐（课程审批/系统设置/审计日志/内容举报/监控大盘）✅ 已实施；AI 基础设施：RAG 向量检索 ✅ / Agent 编排 ✅ / MCP ⏳ / 内容审核 ✅（2026-09-03 D-09 落地）</td><td>RAG/Agent/审核已落地 · MCP 规划中</td><td><span class="tag high">P1</span></td><td>Milvus / AgentScope / 知网 AIGC</td></tr>
       <tr><td><b>D-08</b></td><td>运营演进：独立监控 + CI/CD</td><td>—</td><td><span class="tag medium">P2</span></td><td>Prometheus + Grafana · GitHub Actions</td></tr>
       <tr><td><b>D-09</b></td><td>规模演进：K8s 集群</td><td>—</td><td><span class="tag medium">P2</span></td><td>触发条件：用户量 > 5000</td></tr>
       <tr><td><b>D-10</b></td><td>鸿蒙（HarmonyOS）适配评估 + 移动端平台矩阵</td><td>—</td><td><span class="tag medium">P2</span></td><td><b>Expo 官方不支持鸿蒙</b>（现状移动端仅 iOS/Android）；三路线评估：**原生 ArkTS / ArkUI 独立客户端（DevEco Studio，移动端仅 6 页面 · 推荐评估项）** · RNOH（bare RN 迁移 + 依赖替换）· uni-app 跨端；产出兼容矩阵结论，不阻塞 M4 · 校园信创诉求触发评审</td></tr>

@@ -28,7 +28,7 @@ class TestTableDefinitions:
     """表定义测试"""
 
     def test_all_tables_exist(self, tables):
-        """所有 57 张表已定义"""
+        """所有 62 张表已定义"""
         expected = {
             "users", "sessions", "courses", "enrollments", "chapters",
             "announcements", "assignments", "submissions", "grade_records",
@@ -48,12 +48,15 @@ class TestTableDefinitions:
             "challenges", "challenge_attempts",
             # D-08 视频录播
             "videos", "video_chapters", "video_notes", "video_watch_history",
+            # D-09 AI 基础设施
+            "knowledge_bases", "knowledge_chunks", "agent_tools",
+            "agent_sessions", "moderation_logs",
         }
         assert expected.issubset(tables), f"缺少表: {expected - tables}"
 
     def test_table_count(self, tables):
-        """表数量为 57（17 业务 + 5 直播 + 8 协作 + 1 消息通知 + 4 题库考试 D-04 + 5 学情 D-05 + 4 管理端 D-07/D-08 + 13 学习/视频 D-06/D-08）"""
-        assert len(tables) == 57
+        """表数量为 62（17 业务 + 5 直播 + 8 协作 + 1 消息通知 + 4 题库考试 D-04 + 5 学情 D-05 + 4 管理端 D-07/D-08 + 13 学习/视频 D-06/D-08 + 5 AI 基建 D-09）"""
+        assert len(tables) == 62
 
 
 class TestUserModel:

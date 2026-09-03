@@ -973,4 +973,83 @@ class VideoWatchHistory(Base):
     )
 
 
+# ═══════════════════════════════════════════════════════════════════
+# D-09 · AI 基础设施（RAG / Agent / 内容审核）
+# ═══════════════════════════════════════════════════════════════════
+
+class KnowledgeBase(Base):
+    """知识库（RAG 用）"""
+    __tablename__ = "knowledge_bases"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    course_id = Column(GUID, ForeignKey("courses.id", ondelete="SET NULL"), nullable=True, index=True)
+    name = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    chunk_count = Column(Integer, default=0)
+    embedding_model = Column(String(100), default="text-embedding-v3")
+    created_by = Column(GUID, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
+
+
+class KnowledgeChunk(Base):
+    """知识库分块（嵌入向量存储）"""
+    __tablename__ = "knowledge_chunks"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    kb_id = Column(GUID, ForeignKey("knowledge_bases.id", ondelete="CASCADE"), nullable=False, index=True)
+    content = Column(Text, nullable=False)
+    metadata_json = Column(JSON, nullable=True)           # 来源/页码/章节等
+    # 嵌入向量（MySQL 9.7 原生 VECTOR 类型，此处用 JSON 存储，Python 侧计算距离）
+    embedding = Column(JSON, nullable=True)               # [0.1, 0.2, ...]
+    token_count = Column(Integer, default=0)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index("ix_chunk_kb", "kb_id"),
+    )
+
+
+class AgentTool(Base):
+    """Agent 工具定义（可供 Agent 调用）"""
+    __tablename__ = "agent_tools"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    name = Column(String(100), unique=True, nullable=False)    # get_course_info / search_docs
+    description = Column(Text, nullable=False)
+    parameters_schema = Column(JSON, nullable=False)           # JSON Schema
+    handler = Column(String(200), nullable=False)              # Python 函数路径
+    enabled = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+
+
+class AgentSession(Base):
+    """Agent 会话（多轮工具调用）"""
+    __tablename__ = "agent_sessions"
+
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID, nullable=False, index=True)
+    title = Column(String(200), nullable=True)
+    messages = Column(JSON, default=list)                      # 消息历史
+    tool_calls = Column(JSON, default=list)                    # 工具调用记录
+    status = Column(String(20), default="active")              # active / completed
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), onupdate=_now)
+
+
+class ModerationLog(Base):
+    """内容审核日志"""
+    __tablename__ = "moderation_logs"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(GUID, nullable=True, index=True)
+    content_type = Column(String(50), nullable=False)          # chat / note / discussion / file
+    content_id = Column(GUID, nullable=True)
+    content_text = Column(Text, nullable=True)
+    flagged = Column(Boolean, default=False)                   # 是否触发审核
+    reason = Column(String(100), nullable=True)                # 触发原因
+    action = Column(String(20), default="pass")                # pass / flag / block
+    created_at = Column(DateTime(timezone=True), default=_now, server_default=func.now(), nullable=False, index=True)
+
+
 # ─── 监控共享表 ───

@@ -1668,3 +1668,127 @@ class LearningStatsOut(BaseModel):
     challenges_passed: int
     videos_watched: int
     videos_total: int
+
+
+# ═══════════════════════════════════════════════════════════════════
+# D-09 · AI 基础设施（RAG / Agent / 内容审核）
+# ═══════════════════════════════════════════════════════════════════
+
+# ─── RAG 知识库 ───
+class KnowledgeBaseCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = None
+    course_id: Optional[uuid.UUID] = None
+
+class KnowledgeBaseOut(BaseModel):
+    id: uuid.UUID
+    course_id: Optional[uuid.UUID] = None
+    name: str
+    description: Optional[str] = None
+    chunk_count: int
+    embedding_model: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class KnowledgeChunkOut(BaseModel):
+    id: uuid.UUID
+    kb_id: uuid.UUID
+    content: str
+    token_count: int
+    metadata_json: Optional[dict] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class RAGQueryIn(BaseModel):
+    """RAG 查询输入"""
+    kb_id: uuid.UUID
+    query: str = Field(..., min_length=1, max_length=2000)
+    top_k: int = Field(5, ge=1, le=20)
+    model_name: Optional[str] = None         # 可选指定生成模型
+
+class RAGChunkResult(BaseModel):
+    chunk_id: uuid.UUID
+    content: str
+    score: float                              # 相似度得分 0-1
+    metadata_json: Optional[dict] = None
+
+class RAGQueryOut(BaseModel):
+    """RAG 查询结果"""
+    query: str
+    answer: str                               # LLM 生成答案
+    sources: list[RAGChunkResult]             # 引用分块
+    model_used: str
+    total_tokens: int
+
+# ─── Agent 工具 ───
+class AgentToolOut(BaseModel):
+    id: uuid.UUID
+    name: str
+    description: str
+    parameters_schema: dict
+    enabled: bool
+
+    class Config:
+        from_attributes = True
+
+class AgentSessionOut(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    title: Optional[str] = None
+    message_count: int
+    tool_call_count: int
+    status: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AgentMessageIn(BaseModel):
+    """Agent 对话输入"""
+    session_id: Optional[uuid.UUID] = None    # 新会话时为 None
+    message: str = Field(..., min_length=1, max_length=5000)
+    tools_enabled: bool = True                # 是否启用工具调用
+
+class AgentToolCall(BaseModel):
+    tool_name: str
+    parameters: dict
+    result: Any
+    duration_ms: int
+
+class AgentMessageOut(BaseModel):
+    """Agent 响应"""
+    session_id: uuid.UUID
+    message: str                              # LLM 回复
+    tool_calls: list[AgentToolCall]           # 本轮工具调用
+    model_used: str
+    total_tokens: int
+
+# ─── 内容审核 ───
+class ModerationCheckIn(BaseModel):
+    content_type: str = Field(..., pattern="^(chat|note|discussion|file|profile)$")
+    content_text: str = Field(..., min_length=1, max_length=10000)
+    content_id: Optional[uuid.UUID] = None
+
+class ModerationCheckOut(BaseModel):
+    flagged: bool                             # 是否触发
+    reason: Optional[str] = None              # 触发原因
+    action: str                               # pass / flag / block
+    confidence: float                         # 置信度 0-1
+
+class ModerationLogOut(BaseModel):
+    id: int
+    user_id: Optional[uuid.UUID] = None
+    content_type: str
+    content_id: Optional[uuid.UUID] = None
+    flagged: bool
+    reason: Optional[str] = None
+    action: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
